@@ -39,3 +39,4 @@ Revisión Cruzada: Todo PR exige al menos 1 aprobación de un compañero del equ
 Asociación de Tareas: Si olvidan colocar el número de la tarea (#ID) en el commit, Azure DevOps no podrá registrar el avance del Sprint de forma automática.
 
 ¡Cualquier consulta sobre cómo sacar el ID de la tarjeta en Azure me avisan! Vamos a mantener este orden impecable desde el Día 1. 🔥
+<img width="1394" height="401" alt="image" src="https://github.com/user-attachments/assets/742f7f35-d3e2-48a0-b950-3403decc15a3" />
