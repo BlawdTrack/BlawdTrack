@@ -65,6 +65,7 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+<<<<<<< HEAD
 
 		<!-- H2: base de datos embebida solo para pruebas (@DataJpaTest) -->
 		<dependency>
@@ -113,6 +114,8 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
+=======
+>>>>>>> c43676b (feat(core): inicializar la aplicación Spring Boot BlawdTrack #3)
 	</dependencies>
 
 	<build>
