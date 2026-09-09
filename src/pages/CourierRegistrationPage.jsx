@@ -9,7 +9,7 @@ import {
   InputAdornment
 } from '@mui/material';
 
-// Icono personalizado para el carné naranja del encabezado
+// Custom badge icon for the header card
 function BadgeCustomIcon() {
   return (
     <svg
@@ -24,7 +24,7 @@ function BadgeCustomIcon() {
   );
 }
 
-// Icono personalizado de usuario con + para el botón
+// Custom user add icon for the submit button
 function PersonAddCustomIcon() {
   return (
     <svg
@@ -39,34 +39,34 @@ function PersonAddCustomIcon() {
   );
 }
 
-export function RegistroMensajeroPage() {
+export function CourierRegistrationPage() {
   const [formData, setFormData] = useState({
-    nombreCompleto: '',
-    telefono: '',
-    correo: '',
-    contrasenaInicial: '',
-    cedula: '',
-    horario: '',
-    capacidadCargaKg: ''
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+    password: '',
+    idCard: '',
+    schedule: '',
+    maxLoadCapacityKg: ''
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previousData) => ({
+      ...previousData,
       [name]: value
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Datos del mensajero:', formData);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log('Courier data submitted:', formData);
   };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
-        {/* Encabezado con icono naranja */}
+        {/* Header section */}
         <Box
           sx={{
             backgroundColor: '#1b3e32',
@@ -87,7 +87,7 @@ export function RegistroMensajeroPage() {
           </Typography>
         </Box>
 
-        {/* Formulario manteniéndolos en 7 campos */}
+        {/* Registration Form */}
         <Box
           component="form"
           onSubmit={handleSubmit}
@@ -98,84 +98,84 @@ export function RegistroMensajeroPage() {
             gap: 2.5
           }}
         >
-          {/* Fila 1 */}
+          {/* Row 1: Full Name and Phone Number */}
           <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
             <TextField
               fullWidth
               required
               label="Nombre Completo"
-              name="nombreCompleto"
-              value={formData.nombreCompleto}
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
             />
             <TextField
               fullWidth
               required
               label="Número de Teléfono"
-              name="telefono"
+              name="phoneNumber"
               type="tel"
-              value={formData.telefono}
+              value={formData.phoneNumber}
               onChange={handleChange}
             />
           </Box>
 
-          {/* Fila 2 */}
+          {/* Row 2: Email and Password */}
           <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
             <TextField
               fullWidth
               required
               label="Correo Electrónico"
-              name="correo"
+              name="email"
               type="email"
-              value={formData.correo}
+              value={formData.email}
               onChange={handleChange}
             />
             <TextField
               fullWidth
               required
               label="Contraseña Inicial"
-              name="contrasenaInicial"
+              name="password"
               type="password"
-              value={formData.contrasenaInicial}
+              value={formData.password}
               onChange={handleChange}
             />
           </Box>
 
-          {/* Fila 3 */}
+          {/* Row 3: ID Card and Schedule */}
           <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
             <TextField
               fullWidth
               required
               label="Cédula / Identificación"
-              name="cedula"
-              value={formData.cedula}
+              name="idCard"
+              value={formData.idCard}
               onChange={handleChange}
             />
             <TextField
               fullWidth
               required
               label="Horario"
-              name="horario"
-              value={formData.horario}
+              name="schedule"
+              value={formData.schedule}
               onChange={handleChange}
             />
           </Box>
 
-          {/* Fila 4 */}
+          {/* Row 4: Maximum Load Capacity */}
           <TextField
             fullWidth
             required
             label="Capacidad máxima de carga por paquete"
-            name="capacidadCargaKg"
+            name="maxLoadCapacityKg"
             type="number"
-            value={formData.capacidadCargaKg}
+            value={formData.maxLoadCapacityKg}
             onChange={handleChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">kg</InputAdornment>
             }}
           />
 
-          {/* Botón con el estilo verde oscuro e icono de sumar usuario */}
+          {/* Submit Button */}
           <Button
             type="submit"
             fullWidth
@@ -205,4 +205,6 @@ export function RegistroMensajeroPage() {
   );
 }
 
-export default RegistroMensajeroPage;
+// Exports for compatibility with default and named imports
+export { CourierRegistrationPage as RegistroMensajeroPage };
+export default CourierRegistrationPage;

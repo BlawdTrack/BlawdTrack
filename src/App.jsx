@@ -1,10 +1,10 @@
 import React from 'react';
-import { RegistroMensajeroPage } from '@/pages/RegistroMensajeroPage';
+import CourierRegistrationPage from './pages/CourierRegistrationPage';
 
 function App() {
   return (
     <main>
-      <RegistroMensajeroPage />
+      <CourierRegistrationPage />
     </main>
   );
 }
