@@ -2,6 +2,14 @@
 
 Rama: `feature/62/genesis-silesky` (creada localmente desde `develop`, sin push).
 
+Commits en la rama (ambos locales, sin push):
+
+1. `feat(auth): agregar endpoint de solicitud de recuperacion de contrasena #62`
+   — la implementación de esta task.
+2. `fix(infra): agregar starter de Flyway al pom.xml #62` — fix de un bug
+   preexistente del proyecto (Flyway nunca corría), necesario para poder
+   probar de punta a punta. Ver sección "Fix de infraestructura" abajo.
+
 ## Resumen de lo implementado
 
 - `POST /api/v1/auth/password-reset/request` recibe `{ "email": "..." }` y
@@ -99,6 +107,25 @@ falta tocar `SecurityConfig` ni nada de Task #52).
    fila nueva; puede quedar más de un token activo por usuario a la vez.
    Queda para revisión del equipo si se necesita en una task futura.
 
+## Fix de infraestructura aplicado (commit separado, mismo alcance #62)
+
+Al intentar levantar la app para probar de punta a punta, Hibernate falló con
+`Schema validation: missing table [tokens_recuperacion_contrasena]`. Se
+investigó y se confirmó que **Flyway nunca se ejecutaba en el proyecto**, ni
+siquiera para `V1` (no había tabla `flyway_schema_history` en la BD). Causa:
+en Spring Boot 4.1.1 el auto-arranque de Flyway se movió a un módulo aparte
+(`spring-boot-starter-flyway`), y el `pom.xml` solo traía `flyway-core` y
+`flyway-mysql` sueltos, sin ese starter — por eso Spring Boot nunca detectaba
+a Flyway (no aparecía ni una vez en el log ni en el reporte de condiciones).
+
+Esto es un bug preexistente del proyecto, no introducido por esta task, pero
+bloqueaba poder probarla. Con autorización explícita del usuario, se agregó
+`org.springframework.boot:spring-boot-starter-flyway` al `pom.xml`
+(commit separado: `fix(infra): agregar starter de Flyway al pom.xml #62`).
+Verificado: al arrancar, Flyway bautiza el esquema existente en versión 1 y
+aplica `V2` sola ("Migrating schema `blawdtrack` to version 2 ... Successfully
+applied 1 migration").
+
 ## Hallazgos fuera de alcance (no corregidos)
 
 1. **Inconsistencia `estado`/`UserStatus`**: la migración `V1` define
@@ -112,16 +139,38 @@ falta tocar `SecurityConfig` ni nada de Task #52).
 2. **Mensajes de validación en inglés en `LoginRequest`**: contradice la
    convención de "textos de UI en español" que sí seguí en los DTOs nuevos
    de esta task. Preexistente de Task #52, no lo toqué.
+3. **Errores de validación devuelven `403` vacío en vez de `400`, en TODA la
+   API**: al probar manualmente con un body inválido (`{}`), tanto
+   `POST /api/v1/auth/password-reset/request` (esta task) como
+   `POST /api/v1/auth/login` (preexistente, Task #52) devuelven `403` con
+   cuerpo vacío en lugar de un `400` con el detalle de validación. Causa
+   probable: `SecurityConfig` no incluye `/error` en su `permitAll()`
+   ([SecurityConfig.java:45](blawdtrack/src/main/java/com/blawdgourmet/blawdtrack/auth/config/SecurityConfig.java#L45)),
+   y desde Spring Security 6/7 el filtro de autorización también se aplica al
+   *forward* interno hacia `/error` que hace `sendError(400)` — al no estar
+   autenticado, ese forward es rechazado con `403`. Es un problema de
+   `SecurityConfig` que afecta a todos los endpoints del proyecto, no algo
+   introducido por esta task. No lo corregí (no estaba en el alcance
+   autorizado); queda para que el equipo decida si abre una task aparte.
 
 ## Cómo se validó
 
 - `mvnw compile` (offline) — compila sin errores.
 - `mvnw test -Dtest=PasswordResetServiceImplTest,UserDetailsServiceImplTest` —
-  6/6 tests verdes (3 nuevos de esta task + los 3 existentes de Task #52, para
-  confirmar que no rompí nada de esa capa).
-- No se corrió la migración Flyway contra una base MySQL real (no había una
-  disponible en este entorno); se revisó manualmente contra la sintaxis y el
-  estilo de `V1__crear_tablas_roles_usuarios.sql`.
+  6/6 tests verdes (3 nuevos de esta task + los 3 existentes de Task #52).
+- **Pruebas manuales end-to-end**, app real levantada contra el MySQL local
+  del usuario (`curl` + consultas directas a la tabla nueva):
+
+  | Escenario | Petición | Respuesta HTTP | ¿Token creado? |
+  |---|---|---|---|
+  | Correo existente y activo (`alicia@blawdgourmet.com`, único usuario real en la BD) | `POST .../password-reset/request {"email":"alicia@blawdgourmet.com"}` | `200` + mensaje genérico | Sí — fila nueva en `tokens_recuperacion_contrasena`, `token_hash` en formato BCrypt (`$2a$10$...`), `fecha_expiracion` = `fecha_creacion` + 15 min exacto |
+  | Correo inexistente | `POST ... {"email":"no-existe@blawdgourmet.com"}` | `200` + mismo mensaje genérico | No — conteo de filas sin cambios |
+  | Cuenta inactiva | usuario de prueba temporal insertado por SQL directo (`estado='INACTIVE'`), probado, y **borrado al terminar** | `200` + mismo mensaje genérico | No — conteo de filas sin cambios |
+
+  La BD local quedó exactamente como estaba antes de las pruebas (solo el
+  usuario real `alicia@blawdgourmet.com`, más el único token de la prueba 1,
+  que se dejó en la tabla como evidencia — el equipo puede borrarlo si lo
+  prefiere).
 
 ## Pendiente (a cargo del usuario)
 
