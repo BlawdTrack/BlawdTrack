@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blawdtrack-container
+    ports:
+      - "8080:80"
+    restart: always
