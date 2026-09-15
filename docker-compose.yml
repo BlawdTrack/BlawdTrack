@@ -1,7 +1,19 @@
+version: '3.8'
+
 services:
-  blawdtrack-frontend:
-    build: .
+  frontend:
     container_name: blawdtrack_frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "3000:80"
-    restart: always
+      - "5173:5173"
+    volumes:
+      # Mapea tu código local al contenedor para la recarga en vivo
+      - .:/app
+      # Protege los node_modules del contenedor para que no se sobrescriban con los tuyos locales
+      - /app/node_modules
+    environment:
+      # Ayuda a que Vite detecte los cambios de archivos dentro de Docker
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true

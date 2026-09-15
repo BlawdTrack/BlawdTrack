@@ -3,9 +3,9 @@ import CourierRegistrationPage from './pages/CourierRegistrationPage';
 
 function App() {
   return (
-    <main>
+    <div>
       <CourierRegistrationPage />
-    </main>
+    </div>
   );
 }
 

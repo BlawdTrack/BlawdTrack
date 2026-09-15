@@ -1,15 +1,20 @@
-FROM node:20-alpine AS build
+# Usamos una versión ligera de Node.js
+FROM node:20-alpine
+
+# Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-COPY package*.json ./
+# Copiamos los archivos de dependencias primero (optimiza el caché de Docker)
+COPY package.json package-lock.json* ./
+
+# Instalamos las dependencias
 RUN npm install
 
+# Copiamos el resto del código del proyecto
 COPY . .
-RUN npm run build
 
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+# Exponemos el puerto que usa Vite por defecto
+EXPOSE 5173
 
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Comando para iniciar la aplicación, forzando a Vite a exponerse a la red del contenedor
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
