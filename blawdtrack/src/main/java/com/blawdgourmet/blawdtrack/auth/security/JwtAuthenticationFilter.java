@@ -1,29 +1,27 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value("${security.jwt.secret}")
-    private String secret;
+    private final JwtService jwtService;
 
     private static final String HEADER = "Authorization";
     private static final String PREFIX = "Bearer ";
@@ -37,9 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith(PREFIX)) {
             String token = header.substring(PREFIX.length());
             try {
-                SecretKey key = Keys.hmacShaKeyFor(secret.getBytes());
-                Claims claims = Jwts.parser().verifyWith(key).build()
-                        .parseSignedClaims(token).getPayload();
+                Claims claims = jwtService.validateToken(token);
 
                 String email = claims.getSubject();
                 String rolesClaim = claims.get("roles", String.class);
@@ -50,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 var authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception ex) {
+            } catch (JwtException | IllegalArgumentException ex) {
                 SecurityContextHolder.clearContext();
             }
         }
