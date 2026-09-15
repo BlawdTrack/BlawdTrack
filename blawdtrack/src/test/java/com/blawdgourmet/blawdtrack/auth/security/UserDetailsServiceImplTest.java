@@ -73,9 +73,9 @@ class UserDetailsServiceImplTest {
     }
 
     @Test
-    void loadUserByUsername_conUsuarioInactivo_devuelveUserPrincipalConFlagsEnFalse() {
+    void loadUserByUsername_conUsuarioInactivo_devuelveUserPrincipalDeshabilitado() {
         // El servicio NO lanza excepción para un usuario inactivo: la validación
-        // de estado vive en UserPrincipal.isEnabled()/isAccountNonLocked(), que
+        // de estado vive en UserPrincipal.isEnabled(), que
         // Spring Security evalúa en la capa de autenticación. Ver Javadoc de
         // UserDetailsServiceImpl para la justificación de esta decisión.
         User user = buildUser(UserStatus.INACTIVE);
@@ -85,6 +85,6 @@ class UserDetailsServiceImplTest {
 
         assertThat(result).isInstanceOf(UserPrincipal.class);
         assertThat(result.isEnabled()).isFalse();
-        assertThat(result.isAccountNonLocked()).isFalse();
+        assertThat(result.isAccountNonLocked()).isTrue();
     }
 }
