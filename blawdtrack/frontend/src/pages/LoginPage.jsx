@@ -6,28 +6,62 @@ import {
   Typography,
   TextField,
   Button,
-  Alert,
   CircularProgress,
   Link,
-  useTheme,
 } from '@mui/material';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
+import { StatusMessage } from '../components/StatusMessage';
+import blawdtrackLogo from '../assets/blawdtrack-logo.png';
 
-// Distintivo de paquetería/mensajería: mismo formato de ícono plano
-// (un solo path, color por prop) usado en el resto de la pantalla.
-function PackageCustomIcon({ color, size = 32 }) {
+// Candado de dos tonos (blanco + punto naranja), reconstruido a partir
+// del mockup — ahí también está armado con formas simples en vez de un
+// ícono importado.
+function LockIcon({ size = 26 }) {
+  const scale = size / 26;
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <path d="M12 2 2 7v10l10 5 10-5V7L12 2zm0 2.18L18.82 7 12 9.82 5.18 7 12 4.18zM4 8.66l7 3.5v7.82l-7-3.5V8.66zm9 11.32v-7.82l7-3.5v7.82l-7 3.5z" />
-    </svg>
+    <Box sx={{ width: size, height: size, position: 'relative', flexShrink: 0 }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          left: '50%',
+          top: 2 * scale,
+          width: 15 * scale,
+          height: 11 * scale,
+          border: `${2.5 * scale}px solid #fff`,
+          borderBottom: 'none',
+          borderRadius: '8px 8px 0 0',
+          transform: 'translateX(-50%)',
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: '50%',
+          top: 10 * scale,
+          width: 19 * scale,
+          height: 13 * scale,
+          bgcolor: '#fff',
+          borderRadius: '2px',
+          transform: 'translateX(-50%)',
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: '50%',
+          top: 15 * scale,
+          width: 3 * scale,
+          height: 3 * scale,
+          bgcolor: 'secondary.main',
+          borderRadius: '50%',
+          transform: 'translateX(-50%)',
+        }}
+      />
+    </Box>
   );
 }
 
-// onLoginSuccess recibe la respuesta cruda del backend (o del mock), con la
-// misma forma que LoginResponse. Guardar el token de forma segura es tarea
-// de T16; aquí solo se entrega la respuesta a quien la necesite.
 export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword }) {
-  const theme = useTheme();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const { login, loading, error, resetError } = useAuth();
 
@@ -44,41 +78,58 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
       const response = await login(formData.email, formData.password);
       onLoginSuccess?.(response);
     } catch {
-      // El mensaje de error ya queda reflejado por el hook useAuth.
+      // El mensaje de error ya queda reflejado por el AuthContext.
     }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        py: 4,
-      }}
-    >
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
       <Container maxWidth="sm">
-        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        <Paper elevation={3} sx={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #E4DED7' }}>
+          <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />
+
           <Box
             sx={{
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              p: 3,
+              px: { xs: 3, sm: 6 },
+              pt: 4.5,
+              pb: 5,
               textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <PackageCustomIcon color={theme.palette.secondary.main} size={32} />
-              <Typography variant="h5" component="h1" fontWeight="bold">
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', mb: '28px' }}>
+              <Box
+                sx={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '10px',
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                }}
+              >
+                <img
+                  src={blawdtrackLogo}
+                  alt="BlawdTrack"
+                  style={{ width: 24, height: 29, objectFit: 'contain' }}
+                />
+              </Box>
+              <Typography variant="h6" component="span">
                 BlawdTrack
               </Typography>
             </Box>
-            <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5 }}>
-              Inicia sesión en tu plataforma de paquetería
+
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+              <LockIcon size={26} />
+              <Typography variant="h4" component="h1">
+                Iniciar sesión
+              </Typography>
+            </Box>
+            <Typography sx={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', mt: 1 }}>
+              Ingresa con tu correo y contraseña para acceder al panel de BlawdTrack.
             </Typography>
           </Box>
 
@@ -86,33 +137,63 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             component="form"
             onSubmit={handleSubmit}
             noValidate
-            sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 2.5 }}
+            sx={{
+              p: { xs: 3, sm: 5 },
+              bgcolor: '#F1ECE7',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '22px',
+            }}
           >
-            {error && <Alert severity="error">{error}</Alert>}
+            {error && <StatusMessage severity={error.severity} message={error.message} />}
 
-            <TextField
-              fullWidth
-              required
-              label="Correo electrónico"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <Typography
+                sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.4px' }}
+              >
+                Correo electrónico
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="email"
+                type="email"
+                placeholder="nombre@blawdgourmet.com"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={loading}
+              />
+            </Box>
 
-            <TextField
-              fullWidth
-              required
-              label="Contraseña"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <Typography
+                sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.4px' }}
+              >
+                Contraseña
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+                disabled={loading}
+              />
+            </Box>
+
+            <Link
+              component="button"
+              type="button"
+              onClick={() => onForgotPassword?.()}
+              underline="hover"
+              sx={{ alignSelf: 'flex-end', color: 'primary.main', fontWeight: 600, fontSize: 13 }}
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
 
             <Button
               type="submit"
@@ -120,25 +201,17 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               variant="contained"
               size="large"
               disabled={loading}
-              sx={{ mt: 1, py: 1.5, fontWeight: 'bold', fontSize: '1rem' }}
+              sx={{ fontWeight: 'bold', fontSize: 15, display: 'flex', gap: '10px' }}
             >
-              {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Iniciar sesión'}
+              {loading ? (
+                <CircularProgress size={22} sx={{ color: 'inherit' }} />
+              ) : (
+                <>
+                  <span>Iniciar sesión</span>
+                  <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: 'secondary.main' }} />
+                </>
+              )}
             </Button>
-
-            <Link
-              component="button"
-              type="button"
-              onClick={() => onForgotPassword?.()}
-              underline="hover"
-              sx={{
-                color: 'secondary.main',
-                fontWeight: 600,
-                fontSize: '0.875rem',
-                alignSelf: 'center',
-              }}
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
           </Box>
         </Paper>
       </Container>

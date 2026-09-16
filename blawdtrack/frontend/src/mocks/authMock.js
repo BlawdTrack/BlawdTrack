@@ -1,52 +1,28 @@
-// Datos de prueba para simular POST /api/v1/auth/login mientras el backend
-// de HU-001 no está desplegado. El contrato (request/response/error) está
-// tomado de la rama feature/HU-001-login (AuthController, LoginResponse,
-// ErrorResponse) para que el cambio a datos reales sea solo quitar el mock.
+// Datos de prueba para simular POST /api/v1/auth/login. Contrato
+// CONFIRMADO contra la rama feature/HU001-LuisMadrigal:
 //
-// TODO: eliminar este archivo cuando el endpoint real esté disponible.
+//   200  { token, tokenType, expiresInSeconds, user: { id, fullName, email, role } }
+//   401  { code: 'CREDENCIALES_INVALIDAS', message, status }  (correo o contraseña incorrectos)
+//   403  { code: 'CUENTA_INACTIVA', message, status }         (cuenta inactiva)
+//
+// Los textos de error son copia literal de AuthService.java (incluye la
+// falta de tildes tal como está en el backend real).
+//
+// TODO: eliminar este archivo cuando el endpoint real esté desplegado.
+
+import { mockUsers } from './mockUsers';
 
 const MOCK_DELAY_MS = 600;
-
-const mockUsers = [
-  {
-    email: 'alicia@blawdgourmet.com',
-    password: 'ChangeMe123',
-    id: 1,
-    fullName: 'Alicia (Super Usuario)',
-    role: 'SUPER_USER',
-    permissions: [
-      'USER_CREATE', 'USER_UPDATE', 'USER_DEACTIVATE', 'USER_DELETE',
-      'ROLE_ASSIGN', 'PACKAGE_IMPORT', 'PACKAGE_DELETE', 'PACKAGE_VIEW',
-      'PACKAGE_SEARCH', 'PACKAGE_EXPORT', 'PACKAGE_GENERATE_QR',
-      'PACKAGE_ASSIGN', 'PACKAGE_VIEW_ASSIGNED', 'PACKAGE_UPDATE_STATUS',
-      'TRIP_COST_REGISTER', 'REPORT_VIEW', 'REPORT_PRINT',
-      'PROOF_OF_DELIVERY_VIEW', 'COST_VIEW',
-    ],
-  },
-  {
-    email: 'admin.ventas@blawdgourmet.com',
-    password: 'Ventas123',
-    id: 2,
-    fullName: 'Administrador de Ventas (prueba)',
-    role: 'SALES_ADMIN',
-    permissions: [
-      'PACKAGE_IMPORT', 'PACKAGE_DELETE', 'PACKAGE_VIEW', 'PACKAGE_SEARCH',
-      'PACKAGE_EXPORT', 'PACKAGE_GENERATE_QR', 'PACKAGE_ASSIGN',
-      'REPORT_VIEW', 'REPORT_PRINT', 'PROOF_OF_DELIVERY_VIEW', 'COST_VIEW',
-    ],
-  },
-  {
-    email: 'mensajero@blawdgourmet.com',
-    password: 'Mensajero123',
-    id: 3,
-    fullName: 'Mensajero (prueba)',
-    role: 'COURIER',
-    permissions: ['PACKAGE_VIEW_ASSIGNED', 'PACKAGE_UPDATE_STATUS', 'TRIP_COST_REGISTER'],
-  },
-];
+const TOKEN_EXPIRATION_SECONDS = 3600;
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function throwAuthError(code, message, status) {
+  const error = new Error(message);
+  error.response = { status, data: { code, message, status } };
+  throw error;
 }
 
 export async function mockLogin(email, password) {
@@ -57,27 +33,30 @@ export async function mockLogin(email, password) {
   );
 
   if (!user || user.password !== password) {
-    const error = new Error('Invalid email or password');
-    // Misma forma que un error real de axios, para que el hook/página
-    // no necesiten cambiar cuando se conecte el endpoint real.
-    error.response = {
-      status: 401,
-      data: {
-        code: 'AUTH_FAILED',
-        message: 'Correo o contraseña incorrectos',
-        status: 401,
-      },
-    };
-    throw error;
+    throwAuthError(
+      'CREDENCIALES_INVALIDAS',
+      'El correo electronico o la contrasena son incorrectos.',
+      401
+    );
+  }
+
+  if (user.status === 'INACTIVE') {
+    throwAuthError(
+      'CUENTA_INACTIVA',
+      'La cuenta se encuentra inactiva. Contacte al Super Usuario para reactivarla.',
+      403
+    );
   }
 
   return {
     token: `mock-jwt-token-${user.id}-${Date.now()}`,
-    type: 'Bearer',
-    id: user.id,
-    fullName: user.fullName,
-    email: user.email,
-    role: user.role,
-    permissions: user.permissions,
+    tokenType: 'Bearer',
+    expiresInSeconds: TOKEN_EXPIRATION_SECONDS,
+    user: {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+    },
   };
 }
