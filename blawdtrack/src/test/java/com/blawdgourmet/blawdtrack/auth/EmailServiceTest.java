@@ -76,6 +76,19 @@ class EmailServiceTest {
         }
     }
 
+    @Test
+    void sendsWelcomeWithCredentialsAndEscapesHtml() throws Exception {
+        var message = prepare();
+        service.sendCourierWelcome("courier@example.com", "Ana <script>", "Ab12<&strong>!");
+        verify(sender).send(message);
+        message.saveChanges();
+        assertThat(message.getAllRecipients()[0].toString()).isEqualTo("courier@example.com");
+        assertThat(message.getSubject()).isEqualTo("BlawdTrack: bienvenida y credenciales de acceso");
+        assertThat(body(message, "text/plain")).contains("courier@example.com", "Ab12<&strong>!");
+        assertThat(body(message, "text/html")).contains("Ana &lt;script&gt;", "Ab12&lt;&amp;strong&gt;!")
+                .doesNotContain("<script>", "Ab12<&strong>!");
+    }
+
     private String body(Part part, String type) throws Exception {
         if (part.isMimeType(type)) return (String) part.getContent();
         if (part.getContent() instanceof Multipart multipart) {
