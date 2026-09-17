@@ -33,5 +33,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByNationalId(String nationalId);
     boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCase(String email);
     boolean existsByNationalId(String nationalId);
 }
