@@ -5,7 +5,8 @@ import jakarta.mail.Multipart;
 import jakarta.mail.Part;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
@@ -23,8 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /** Comprueba el transporte SMTP real contra un receptor local, sin correos externos. */
 class EmailServiceSmtpTest {
-    @Test
-    void deliversTemplateAndTokenOverLocalSmtp() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void deliversRecoveryOrWelcomeOverLocalSmtp(boolean welcome) throws Exception {
         try (var server = new ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"));
              var executor = Executors.newSingleThreadExecutor()) {
             server.setSoTimeout(5000);
@@ -40,7 +42,12 @@ class EmailServiceSmtpTest {
                     "https://blawdtrack.test/recovery",
                     new ClassPathResource("templates/mail/email-with-token.html"));
 
-            service.sendEmailWithToken("destinatario@example.test", "token-prueba+/=&ñ");
+            if (welcome) {
+                service.sendCourierWelcome("destinatario@example.test", "Mensajero de prueba",
+                        "Clave-FICTICIA-70!&");
+            } else {
+                service.sendEmailWithToken("destinatario@example.test", "token-prueba+/=&ñ");
+            }
             Capture capture = received.get(10, TimeUnit.SECONDS);
             assertThat(capture.envelope()).contains("MAIL FROM:<no-reply@blawdtrack.test>",
                     "RCPT TO:<destinatario@example.test>");
@@ -48,18 +55,25 @@ class EmailServiceSmtpTest {
                     new ByteArrayInputStream(capture.message()));
             assertThat(message.getAllRecipients()).hasSize(1);
             assertThat(message.getAllRecipients()[0].toString()).isEqualTo("destinatario@example.test");
-            assertThat(message.getSubject()).isEqualTo("BlawdTrack: enlace de recuperación");
-            String link = "https://blawdtrack.test/recovery?token=token-prueba%2B%2F%3D%26%C3%B1";
-            assertThat(body(message, "text/plain")).contains(link, "ignorá");
             String html = body(message, "text/html");
-            assertThat(html).contains("href=\"" + link + "\"", "Abrir enlace de recuperación")
-                    .doesNotContain("{{emailLink}}");
+            if (welcome) {
+                assertThat(message.getSubject()).isEqualTo("BlawdTrack: bienvenida y credenciales de acceso");
+                assertThat(body(message, "text/plain")).contains("destinatario@example.test", "Clave-FICTICIA-70!&");
+                assertThat(html).contains("Mensajero de prueba", "Clave-FICTICIA-70!&amp;");
+            } else {
+                assertThat(message.getSubject()).isEqualTo("BlawdTrack: enlace de recuperación");
+                String link = "https://blawdtrack.test/recovery?token=token-prueba%2B%2F%3D%26%C3%B1";
+                assertThat(body(message, "text/plain")).contains(link, "ignorá");
+                assertThat(html).contains("href=\"" + link + "\"", "Abrir enlace de recuperación")
+                        .doesNotContain("{{emailLink}}");
+            }
 
             // Evidencia reproducible con datos ficticios para inspeccionar el correo recibido.
             Path output = Path.of("target", "email-preview");
             Files.createDirectories(output);
-            Files.write(output.resolve("correo-prueba.eml"), capture.message());
-            Files.writeString(output.resolve("correo-prueba.html"), html, StandardCharsets.UTF_8);
+            String filename = welcome ? "bienvenida-task70" : "correo-prueba";
+            Files.write(output.resolve(filename + ".eml"), capture.message());
+            Files.writeString(output.resolve(filename + ".html"), html, StandardCharsets.UTF_8);
         }
     }
 

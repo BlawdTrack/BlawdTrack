@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.auth.config;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtAuthenticationFilter;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +53,9 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
+                        // Conservar el 403 original cuando Tomcat despacha internamente a /error.
+                        // Las solicitudes HTTP directas siguen requiriendo autenticación.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )

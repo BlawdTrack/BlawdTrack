@@ -1,6 +1,8 @@
 package com.blawdgourmet.blawdtrack.couriers;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
+import com.blawdgourmet.blawdtrack.auth.service.EmailService;
+import com.blawdgourmet.blawdtrack.couriers.service.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
@@ -9,6 +11,7 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.mail.MailSendException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -35,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CourierRegistrationTest {
     private static final String BODY = """
             {"nationalId":"123456789","fullName":"Mensajero de prueba",
-             "email":"courier69@example.com","password":"Courier69-password!",
+             "email":"courier69@example.com",
              "phone":"88888888","schedule":"Lunes a viernes, 08:00-17:00",
              "maxPackageWeightKg":25.50}
             """;
@@ -45,6 +50,13 @@ class CourierRegistrationTest {
     @MockitoSpyBean private CourierRepository couriers;
     @Autowired private JwtService jwt;
     @Autowired private PasswordEncoder encoder;
+    @MockitoBean private TemporaryPasswordGenerator temporaryPasswords;
+    @MockitoBean private EmailService emailService;
+
+    @BeforeEach
+    void generatedPassword() {
+        when(temporaryPasswords.generate()).thenReturn("Courier69-password!");
+    }
 
     private String token(String role, UserStatus status) {
         var user = users.saveAndFlush(User.builder().nationalId("ACTOR69")
@@ -126,6 +138,7 @@ class CourierRegistrationTest {
             assertThat(users.existsByEmail("courier69@example.com")).isFalse();
             assertThat(users.count()).isEqualTo(userCount);
             assertThat(couriers.count()).isEqualTo(courierCount);
+            verifyNoInteractions(emailService);
         } finally {
             users.findByEmail("actor69@example.com").ifPresent(users::delete);
         }
@@ -146,15 +159,13 @@ class CourierRegistrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"blank-id", "invalid-email", "blank-password", "unicode-password",
+    @ValueSource(strings = {"blank-id", "invalid-email",
             "blank-name", "blank-schedule", "zero-weight", "negative-weight", "precision", "missing"})
     void datosInvalidosNoCreanUsuarios(String scenario) throws Exception {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
         String body = switch (scenario) {
             case "blank-id" -> BODY.replace("123456789", " ");
             case "invalid-email" -> BODY.replace("courier69@example.com", "invalid");
-            case "blank-password" -> BODY.replace("Courier69-password!", " ");
-            case "unicode-password" -> BODY.replace("Courier69-password!", "á".repeat(40));
             case "blank-name" -> BODY.replace("Mensajero de prueba", " ");
             case "blank-schedule" -> BODY.replace("Lunes a viernes, 08:00-17:00", " ");
             case "zero-weight" -> BODY.replace("25.50", "0");
@@ -167,5 +178,39 @@ class CourierRegistrationTest {
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.password").doesNotExist());
         assertThat(users.count()).isEqualTo(count);
+    }
+
+    @Test
+    void noEnviaAntesDeConfirmarLaTransaccion() throws Exception {
+        register(token("SUPER_USUARIO", UserStatus.ACTIVE), BODY).andExpect(status().isCreated());
+        verifyNoInteractions(emailService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void enviaCredencialesDespuesDelCommitYConservaCuentaSiSmtpFalla(boolean smtpFails) throws Exception {
+        String actorToken = token("SUPER_USUARIO", UserStatus.ACTIVE);
+        try {
+            doAnswer(invocation -> {
+                // El correo utiliza la misma clave cuyo hash se guardó con el perfil.
+                var user = users.findByEmail("courier69@example.com").orElseThrow();
+                assertThat(couriers.findByUserId(user.getId())).isPresent();
+                assertThat(encoder.matches(invocation.getArgument(2), user.getPasswordHash())).isTrue();
+                if (smtpFails) throw new MailSendException("SMTP simulado no disponible");
+                return null;
+            }).when(emailService).sendCourierWelcome(any(), any(), any());
+            register(actorToken, BODY).andExpect(status().isCreated());
+            verify(emailService).sendCourierWelcome("courier69@example.com", "Mensajero de prueba", "Courier69-password!");
+            assertThat(users.existsByEmail("courier69@example.com")).isTrue();
+            register(actorToken, BODY).andExpect(status().isConflict());
+            verifyNoMoreInteractions(emailService);
+        } finally {
+            users.findByEmail("courier69@example.com").ifPresent(user -> {
+                couriers.findByUserId(user.getId()).ifPresent(couriers::delete);
+                users.delete(user);
+            });
+            users.findByEmail("actor69@example.com").ifPresent(users::delete);
+        }
     }
 }
