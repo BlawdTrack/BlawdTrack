@@ -17,6 +17,7 @@ public record CreateCourierRequest(
         fullName = trim(fullName);
         email = email == null ? null : email.trim().toLowerCase(Locale.ROOT);
         phone = trim(phone);
+        if (phone != null && phone.isEmpty()) phone = null;
         schedule = trim(schedule);
     }
 

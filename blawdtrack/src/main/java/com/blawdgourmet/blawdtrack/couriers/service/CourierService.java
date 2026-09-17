@@ -35,6 +35,9 @@ public class CourierService {
         if (users.existsByEmailIgnoreCase(request.email())) {
             throw new DuplicateCourierException("El correo ya está registrado");
         }
+        if (request.phone() != null && users.existsByPhone(request.phone())) {
+            throw new DuplicateCourierException("El teléfono ya está registrado");
+        }
         var role = roles.findByName(RoleName.COURIER)
                 .orElseThrow(() -> new IllegalStateException("El rol MENSAJERO no está configurado"));
         String temporaryPassword = temporaryPasswords.generate();
