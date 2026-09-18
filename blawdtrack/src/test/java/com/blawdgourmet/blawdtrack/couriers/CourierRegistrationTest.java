@@ -153,9 +153,43 @@ class CourierRegistrationTest {
         String body = field.equals("nationalId") ? BODY.replace("123456789", " ACTOR69 ")
                 : BODY.replace("courier69@example.com", " ACTOR69@EXAMPLE.COM ");
         register(token, body).andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"));
+                .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"))
+                .andExpect(jsonPath("$.message").value(field.equals("nationalId")
+                        ? "La cédula ya está registrada" : "El correo ya está registrado"));
         assertThat(users.count()).isEqualTo(userCount);
         assertThat(couriers.count()).isEqualTo(courierCount);
+    }
+
+    @Test
+    void telefonoExistenteEnOtroUsuarioSeRechazaConMensajeEspecifico() throws Exception {
+        var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
+        users.saveAndFlush(User.builder().nationalId("EXISTING-PHONE")
+                .fullName("Usuario existente").email("existing-phone@example.com")
+                .phone("88888888").passwordHash("unused")
+                .status(UserStatus.ACTIVE)
+                .role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
+        long userCount = users.count();
+        long courierCount = couriers.count();
+
+        register(token, BODY).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"))
+                .andExpect(jsonPath("$.message").value("El teléfono ya está registrado"));
+        assertThat(users.count()).isEqualTo(userCount);
+        assertThat(couriers.count()).isEqualTo(courierCount);
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    void telefonoVacioSeGuardaComoNuloYPermiteMasDeUnRegistro() throws Exception {
+        var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
+        String withoutPhone = BODY.replace("88888888", "   ");
+
+        register(token, withoutPhone).andExpect(status().isCreated());
+        register(token, withoutPhone.replace("123456789", "987654321")
+                .replace("courier69@example.com", "courier70@example.com"))
+                .andExpect(status().isCreated());
+        assertThat(users.findByEmail("courier69@example.com").orElseThrow().getPhone()).isNull();
+        assertThat(users.findByEmail("courier70@example.com").orElseThrow().getPhone()).isNull();
     }
 
     @ParameterizedTest

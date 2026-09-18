@@ -59,8 +59,8 @@ class CourierCredentialsIntegrationTest {
                 String body = """
                         {"nationalId":"E2E70%d","fullName":"Mensajero prueba",
                          "email":"%s","password":"ClaveElegidaPorCliente!",
-                         "phone":"88888888","schedule":"Lunes a viernes","maxPackageWeightKg":20}
-                        """.formatted(i, email);
+                         "phone":"8888888%d","schedule":"Lunes a viernes","maxPackageWeightKg":20}
+                        """.formatted(i, email, i);
                 mvc.perform(post("/api/v1/couriers").header("Authorization", "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON).content(body))
                         .andExpect(status().isCreated())
