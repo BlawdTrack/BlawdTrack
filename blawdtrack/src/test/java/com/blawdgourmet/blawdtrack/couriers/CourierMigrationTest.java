@@ -26,7 +26,7 @@ class CourierMigrationTest {
                            ('222', 'Usuario previo inactivo', 'inactivo@example.test', 'hash-inactivo', '   ', 'INACTIVE', 1)
                     """);
 
-            Flyway flyway = Flyway.configure().dataSource(url, "sa", "").load();
+            Flyway flyway = Flyway.configure().dataSource(url, "sa", "").target("3").load();
             assertThat(flyway.migrate().migrationsExecuted).isEqualTo(2);
             flyway.validate();
 
