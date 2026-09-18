@@ -25,13 +25,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      *   <li>Correo no encontrado: se lanza {@link UsernameNotFoundException}
      *       con mensaje genérico, sin revelar si el correo existe o no
      *       (regla de negocio de CU-001).</li>
-     *   <li>Usuario inactivo: <b>no</b> se valida en este método. El
-     *       {@link UserPrincipal} se construye igual y son sus flags
-     *       {@code isEnabled()} / {@code isAccountNonLocked()} (delegando en
-     *       {@code User#isActive()}) los que reflejan el estado; Spring
-     *       Security ({@code DaoAuthenticationProvider}) los evalúa
-     *       automáticamente durante la autenticación. Duplicar esa validación
-     *       aquí produciría dos fuentes de verdad para el mismo estado.</li>
+     *   <li>Usuario inactivo: no se valida en este método. El
+     *       {@link UserPrincipal} refleja el estado mediante
+     *       {@code isEnabled()}, delegando en {@code User#isActive()}.
+     *       Spring Security ({@code DaoAuthenticationProvider}) lo evalúa
+     *       durante la autenticación. Duplicar esa validación aquí
+     *       produciría dos fuentes de verdad para el mismo estado.</li>
      * </ul>
      */
     @Override
