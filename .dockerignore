@@ -3,3 +3,7 @@ dist
 .git
 .env
 .DS_Store
+.gitignore
+Dockerfile
+.dockerignore
+README.md
