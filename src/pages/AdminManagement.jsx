@@ -13,21 +13,14 @@ import {
   BottomNavigationAction
 } from '@mui/material';
 
-// Iconos para la navegación móvil
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import SecurityIcon from '@mui/icons-material/Security';
-
 import DeleteAdminModal from '../components/DeleteAdminModal';
 
 const AdminManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [toastOpen, setToastOpen] = useState(false);
-  const [navValue, setNavValue] = useState('admins');
 
-  // Dejamos SOLO el mensajero de prueba como solicitaste
+  // Lista con el único usuario de prueba
   const [mockUsers, setMockUsers] = useState([
     {
       id: '9-0000-0000',
@@ -37,7 +30,7 @@ const AdminManagement = () => {
     }
   ]);
 
-  // Estado inicial de la auditoría (con un dato falso para mostrar estructura)
+  // Estado inicial de la auditoría
   const [auditLogs, setAuditLogs] = useState([
     {
       id: 1,
@@ -79,10 +72,10 @@ const AdminManagement = () => {
       isCreation: false
     };
 
-    // Agregar el log al inicio de la lista
+    // Agregar el log al inicio
     setAuditLogs([newLog, ...auditLogs]);
 
-    // 3. Cerrar modal y mostrar alerta de éxito
+    // 3. Cerrar modal y mostrar alerta
     setIsModalOpen(false);
     setToastOpen(true);
   };
@@ -98,10 +91,10 @@ const AdminManagement = () => {
       p: { xs: 2, md: 4 }, 
       bgcolor: '#f4f3ef', 
       minHeight: '100vh',
-      pb: { xs: 10, md: 4 } // Padding extra en móvil para que no estorbe el BottomNav
+      pb: { xs: 12, md: 4 } 
     }}>
       
-      <Box sx={{ maxWidth: '800px' }}>
+      <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
         
         {/* BUSCADOR */}
         <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 3, border: '1px solid #e0e0e0' }}>
@@ -129,7 +122,7 @@ const AdminManagement = () => {
           </Box>
         </Paper>
 
-        {/* LISTA DE ADMINISTRADORES EN UN SOLO BLOQUE */}
+        {/* LISTA DE ADMINISTRADORES */}
         <Typography variant="h6" sx={{ color: '#212121', mb: 2, fontWeight: 'bold' }}>
           Administradores
         </Typography>
@@ -143,14 +136,9 @@ const AdminManagement = () => {
             mockUsers.map((user, index) => (
               <React.Fragment key={user.id}>
                 <Box sx={{ 
-                  p: 2, 
-                  display: 'flex',
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  alignItems: { xs: 'flex-start', sm: 'center' },
-                  justifyContent: 'space-between',
-                  gap: 2
+                  p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' },
+                  alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2
                 }}>
-                  {/* Info del Usuario */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar sx={{ bgcolor: '#e0e0e0', color: '#666', fontWeight: 'bold' }}>
                       {getInitials(user.name)}
@@ -164,33 +152,22 @@ const AdminManagement = () => {
                       </Typography>
                     </Box>
                   </Box>
-
-                  {/* Acción */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: { xs: 'flex-end', sm: 'flex-end' },
-                    width: { xs: '100%', sm: 'auto' },
-                    gap: 2
-                  }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-end', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}>
                     <Button 
-                      variant="outlined" 
-                      color="error"
-                      onClick={() => handleOpenModal(user)}
+                      variant="outlined" color="error" onClick={() => handleOpenModal(user)}
                       sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold', py: 0.5 }}
                     >
                       Eliminar
                     </Button>
                   </Box>
                 </Box>
-                {/* Divisor entre usuarios, excepto el último */}
                 {index < mockUsers.length - 1 && <Divider />}
               </React.Fragment>
             ))
           )}
         </Paper>
 
-        {/* AUDITORÍA DE ELIMINACIONES Y CREACIONES */}
+        {/* AUDITORÍA */}
         <Typography variant="h6" sx={{ color: '#212121', mb: 2, fontWeight: 'bold' }}>
           Auditoría de eliminaciones y creaciones
         </Typography>
@@ -198,41 +175,18 @@ const AdminManagement = () => {
         <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden' }}>
           {auditLogs.map((log, index) => (
             <React.Fragment key={log.id}>
-              <Box sx={{ 
-                p: 2, 
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: 2
-              }}>
-                {/* Fecha y Etiqueta */}
+              <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: '220px' }}>
-                  <Typography variant="body2" sx={{ color: '#666' }}>
-                    {log.date}
-                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666' }}>{log.date}</Typography>
                   <Typography variant="caption" sx={{ 
                     px: 1.5, py: 0.5, borderRadius: 1.5, fontWeight: 'bold',
-                    bgcolor: log.isCreation ? '#e8f5e9' : '#ffebee',
-                    color: log.isCreation ? '#2e7d32' : '#c62828'
+                    bgcolor: log.isCreation ? '#e8f5e9' : '#ffebee', color: log.isCreation ? '#2e7d32' : '#c62828'
                   }}>
                     {log.action}
                   </Typography>
                 </Box>
-                
-                {/* Detalles del Log */}
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="body2" color="#212121">
-                    {log.details}
-                  </Typography>
-                </Box>
-
-                {/* Rol */}
-                <Box>
-                  <Typography variant="body2" color="#666">
-                    {log.role}
-                  </Typography>
-                </Box>
-
+                <Box sx={{ flexGrow: 1 }}><Typography variant="body2" color="#212121">{log.details}</Typography></Box>
+                <Box><Typography variant="body2" color="#666">{log.role}</Typography></Box>
               </Box>
               {index < auditLogs.length - 1 && <Divider />}
             </React.Fragment>
@@ -241,55 +195,74 @@ const AdminManagement = () => {
 
       </Box>
 
-      {/* MODAL DE ELIMINACIÓN */}
+      {/* MODAL */}
       <DeleteAdminModal 
-        open={isModalOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleDeleteConfirm}
-        adminData={selectedAdmin}
+        open={isModalOpen} onClose={handleCloseModal} onConfirm={handleDeleteConfirm} adminData={selectedAdmin}
       />
 
-      {/* TOAST NOTIFICACIÓN DE ÉXITO */}
+      {/* TOAST */}
       <Snackbar 
-        open={toastOpen} 
-        autoHideDuration={4000} 
-        onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        sx={{ mb: { xs: 8, md: 0 } }} // Elevar un poco en móvil para que no choque con la barra
+        open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} sx={{ mb: { xs: 12, md: 0 } }} 
       >
-        <Alert 
-          onClose={() => setToastOpen(false)} 
-          severity="success" 
-          sx={{ width: '100%', bgcolor: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 2 }}
-        >
+        <Alert severity="success" sx={{ width: '100%', bgcolor: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 2 }}>
           Administrador eliminado correctamente.
         </Alert>
       </Snackbar>
 
-      {/* BOTTOM NAVIGATION (Solo visible en pantallas pequeñas) */}
+      {/* NAVEGACIÓN MÓVIL EXACTA AL MOCKUP */}
       <Box sx={{ 
         display: { xs: 'block', sm: 'none' }, 
         position: 'fixed', 
         bottom: 0, left: 0, right: 0, 
         zIndex: 1000, 
-        borderTop: '1px solid #e0e0e0' 
+        bgcolor: '#ffffff',
+        borderTopLeftRadius: 24, // Bordes redondeados sutiles en la parte superior del menú
+        borderTopRightRadius: 24,
+        boxShadow: '0px -4px 12px rgba(0,0,0,0.05)',
+        pt: 1,
+        pb: 2 // Espacio extra inferior para mejor área táctil
       }}>
         <BottomNavigation
           showLabels
-          value={navValue}
-          onChange={(event, newValue) => {
-            setNavValue(newValue);
-          }}
+          value="admins" // Se bloquea permanentemente en la vista de admins
           sx={{
+            bgcolor: 'transparent',
+            height: 'auto',
+            '& .MuiBottomNavigationAction-root': {
+              minWidth: 'auto',
+              padding: '8px 0',
+            },
             '& .Mui-selected': {
-              color: '#e65100', // Naranja del mockup
+              color: '#ff6d00 !important', // Color naranja fosforescente para el texto activo
+            },
+            '& .MuiBottomNavigationAction-label': {
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              mt: 0.5
             }
           }}
         >
-          <BottomNavigationAction label="Acceso" value="acceso" icon={<VpnKeyIcon />} />
-          <BottomNavigationAction label="Mensajeros" value="mensajeros" icon={<LocalShippingIcon />} />
-          <BottomNavigationAction label="Admins" value="admins" icon={<AdminPanelSettingsIcon />} />
-          <BottomNavigationAction label="Permisos" value="permisos" icon={<SecurityIcon />} />
+          <BottomNavigationAction 
+            label="Acceso" 
+            value="acceso" 
+            icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} 
+          />
+          <BottomNavigationAction 
+            label="Mensajeros" 
+            value="mensajeros" 
+            icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} 
+          />
+          <BottomNavigationAction 
+            label="Admins" 
+            value="admins" 
+            icon={<Box sx={{ width: 28, height: 28, bgcolor: '#ff6d00', borderRadius: 2 }} />} // Cuadrado naranja más grande
+          />
+          <BottomNavigationAction 
+            label="Permisos" 
+            value="permisos" 
+            icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} 
+          />
         </BottomNavigation>
       </Box>
 
