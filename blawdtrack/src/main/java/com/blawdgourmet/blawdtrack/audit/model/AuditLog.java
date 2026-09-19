@@ -52,7 +52,7 @@ public class AuditLog {
     @Column(name = "accion", nullable = false, length = 100)
     private String action;
 
-    @Column(name = "detalle", columnDefinition = "TEXT")
+    @Column(name = "detalle", length = 500)
     private String details;
 
     @Column(name = "fecha_hora", nullable = false)
