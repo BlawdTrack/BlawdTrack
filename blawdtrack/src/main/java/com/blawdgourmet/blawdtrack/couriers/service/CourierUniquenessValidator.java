@@ -20,4 +20,13 @@ public class CourierUniquenessValidator {
             throw new DuplicateCourierException("El teléfono ya está registrado");
         }
     }
+
+    public void validateUpdate(Long userId, String email, String phone) {
+        if (users.existsByEmailIgnoreCaseAndIdNot(email, userId)) {
+            throw new DuplicateCourierException("El correo ya está registrado");
+        }
+        if (phone != null && users.existsByPhoneAndIdNot(phone, userId)) {
+            throw new DuplicateCourierException("El teléfono ya está registrado");
+        }
+    }
 }
