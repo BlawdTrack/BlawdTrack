@@ -1,6 +1,12 @@
 package com.blawdgourmet.blawdtrack.common.dto;
 
-import java.time.Instant;
+import lombok.Builder;
+import lombok.Getter;
 
-public record ErrorResponse(Instant timestamp, int status, String message) {
+@Getter
+@Builder
+public class ErrorResponse {
+    private String code;
+    private String message;
+    private int status;
 }

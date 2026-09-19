@@ -28,7 +28,7 @@ public class User {
     @Column(name = "contrasena_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "telefono", length = 20)
+    @Column(name = "telefono", unique = true, length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)
