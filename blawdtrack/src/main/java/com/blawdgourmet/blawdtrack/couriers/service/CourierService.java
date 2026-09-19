@@ -25,19 +25,12 @@ public class CourierService {
     private final PasswordEncoder passwordEncoder;
     private final TemporaryPasswordGenerator temporaryPasswords;
     private final ApplicationEventPublisher events;
+    private final CourierUniquenessValidator uniquenessValidator;
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public CourierResponse register(CreateCourierRequest request) {
-        if (users.existsByNationalId(request.nationalId())) {
-            throw new DuplicateCourierException("La cédula ya está registrada");
-        }
-        if (users.existsByEmailIgnoreCase(request.email())) {
-            throw new DuplicateCourierException("El correo ya está registrado");
-        }
-        if (request.phone() != null && users.existsByPhone(request.phone())) {
-            throw new DuplicateCourierException("El teléfono ya está registrado");
-        }
+        uniquenessValidator.validateNew(request.nationalId(), request.email(), request.phone());
         var role = roles.findByName(RoleName.COURIER)
                 .orElseThrow(() -> new IllegalStateException("El rol MENSAJERO no está configurado"));
         String temporaryPassword = temporaryPasswords.generate();
