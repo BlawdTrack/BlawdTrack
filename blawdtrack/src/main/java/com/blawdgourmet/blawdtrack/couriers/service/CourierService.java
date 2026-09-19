@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.couriers.service;
 
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
@@ -43,6 +44,23 @@ public class CourierService {
                 .schedule(request.schedule()).maxPackageWeightKg(request.maxPackageWeightKg()).build());
         events.publishEvent(new CourierRegisteredEvent(user.getId(), user.getEmail(),
                 user.getFullName(), temporaryPassword));
+        return CourierResponse.from(courier);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public CourierResponse update(String nationalId, UpdateCourierRequest request) {
+        var courier = couriers.findByUserNationalId(nationalId)
+                .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+        var user = courier.getUser();
+        uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());
+        user.setFullName(request.fullName());
+        user.setEmail(request.email());
+        user.setPhone(request.phone());
+        courier.setSchedule(request.schedule());
+        courier.setMaxPackageWeightKg(request.maxPackageWeightKg());
+        users.saveAndFlush(user);
+        couriers.saveAndFlush(courier);
         return CourierResponse.from(courier);
     }
 }
