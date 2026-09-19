@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "password-reset.token-ttl-minutes",
+      "type": "java.lang.Long",
+      "defaultValue": 15,
+      "description": "Tiempo de vida de los tokens de restablecimiento en minutos."
+    }
+  ]
+}
