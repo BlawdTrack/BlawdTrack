@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.blawdgourmet.blawdtrack.auth.exception.TokenRestablecimientoInvalidoException;
+import com.blawdgourmet.blawdtrack.auth.exception.ContrasenaReutilizadaException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
 
 /**
@@ -17,6 +19,29 @@ import com.blawdgourmet.blawdtrack.common.dto.ApiError;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+        @ExceptionHandler(ContrasenaReutilizadaException.class)
+        public ResponseEntity<ApiError> manejarContrasenaReutilizada(ContrasenaReutilizadaException ex) {
+                ApiError error = ApiError.builder()
+                                .code("CONTRASENA_REUTILIZADA")
+                                .message(ex.getMessage())
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .build();
+
+                return ResponseEntity.badRequest().body(error);
+        }
+
+        @ExceptionHandler(TokenRestablecimientoInvalidoException.class)
+        public ResponseEntity<ApiError> manejarTokenRestablecimientoInvalido(
+                        TokenRestablecimientoInvalidoException ex) {
+                ApiError error = ApiError.builder()
+                                .code("TOKEN_INVALIDO")
+                                .message(ex.getMessage())
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .build();
+
+                return ResponseEntity.badRequest().body(error);
+        }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> manejarValidacion(MethodArgumentNotValidException ex) {
