@@ -1,0 +1,275 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Button, 
+  Typography, 
+  TextField, 
+  Avatar, 
+  Paper, 
+  Divider,
+  Snackbar,
+  Alert,
+  BottomNavigation,
+  BottomNavigationAction,
+  CircularProgress
+} from '@mui/material';
+
+import DeleteAdminModal from '../components/DeleteAdminModal';
+import {
+  deleteAdministrator,
+  getAdministrators
+} from '../services/AdminService';
+
+const AdminManagement = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [toastOpen, setToastOpen] = useState(false);
+
+  // Estados limpios: arreglos vacíos sin datos falsos
+  const [admins, setAdmins] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
+  
+  // Estados para manejar la carga de la API
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        setError(null);
+        const data = await getAdministrators();
+        setAdmins(data);
+      } catch (err) {
+        console.error('Error al cargar administradores:', err);
+        setError('No se pudieron cargar los datos. Verifica la conexión con el servidor.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAdmins();
+  }, []);
+
+  const handleOpenModal = (admin) => {
+    setSelectedAdmin(admin);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAdmin(null);
+  };
+
+const handleDeleteConfirm = async (cedula) => {
+    //Validación preventiva: Evitar peticiones si no hay cédula
+    if (!cedula) {
+      console.error('Intento de eliminación fallido: Cédula indefinida o vacía.');
+      setError('No se puede procesar la solicitud porque faltan datos del administrador.');
+      handleCloseModal();
+      return;
+    }
+
+    try {
+      setError(null);
+      
+      // 1. Enviar la cédula requerida al backend
+      await deleteAdministrator(cedula);
+
+      // 2. Buscar el administrador a eliminar para el log de auditoría
+      const adminToDelete = admins.find(
+        (admin) => admin.identification === cedula || admin.nationalId === cedula || admin.id === cedula
+      );
+
+      // 3. Actualizar dinámicamente la lista de usuarios en pantalla filtrando por cédula
+      setAdmins((currentAdmins) =>
+        currentAdmins.filter(
+          (admin) => admin.identification !== cedula && admin.nationalId !== cedula && admin.id !== cedula
+        )
+      );
+
+      if (adminToDelete) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-CR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const timeStr = now.toLocaleTimeString('es-CR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        const newLog = {
+          id: Date.now(),
+          date: `${dateStr} - ${timeStr}`,
+          action: 'Eliminación',
+          details: `Administrador ${adminToDelete.name} - ${cedula}`,
+          role: 'Súper Usuario',
+          isCreation: false
+        };
+
+        setAuditLogs((currentLogs) => [newLog, ...currentLogs]);
+      }
+
+      handleCloseModal();
+      setToastOpen(true);
+    } catch (err) {
+      console.error('Error al eliminar administrador:', err);
+      setError('No se pudo eliminar el administrador. Intenta nuevamente.');
+    }
+  };
+
+  const getInitials = (name) => {
+    if (!name) return '';
+    const names = name.split(' ');
+    if (names.length >= 2) return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  return (
+    <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f4f3ef', minHeight: '100vh', pb: { xs: 12, md: 4 } }}>
+      <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
+        
+        {/* BUSCADOR */}
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4, bgcolor: '#ffffff' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+            <Typography 
+              variant="overline" 
+              sx={{ 
+                color: '#1b3e32', 
+                fontWeight: 'bold', 
+                display: 'block', 
+                textAlign: 'left',
+                fontSize: '0.8rem'
+              }}
+            >
+              BUSCAR ADMINISTRADOR POR CÉDULA
+            </Typography>
+          </Box>
+          <Box sx={{ p: 2.5, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+            <TextField 
+              fullWidth variant="outlined" placeholder="1-2345-6789" size="small" 
+              sx={{ bgcolor: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+            <Button 
+              variant="contained" disableElevation
+              sx={{ bgcolor: '#1b3e32', color: '#fff', fontWeight: 'bold', px: 4, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
+            >
+              Buscar
+            </Button>
+          </Box>
+        </Paper>
+
+        {/* LISTA DE ADMINISTRADORES */}
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4, bgcolor: '#ffffff' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+            <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
+              Administradores
+            </Typography>
+          </Box>
+
+          <Box>
+            {isLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress sx={{ color: '#1b3e32' }} />
+              </Box>
+            ) : error ? (
+              <Typography variant="body1" sx={{ p: 3, color: '#d32f2f', textAlign: 'center', fontWeight: 'bold' }}>
+                {error}
+              </Typography>
+            ) : admins.length === 0 ? (
+              <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
+                No hay administradores registrados.
+              </Typography>
+            ) : (
+              admins.map((user, index) => (
+                <React.Fragment key={user.id}>
+                  <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar sx={{ bgcolor: '#e0e0e0', color: '#666', fontWeight: 'bold' }}>
+                        {getInitials(user.name)}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight="bold" color="#212121" lineHeight={1.2}>
+                          {user.name}
+                        </Typography>
+                        <Typography variant="body2" color="#666666">
+                          {user.identification || user.id} · {user.email}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-end', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}>
+                      <Button 
+                        variant="outlined" color="error" onClick={() => handleOpenModal(user)}
+                        sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold', py: 0.5 }}
+                      >
+                        Eliminar
+                      </Button>
+                    </Box>
+                  </Box>
+                  {index < admins.length - 1 && <Divider />}
+                </React.Fragment>
+              ))
+            )}
+          </Box>
+        </Paper>
+
+        {/* AUDITORÍA */}
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', bgcolor: '#ffffff' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+            <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
+              Auditoría de eliminaciones y creaciones
+            </Typography>
+          </Box>
+
+          <Box>
+            {auditLogs.length === 0 ? (
+              <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
+                No hay registros de auditoría recientes.
+              </Typography>
+            ) : (
+              auditLogs.map((log, index) => (
+                <React.Fragment key={log.id}>
+                  <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: '220px' }}>
+                      <Typography variant="body2" sx={{ color: '#666' }}>{log.date}</Typography>
+                      <Typography variant="caption" sx={{ px: 1.5, py: 0.5, borderRadius: 1.5, fontWeight: 'bold', bgcolor: log.isCreation ? '#e8f5e9' : '#ffebee', color: log.isCreation ? '#2e7d32' : '#c62828' }}>
+                        {log.action}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ flexGrow: 1 }}><Typography variant="body2" color="#212121">{log.details}</Typography></Box>
+                    <Box><Typography variant="body2" color="#666">{log.role}</Typography></Box>
+                  </Box>
+                  {index < auditLogs.length - 1 && <Divider />}
+                </React.Fragment>
+              ))
+            )}
+          </Box>
+        </Paper>
+
+      </Box>
+
+      {/* MODAL */}
+      <DeleteAdminModal open={isModalOpen} onClose={handleCloseModal} onConfirm={handleDeleteConfirm} adminData={selectedAdmin} />
+
+      {/* TOAST */}
+      <Snackbar open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} sx={{ mb: { xs: 12, md: 0 } }}>
+        <Alert severity="success" sx={{ width: '100%', bgcolor: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 2 }}>
+          Administrador eliminado correctamente.
+        </Alert>
+      </Snackbar>
+
+      {/* NAVEGACIÓN MÓVIL EXACTA AL MOCKUP */}
+      <Box sx={{ display: { xs: 'block', sm: 'none' }, position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, bgcolor: '#ffffff', borderTopLeftRadius: 24, borderTopRightRadius: 24, boxShadow: '0px -4px 12px rgba(0,0,0,0.05)', pt: 1, pb: 2 }}>
+        <BottomNavigation showLabels value="admins" sx={{ bgcolor: 'transparent', height: 'auto', '& .MuiBottomNavigationAction-root': { minWidth: 'auto', padding: '8px 0' }, '& .Mui-selected': { color: '#ff6d00 !important' }, '& .MuiBottomNavigationAction-label': { fontSize: '0.75rem', fontWeight: '600', mt: 0.5 } }}>
+          <BottomNavigationAction label="Acceso" value="acceso" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
+          <BottomNavigationAction label="Mensajeros" value="mensajeros" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
+          <BottomNavigationAction label="Admins" value="admins" icon={<Box sx={{ width: 28, height: 28, bgcolor: '#ff6d00', borderRadius: 2 }} />} />
+          <BottomNavigationAction label="Permisos" value="permisos" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
+        </BottomNavigation>
+      </Box>
+    </Box>
+  );
+};
+
+export default AdminManagement;
