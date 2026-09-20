@@ -36,6 +36,11 @@ public class User {
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
+    @Setter(AccessLevel.NONE)
+    @Column(name = "version_token", nullable = false)
+    @Builder.Default
+    private int tokenVersion = 0;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)
     private Role role;
