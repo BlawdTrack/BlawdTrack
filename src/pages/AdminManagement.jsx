@@ -61,6 +61,14 @@ const AdminManagement = () => {
   };
 
 const handleDeleteConfirm = async (cedula) => {
+    //Validación preventiva: Evitar peticiones si no hay cédula
+    if (!cedula) {
+      console.error('Intento de eliminación fallido: Cédula indefinida o vacía.');
+      setError('No se puede procesar la solicitud porque faltan datos del administrador.');
+      handleCloseModal();
+      return;
+    }
+
     try {
       setError(null);
       
