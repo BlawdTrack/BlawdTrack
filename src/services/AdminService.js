@@ -1,6 +1,7 @@
 import axiosClient from '../api/axiosClient';
 
-const ADMINISTRATORS_PATH = '/v1/administradores';
+// Ruta base centralizada según la definición del backend
+const ADMINISTRATORS_PATH = '/v1/admins';
 
 const normalizeAdministrator = (administrator) => {
   if (!administrator || administrator.id === undefined || administrator.id === null) {
@@ -38,6 +39,6 @@ export const getAdministrators = async () => {
 
 export const deleteAdministrator = async (cedula) => {
   await axiosClient.delete(
-    `/v1/administradores/${encodeURIComponent(cedula)}`
+    `${ADMINISTRATORS_PATH}/${encodeURIComponent(cedula)}`
   );
 };
