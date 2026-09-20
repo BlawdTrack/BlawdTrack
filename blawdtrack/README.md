@@ -7,8 +7,9 @@ levantes localmente, donde sí tienes salida a Maven Central.
 
 ## 1. Levanta el backend
 
+Los comandos se ejecutan desde la carpeta `blawdtrack/`.
+
 ```
-cd backend
 ./mvnw spring-boot:run
 ```
 (en Windows: `mvnw.cmd spring-boot:run`)
