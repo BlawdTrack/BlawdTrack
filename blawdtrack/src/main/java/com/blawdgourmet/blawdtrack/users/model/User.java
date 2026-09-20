@@ -48,4 +48,21 @@ public class User {
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
     }
+
+    /**
+     * Cambia el estado de la cuenta y cierra las sesiones ya emitidas: si el estado
+     * realmente cambia, incrementa la versión del token. Si el nuevo estado es igual
+     * al actual no hace nada. Usar este método en lugar de {@code setStatus}, que no
+     * incrementa la versión.
+     */
+    public void changeStatus(UserStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("El estado no puede ser nulo");
+        }
+        if (this.status == newStatus) {
+            return;
+        }
+        this.status = newStatus;
+        this.tokenVersion++;
+    }
 }
