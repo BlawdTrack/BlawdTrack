@@ -1,11 +1,11 @@
-package com.blawdgourmet.blawdtrack.security;
+package com.blawdgourmet.blawdtrack.auth.security;
 
 import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
@@ -14,23 +14,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
-* Responds with the unified error format (P05) when the request does not include
-* valid credentials (401).
+* Responds with the unified error format (P05) when an authenticated user
+* does not have the required role (403) — this is the case for the
+* "Super User only" restriction on admin registration.
  */
 @Component
-public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response,
-                          AuthenticationException authException) throws IOException {
+    public void handle(HttpServletRequest request, HttpServletResponse response,
+                        AccessDeniedException accessDeniedException) throws IOException {
 
         ApiError error = ApiError.builder()
-                .code("NO_AUTENTICADO")
-                .message("Authentication is required to access this resource.")
-                .status(HttpStatus.UNAUTHORIZED.value())
+                .code("ACCESO_DENEGADO")
+                .message("You do not have the required permissions (Super User role) to perform this action.")
+                .status(HttpStatus.FORBIDDEN.value())
                 .build();
 
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(toJson(error));
     }
