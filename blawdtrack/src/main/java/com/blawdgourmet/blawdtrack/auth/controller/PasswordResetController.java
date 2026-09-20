@@ -1,15 +1,18 @@
 package com.blawdgourmet.blawdtrack.auth.controller;
 
-import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetRequestDTO;
-import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetResponseDTO;
-import com.blawdgourmet.blawdtrack.auth.service.PasswordResetService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetConfirmRequest;
+import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetRequestDTO;
+import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetResponseDTO;
+import com.blawdgourmet.blawdtrack.auth.service.PasswordResetService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Solicitud de recuperación de contraseña (Task #62).
@@ -35,5 +38,14 @@ public class PasswordResetController {
             @Valid @RequestBody PasswordResetRequestDTO request) {
         passwordResetService.requestPasswordReset(request.getEmail());
         return ResponseEntity.ok(PasswordResetResponseDTO.builder().message(GENERIC_MESSAGE).build());
+    }
+
+    @PostMapping("/password-reset/confirm")
+    public ResponseEntity<PasswordResetResponseDTO> confirmPasswordReset(
+            @Valid @RequestBody PasswordResetConfirmRequest request) {
+        passwordResetService.confirmPasswordReset(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(PasswordResetResponseDTO.builder()
+                .message("Contraseña actualizada correctamente.")
+                .build());
     }
 }
