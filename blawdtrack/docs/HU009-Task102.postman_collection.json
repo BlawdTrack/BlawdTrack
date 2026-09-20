@@ -1,0 +1,127 @@
+{
+  "info": {
+    "name": "HU009 - Task 102 - Permisos por rol",
+    "description": "Ejecutar en orden contra una base de desarrollo. La solicitud 02 modifica MENSAJERO; la 05 restaura los permisos originales guardados antes de empezar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "adminEmail", "value": "alicia@blawdgourmet.com" },
+    { "key": "adminPassword", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "courierRoleId", "value": "" },
+    { "key": "viewAssignedId", "value": "" },
+    { "key": "updateStatusId", "value": "" },
+    { "key": "roleAssignId", "value": "" },
+    { "key": "originalPermissionIds", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Login Super Usuario - 200",
+      "request": {
+        "method": "POST",
+        "auth": { "type": "noauth" },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('HTTP 200 y rol SUPER_USUARIO', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().role).to.eql('SUPER_USUARIO'); });",
+          "if (pm.response.code === 200) { pm.collectionVariables.set('adminToken', pm.response.json().token); }"
+        ] }
+      }]
+    },
+    {
+      "name": "02 - Modificar MENSAJERO - 200",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/api/v1/roles/{{courierRoleId}}/permissions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"permissionIds\": [{{viewAssignedId}}, {{updateStatusId}}]\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('HTTP 200 y dos permisos permitidos', function () { pm.response.to.have.status(200); const b = pm.response.json(); pm.expect(b.role).to.eql('MENSAJERO'); pm.expect(b.permissions).to.have.members(['PAQUETE_CONSULTAR_ASIGNADOS', 'PAQUETE_ACTUALIZAR_ESTADO']); });"
+        ] }
+      }]
+    },
+    {
+      "name": "03 - Intento de privilegio indebido - 403",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/api/v1/roles/{{courierRoleId}}/permissions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"permissionIds\": [{{viewAssignedId}}, {{roleAssignId}}]\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('HTTP 403 sin conceder ROL_ASIGNAR', function () { pm.response.to.have.status(403); pm.expect(pm.response.json().code).to.eql('ROLE_PERMISSIONS_ERROR'); });"
+        ] }
+      }]
+    },
+    {
+      "name": "04 - Sin token - 401",
+      "request": {
+        "method": "PUT",
+        "auth": { "type": "noauth" },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/v1/roles/{{courierRoleId}}/permissions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"permissionIds\": [{{viewAssignedId}}, {{updateStatusId}}]\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('HTTP 401', function () { pm.response.to.have.status(401); });"
+        ] }
+      }]
+    },
+    {
+      "name": "05 - Restaurar permisos originales - 200",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/api/v1/roles/{{courierRoleId}}/permissions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"permissionIds\": [{{originalPermissionIds}}]\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "pm.test('HTTP 200 al restaurar', function () { pm.response.to.have.status(200); });"
+        ] }
+      }]
+    }
+  ]
+}

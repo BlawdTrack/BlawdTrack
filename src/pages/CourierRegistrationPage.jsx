@@ -1,0 +1,285 @@
+import React, { useState } from 'react';
+import {
+  Container,
+  Paper,
+  Box,
+  Typography,
+  TextField,
+  Button
+} from '@mui/material';
+import { registerCourier } from '../services/CourierService';
+
+// 1. Importamos la imagen desde la carpeta assets
+import logo from '../assets/logo.png';
+
+function BlawdTrackLogo() {
+  return (
+    <Box
+      sx={{
+        width: 46,
+        height: 46,
+        backgroundColor: '#ffffff',
+        borderRadius: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0px 2px 4px rgba(0,0,0,0.1)'
+      }}
+    >
+      {/* 2. Reemplazamos el SVG por la etiqueta img llamando a la variable 'logo' */}
+      <img 
+        src={logo} 
+        alt="BlawdTrack Logo" 
+        style={{ width: '34px', height: '34px', objectFit: 'contain' }} 
+      />
+    </Box>
+  );
+}
+
+function PersonHeaderIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="#ffffff">
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+    </svg>
+  );
+}
+
+export function CourierRegistrationPage() {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+    password: '',
+    idCard: '',
+    schedule: '',
+    maxLoadCapacityKg: ''
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await registerCourier(formData);
+      if (response?.success) {
+        alert('Mensajero registrado con éxito');
+      }
+    } catch (error) {
+      alert('Error al registrar el mensajero');
+    }
+  };
+
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Paper
+        elevation={2}
+        sx={{
+          borderRadius: 4,
+          overflow: 'hidden',
+          backgroundColor: '#eae7e1'
+        }}
+      >
+        <Box sx={{ height: '5px', backgroundColor: '#ff6b00', width: '100%' }} />
+
+        <Box
+          sx={{
+            backgroundColor: '#183a2e',
+            color: '#ffffff',
+            py: 3.5,
+            px: 2,
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}
+        >
+          <BlawdTrackLogo />
+          <Typography
+            variant="subtitle1"
+            fontWeight="bold"
+            sx={{ color: '#ffffff', mt: 1, letterSpacing: '0.5px', fontSize: '1.05rem' }}
+          >
+            BlawdTrack
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
+            <PersonHeaderIcon />
+            <Typography variant="h5" component="h1" fontWeight="bold">
+              Registro de mensajero
+            </Typography>
+          </Box>
+
+          <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5, fontSize: '0.9rem' }}>
+            Completa los datos para dar de alta a un nuevo mensajero.
+          </Typography>
+        </Box>
+
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            p: { xs: 2.5, sm: 4 },
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2.5
+          }}
+        >
+          <Box sx={{ display: 'flex', gap: 2.5, flexDirection: { xs: 'column', sm: 'row' } }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+                NOMBRE COMPLETO
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="fullName"
+                placeholder="Ej. María José Solano"
+                value={formData.fullName}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+                TELÉFONO
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="phoneNumber"
+                type="tel"
+                placeholder="8888-8888"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
+              />
+            </Box>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2.5, flexDirection: { xs: 'column', sm: 'row' } }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+                CORREO ELECTRÓNICO
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="email"
+                type="email"
+                placeholder="nombre@blawdgourmet.com"
+                value={formData.email}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+                CONTRASEÑA INICIAL
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
+              />
+            </Box>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2.5, flexDirection: { xs: 'column', sm: 'row' } }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+                CÉDULA / IDENTIFICACIÓN
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="idCard"
+                placeholder="1-2345-6789"
+                value={formData.idCard}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+                HORARIO
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                name="schedule"
+                placeholder="Ej. 6:00 am – 2:00 pm"
+                value={formData.schedule}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
+              />
+            </Box>
+          </Box>
+
+          <Box sx={{ width: { xs: '100%', sm: '48.5%' } }}>
+            <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+              CAPACIDAD MÁXIMA DE CARGA (KG)
+            </Typography>
+            <TextField
+              fullWidth
+              required
+              name="maxLoadCapacityKg"
+              type="number"
+              placeholder="Ej. 25"
+              value={formData.maxLoadCapacityKg}
+              onChange={handleChange}
+              sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
+            />
+          </Box>
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            size="large"
+            sx={{
+              mt: 2,
+              py: 1.8,
+              fontWeight: 'bold',
+              backgroundColor: '#183a2e',
+              '&:hover': {
+                backgroundColor: '#10271e'
+              },
+              textTransform: 'none',
+              fontSize: '1rem',
+              borderRadius: 2.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1.2
+            }}
+          >
+            Registrar mensajero
+            <Box
+              component="span"
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: '#ff6b00',
+                display: 'inline-block'
+              }}
+            />
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
+  );
+}
+
+export default CourierRegistrationPage;

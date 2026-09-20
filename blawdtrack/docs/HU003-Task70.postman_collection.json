@@ -1,0 +1,422 @@
+{
+  "info": {
+    "name": "HU003 - Task 70 - Credenciales temporales",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Ejecutar manualmente: configurar courierEmail con un buzón real no registrado, enviar 01 y 02, revisar correo y copiar la clave en courierPassword antes de 07. El alta crea datos reales. No ejecutar toda la colección sin esa pausa."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminEmail",
+      "value": "alicia@blawdgourmet.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "courierToken",
+      "value": ""
+    },
+    {
+      "key": "courierEmail",
+      "value": ""
+    },
+    {
+      "key": "courierPassword",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Login Super Usuario",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"{{adminEmail}}\",\r\n  \"password\": \"{{adminPassword}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const run = Date.now().toString();",
+              "pm.collectionVariables.set(\"nationalId\", \"70\" + run);",
+              "pm.collectionVariables.set(\"otherNationalId\", \"71\" + run);",
+              "pm.collectionVariables.set(\"otherEmail\", \"otro70.\" + run + \"@example.test\");",
+              "pm.collectionVariables.unset(\"adminToken\");",
+              "pm.collectionVariables.unset(\"courierToken\");",
+              "pm.collectionVariables.set(\"courierPassword\", \"\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "if (pm.response.code === 200) { pm.collectionVariables.set(\"adminToken\", pm.response.json().token); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Alta correcta - 201",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/api/v1/couriers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nationalId\": \"{{nationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{courierEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"Activo y rol mensajero\", function () { const b = pm.response.json(); pm.expect(b.status).to.eql(\"ACTIVE\"); pm.expect(b.role).to.eql(\"MENSAJERO\"); pm.expect(b.id).to.be.a(\"number\"); pm.expect(b.userId).to.be.a(\"number\"); });",
+              "pm.test(\"Sin contraseña en respuesta\", function () { const b = pm.response.json(); pm.expect(b).not.to.have.property(\"password\"); pm.expect(b).not.to.have.property(\"passwordHash\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Cédula duplicada - 409",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/api/v1/couriers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nationalId\": \"{{nationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Cédula duplicada\", function () { pm.expect(pm.response.json().message).to.eql(\"La cédula ya está registrada\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Correo duplicado - 409",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/api/v1/couriers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{courierEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Correo duplicado\", function () { pm.expect(pm.response.json().message).to.eql(\"El correo ya está registrado\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Datos inválidos - 400",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/api/v1/couriers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"correo-invalido\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 0\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Error de validación\", function () { pm.expect(pm.response.json().code).to.eql(\"VALIDATION_FAILED\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Sin token - 401",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/v1/couriers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Login del mensajero creado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"{{courierEmail}}\",\r\n  \"password\": \"{{courierPassword}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "if (pm.response.code === 200) { pm.collectionVariables.set(\"courierToken\", pm.response.json().token); }",
+              "pm.test(\"Rol MENSAJERO\", function () { pm.expect(pm.response.json().role).to.eql(\"MENSAJERO\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Mensajero sin permisos - 403",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{courierToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/api/v1/couriers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Clave incorrecta - 401",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{courierEmail}}\",\"password\":\"EstaNoEsLaClaveRecibida!\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+              "pm.test(\"Credenciales rechazadas\", function () { pm.expect(pm.response.json().code).to.eql(\"AUTH_FAILED\"); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
