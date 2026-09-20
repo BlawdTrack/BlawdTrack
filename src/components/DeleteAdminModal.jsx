@@ -105,7 +105,7 @@ const DeleteAdminModal = ({ open, onClose, onConfirm, adminData }) => {
           Cancelar
         </Button>
         <Button
-          onClick={() => onConfirm(adminData.id)}
+          onClick={() => onConfirm(adminData.identification || adminData.nationalId)}
           variant="contained"
           disableElevation
           sx={{

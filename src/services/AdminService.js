@@ -36,10 +36,8 @@ export const getAdministrators = async () => {
   return administrators.map(normalizeAdministrator);
 };
 
-export const deleteAdministrator = async (administratorId) => {
-  if (administratorId === undefined || administratorId === null) {
-    throw new Error('Se requiere el identificador del administrador.');
-  }
-
-  await axiosClient.delete(`${ADMINISTRATORS_PATH}/${encodeURIComponent(administratorId)}`);
+export const deleteAdministrator = async (cedula) => {
+  await axiosClient.delete(
+    `/v1/administradores/${encodeURIComponent(cedula)}`
+  );
 };

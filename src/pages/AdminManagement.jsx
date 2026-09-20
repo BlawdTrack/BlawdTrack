@@ -60,15 +60,23 @@ const AdminManagement = () => {
     setSelectedAdmin(null);
   };
 
-  const handleDeleteConfirm = async (adminId) => {
+const handleDeleteConfirm = async (cedula) => {
     try {
       setError(null);
-      await deleteAdministrator(adminId);
+      
+      // 1. Enviar la cédula requerida al backend
+      await deleteAdministrator(cedula);
 
-      const adminToDelete = admins.find((admin) => admin.id === adminId);
+      // 2. Buscar el administrador a eliminar para el log de auditoría
+      const adminToDelete = admins.find(
+        (admin) => admin.identification === cedula || admin.nationalId === cedula || admin.id === cedula
+      );
 
+      // 3. Actualizar dinámicamente la lista de usuarios en pantalla filtrando por cédula
       setAdmins((currentAdmins) =>
-        currentAdmins.filter((admin) => admin.id !== adminId)
+        currentAdmins.filter(
+          (admin) => admin.identification !== cedula && admin.nationalId !== cedula && admin.id !== cedula
+        )
       );
 
       if (adminToDelete) {
@@ -87,7 +95,7 @@ const AdminManagement = () => {
           id: Date.now(),
           date: `${dateStr} - ${timeStr}`,
           action: 'Eliminación',
-          details: `Administrador ${adminToDelete.name} - ${adminToDelete.id}`,
+          details: `Administrador ${adminToDelete.name} - ${cedula}`,
           role: 'Súper Usuario',
           isCreation: false
         };
