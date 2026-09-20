@@ -15,6 +15,10 @@ import {
 } from '@mui/material';
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
+import {
+  deleteAdministrator,
+  getAdministrators
+} from '../services/AdminService';
 
 const AdminManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,18 +33,14 @@ const AdminManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Puente de conexión HTTP hacia Java/Spring Boot y MySQL
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        // Reemplaza esta URL con el endpoint exacto que te dé tu compañero de backend
-        const response = await fetch('http://localhost:8080/api/administradores'); 
-        if (!response.ok) throw new Error('Error al conectar con el servidor');
-        
-        const data = await response.json();
+        setError(null);
+        const data = await getAdministrators();
         setAdmins(data);
       } catch (err) {
-        console.error(err);
+        console.error('Error al cargar administradores:', err);
         setError('No se pudieron cargar los datos. Verifica la conexión con el servidor.');
       } finally {
         setIsLoading(false);
@@ -61,33 +61,46 @@ const AdminManagement = () => {
   };
 
   const handleDeleteConfirm = async (adminId) => {
-    // Aquí idealmente también harías un fetch con el método DELETE al backend
-    // await fetch(`http://localhost:8080/api/administradores/${adminId}`, { method: 'DELETE' });
-    
-    const adminToDelete = admins.find(u => u.id === adminId);
-    
-    // 1. Actualizar estado local
-    setAdmins(admins.filter(u => u.id !== adminId));
+    try {
+      setError(null);
+      await deleteAdministrator(adminId);
 
-    // 2. Crear registro de auditoría local
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const timeStr = now.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+      const adminToDelete = admins.find((admin) => admin.id === adminId);
 
-    const newLog = {
-      id: Date.now(),
-      date: `${dateStr} - ${timeStr}`,
-      action: 'Eliminación',
-      details: `Administrador ${adminToDelete.name} - ${adminToDelete.id}`,
-      role: 'Súper Usuario',
-      isCreation: false
-    };
+      setAdmins((currentAdmins) =>
+        currentAdmins.filter((admin) => admin.id !== adminId)
+      );
 
-    setAuditLogs([newLog, ...auditLogs]);
+      if (adminToDelete) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-CR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const timeStr = now.toLocaleTimeString('es-CR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
 
-    // 3. Cerrar modal y mostrar alerta
-    setIsModalOpen(false);
-    setToastOpen(true);
+        const newLog = {
+          id: Date.now(),
+          date: `${dateStr} - ${timeStr}`,
+          action: 'Eliminación',
+          details: `Administrador ${adminToDelete.name} - ${adminToDelete.id}`,
+          role: 'Súper Usuario',
+          isCreation: false
+        };
+
+        setAuditLogs((currentLogs) => [newLog, ...currentLogs]);
+      }
+
+      handleCloseModal();
+      setToastOpen(true);
+    } catch (err) {
+      console.error('Error al eliminar administrador:', err);
+      setError('No se pudo eliminar el administrador. Intenta nuevamente.');
+    }
   };
 
   const getInitials = (name) => {
@@ -150,7 +163,7 @@ const AdminManagement = () => {
                         {user.name}
                       </Typography>
                       <Typography variant="body2" color="#666666">
-                        {user.id} · {user.email}
+                        {user.identification || user.id} · {user.email}
                       </Typography>
                     </Box>
                   </Box>

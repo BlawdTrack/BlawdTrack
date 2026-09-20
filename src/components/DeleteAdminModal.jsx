@@ -76,7 +76,7 @@ const DeleteAdminModal = ({ open, onClose, onConfirm, adminData }) => {
               {adminData.name}
             </Typography>
             <Typography variant="body2" color="#666666">
-              {adminData.id} - {adminData.email}
+              {adminData.identification || adminData.id} - {adminData.email}
             </Typography>
           </Box>
         </Box>
