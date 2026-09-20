@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Container, Typography } from '@mui/material';
-import DeactivateMessengerModal from './components/DeactivateMessengerModal';
-
+import { DeactivateMessengerModal } from './components/DeactivateMessengerModal';
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
