@@ -115,13 +115,25 @@ const AdminManagement = () => {
       <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
         
         {/* BUSCADOR */}
-        <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 3, border: '1px solid #e0e0e0' }}>
-          <Typography variant="overline" sx={{ color: '#666', fontWeight: 'bold', display: 'block', mb: 1 }}>
-            BUSCAR ADMINISTRADOR POR CÉDULA
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4, bgcolor: '#ffffff' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+            <Typography 
+              variant="overline" 
+              sx={{ 
+                color: '#1b3e32', 
+                fontWeight: 'bold', 
+                display: 'block', 
+                textAlign: 'left',
+                fontSize: '0.8rem'
+              }}
+            >
+              BUSCAR ADMINISTRADOR POR CÉDULA
+            </Typography>
+          </Box>
+          <Box sx={{ p: 2.5, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
             <TextField 
-              fullWidth variant="outlined" placeholder="1-2345-6789" size="small" sx={{ bgcolor: '#fff' }}
+              fullWidth variant="outlined" placeholder="1-2345-6789" size="small" 
+              sx={{ bgcolor: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
             <Button 
               variant="contained" disableElevation
@@ -133,82 +145,90 @@ const AdminManagement = () => {
         </Paper>
 
         {/* LISTA DE ADMINISTRADORES */}
-        <Typography variant="h6" sx={{ color: '#212121', mb: 2, fontWeight: 'bold' }}>
-          Administradores
-        </Typography>
-        
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4 }}>
-          {isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-              <CircularProgress sx={{ color: '#1b3e32' }} />
-            </Box>
-          ) : error ? (
-            <Typography variant="body1" sx={{ p: 3, color: '#d32f2f', textAlign: 'center', fontWeight: 'bold' }}>
-              {error}
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4, bgcolor: '#ffffff' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+            <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
+              Administradores
             </Typography>
-          ) : admins.length === 0 ? (
-            <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
-              No hay administradores registrados.
-            </Typography>
-          ) : (
-            admins.map((user, index) => (
-              <React.Fragment key={user.id}>
-                <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: '#e0e0e0', color: '#666', fontWeight: 'bold' }}>
-                      {getInitials(user.name)}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="bold" color="#212121" lineHeight={1.2}>
-                        {user.name}
-                      </Typography>
-                      <Typography variant="body2" color="#666666">
-                        {user.identification || user.id} · {user.email}
-                      </Typography>
+          </Box>
+
+          <Box>
+            {isLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress sx={{ color: '#1b3e32' }} />
+              </Box>
+            ) : error ? (
+              <Typography variant="body1" sx={{ p: 3, color: '#d32f2f', textAlign: 'center', fontWeight: 'bold' }}>
+                {error}
+              </Typography>
+            ) : admins.length === 0 ? (
+              <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
+                No hay administradores registrados.
+              </Typography>
+            ) : (
+              admins.map((user, index) => (
+                <React.Fragment key={user.id}>
+                  <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar sx={{ bgcolor: '#e0e0e0', color: '#666', fontWeight: 'bold' }}>
+                        {getInitials(user.name)}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight="bold" color="#212121" lineHeight={1.2}>
+                          {user.name}
+                        </Typography>
+                        <Typography variant="body2" color="#666666">
+                          {user.identification || user.id} · {user.email}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-end', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}>
+                      <Button 
+                        variant="outlined" color="error" onClick={() => handleOpenModal(user)}
+                        sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold', py: 0.5 }}
+                      >
+                        Eliminar
+                      </Button>
                     </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-end', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}>
-                    <Button 
-                      variant="outlined" color="error" onClick={() => handleOpenModal(user)}
-                      sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold', py: 0.5 }}
-                    >
-                      Eliminar
-                    </Button>
-                  </Box>
-                </Box>
-                {index < admins.length - 1 && <Divider />}
-              </React.Fragment>
-            ))
-          )}
+                  {index < admins.length - 1 && <Divider />}
+                </React.Fragment>
+              ))
+            )}
+          </Box>
         </Paper>
 
         {/* AUDITORÍA */}
-        <Typography variant="h6" sx={{ color: '#212121', mb: 2, fontWeight: 'bold' }}>
-          Auditoría de eliminaciones y creaciones
-        </Typography>
-
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden' }}>
-          {auditLogs.length === 0 ? (
-            <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
-              No hay registros de auditoría recientes.
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', bgcolor: '#ffffff' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+            <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
+              Auditoría de eliminaciones y creaciones
             </Typography>
-          ) : (
-            auditLogs.map((log, index) => (
-              <React.Fragment key={log.id}>
-                <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: '220px' }}>
-                    <Typography variant="body2" sx={{ color: '#666' }}>{log.date}</Typography>
-                    <Typography variant="caption" sx={{ px: 1.5, py: 0.5, borderRadius: 1.5, fontWeight: 'bold', bgcolor: log.isCreation ? '#e8f5e9' : '#ffebee', color: log.isCreation ? '#2e7d32' : '#c62828' }}>
-                      {log.action}
-                    </Typography>
+          </Box>
+
+          <Box>
+            {auditLogs.length === 0 ? (
+              <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
+                No hay registros de auditoría recientes.
+              </Typography>
+            ) : (
+              auditLogs.map((log, index) => (
+                <React.Fragment key={log.id}>
+                  <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: '220px' }}>
+                      <Typography variant="body2" sx={{ color: '#666' }}>{log.date}</Typography>
+                      <Typography variant="caption" sx={{ px: 1.5, py: 0.5, borderRadius: 1.5, fontWeight: 'bold', bgcolor: log.isCreation ? '#e8f5e9' : '#ffebee', color: log.isCreation ? '#2e7d32' : '#c62828' }}>
+                        {log.action}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ flexGrow: 1 }}><Typography variant="body2" color="#212121">{log.details}</Typography></Box>
+                    <Box><Typography variant="body2" color="#666">{log.role}</Typography></Box>
                   </Box>
-                  <Box sx={{ flexGrow: 1 }}><Typography variant="body2" color="#212121">{log.details}</Typography></Box>
-                  <Box><Typography variant="body2" color="#666">{log.role}</Typography></Box>
-                </Box>
-                {index < auditLogs.length - 1 && <Divider />}
-              </React.Fragment>
-            ))
-          )}
+                  {index < auditLogs.length - 1 && <Divider />}
+                </React.Fragment>
+              ))
+            )}
+          </Box>
         </Paper>
 
       </Box>
