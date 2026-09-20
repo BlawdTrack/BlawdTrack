@@ -31,4 +31,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByNationalId(String nationalId);
     boolean existsByPhone(String phone);
+
+    // Excluyen al propio usuario para no dar un 409 falso al guardar sin cambios.
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+    boolean existsByPhoneAndIdNot(String phone, Long id);
 }
