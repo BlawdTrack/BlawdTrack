@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtService {
 
+    private static final String TOKEN_VERSION_CLAIM = "tokenVersion";
+
     @Value("${security.jwt.secret}")
     private String secret;
 
@@ -48,9 +50,19 @@ public class JwtService {
                 .claim("roles", roles)
                 .claim("nationalId", principal.getUser().getNationalId())
                 .claim("fullName", principal.getUser().getFullName())
+                .claim(TOKEN_VERSION_CLAIM, principal.getTokenVersion())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key())
                 .compact();
+    }
+
+    /**
+     * Versión de sesión con la que se emitió el token. Los tokens anteriores a la
+     * introducción del claim no lo traen y se consideran versión 0.
+     */
+    public int extractTokenVersion(Claims claims) {
+        Integer version = claims.get(TOKEN_VERSION_CLAIM, Integer.class);
+        return version == null ? 0 : version;
     }
 }
