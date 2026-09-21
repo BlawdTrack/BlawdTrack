@@ -40,5 +40,5 @@ public class PasswordHistory {
     private String passwordHash;
 
     @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime createdAt;
 }

@@ -53,9 +53,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         PasswordResetToken token = PasswordResetToken.builder()
                 .user(user.get())
                 .tokenHash(passwordEncoder.encode(rawToken))
-                .fechaExpiracion(now.plusMinutes(TOKEN_EXPIRATION_MINUTES))
-                .fechaCreacion(now)
-                .usado(false)
+                .expirationDate(now.plusMinutes(TOKEN_EXPIRATION_MINUTES))
+                .createdAt(now)
+                .used(false)
                 .build();
 
         passwordResetTokenRepository.save(token);
@@ -78,7 +78,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             throw new ContrasenaReutilizadaException();
         }
 
-        List<PasswordHistory> history = passwordHistoryRepository.findTop2ByUserOrderByFechaCreacionDesc(user);
+        List<PasswordHistory> history = passwordHistoryRepository.findTop2ByUserOrderByCreatedAtDesc(user);
         if (history.stream().anyMatch(entry -> passwordEncoder.matches(newPassword, entry.getPasswordHash()))) {
             throw new ContrasenaReutilizadaException();
         }
@@ -86,11 +86,11 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         passwordHistoryRepository.save(PasswordHistory.builder()
                 .user(user)
                 .passwordHash(user.getPasswordHash())
-                .fechaCreacion(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build());
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        token.setUsado(true);
+        token.setUsed(true);
         passwordResetTokenRepository.save(token);
     }
 }

@@ -9,5 +9,5 @@ import com.blawdgourmet.blawdtrack.users.model.User;
 
 public interface PasswordHistoryRepository extends JpaRepository<PasswordHistory, Long> {
 
-    List<PasswordHistory> findTop2ByUserOrderByFechaCreacionDesc(User user);
+    List<PasswordHistory> findTop2ByUserOrderByCreatedAtDesc(User user);
 }

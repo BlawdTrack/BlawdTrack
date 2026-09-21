@@ -20,6 +20,6 @@ import jakarta.persistence.LockModeType;
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Long> {
 
 	 @Lock(LockModeType.PESSIMISTIC_WRITE)
-	 @Query("SELECT t FROM PasswordResetToken t WHERE t.usado = false AND t.fechaExpiracion > :ahora")
+	 @Query("SELECT t FROM PasswordResetToken t WHERE t.used = false AND t.expirationDate > :ahora")
 	 List<PasswordResetToken> findActivosParaActualizar(@Param("ahora") LocalDateTime ahora);
 }

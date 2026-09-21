@@ -92,8 +92,8 @@ class PasswordResetServiceImplTest {
         PasswordResetToken saved = captor.getValue();
         assertThat(saved.getUser()).isEqualTo(user);
         assertThat(saved.getTokenHash()).isEqualTo("hash-simulado");
-        assertThat(saved.isUsado()).isFalse();
-        assertThat(saved.getFechaExpiracion()).isAfter(LocalDateTime.now());
+        assertThat(saved.isUsed()).isFalse();
+        assertThat(saved.getExpirationDate()).isAfter(LocalDateTime.now());
         // El valor plano nunca se guarda: solo se persiste su hash.
         assertThat(saved.getTokenHash()).isNotEqualTo(result.rawToken());
     }
@@ -127,13 +127,13 @@ class PasswordResetServiceImplTest {
         when(passwordResetTokenRepository.findActivosParaActualizar(any())).thenReturn(List.of(token));
         when(passwordEncoder.matches("raw-token", "hash-token")).thenReturn(true);
         when(passwordEncoder.matches("Nueva123", "hash-no-real")).thenReturn(false);
-        when(passwordHistoryRepository.findTop2ByUserOrderByFechaCreacionDesc(user)).thenReturn(List.of());
+        when(passwordHistoryRepository.findTop2ByUserOrderByCreatedAtDesc(user)).thenReturn(List.of());
         when(passwordEncoder.encode("Nueva123")).thenReturn("hash-nueva");
 
         passwordResetService.confirmPasswordReset("raw-token", "Nueva123");
 
         assertThat(user.getPasswordHash()).isEqualTo("hash-nueva");
-        assertThat(token.isUsado()).isTrue();
+        assertThat(token.isUsed()).isTrue();
         verify(passwordHistoryRepository).save(argThat(history ->
                 history.getUser() == user && history.getPasswordHash().equals("hash-no-real")));
         verify(userRepository).save(user);
@@ -192,7 +192,7 @@ class PasswordResetServiceImplTest {
         when(passwordResetTokenRepository.findActivosParaActualizar(any())).thenReturn(List.of(token));
         when(passwordEncoder.matches("raw-token", "hash-token")).thenReturn(true);
         when(passwordEncoder.matches("Nueva123", "hash-no-real")).thenReturn(false);
-        when(passwordHistoryRepository.findTop2ByUserOrderByFechaCreacionDesc(user)).thenReturn(List.of(
+        when(passwordHistoryRepository.findTop2ByUserOrderByCreatedAtDesc(user)).thenReturn(List.of(
                 PasswordHistory.builder().user(user).passwordHash("hash-anterior-1").build(),
                 PasswordHistory.builder().user(user).passwordHash("hash-anterior-2").build()));
         when(passwordEncoder.matches("Nueva123", "hash-anterior-1")).thenReturn(false);
@@ -211,7 +211,7 @@ class PasswordResetServiceImplTest {
         when(passwordResetTokenRepository.findActivosParaActualizar(any())).thenReturn(List.of(token));
         when(passwordEncoder.matches("raw-token", "hash-token")).thenReturn(true);
         when(passwordEncoder.matches("Nueva123", "hash-no-real")).thenReturn(false);
-        when(passwordHistoryRepository.findTop2ByUserOrderByFechaCreacionDesc(user)).thenReturn(List.of(
+        when(passwordHistoryRepository.findTop2ByUserOrderByCreatedAtDesc(user)).thenReturn(List.of(
                 PasswordHistory.builder().user(user).passwordHash("hash-anterior-1").build(),
                 PasswordHistory.builder().user(user).passwordHash("hash-anterior-2").build()));
         when(passwordEncoder.matches("Nueva123", "hash-anterior-1")).thenReturn(false);
@@ -229,9 +229,9 @@ class PasswordResetServiceImplTest {
         return PasswordResetToken.builder()
                 .user(user)
                 .tokenHash("hash-token")
-                .fechaExpiracion(LocalDateTime.now().plusMinutes(10))
-                .fechaCreacion(LocalDateTime.now())
-                .usado(false)
+                .expirationDate(LocalDateTime.now().plusMinutes(10))
+                .createdAt(LocalDateTime.now())
+                .used(false)
                 .build();
     }
 }

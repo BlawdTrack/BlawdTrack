@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
 
         ApiError error = ApiError.builder()
                 .code("VALIDATION_ERROR")
-                .message("One or more fields do not meet the required validation rules.")
+                .message("Uno o más campos no cumplen las reglas de validación requeridas.")
                 .status(HttpStatus.BAD_REQUEST.value())
                 .errores(errores)
                 .build();

@@ -67,8 +67,8 @@ class PasswordResetConfirmIntegrationTest {
                 .andExpect(status().isUnauthorized());
 
         User updated = users.findByEmail(EMAIL).orElseThrow();
-        assertThat(history.findTop2ByUserOrderByFechaCreacionDesc(updated)).hasSize(1);
-        assertThat(tokens.findAll()).singleElement().satisfies(token -> assertThat(token.isUsado()).isTrue());
+        assertThat(history.findTop2ByUserOrderByCreatedAtDesc(updated)).hasSize(1);
+        assertThat(tokens.findAll()).singleElement().satisfies(token -> assertThat(token.isUsed()).isTrue());
     }
 
     @Test
@@ -97,9 +97,9 @@ class PasswordResetConfirmIntegrationTest {
         tokens.saveAndFlush(PasswordResetToken.builder()
                 .user(user)
                 .tokenHash(passwordEncoder.encode("expired-token"))
-                .fechaExpiracion(LocalDateTime.now().minusMinutes(1))
-                .fechaCreacion(LocalDateTime.now().minusMinutes(2))
-                .usado(false)
+                .expirationDate(LocalDateTime.now().minusMinutes(1))
+                .createdAt(LocalDateTime.now().minusMinutes(2))
+                .used(false)
                 .build());
 
         confirm("expired-token", "NewPass123")
@@ -132,7 +132,7 @@ class PasswordResetConfirmIntegrationTest {
         history.save(PasswordHistory.builder()
                 .user(user)
                 .passwordHash(passwordEncoder.encode("Previous123"))
-                .fechaCreacion(LocalDateTime.now().minusDays(1))
+                .createdAt(LocalDateTime.now().minusDays(1))
                 .build());
         PasswordResetResult result = passwordResetService.requestPasswordReset(EMAIL);
 
