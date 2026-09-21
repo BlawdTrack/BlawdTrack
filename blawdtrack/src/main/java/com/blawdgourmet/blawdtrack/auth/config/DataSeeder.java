@@ -116,11 +116,14 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private Role createOrUpdateRole(String name, String description, Set<Permission> permissions) {
-        Role role = roleRepository.findByName(name)
-                .orElseGet(() -> Role.builder().name(name).description(description).build());
-        role.setDescription(description);
-        role.setPermissions(permissions);
-        return roleRepository.save(role);
+        if (RoleName.SUPER_USER.equals(name)) {
+            Role role = roleRepository.findByName(name)
+                    .orElseGet(() -> Role.builder().name(name).description(description).build());
+            role.setPermissions(permissions);
+            return roleRepository.save(role);
+        }
+        return roleRepository.findByName(name).orElseGet(() -> roleRepository.save(
+                Role.builder().name(name).description(description).permissions(permissions).build()));
     }
 
     private void seedDefaultAdminUser(Role superUserRole) {

@@ -3,6 +3,8 @@ package com.blawdgourmet.blawdtrack.couriers.controller;
 import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
 import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
 import jakarta.validation.Valid;
@@ -24,6 +26,12 @@ public class CourierController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
     }
 
+    @PutMapping("/{nationalId}")
+    public CourierResponse update(@PathVariable String nationalId,
+                                  @Valid @RequestBody UpdateCourierRequest request) {
+        return service.update(nationalId, request);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> invalidRequest(MethodArgumentNotValidException ex) {
         // No incluir valores rechazados: podrían contener la contraseña.
@@ -37,6 +45,12 @@ public class CourierController {
     @ExceptionHandler(DuplicateCourierException.class)
     public ResponseEntity<ErrorResponse> duplicate(DuplicateCourierException ex) {
         return conflict(ex.getMessage());
+    }
+
+    @ExceptionHandler(CourierNotFoundException.class)
+    public ResponseEntity<ErrorResponse> notFound(CourierNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
+                .code("COURIER_NOT_FOUND").message(ex.getMessage()).status(404).build());
     }
 
     // Las restricciones únicas también protegen frente a registros simultáneos.

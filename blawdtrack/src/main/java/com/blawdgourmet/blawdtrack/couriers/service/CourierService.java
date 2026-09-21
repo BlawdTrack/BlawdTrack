@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.couriers.service;
 
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
@@ -25,19 +26,12 @@ public class CourierService {
     private final PasswordEncoder passwordEncoder;
     private final TemporaryPasswordGenerator temporaryPasswords;
     private final ApplicationEventPublisher events;
+    private final CourierUniquenessValidator uniquenessValidator;
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public CourierResponse register(CreateCourierRequest request) {
-        if (users.existsByNationalId(request.nationalId())) {
-            throw new DuplicateCourierException("La cédula ya está registrada");
-        }
-        if (users.existsByEmailIgnoreCase(request.email())) {
-            throw new DuplicateCourierException("El correo ya está registrado");
-        }
-        if (request.phone() != null && users.existsByPhone(request.phone())) {
-            throw new DuplicateCourierException("El teléfono ya está registrado");
-        }
+        uniquenessValidator.validateNew(request.nationalId(), request.email(), request.phone());
         var role = roles.findByName(RoleName.COURIER)
                 .orElseThrow(() -> new IllegalStateException("El rol MENSAJERO no está configurado"));
         String temporaryPassword = temporaryPasswords.generate();
@@ -50,6 +44,23 @@ public class CourierService {
                 .schedule(request.schedule()).maxPackageWeightKg(request.maxPackageWeightKg()).build());
         events.publishEvent(new CourierRegisteredEvent(user.getId(), user.getEmail(),
                 user.getFullName(), temporaryPassword));
+        return CourierResponse.from(courier);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public CourierResponse update(String nationalId, UpdateCourierRequest request) {
+        var courier = couriers.findByUserNationalId(nationalId)
+                .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+        var user = courier.getUser();
+        uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());
+        user.setFullName(request.fullName());
+        user.setEmail(request.email());
+        user.setPhone(request.phone());
+        courier.setSchedule(request.schedule());
+        courier.setMaxPackageWeightKg(request.maxPackageWeightKg());
+        users.saveAndFlush(user);
+        couriers.saveAndFlush(courier);
         return CourierResponse.from(courier);
     }
 }
