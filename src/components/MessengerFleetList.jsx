@@ -56,7 +56,8 @@ export const MessengerFleetList = () => {
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
 
   return (
-    <Box sx={{ maxWidth: '900px', margin: '0 auto', p: 2 }}>
+    // Se añadió un padding inferior extra (pb: { xs: 12, sm: 2 }) para que el contenido no quede oculto por la barra móvil
+    <Box sx={{ maxWidth: '900px', margin: '0 auto', p: 2, pb: { xs: 12, sm: 2 } }}>
       
       <Paper elevation={0} sx={{ border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden' }}>
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, p: 3, bgcolor: '#FFFFFF' }}>
@@ -72,8 +73,7 @@ export const MessengerFleetList = () => {
 
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           {messengers.map((messenger, index) => {
-            // AJUSTA ESTAS DOS VARIABLES SEGÚN LOS NOMBRES REALES DE TU BACKEND
-            const isWorking = messenger.inLabor; // o messenger.status === 'EN_RUTA', etc.
+            const isWorking = messenger.inLabor; 
             const pending = messenger.pendingPackages || 0; 
 
             return (
@@ -153,6 +153,54 @@ export const MessengerFleetList = () => {
         </Typography>
       </Box>
 
+      {/* TABS DE NAVEGACIÓN (SÓLO MÓVIL) */}
+      <Box
+        sx={{
+          display: { xs: 'flex', sm: 'none' }, // Oculto en pantallas grandes
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          bgcolor: '#FFFFFF',
+          borderTop: '1px solid #E5E7EB',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          pt: 1.5,
+          pb: 3,
+          boxShadow: '0px -2px 10px rgba(0, 0, 0, 0.05)',
+          zIndex: 1000,
+          borderRadius: '20px 20px 0 0'
+        }}
+      >
+        {[
+          { label: 'Acceso', active: false },
+          { label: 'Mensajeros', active: true },
+          { label: 'Admins', active: false },
+          { label: 'Permisos', active: false }
+        ].map((item) => (
+          <Box key={item.label} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.8, cursor: 'pointer' }}>
+            <Box
+              sx={{
+                width: 26,
+                height: 26,
+                borderRadius: '8px',
+                bgcolor: item.active ? '#FF6B00' : '#E5E5E5'
+              }}
+            />
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                color: item.active ? '#FF6B00' : '#9CA3AF'
+              }}
+            >
+              {item.label}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
       <DeactivateMessengerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -166,7 +214,8 @@ export const MessengerFleetList = () => {
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         sx={{
-          bottom: { xs: 16, sm: 24 }, right: { xs: 'auto', sm: 24 }, left: { xs: '50%', sm: 'auto' },
+          bottom: { xs: 90, sm: 24 }, // Se subió en móvil para no chocar con la barra de navegación
+          right: { xs: 'auto', sm: 24 }, left: { xs: '50%', sm: 'auto' },
           transform: { xs: 'translateX(-50%)', sm: 'none' }, width: { xs: 'calc(100% - 32px)', sm: 'auto' }
         }}
       >
