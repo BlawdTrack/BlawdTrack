@@ -1,45 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  Button, 
-  Typography, 
-  Box, 
-  Avatar 
+  Dialog, DialogTitle, DialogContent, DialogActions, 
+  Button, Typography, Box, Avatar, Alert 
 } from '@mui/material';
+import { useDeactivateMessenger } from '../hooks/useDeactivateMessenger';
 
 export const DeactivateMessengerModal = ({ isOpen, onClose, courier, onDeactivateSuccess }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { deactivate, isLoading, error, clearError } = useDeactivateMessenger();
+
+  // Limpiamos el error cada vez que se abre/cierra el modal
+  useEffect(() => {
+    if (!isOpen) clearError();
+  }, [isOpen]);
 
   if (!courier) return null;
 
   const handleConfirm = async () => {
-    setIsLoading(true);
+    // PUNTO 1: Pasamos el nationalId en lugar del courier.id
+    const result = await deactivate(courier.nationalId);
     
-    try {
-      const token = localStorage.getItem('token');
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-      
-      // Petición real al backend
-      const response = await fetch(`${baseUrl}/api/v1/couriers/${courier.id}/deactivate`, {
-        method: 'PATCH', // Cambia a PUT o POST si tu backend lo requiere así
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        onDeactivateSuccess(); 
-      } else {
-        console.error('Error del servidor al desactivar el mensajero');
-      }
-    } catch (error) {
-      console.error('Error de red al intentar desactivar:', error);
-    } finally {
-      setIsLoading(false);
+    if (result.success) {
+      onDeactivateSuccess(); 
     }
   };
 
@@ -91,9 +72,17 @@ export const DeactivateMessengerModal = ({ isOpen, onClose, courier, onDeactivat
             </Typography>
           </Box>
         </Box>
+        
         <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.5 }}>
           El mensajero perderá el acceso de inmediato y no recibirá nuevas asignaciones. Su historial de entregas se conserva.
         </Typography>
+
+        {/* PUNTO 3: Mostramos el mensaje de error del backend al usuario */}
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: '8px', fontWeight: 500 }}>
+            {error}
+          </Alert>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2, pt: 1 }}>
