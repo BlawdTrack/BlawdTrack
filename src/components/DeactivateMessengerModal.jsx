@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 
 export const DeactivateMessengerModal = ({ isOpen, onClose, courier, onDeactivateSuccess }) => {
-  // Estado local para manejar el botón de carga
   const [isLoading, setIsLoading] = useState(false);
 
   if (!courier) return null;
@@ -23,9 +22,9 @@ export const DeactivateMessengerModal = ({ isOpen, onClose, courier, onDeactivat
       const token = localStorage.getItem('token');
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
       
-      // Intentar hacer la petición real al backend
+      // Petición real al backend
       const response = await fetch(`${baseUrl}/api/v1/couriers/${courier.id}/deactivate`, {
-        method: 'PATCH', // Ajusta a PUT o POST según como esté tu backend
+        method: 'PATCH', // Cambia a PUT o POST si tu backend lo requiere así
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -33,19 +32,14 @@ export const DeactivateMessengerModal = ({ isOpen, onClose, courier, onDeactivat
       });
 
       if (response.ok) {
-        onDeactivateSuccess(); // Éxito real
+        onDeactivateSuccess(); 
       } else {
-        throw new Error('Fallo al desactivar en el backend');
+        console.error('Error del servidor al desactivar el mensajero');
       }
     } catch (error) {
-      console.warn("Backend no disponible. Usando simulación de éxito para la UI.");
-      
-      // MOCK DE RESPALDO: Si no hay backend, esperamos 1 segundo para ver 
-      // el botón de "Desactivando..." y luego forzamos el éxito.
-      setTimeout(() => {
-        onDeactivateSuccess(); 
-        setIsLoading(false);
-      }, 1000);
+      console.error('Error de red al intentar desactivar:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,7 +73,6 @@ export const DeactivateMessengerModal = ({ isOpen, onClose, courier, onDeactivat
       </DialogTitle>
 
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pb: 1 }}>
-        
         <Box 
           sx={{ 
             display: 'flex', alignItems: 'center', gap: 2, 
@@ -98,11 +91,9 @@ export const DeactivateMessengerModal = ({ isOpen, onClose, courier, onDeactivat
             </Typography>
           </Box>
         </Box>
-
         <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.5 }}>
           El mensajero perderá el acceso de inmediato y no recibirá nuevas asignaciones. Su historial de entregas se conserva.
         </Typography>
-
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2, pt: 1 }}>
