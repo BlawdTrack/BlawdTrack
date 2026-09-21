@@ -1,19 +1,24 @@
 import React from 'react';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
+import NewPasswordPage from './pages/NewPasswordPage.jsx';
 
-// TODO: Falta definir un router (ej. react-router-dom) para navegar entre pantallas.
-// Temporalmente se renderizan ambas pantallas para pruebas de UI (HU008 y HU003).
+// TODO: Definir un router para navegar entre pantallas.
 function App() {
   return (
     <div>
       {/* Vista de Administradores (HU008) */}
       <AdminManagement />
-      
+
       <hr style={{ margin: '40px 0', border: '1px solid #ccc' }} />
-      
+
       {/* Vista de Registro de Mensajeros (HU003) */}
       <CourierRegistrationPage />
+
+      <hr style={{ margin: '40px 0', border: '1px solid #ccc' }} />
+
+      {/* Vista de Nueva Contraseña (HU002 - tarea #66) */}
+      <NewPasswordPage />
     </div>
   );
 }
