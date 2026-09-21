@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Avatar, Chip, CircularProgress, Paper, Divider } from '@mui/material';
+// 1. CORRECCIÓN: Se añadió Snackbar a la importación
+import { Box, Typography, Button, Avatar, Chip, CircularProgress, Paper, Divider, Snackbar } from '@mui/material';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
 
 export const MessengerFleetList = () => {
@@ -9,6 +10,9 @@ export const MessengerFleetList = () => {
   // Estados para controlar el modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMessenger, setSelectedMessenger] = useState(null);
+  
+  // 2. CORRECCIÓN: Se añadió el estado para la notificación que faltaba
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // PUENTE CON EL BACKEND
   useEffect(() => {
@@ -29,7 +33,7 @@ export const MessengerFleetList = () => {
         }
       } catch (error) {
         console.warn(error.message);
-        // MOCK DE RESPALDO (Basado exactamente en tu diseño Figma)
+        // MOCK DE RESPALDO
         setMessengers([
           {
             id: 1,
@@ -80,12 +84,13 @@ export const MessengerFleetList = () => {
     setSelectedMessenger(messenger);
     setIsModalOpen(true);
   };
-
+  
   const handleSuccessfulDeactivation = () => {
     setMessengers(prev => prev.map(m => 
       m.id === selectedMessenger.id ? { ...m, status: 'INACTIVE' } : m
     ));
     setIsModalOpen(false);
+    setSnackbarOpen(true); 
   };
 
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
@@ -93,16 +98,16 @@ export const MessengerFleetList = () => {
   return (
     <Box sx={{ maxWidth: '900px', margin: '0 auto', p: 2 }}>
       
-      {/* CONTENEDOR PRINCIPAL TIPO TABLA (Card único) */}
+      {/* CONTENEDOR PRINCIPAL TIPO TABLA */}
       <Paper 
         elevation={0} 
         sx={{ 
           border: '1px solid #E5E7EB', 
           borderRadius: '12px',
-          overflow: 'hidden' // Para que los bordes redondeados contengan todo bien
+          overflow: 'hidden'
         }}
       >
-        {/* ENCABEZADO: Título a la izquierda, subtítulo a la derecha */}
+        {/* ENCABEZADO */}
         <Box sx={{ 
           display: 'flex', 
           flexDirection: { xs: 'column', sm: 'row' }, 
@@ -121,7 +126,7 @@ export const MessengerFleetList = () => {
 
         <Divider />
 
-        {/* LISTA DE MENSAJEROS (Filas dentro del mismo contenedor) */}
+        {/* LISTA DE MENSAJEROS */}
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           {messengers.map((messenger, index) => (
             <React.Fragment key={messenger.id}>
@@ -134,7 +139,7 @@ export const MessengerFleetList = () => {
                   p: 3,
                   gap: 2,
                   bgcolor: '#FFFFFF',
-                  '&:hover': { bgcolor: '#F9FAFB' } // Efecto hover sutil
+                  '&:hover': { bgcolor: '#F9FAFB' }
                 }}
               >
                 {/* Info Principal */}
@@ -158,7 +163,7 @@ export const MessengerFleetList = () => {
                     variant="body2" 
                     sx={{ 
                       fontWeight: 600, 
-                      color: messenger.mockInfo?.inLabor ? '#92400E' : '#047857' // Café si está en labores, Verde si está fuera
+                      color: messenger.mockInfo?.inLabor ? '#92400E' : '#047857'
                     }}
                   >
                     {messenger.mockInfo?.inLabor ? 'En labores' : 'Fuera de labores'}
@@ -205,7 +210,6 @@ export const MessengerFleetList = () => {
                 </Box>
               </Box>
               
-              {/* Divider para todas las filas excepto la última */}
               {index < messengers.length - 1 && <Divider />}
             </React.Fragment>
           ))}
@@ -236,13 +240,45 @@ export const MessengerFleetList = () => {
         </Typography>
       </Box>
 
-      {/* MODAL DESACOPLADO */}
+      {/* 3. CORRECCIÓN: Se renderiza el Modal aquí */}
       <DeactivateMessengerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         courier={selectedMessenger}
         onDeactivateSuccess={handleSuccessfulDeactivation}
       />
+
+      {/* NOTIFICACIÓN DE ÉXITO (SNACKBAR) */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ 
+          vertical: 'bottom', 
+          horizontal: 'right'
+        }}
+        sx={{
+          bottom: { xs: 16, sm: 24 },
+          right: { xs: 'auto', sm: 24 },
+          left: { xs: '50%', sm: 'auto' },
+          transform: { xs: 'translateX(-50%)', sm: 'none' },
+          width: { xs: 'calc(100% - 32px)', sm: 'auto' }
+        }}
+      >
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            display: 'flex', alignItems: 'center', gap: 2, p: 2, 
+            borderRadius: '8px', border: '1px solid #E5E7EB', 
+            bgcolor: '#FFFFFF', width: '100%', minWidth: { sm: '380px' }
+          }}
+        >
+          <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#DC2626', flexShrink: 0 }} />
+          <Typography variant="body2" sx={{ fontWeight: 600, color: '#111827' }}>
+            Mensajero desactivado. Reasigna sus paquetes pendientes.
+          </Typography>
+        </Paper>
+      </Snackbar>
     </Box>
   );
 };
