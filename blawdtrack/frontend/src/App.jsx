@@ -3,18 +3,14 @@ import { Container, Paper, Typography, Box, Button, Divider } from '@mui/materia
 import LoginPage from './pages/LoginPage';
 import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
 import { useAuth } from './context/AuthContext';
-// 1. Se agrega la importación de tu componente
 import { MessengerFleetList } from './components/MessengerFleetList';
 
-// Esta pantalla es solo para probar T16: si hay sesión guardada (localStorage)...
 function SessionActiveScreen() {
   const { user, logout } = useAuth();
 
   return (
-    // Se ajustó el Box a flexDirection: 'column' para que los elementos se apilen
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
       
-      {/* Tarjeta de sesión activa original de develop */}
       <Container maxWidth="xs" sx={{ mb: 4 }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 3, textAlign: 'center' }}>
           <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -38,7 +34,6 @@ function SessionActiveScreen() {
         </Paper>
       </Container>
 
-      {/* 2. Se inyecta todo el flujo de tu tabla (Lista -> Modal -> Hook) */}
       <Container>
         <MessengerFleetList />
       </Container>
@@ -61,7 +56,7 @@ function App() {
     return <PasswordRecoveryTestPage onBackToLogin={() => setView('login')} />;
   }
 
-  return <LoginPage onForgotPassord={() => setView('recovery')} />;
+  return <LoginPage onForgotPassword={() => setView('recovery')} />;
 }
 
 export default App;

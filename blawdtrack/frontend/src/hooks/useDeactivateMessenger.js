@@ -1,46 +1,45 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { deactivateCourier } from '../services/CourierService';
 
 export const useDeactivateMessenger = () => {
+  const { logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [status, setStatus] = useState(null);
 
-  // Recibimos nationalId en lugar del ID interno
   const deactivate = async (nationalId) => {
     setIsLoading(true);
     setError(null);
-    
-    try {
-      const token = localStorage.getItem('token');
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-      
-      // Se usa PUT y la ruta con nationalId de forma provisional.
-      // Fácil de actualizar cuando se resuelva la Task #81.
-      const response = await fetch(`${baseUrl}/api/v1/couriers/${nationalId}`, {
-        method: 'PUT', 
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: 'INACTIVE' })
-      });
+    setStatus(null);
 
-      if (!response.ok) {
-        // Intentamos leer el JSON del backend para sacar el mensaje (ej. el error 409)
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Error inesperado al intentar desactivar el mensajero.');
+    try {
+      await deactivateCourier(nationalId);
+      return { success: true, status: 200 };
+    } catch (requestError) {
+      const responseStatus = requestError.response?.status ?? null;
+      const message =
+        requestError.response?.data?.message ||
+        requestError.message ||
+        'Error inesperado al intentar desactivar el mensajero.';
+
+      setError(message);
+      setStatus(responseStatus);
+
+      if (responseStatus === 401) {
+        logout();
       }
 
+      return { success: false, status: responseStatus, error: message };
+    } finally {
       setIsLoading(false);
-      return { success: true };
-      
-    } catch (err) {
-      setIsLoading(false);
-      setError(err.message);
-      return { success: false };
     }
   };
 
-  const clearError = () => setError(null);
+  const clearError = () => {
+    setError(null);
+    setStatus(null);
+  };
 
-  return { deactivate, isLoading, error, clearError };
+  return { deactivate, isLoading, error, status, clearError };
 };
