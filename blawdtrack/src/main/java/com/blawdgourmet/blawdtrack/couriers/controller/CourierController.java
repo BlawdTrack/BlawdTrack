@@ -1,8 +1,11 @@
 package com.blawdgourmet.blawdtrack.couriers.controller;
 
 import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
 import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
 import jakarta.validation.Valid;
@@ -10,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +26,13 @@ public class CourierController {
     @PostMapping
     public ResponseEntity<CourierResponse> register(@Valid @RequestBody CreateCourierRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
+    }
+
+    @PutMapping("/{id}")
+    public CourierResponse update(@PathVariable Long id,
+                                  @Valid @RequestBody UpdateCourierRequest request,
+                                  @AuthenticationPrincipal AuthenticatedUser actor) {
+        return service.update(id, request, actor);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -37,6 +48,12 @@ public class CourierController {
     @ExceptionHandler(DuplicateCourierException.class)
     public ResponseEntity<ErrorResponse> duplicate(DuplicateCourierException ex) {
         return conflict(ex.getMessage());
+    }
+
+    @ExceptionHandler(CourierNotFoundException.class)
+    public ResponseEntity<ErrorResponse> notFound(CourierNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
+                .code("COURIER_NOT_FOUND").message(ex.getMessage()).status(404).build());
     }
 
     // Las restricciones únicas también protegen frente a registros simultáneos.

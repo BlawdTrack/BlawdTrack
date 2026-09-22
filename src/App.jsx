@@ -1,14 +1,18 @@
- import React from 'react';
+import React from 'react';
+import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 
-// TODO: se resolvió este conflicto de merge quedándose con la pantalla de
-// registro de mensajero (HU003). La pantalla de prueba de desactivación de
-// mensajero (HU005, con DeactivateMessengerModal) quedó fuera de App.jsx
-// temporalmente — falta definir un router (o navegación equivalente) para
-// que ambas pantallas convivan. Revisar antes de continuar con más HUs de UI. importante muy importante
+// TODO: Falta definir un router (ej. react-router-dom) para navegar entre pantallas.
+// Temporalmente se renderizan ambas pantallas para pruebas de UI (HU008 y HU003).
 function App() {
   return (
     <div>
+      {/* Vista de Administradores (HU008) */}
+      <AdminManagement />
+      
+      <hr style={{ margin: '40px 0', border: '1px solid #ccc' }} />
+      
+      {/* Vista de Registro de Mensajeros (HU003) */}
       <CourierRegistrationPage />
     </div>
   );

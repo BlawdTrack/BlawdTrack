@@ -42,7 +42,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public AdminRegistrationResponse registrarAdministrador(AdminRegistrationRequest request, AuthenticatedUser actor) {
 
-        String cedula = request.cedulaIdentidad().trim();
+        String documentNumber = request.documentNumber().trim();
         String correo = request.correoElectronico().trim().toLowerCase();
 
         if (userRepository.existsByNationalId(cedula)) {
@@ -60,7 +60,8 @@ public class AdminServiceImpl implements AdminService {
                         "The role '" + RoleName.SALES_ADMIN + "' is not registered in the roles table."));
 
         User nuevoAdministrador = User.builder()
-                .nationalId(cedula)
+                .documentType(request.documentType())
+                .documentNumber(documentNumber)
                 .fullName(request.nombreCompleto().trim())
                 .email(correo)
                 .passwordHash(passwordEncoder.encode(request.contrasenaInicial()))
@@ -75,7 +76,8 @@ public class AdminServiceImpl implements AdminService {
 
         return new AdminRegistrationResponse(
                 administradorGuardado.getId(),
-                administradorGuardado.getNationalId(),
+                administradorGuardado.getDocumentType(),
+                administradorGuardado.getDocumentNumber(),
                 administradorGuardado.getFullName(),
                 administradorGuardado.getEmail(),
                 administradorGuardado.getPhone(),
