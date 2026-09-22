@@ -1,5 +1,9 @@
 package com.blawdgourmet.blawdtrack.couriers.service;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.audit.service.ChangeSet;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
@@ -20,6 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CourierService {
+    // Nombres de campo que se registran en el historial de auditoría (nunca sus valores).
+    private static final String FIELD_FULL_NAME = "fullName";
+    private static final String FIELD_EMAIL = "email";
+    private static final String FIELD_PHONE = "phone";
+    private static final String FIELD_SCHEDULE = "schedule";
+    private static final String FIELD_MAX_PACKAGE_WEIGHT = "maxPackageWeightKg";
+
     private final UserRepository users;
     private final RoleRepository roles;
     private final CourierRepository couriers;
@@ -27,6 +38,7 @@ public class CourierService {
     private final TemporaryPasswordGenerator temporaryPasswords;
     private final ApplicationEventPublisher events;
     private final CourierUniquenessValidator uniquenessValidator;
+    private final AuditService audit;
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
@@ -49,11 +61,18 @@ public class CourierService {
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
-    public CourierResponse update(String nationalId, UpdateCourierRequest request) {
+    public CourierResponse update(String nationalId, UpdateCourierRequest request, AuthenticatedUser actor) {
         var courier = couriers.findByUserNationalId(nationalId)
                 .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
         var user = courier.getUser();
         uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());
+        // Se compara antes de aplicar los setters, mientras la entidad conserva los valores actuales.
+        var changes = new ChangeSet()
+                .track(FIELD_FULL_NAME, user.getFullName(), request.fullName())
+                .track(FIELD_EMAIL, user.getEmail(), request.email())
+                .track(FIELD_PHONE, user.getPhone(), request.phone())
+                .track(FIELD_SCHEDULE, courier.getSchedule(), request.schedule())
+                .track(FIELD_MAX_PACKAGE_WEIGHT, courier.getMaxPackageWeightKg(), request.maxPackageWeightKg());
         user.setFullName(request.fullName());
         user.setEmail(request.email());
         user.setPhone(request.phone());
@@ -61,6 +80,9 @@ public class CourierService {
         courier.setMaxPackageWeightKg(request.maxPackageWeightKg());
         users.saveAndFlush(user);
         couriers.saveAndFlush(courier);
+        if (!changes.isEmpty()) {
+            audit.logAction(AuditAction.COURIER_UPDATED, actor, user, changes.describe());
+        }
         return CourierResponse.from(courier);
     }
 }
