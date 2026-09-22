@@ -5,6 +5,7 @@ import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierHasActiveAssignmentsException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
 import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
@@ -35,6 +36,12 @@ public class CourierController {
         return service.update(id, request, actor);
     }
 
+    @PatchMapping("/{id}/deactivate")
+    public CourierResponse deactivate(@PathVariable Long id,
+                                      @AuthenticationPrincipal AuthenticatedUser actor) {
+        return service.deactivate(id, actor);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> invalidRequest(MethodArgumentNotValidException ex) {
         // No incluir valores rechazados: podrían contener la contraseña.
@@ -54,6 +61,12 @@ public class CourierController {
     public ResponseEntity<ErrorResponse> notFound(CourierNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
                 .code("COURIER_NOT_FOUND").message(ex.getMessage()).status(404).build());
+    }
+
+    @ExceptionHandler(CourierHasActiveAssignmentsException.class)
+    public ResponseEntity<ErrorResponse> hasActiveAssignments(CourierHasActiveAssignmentsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder()
+                .code("COURIER_HAS_ACTIVE_ASSIGNMENTS").message(ex.getMessage()).status(409).build());
     }
 
     // Las restricciones únicas también protegen frente a registros simultáneos.

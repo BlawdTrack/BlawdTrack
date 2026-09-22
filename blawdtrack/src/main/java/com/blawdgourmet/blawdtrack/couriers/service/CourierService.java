@@ -31,6 +31,7 @@ public class CourierService {
     private static final String FIELD_PHONE = "phone";
     private static final String FIELD_SCHEDULE = "schedule";
     private static final String FIELD_MAX_PACKAGE_WEIGHT = "maxPackageWeightKg";
+    private static final String FIELD_STATUS = "status";
 
     private final UserRepository users;
     private final RoleRepository roles;
@@ -39,6 +40,7 @@ public class CourierService {
     private final TemporaryPasswordGenerator temporaryPasswords;
     private final ApplicationEventPublisher events;
     private final CourierUniquenessValidator uniquenessValidator;
+    private final CourierDeactivationValidator deactivationValidator;
     private final AuditService audit;
 
     @Transactional
@@ -83,6 +85,22 @@ public class CourierService {
         couriers.saveAndFlush(courier);
         if (!changes.isEmpty()) {
             audit.logAction(AuditAction.COURIER_UPDATED, actor, user, changes.describe());
+        }
+        return CourierResponse.from(courier);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public CourierResponse deactivate(Long courierId, AuthenticatedUser actor) {
+        var courier = couriers.findById(courierId)
+                .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+        deactivationValidator.validateCanDeactivate(courierId);
+        var user = courier.getUser();
+        var changes = new ChangeSet().track(FIELD_STATUS, user.getStatus(), UserStatus.INACTIVE);
+        user.changeStatus(UserStatus.INACTIVE);
+        users.saveAndFlush(user);
+        if (!changes.isEmpty()) {
+            audit.logAction(AuditAction.COURIER_DEACTIVATED, actor, user, changes.describe());
         }
         return CourierResponse.from(courier);
     }
