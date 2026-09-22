@@ -1,11 +1,9 @@
 package com.blawdgourmet.blawdtrack.auth.service;
 
-import com.blawdgourmet.blawdtrack.auth.dto.LoginRequest;
-import com.blawdgourmet.blawdtrack.auth.dto.LoginResponse;
-import com.blawdgourmet.blawdtrack.auth.security.JwtService;
-import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
-import com.blawdgourmet.blawdtrack.users.model.Permission;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -13,8 +11,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.blawdgourmet.blawdtrack.auth.dto.LoginRequest;
+import com.blawdgourmet.blawdtrack.auth.dto.LoginResponse;
+import com.blawdgourmet.blawdtrack.auth.security.JwtService;
+import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.model.Permission;
+import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     public LoginResponse authenticate(LoginRequest request) {
         Authentication authentication;
@@ -39,6 +44,8 @@ public class AuthService {
         }
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        principal.getUser().setLastLoginAt(LocalDateTime.now());
+        userRepository.save(principal.getUser());
         String token = jwtService.generateToken(principal);
 
         List<String> permissions = principal.getUser().getRole().getPermissions()

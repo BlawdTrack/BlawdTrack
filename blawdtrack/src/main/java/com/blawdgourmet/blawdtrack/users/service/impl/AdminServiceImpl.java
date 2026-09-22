@@ -1,5 +1,9 @@
 package com.blawdgourmet.blawdtrack.users.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +13,7 @@ import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationExcepti
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.model.Role;
@@ -16,6 +21,7 @@ import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +43,9 @@ public class AdminServiceImpl implements AdminService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+
+        @Value("${security.jwt.expiration-ms}")
+        private long jwtExpirationMs;
 
     @Override
     @Transactional
@@ -81,6 +90,39 @@ public class AdminServiceImpl implements AdminService {
                 administradorGuardado.getPhone(),
                 administradorGuardado.getRole().getName(),
                 administradorGuardado.getStatus()
+        );
+    }
+
+    /**
+     * Considera activa una sesión cuando el último inicio exitoso ocurrió dentro
+     * de la vigencia configurada del token JWT. Esta comprobación es deliberadamente
+     * acotada: el filtro JWT actual no consulta la base de datos en cada petición;
+     * esa revalidación corresponde a la task #75.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(String cedula) {
+        User administrador = userRepository.findByNationalId(cedula)
+                .filter(usuario -> usuario.getRole() != null
+                        && RoleName.SALES_ADMIN.equals(usuario.getRole().getName()))
+                .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
+
+        LocalDateTime ahora = LocalDateTime.now();
+        boolean tieneSesionActiva = administrador.getLastLoginAt() != null
+                && ahora.isBefore(administrador.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS));
+        boolean elegible = !tieneSesionActiva;
+        String motivo = elegible
+                ? null
+                : "El administrador tiene una sesión activa. Debe cerrarla antes de eliminarlo.";
+
+        return new AdminEliminacionElegibilidadResponse(
+                administrador.getId(),
+                administrador.getNationalId(),
+                administrador.getFullName(),
+                administrador.getStatus(),
+                tieneSesionActiva,
+                elegible,
+                motivo
         );
     }
 }
