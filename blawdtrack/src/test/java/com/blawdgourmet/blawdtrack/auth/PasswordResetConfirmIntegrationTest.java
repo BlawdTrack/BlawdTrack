@@ -25,6 +25,7 @@ import com.blawdgourmet.blawdtrack.auth.repository.PasswordResetTokenRepository;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.service.PasswordResetResult;
 import com.blawdgourmet.blawdtrack.auth.service.PasswordResetService;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -144,7 +145,8 @@ class PasswordResetConfirmIntegrationTest {
     private User createUser() {
         Role role = roles.save(Role.builder().name("PASSWORD_RESET_ROLE").build());
         return users.saveAndFlush(User.builder()
-                .nationalId("PASSWORD-RESET")
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("PASSWORD-RESET")
                 .fullName("Usuario de restablecimiento")
                 .email(EMAIL)
                 .passwordHash(passwordEncoder.encode(OLD_PASSWORD))
