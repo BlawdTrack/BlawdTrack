@@ -9,6 +9,7 @@ import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -43,12 +44,12 @@ public class CourierService {
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public CourierResponse register(CreateCourierRequest request) {
-        uniquenessValidator.validateNew(request.nationalId(), request.email(), request.phone());
+        uniquenessValidator.validateNew(request.documentType(), request.documentNumber(), request.email(), request.phone());
         var role = roles.findByName(RoleName.COURIER)
                 .orElseThrow(() -> new IllegalStateException("El rol MENSAJERO no está configurado"));
         String temporaryPassword = temporaryPasswords.generate();
         var user = users.saveAndFlush(User.builder()
-                .nationalId(request.nationalId()).fullName(request.fullName())
+                .documentType(request.documentType()).documentNumber(request.documentNumber()).fullName(request.fullName())
                 .email(request.email()).phone(request.phone())
                 .passwordHash(passwordEncoder.encode(temporaryPassword))
                 .status(UserStatus.ACTIVE).role(role).build());
@@ -61,8 +62,8 @@ public class CourierService {
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
-    public CourierResponse update(String nationalId, UpdateCourierRequest request, AuthenticatedUser actor) {
-        var courier = couriers.findByUserNationalId(nationalId)
+    public CourierResponse update(Long courierId, UpdateCourierRequest request, AuthenticatedUser actor) {
+        var courier = couriers.findById(courierId)
                 .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
         var user = courier.getUser();
         uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());
