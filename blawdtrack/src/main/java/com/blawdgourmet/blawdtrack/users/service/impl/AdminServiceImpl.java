@@ -46,12 +46,12 @@ public class AdminServiceImpl implements AdminService {
         String correo = request.correoElectronico().trim().toLowerCase();
 
         if (userRepository.existsByNationalId(cedula)) {
-            throw new DuplicateResourceException("CEDULA_DUPLICADA",
+            throw new DuplicateResourceException("DUPLICATE_NATIONAL_ID",
                     "The entered identity document is already associated with another registered user in the system.");
         }
 
         if (userRepository.existsByEmail(correo)) {
-            throw new DuplicateResourceException("CORREO_DUPLICADO",
+            throw new DuplicateResourceException("DUPLICATE_EMAIL",
                     "The email address entered is already registered in the system.");
         }
 
