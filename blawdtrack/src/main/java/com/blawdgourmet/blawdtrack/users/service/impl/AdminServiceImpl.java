@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.users.service.impl;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,8 +10,11 @@ import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationExcepti
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
+import com.blawdgourmet.blawdtrack.users.exception.AdminNotFoundException;
+import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -82,5 +86,39 @@ public class AdminServiceImpl implements AdminService {
                 administradorGuardado.getRole().getName(),
                 administradorGuardado.getStatus()
         );
+    }
+
+    @Override
+    @Transactional
+    public AdminDeletionResponse eliminarAdministrador(String cedula, AuthenticatedUser actor) {
+        if (actor == null || actor.id() == null) {
+            throw new AccessDeniedException("Acceso denegado");
+        }
+
+        User administradorAEliminar = userRepository.findByNationalId(cedula)
+                .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
+
+        if (!RoleName.SALES_ADMIN.equals(administradorAEliminar.getRole() == null ? null : administradorAEliminar.getRole().getName())) {
+            throw new AccessDeniedException("Acceso denegado");
+        }
+
+        if (administradorAEliminar.getStatus() == UserStatus.ACTIVE) {
+            throw new AdminSessionActiveException("El administrador tiene una sesión activa. Cierre primero la sesión antes de eliminarlo.");
+        }
+
+        if (actor.id().equals(administradorAEliminar.getId())) {
+            throw new AccessDeniedException("Acceso denegado");
+        }
+
+        User actorActual = userRepository.getReferenceById(actor.id());
+        if (actorActual.getRole() == null || !RoleName.SUPER_USER.equals(actorActual.getRole().getName())) {
+            throw new AccessDeniedException("Acceso denegado");
+        }
+
+        auditService.registrarEliminacionAdministrador(actor, administradorAEliminar);
+        userRepository.delete(administradorAEliminar);
+        userRepository.flush();
+
+        return new AdminDeletionResponse("Administrador eliminado correctamente.");
     }
 }

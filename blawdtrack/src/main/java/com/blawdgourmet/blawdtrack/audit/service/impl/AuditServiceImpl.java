@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class AuditServiceImpl implements AuditService {
 
     private static final String ACCION_CREAR_ADMINISTRADOR = "CREAR_ADMINISTRADOR";
+    private static final String ACCION_ELIMINAR_ADMINISTRADOR = "ELIMINAR_ADMINISTRADOR";
 
     private final AuditLogRepository auditLogRepository;
     private final UserRepository userRepository;
@@ -36,6 +37,26 @@ public class AuditServiceImpl implements AuditService {
                 .actor(actorReferencia)
                 .usuarioAfectado(administradorCreado)
                 .action(ACCION_CREAR_ADMINISTRADOR)
+                .details(detalle)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        auditLogRepository.save(registro);
+    }
+
+    @Override
+    public void registrarEliminacionAdministrador(AuthenticatedUser actor, User administradorEliminado) {
+        User actorReferencia = userRepository.getReferenceById(actor.id());
+
+        String detalle = "El Super Usuario '%s' (cédula %s) eliminó al Administrador de Ventas '%s' (cédula %s, correo %s)."
+                .formatted(actor.nombreCompleto(), actor.cedula(),
+                        administradorEliminado.getFullName(), administradorEliminado.getNationalId(),
+                        administradorEliminado.getEmail());
+
+        AuditLog registro = AuditLog.builder()
+                .actor(actorReferencia)
+                .usuarioAfectado(null)
+                .action(ACCION_ELIMINAR_ADMINISTRADOR)
                 .details(detalle)
                 .timestamp(LocalDateTime.now())
                 .build();

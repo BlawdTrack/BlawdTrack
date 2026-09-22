@@ -5,4 +5,6 @@ import com.blawdgourmet.blawdtrack.users.model.User;
 
 public interface AuditService {
     void registrarCreacionAdministrador(AuthenticatedUser actor, User administradorCreado);
+
+    void registrarEliminacionAdministrador(AuthenticatedUser actor, User administradorEliminado);
 }

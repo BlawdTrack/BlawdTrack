@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
+import com.blawdgourmet.blawdtrack.users.exception.AdminNotFoundException;
+import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 
 /**
  * Traduce las excepciones de la aplicación al formato unificado de errores (estándar P05).
- * Esta copia cubre únicamente las excepciones relevantes para el módulo de registro de administradores (HU-006).
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -57,6 +58,28 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(AdminNotFoundException.class)
+    public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("ADMINISTRADOR_NO_EXISTENTE")
+                .message(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(AdminSessionActiveException.class)
+    public ResponseEntity<ApiError> manejarSesionActiva(AdminSessionActiveException ex) {
+        ApiError error = ApiError.builder()
+                .code("ADMINISTRADOR_CON_SESION_ACTIVA")
+                .message(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
