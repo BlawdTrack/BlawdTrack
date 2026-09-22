@@ -16,3 +16,15 @@ export const registerCourier = async (courierData) => {
     throw error; // Lanza el error para que el catch del componente lo atrape
   }
 };
+
+export const listCouriers = async () => {
+  const response = await axiosClient.get('/v1/couriers');
+  return response.data;
+};
+
+export const deactivateCourier = async (id) => {
+  const response = await axiosClient.patch(
+    `/v1/couriers/${encodeURIComponent(id)}/deactivate`
+  );
+  return response.data;
+};
