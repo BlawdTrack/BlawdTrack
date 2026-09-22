@@ -84,7 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void autenticarEnContexto(Claims claims) {
         String correo = claims.getSubject();
         Long id = claims.get("id", Long.class);
-        DocumentType documentType = DocumentType.valueOf(claims.get("documentType", String.class));
+        String documentTypeClaim = claims.get("documentType", String.class);
+        DocumentType documentType = documentTypeClaim == null ? null : DocumentType.valueOf(documentTypeClaim);
         String documentNumber = claims.get("documentNumber", String.class);
         String fullName = claims.get("fullName", String.class);
         String rolesClaim = claims.get("roles", String.class);
