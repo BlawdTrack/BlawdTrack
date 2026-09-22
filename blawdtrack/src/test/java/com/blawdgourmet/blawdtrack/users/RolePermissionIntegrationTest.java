@@ -148,7 +148,7 @@ class RolePermissionIntegrationTest {
     void superUsuarioInactivoNoPuedeModificarPermisosAunqueConserveSuToken() throws Exception {
         String bearer = "Bearer " + token(RoleName.SUPER_USER);
         var actor = users.findByEmail("rp-" + RoleName.SUPER_USER + "@example.test").orElseThrow();
-        actor.setStatus(UserStatus.INACTIVE);
+        actor.changeStatus(UserStatus.INACTIVE);
         users.saveAndFlush(actor);
 
         mvc.perform(put("/api/v1/roles/{roleId}/permissions",

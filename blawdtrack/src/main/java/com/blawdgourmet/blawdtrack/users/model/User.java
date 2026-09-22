@@ -37,6 +37,7 @@ public class User {
     @Column(name = "telefono", unique = true, length = 20)
     private String phone;
 
+    @Setter(AccessLevel.NONE)
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     @Builder.Default
