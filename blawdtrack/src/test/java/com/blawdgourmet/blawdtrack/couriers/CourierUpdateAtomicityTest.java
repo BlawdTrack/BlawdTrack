@@ -5,6 +5,7 @@ import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -52,7 +53,7 @@ class CourierUpdateAtomicityTest {
             """;
 
     private static final String IDS_OF_THIS_TEST =
-            "SELECT id FROM usuarios WHERE cedula IN ('" + COURIER_NATIONAL_ID + "', '" + ACTOR_NATIONAL_ID + "')";
+            "SELECT id FROM usuarios WHERE numero_documento IN ('" + COURIER_NATIONAL_ID + "', '" + ACTOR_NATIONAL_ID + "')";
 
     @Autowired private MockMvc mvc;
     @Autowired private UserRepository users;
@@ -67,28 +68,28 @@ class CourierUpdateAtomicityTest {
         jdbc.update("DELETE FROM auditorias WHERE usuario_id IN (" + IDS_OF_THIS_TEST
                 + ") OR usuario_afectado_id IN (" + IDS_OF_THIS_TEST + ")");
         jdbc.update("DELETE FROM mensajeros WHERE usuario_id IN (" + IDS_OF_THIS_TEST + ")");
-        jdbc.update("DELETE FROM usuarios WHERE cedula IN ('" + COURIER_NATIONAL_ID
+        jdbc.update("DELETE FROM usuarios WHERE numero_documento IN ('" + COURIER_NATIONAL_ID
                 + "', '" + ACTOR_NATIONAL_ID + "')");
 
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM usuarios WHERE cedula IN ('"
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM usuarios WHERE numero_documento IN ('"
                 + COURIER_NATIONAL_ID + "', '" + ACTOR_NATIONAL_ID + "')", Integer.class)).isZero();
     }
 
     @Test
     void siLaAuditoriaFallaSeRevierteElCambioDelMensajero() throws Exception {
-        var actor = users.saveAndFlush(User.builder().nationalId(ACTOR_NATIONAL_ID)
+        var actor = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber(ACTOR_NATIONAL_ID)
                 .fullName("Actor 76X").email("actor76x@example.com").passwordHash("unused")
                 .status(UserStatus.ACTIVE).role(roles.findByName("SUPER_USUARIO").orElseThrow()).build());
-        var courierUser = users.saveAndFlush(User.builder().nationalId(COURIER_NATIONAL_ID)
+        var courierUser = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber(COURIER_NATIONAL_ID)
                 .fullName(ORIGINAL_NAME).email(ORIGINAL_EMAIL).phone(ORIGINAL_PHONE)
                 .passwordHash("unused").status(UserStatus.ACTIVE)
                 .role(roles.findByName("MENSAJERO").orElseThrow()).build());
-        couriers.saveAndFlush(Courier.builder().user(courierUser).schedule(ORIGINAL_SCHEDULE)
+        var courier = couriers.saveAndFlush(Courier.builder().user(courierUser).schedule(ORIGINAL_SCHEDULE)
                 .maxPackageWeightKg(new BigDecimal(ORIGINAL_WEIGHT)).build());
         String token = jwt.generateToken(new UserPrincipal(actor));
         doThrow(new IllegalStateException("audit down")).when(audit).logAction(any(), any(), any(), any());
 
-        mvc.perform(put("/api/v1/couriers/" + COURIER_NATIONAL_ID)
+        mvc.perform(put("/api/v1/couriers/" + courier.getId())
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isInternalServerError())
@@ -97,10 +98,11 @@ class CourierUpdateAtomicityTest {
         // El 500 proviene de la auditoría, es decir, después del saveAndFlush del cambio.
         verify(audit, times(1)).logAction(any(), any(), any(), any());
 
-        var reloaded = couriers.findByUserNationalId(COURIER_NATIONAL_ID).orElseThrow();
-        assertThat(reloaded.getUser().getFullName()).isEqualTo(ORIGINAL_NAME);
-        assertThat(reloaded.getUser().getEmail()).isEqualTo(ORIGINAL_EMAIL);
-        assertThat(reloaded.getUser().getPhone()).isEqualTo(ORIGINAL_PHONE);
+        var reloaded = couriers.findById(courier.getId()).orElseThrow();
+        var reloadedUser = users.findById(courierUser.getId()).orElseThrow();
+        assertThat(reloadedUser.getFullName()).isEqualTo(ORIGINAL_NAME);
+        assertThat(reloadedUser.getEmail()).isEqualTo(ORIGINAL_EMAIL);
+        assertThat(reloadedUser.getPhone()).isEqualTo(ORIGINAL_PHONE);
         assertThat(reloaded.getSchedule()).isEqualTo(ORIGINAL_SCHEDULE);
         assertThat(reloaded.getMaxPackageWeightKg()).isEqualByComparingTo(ORIGINAL_WEIGHT);
 

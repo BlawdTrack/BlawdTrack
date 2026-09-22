@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.couriers;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -35,7 +36,7 @@ class CourierHttpAuthorizationTest {
 
     @Test
     void mensajeroAutenticadoRecibe403EnHttpReal() throws Exception {
-        var user = users.saveAndFlush(User.builder().nationalId("HTTP403").email(EMAIL)
+        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("HTTP403").email(EMAIL)
                 .fullName("Prueba HTTP").phone("77770403").passwordHash("unused")
                 .status(UserStatus.ACTIVE)
                 .role(roles.findByName("MENSAJERO").orElseThrow()).build());
@@ -52,7 +53,7 @@ class CourierHttpAuthorizationTest {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/v1/couriers"))
                 .header("Authorization", "Bearer " + token).header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString("""
-                        {"nationalId":"HTTP70","fullName":"Prueba HTTP","email":"new-http@example.test",
+                        {"documentType":"CEDULA","documentNumber":"770000070","fullName":"Prueba HTTP","email":"new-http@example.test",
                          "phone":"88888888","schedule":"Lunes a viernes","maxPackageWeightKg":20}
                         """)).build();
         try (var client = HttpClient.newHttpClient()) {

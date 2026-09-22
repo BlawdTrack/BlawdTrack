@@ -5,6 +5,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -33,15 +34,15 @@ class AuditServiceTest {
     @Autowired private RoleRepository roles;
     @Autowired private EntityManager entityManager;
 
-    private User persistedUser(String nationalId, String email, String phone, String role) {
-        return users.saveAndFlush(User.builder().nationalId(nationalId)
-                .fullName("Usuario " + nationalId).email(email).phone(phone)
+    private User persistedUser(String documentNumber, String email, String phone, String role) {
+        return users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber(documentNumber)
+                .fullName("Usuario " + documentNumber).email(email).phone(phone)
                 .passwordHash("unused").status(UserStatus.ACTIVE)
                 .role(roles.findByName(role).orElseThrow()).build());
     }
 
     private static AuthenticatedUser authenticated(User user) {
-        return new AuthenticatedUser(user.getId(), user.getNationalId(), user.getFullName(),
+        return new AuthenticatedUser(user.getId(), user.getDocumentType(), user.getDocumentNumber(), user.getFullName(),
                 user.getRole().getName(), user.getEmail());
     }
 
@@ -108,9 +109,9 @@ class AuditServiceTest {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void sinTransaccionActivaLanzaIllegalTransactionStateException() {
         long recordsBefore = auditLogs.count();
-        var actor = new AuthenticatedUser(1L, "AUDITACTOR76", "Actor", "SUPER_USUARIO",
+        var actor = new AuthenticatedUser(1L, DocumentType.CEDULA, "AUDITACTOR76", "Actor", "SUPER_USUARIO",
                 "auditactor76@example.com");
-        var affected = User.builder().nationalId("AUDITAFECTADO76").build();
+        var affected = User.builder().documentType(DocumentType.CEDULA).documentNumber("AUDITAFECTADO76").build();
 
         assertThatThrownBy(() -> audit.logAction(AuditAction.COURIER_UPDATED, actor, affected, "phone"))
                 .isInstanceOf(IllegalTransactionStateException.class);

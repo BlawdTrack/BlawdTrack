@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.auth;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -33,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Task #75: cambiar el estado de la cuenta cierra las sesiones ya emitidas.
  * Usa el JwtService real y el filtro JWT real; el endpoint protegido es
- * {@code PUT /api/v1/couriers/{nationalId}} con un mensajero inexistente, que para un
+ * {@code PUT /api/v1/couriers/{id}} con un mensajero inexistente, que para un
  * Súper Usuario autenticado responde 404 sin escribir datos.
  */
 @SpringBootTest
@@ -43,7 +44,7 @@ class SessionInvalidationIntegrationTest {
 
     private static final String EMAIL = "sesion75@example.test";
     private static final String PASSWORD = "Sesion75-password!";
-    private static final String PROTECTED_URL = "/api/v1/couriers/SESION75-INEXISTENTE";
+    private static final String PROTECTED_URL = "/api/v1/couriers/999999999";
     private static final String BODY = """
             {"fullName":"Nombre de prueba","email":"sesion75-nuevo@example.test",
              "phone":"75750075","schedule":"Lunes a viernes","maxPackageWeightKg":20}
@@ -60,7 +61,7 @@ class SessionInvalidationIntegrationTest {
 
     private User createSuperUser() {
         return users.saveAndFlush(User.builder()
-                .nationalId("SESION75").fullName("Súper Usuario de prueba")
+                .documentType(DocumentType.CEDULA).documentNumber("SESION75").fullName("Súper Usuario de prueba")
                 .email(EMAIL).phone("75757575")
                 .passwordHash(passwordEncoder.encode(PASSWORD))
                 .status(UserStatus.ACTIVE)
@@ -220,7 +221,7 @@ class SessionInvalidationIntegrationTest {
 
     @Test
     void tokenValidoDeUnIdQueNoExisteEnLaBaseDeDatosRecibe401() throws Exception {
-        User ghost = User.builder().id(987654321L).nationalId("FANTASMA75")
+        User ghost = User.builder().id(987654321L).documentType(DocumentType.CEDULA).documentNumber("FANTASMA75")
                 .fullName("Usuario inexistente").email("fantasma75@example.test")
                 .role(roles.findByName(RoleName.SUPER_USER).orElseThrow()).build();
         assertThat(users.existsById(ghost.getId())).isFalse();

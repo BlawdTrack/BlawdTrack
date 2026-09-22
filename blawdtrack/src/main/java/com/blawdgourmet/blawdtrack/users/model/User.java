@@ -3,6 +3,8 @@ package com.blawdgourmet.blawdtrack.users.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+
 @Entity
 @Table(name = "usuarios")
 @Getter
@@ -16,8 +18,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cedula", nullable = false, unique = true, length = 20)
-    private String nationalId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_documento", nullable = false, length = 20)
+    private DocumentType documentType;
+
+    @Column(name = "numero_documento", nullable = false, length = 20)
+    private String documentNumber;
 
     @Column(name = "nombre_completo", nullable = false, length = 120)
     private String fullName;

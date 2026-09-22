@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.users.repository;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.dto.UserSessionState;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -36,10 +37,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u.status as status, u.tokenVersion as tokenVersion from User u where u.id = :id")
     Optional<UserSessionState> findSessionStateById(@Param("id") Long id);
 
-    Optional<User> findByNationalId(String nationalId);
+    Optional<User> findByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
     boolean existsByEmail(String email);
     boolean existsByEmailIgnoreCase(String email);
-    boolean existsByNationalId(String nationalId);
+    boolean existsByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
     boolean existsByPhone(String phone);
 
     // Excluyen al propio usuario para no dar un 409 falso al guardar sin cambios.
