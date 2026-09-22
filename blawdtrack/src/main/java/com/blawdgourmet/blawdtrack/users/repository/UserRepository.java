@@ -1,8 +1,12 @@
 package com.blawdgourmet.blawdtrack.users.repository;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.dto.UserSessionState;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -26,9 +30,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {"role", "role.permissions"})
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByNationalId(String nationalId);
+    /**
+     * Estado y versión de token de un usuario, sin cargar su rol ni los permisos.
+     * Lo consulta el filtro JWT en cada petición para validar que la sesión sigue vigente.
+     */
+    @Query("select u.status as status, u.tokenVersion as tokenVersion from User u where u.id = :id")
+    Optional<UserSessionState> findSessionStateById(@Param("id") Long id);
+
+    Optional<User> findByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
     boolean existsByEmail(String email);
     boolean existsByEmailIgnoreCase(String email);
-    boolean existsByNationalId(String nationalId);
+    boolean existsByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
     boolean existsByPhone(String phone);
+
+    // Excluyen al propio usuario para no dar un 409 falso al guardar sin cambios.
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+    boolean existsByPhoneAndIdNot(String phone, Long id);
 }

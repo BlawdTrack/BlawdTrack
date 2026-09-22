@@ -25,6 +25,10 @@ public class UserPrincipal implements UserDetails {
         return user;
     }
 
+    public int getTokenVersion() {
+        return user.getTokenVersion();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Stream<GrantedAuthority> role = Stream.of(
