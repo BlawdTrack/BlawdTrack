@@ -1,9 +1,12 @@
 package com.blawdgourmet.blawdtrack.users.dto;
 
-import com.blawdgourmet.blawdtrack.users.validation.ValidCedula;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.validation.DocumentHolder;
+import com.blawdgourmet.blawdtrack.users.validation.ValidDocument;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -11,6 +14,7 @@ import jakarta.validation.constraints.Size;
  * Payload para POST /api/v1/admins (HU-006 / CU-006 Crear administrador).
  * Los nombres de propiedad están en camelCase según el estándar P13 (DTOs/JSON).
  */
+@ValidDocument(message = "Identity document is not in a valid format.")
 public record AdminRegistrationRequest(
 
         @NotBlank(message = "Full name is required.")
@@ -33,8 +37,11 @@ public record AdminRegistrationRequest(
         )
         String contrasenaInicial,
 
+        @NotNull(message = "Identity document type is required.")
+        DocumentType documentType,
+
         @NotBlank(message = "Identity document is required.")
-        @ValidCedula(message = "Identity document is not in a valid format.")
-        String cedulaIdentidad
-) {
+        @Size(max = 20, message = "Identity document cannot exceed 20 characters.")
+        String documentNumber
+) implements DocumentHolder {
 }

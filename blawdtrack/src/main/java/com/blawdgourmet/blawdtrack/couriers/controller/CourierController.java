@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.couriers.controller;
 
 import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +28,11 @@ public class CourierController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
     }
 
-    @PutMapping("/{nationalId}")
-    public CourierResponse update(@PathVariable String nationalId,
-                                  @Valid @RequestBody UpdateCourierRequest request) {
-        return service.update(nationalId, request);
+    @PutMapping("/{id}")
+    public CourierResponse update(@PathVariable Long id,
+                                  @Valid @RequestBody UpdateCourierRequest request,
+                                  @AuthenticationPrincipal AuthenticatedUser actor) {
+        return service.update(id, request, actor);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -14,8 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.model.User;
-import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
+import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -25,9 +27,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Filtro de autenticación JWT con validación del estado actual del usuario.
- * Como la aplicación es stateless, cada petición verifica en base de datos
- * que el usuario siga existiendo y activo para revocar accesos con JWT antiguos.
+ * Filtro de autenticación sin estado. Construye el principal a partir de los claims
+ * del propio JWT, pero en cada petición consulta el estado de la cuenta y la versión
+ * de sus tokens (sin cargar rol ni permisos) para cerrar las sesiones invalidadas:
+ * si el usuario ya no existe, está inactivo o el claim {@code tokenVersion} (0 si
+ * falta) no coincide con la versión actual, la petición continúa sin autenticar y
+ * {@link RestAuthenticationEntryPoint} responde 401 en las rutas protegidas.
  */
 @Component
 @RequiredArgsConstructor
@@ -60,6 +65,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     } else {
                         autenticarEnContexto(claims, usuarioActual, usuarioActual.isActive());
                     }
+                if (isSessionValid(claims)) {
+                    autenticarEnContexto(claims);
+                } else {
+                    SecurityContextHolder.clearContext();
                 }
             } catch (JwtException | IllegalArgumentException ex) {
                 SecurityContextHolder.clearContext();
@@ -69,9 +78,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void autenticarEnContexto(Claims claims, User usuarioActual, boolean usuarioActivo) {
+    /**
+     * La sesión sigue vigente solo si el token identifica a un usuario existente,
+     * activo y cuya versión de token coincide con la del claim.
+     */
+    private boolean isSessionValid(Claims claims) {
+        Long id = claims.get("id", Long.class);
+        if (id == null) {
+            return false;
+        }
+        int tokenVersion = jwtService.extractTokenVersion(claims);
+        return userRepository.findSessionStateById(id)
+                .filter(state -> state.getStatus() == UserStatus.ACTIVE)
+                .filter(state -> state.getTokenVersion() == tokenVersion)
+                .isPresent();
+    }
+
+    private void autenticarEnContexto(Claims claims) {
         String correo = claims.getSubject();
-        String nationalId = claims.get("nationalId", String.class);
+        Long id = claims.get("id", Long.class);
+        String documentTypeClaim = claims.get("documentType", String.class);
+        DocumentType documentType = documentTypeClaim == null ? null : DocumentType.valueOf(documentTypeClaim);
+        String documentNumber = claims.get("documentNumber", String.class);
         String fullName = claims.get("fullName", String.class);
         String rolesClaim = claims.get("roles", String.class);
 
@@ -81,8 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .collect(Collectors.toList())
             : List.of();
 
-        String rol = usuarioActual.getRole() == null ? null : usuarioActual.getRole().getName();
-        AuthenticatedUser principal = new AuthenticatedUser(usuarioActual.getId(), nationalId, fullName, rol, correo);
+        AuthenticatedUser principal = new AuthenticatedUser(id, documentType, documentNumber, fullName, rol, correo);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, authorities);

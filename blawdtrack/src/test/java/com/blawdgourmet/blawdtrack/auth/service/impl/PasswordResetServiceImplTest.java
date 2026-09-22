@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.auth.service.impl;
 import com.blawdgourmet.blawdtrack.auth.entity.PasswordResetToken;
 import com.blawdgourmet.blawdtrack.auth.repository.PasswordResetTokenRepository;
 import com.blawdgourmet.blawdtrack.auth.service.PasswordResetResult;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -52,7 +53,8 @@ class PasswordResetServiceImplTest {
 
         return User.builder()
                 .id(1L)
-                .nationalId("0101010101")
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("0101010101")
                 .fullName("Genesis Silesky")
                 .email("genesis@blawdtrack.com")
                 .passwordHash("hash-no-real")
