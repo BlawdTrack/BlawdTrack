@@ -33,8 +33,8 @@ public class AuditServiceImpl implements AuditService {
         User actorReferencia = userRepository.getReferenceById(actor.id());
 
         String detalle = "The Super User '%s' (ID %s) created the Sales Administrator '%s' (ID %s, email %s)."
-                .formatted(actor.nombreCompleto(), actor.cedula(),
-                        administradorCreado.getFullName(), administradorCreado.getNationalId(),
+                .formatted(actor.nombreCompleto(), actor.documentNumber(),
+                        administradorCreado.getFullName(), administradorCreado.getDocumentNumber(),
                         administradorCreado.getEmail());
 
         AuditLog registro = AuditLog.builder()
