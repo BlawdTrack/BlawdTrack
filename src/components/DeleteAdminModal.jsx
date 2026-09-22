@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -9,12 +8,20 @@ import {
   Typography,
   Box,
   Avatar,
-  IconButton
+  IconButton,
+  Alert
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CloseIcon from '@mui/icons-material/Close';
 
-const DeleteAdminModal = ({ open, onClose, onConfirm, adminData }) => {
+const DeleteAdminModal = ({
+  open,
+  onClose,
+  onConfirm,
+  adminData,
+  errorMessage,
+  isSubmitting = false
+}) => {
   if (!adminData) return null;
 
   // Extraemos las iniciales para el Avatar (ej. "Luis Diego Araya" -> "LD")
@@ -45,6 +52,7 @@ const DeleteAdminModal = ({ open, onClose, onConfirm, adminData }) => {
         <IconButton
           aria-label="close"
           onClick={onClose}
+          disabled={isSubmitting}
           sx={{
             position: 'absolute',
             right: 8,
@@ -84,11 +92,18 @@ const DeleteAdminModal = ({ open, onClose, onConfirm, adminData }) => {
         <DialogContentText sx={{ color: '#212121', fontSize: '0.95rem' }}>
           Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda registrada en auditoría con fecha, hora y responsable.
         </DialogContentText>
+
+        {errorMessage && (
+          <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
+            {errorMessage}
+          </Alert>
+        )}
       </DialogContent>
       
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
         <Button 
-          onClick={onClose} 
+          onClick={onClose}
+          disabled={isSubmitting}
           variant="outlined"
           sx={{ 
             color: '#212121', 
@@ -105,7 +120,10 @@ const DeleteAdminModal = ({ open, onClose, onConfirm, adminData }) => {
           Cancelar
         </Button>
         <Button
-          onClick={() => onConfirm(adminData.identification || adminData.nationalId)}
+          onClick={() =>
+            onConfirm(adminData.identification || adminData.nationalId || adminData.id)
+          }
+          disabled={isSubmitting}
           variant="contained"
           disableElevation
           sx={{
@@ -119,7 +137,7 @@ const DeleteAdminModal = ({ open, onClose, onConfirm, adminData }) => {
             }
           }}
         >
-          Sí, eliminar
+          {isSubmitting ? 'Eliminando...' : 'Sí, eliminar'}
         </Button>
       </DialogActions>
     </Dialog>

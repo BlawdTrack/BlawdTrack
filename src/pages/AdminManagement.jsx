@@ -24,6 +24,8 @@ const AdminManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [toastOpen, setToastOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Estados limpios: arreglos vacíos sin datos falsos
   const [admins, setAdmins] = useState([]);
@@ -51,26 +53,49 @@ const AdminManagement = () => {
   }, []);
 
   const handleOpenModal = (admin) => {
+    setDeleteError(null);
     setSelectedAdmin(admin);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    if (isDeleting) return;
     setIsModalOpen(false);
     setSelectedAdmin(null);
+    setDeleteError(null);
   };
 
-const handleDeleteConfirm = async (cedula) => {
+  const getDeleteErrorMessage = (err) => {
+    const responseStatus = err.response?.status;
+    const backendMessage = err.response?.data?.message;
+
+    if (responseStatus === 404) {
+      return 'Administrador no existente.';
+    }
+
+    if (responseStatus === 409) {
+      return 'No se puede eliminar el administrador porque tiene sesiones activas. Cierre sus sesiones e intente nuevamente.';
+    }
+
+    if (responseStatus === 401 || responseStatus === 403) {
+      return 'No cuenta con permisos para eliminar administradores.';
+    }
+
+    return backendMessage || 'No se pudo eliminar el administrador. Intenta nuevamente.';
+  };
+
+  const handleDeleteConfirm = async (cedula) => {
     //Validación preventiva: Evitar peticiones si no hay cédula
     if (!cedula) {
       console.error('Intento de eliminación fallido: Cédula indefinida o vacía.');
-      setError('No se puede procesar la solicitud porque faltan datos del administrador.');
       handleCloseModal();
+      setDeleteError('No se puede procesar la solicitud porque faltan datos del administrador.');
       return;
     }
 
     try {
-      setError(null);
+      setDeleteError(null);
+      setIsDeleting(true);
       
       // 1. Enviar la cédula requerida al backend
       await deleteAdministrator(cedula);
@@ -115,7 +140,9 @@ const handleDeleteConfirm = async (cedula) => {
       setToastOpen(true);
     } catch (err) {
       console.error('Error al eliminar administrador:', err);
-      setError('No se pudo eliminar el administrador. Intenta nuevamente.');
+      setDeleteError(getDeleteErrorMessage(err));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -250,12 +277,35 @@ const handleDeleteConfirm = async (cedula) => {
       </Box>
 
       {/* MODAL */}
-      <DeleteAdminModal open={isModalOpen} onClose={handleCloseModal} onConfirm={handleDeleteConfirm} adminData={selectedAdmin} />
+      <DeleteAdminModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleDeleteConfirm}
+        adminData={selectedAdmin}
+        errorMessage={deleteError}
+        isSubmitting={isDeleting}
+      />
 
       {/* TOAST */}
       <Snackbar open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} sx={{ mb: { xs: 12, md: 0 } }}>
         <Alert severity="success" sx={{ width: '100%', bgcolor: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 2 }}>
           Administrador eliminado correctamente.
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={Boolean(deleteError) && !isModalOpen}
+        autoHideDuration={6000}
+        onClose={() => setDeleteError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        sx={{ mb: { xs: 12, md: 0 } }}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setDeleteError(null)}
+          sx={{ width: '100%', borderRadius: 2 }}
+        >
+          {deleteError}
         </Alert>
       </Snackbar>
 
