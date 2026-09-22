@@ -6,6 +6,7 @@ import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class CourierUpdateAuditTest {
     private static final String ACTION = "ACTUALIZAR_MENSAJERO";
-    private static final String NATIONAL_ID = "COURIER76";
+    private static final String DOCUMENT_NUMBER = "COURIER76";
     private static final String ORIGINAL_NAME = "Mensajero original 76";
     private static final String ORIGINAL_EMAIL = "courier76@example.com";
     private static final String ORIGINAL_PHONE = "76100001";
@@ -61,24 +62,26 @@ class CourierUpdateAuditTest {
     @Autowired private EntityManager entityManager;
 
     private Long courierUserId;
+    private Long courierId;
 
     @BeforeEach
     void courierAndOtherUser() {
-        var user = users.saveAndFlush(User.builder().nationalId(NATIONAL_ID)
+        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber(DOCUMENT_NUMBER)
                 .fullName(ORIGINAL_NAME).email(ORIGINAL_EMAIL).phone(ORIGINAL_PHONE)
                 .passwordHash(ORIGINAL_PASSWORD_HASH).status(UserStatus.ACTIVE)
                 .role(roles.findByName("MENSAJERO").orElseThrow()).build());
-        couriers.saveAndFlush(Courier.builder().user(user).schedule(ORIGINAL_SCHEDULE)
+        var courier = couriers.saveAndFlush(Courier.builder().user(user).schedule(ORIGINAL_SCHEDULE)
                 .maxPackageWeightKg(new BigDecimal(ORIGINAL_WEIGHT)).build());
-        users.saveAndFlush(User.builder().nationalId("OTHER76")
+        users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("OTHER76")
                 .fullName("Otro usuario 76").email(OTHER_EMAIL).phone(OTHER_PHONE)
                 .passwordHash("unused").status(UserStatus.ACTIVE)
                 .role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
         courierUserId = user.getId();
+        courierId = courier.getId();
     }
 
     private User actor(String role) {
-        return users.saveAndFlush(User.builder().nationalId("ACTOR76")
+        return users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("ACTOR76")
                 .fullName("Actor 76").email("actor76@example.com").passwordHash("unused")
                 .status(UserStatus.ACTIVE).role(roles.findByName(role).orElseThrow()).build());
     }
@@ -93,8 +96,8 @@ class CourierUpdateAuditTest {
                 """.formatted(fullName, email, phone, schedule, weight);
     }
 
-    private ResultActions update(String token, String nationalId, String body) throws Exception {
-        return mvc.perform(put("/api/v1/couriers/" + nationalId)
+    private ResultActions update(String token, Long courierId, String body) throws Exception {
+        return mvc.perform(put("/api/v1/couriers/" + courierId)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON).content(body));
     }
@@ -120,7 +123,7 @@ class CourierUpdateAuditTest {
         var token = token(actorUser);
 
         LocalDateTime before = LocalDateTime.now();
-        update(token, NATIONAL_ID, body(NEW_NAME, NEW_EMAIL, NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
+        update(token, courierId, body(NEW_NAME, NEW_EMAIL, NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
                 .andExpect(status().isOk());
         LocalDateTime after = LocalDateTime.now();
 
@@ -138,7 +141,7 @@ class CourierUpdateAuditTest {
     void soloCambiaElHorarioYElDetalleLoIndica() throws Exception {
         var token = token(actor("SUPER_USUARIO"));
 
-        update(token, NATIONAL_ID,
+        update(token, courierId,
                 body(ORIGINAL_NAME, ORIGINAL_EMAIL, ORIGINAL_PHONE, NEW_SCHEDULE, ORIGINAL_WEIGHT))
                 .andExpect(status().isOk());
 
@@ -151,7 +154,7 @@ class CourierUpdateAuditTest {
     void cambianTelefonoYPesoYElDetalleLosIndicaEnOrden() throws Exception {
         var token = token(actor("SUPER_USUARIO"));
 
-        update(token, NATIONAL_ID,
+        update(token, courierId,
                 body(ORIGINAL_NAME, ORIGINAL_EMAIL, NEW_PHONE, ORIGINAL_SCHEDULE, NEW_WEIGHT))
                 .andExpect(status().isOk());
 
@@ -165,7 +168,7 @@ class CourierUpdateAuditTest {
         var token = token(actor("SUPER_USUARIO"));
         long recordsBefore = auditLogs.count();
 
-        update(token, NATIONAL_ID,
+        update(token, courierId,
                 body(ORIGINAL_NAME, ORIGINAL_EMAIL, ORIGINAL_PHONE, ORIGINAL_SCHEDULE, ORIGINAL_WEIGHT))
                 .andExpect(status().isOk());
 
@@ -177,7 +180,7 @@ class CourierUpdateAuditTest {
         var token = token(actor("SUPER_USUARIO"));
         long recordsBefore = auditLogs.count();
 
-        update(token, NATIONAL_ID,
+        update(token, courierId,
                 body(ORIGINAL_NAME, ORIGINAL_EMAIL, ORIGINAL_PHONE, ORIGINAL_SCHEDULE, "25.5"))
                 .andExpect(status().isOk());
 
@@ -188,7 +191,7 @@ class CourierUpdateAuditTest {
     void elDetalleNoContieneHashNiValoresAnterioresNiNuevos() throws Exception {
         var token = token(actor("SUPER_USUARIO"));
 
-        update(token, NATIONAL_ID, body(NEW_NAME, NEW_EMAIL, NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
+        update(token, courierId, body(NEW_NAME, NEW_EMAIL, NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
                 .andExpect(status().isOk());
 
         var records = courierRecords();
@@ -207,7 +210,7 @@ class CourierUpdateAuditTest {
         var token = token(actor("SUPER_USUARIO"));
         long recordsBefore = auditLogs.count();
 
-        update(token, "NO-EXISTE-76",
+        update(token, 999999999L,
                 body(NEW_NAME, NEW_EMAIL, NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
                 .andExpect(status().isNotFound());
 
@@ -219,7 +222,7 @@ class CourierUpdateAuditTest {
         var token = token(actor("SUPER_USUARIO"));
         long recordsBefore = auditLogs.count();
 
-        update(token, NATIONAL_ID,
+        update(token, courierId,
                 body(NEW_NAME, " OTHER76@EXAMPLE.COM ", NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
                 .andExpect(status().isConflict());
 
@@ -231,7 +234,7 @@ class CourierUpdateAuditTest {
         var token = token(actor("SUPER_USUARIO"));
         long recordsBefore = auditLogs.count();
 
-        update(token, NATIONAL_ID,
+        update(token, courierId,
                 body(NEW_NAME, NEW_EMAIL, OTHER_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
                 .andExpect(status().isConflict());
 
@@ -247,7 +250,7 @@ class CourierUpdateAuditTest {
                 ? body(NEW_NAME, "invalid", NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT)
                 : "{}";
 
-        update(token, NATIONAL_ID, body).andExpect(status().isBadRequest());
+        update(token, courierId, body).andExpect(status().isBadRequest());
 
         assertNoNewRecords(recordsBefore);
     }
@@ -258,7 +261,7 @@ class CourierUpdateAuditTest {
         var token = token(actor(role));
         long recordsBefore = auditLogs.count();
 
-        update(token, NATIONAL_ID, body(NEW_NAME, NEW_EMAIL, NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
+        update(token, courierId, body(NEW_NAME, NEW_EMAIL, NEW_PHONE, NEW_SCHEDULE, NEW_WEIGHT))
                 .andExpect(status().isForbidden());
 
         assertNoNewRecords(recordsBefore);

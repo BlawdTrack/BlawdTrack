@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.users;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.auth.config.DataSeeder;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -43,7 +44,7 @@ class RolePermissionIntegrationTest {
     private String token(String roleName) {
         var role = roles.findByName(roleName).orElseThrow();
         var user = users.saveAndFlush(User.builder()
-                .nationalId("RP-" + roleName).fullName("Prueba permisos")
+                .documentType(DocumentType.CEDULA).documentNumber("RP-" + roleName).fullName("Prueba permisos")
                 .email("rp-" + roleName + "@example.test").passwordHash("hash")
                 .status(UserStatus.ACTIVE).role(role).build());
         return jwt.generateToken(new UserPrincipal(user));
