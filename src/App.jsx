@@ -12,10 +12,10 @@ import { getHomeRoute } from './utils/roleRoutes';
 // vive en su propia ruta en vez de mostrarse todas a la vez.
 
 // La ruta "/recuperar-contrasena" (PasswordRecoveryTestPage, HU-002) se
-// quita mientras esta rama no incluya la HU-002: esa pantalla vive en
-// feature/HU002/restablecimiento-Alvaro y todavía no está en develop.
-// Vuelve a agregarse cuando se integre esa rama. Sin ruta, el enlace
-// "¿Olvidaste tu contraseña?" no navega (onForgotPassword queda sin usar).
+// deja fuera por ahora, aunque el código ya esté en develop: se integra en
+// un cambio aparte, dedicado a HU-002, para no mezclarla con T12. Sin
+// ruta, el enlace "¿Olvidaste tu contraseña?" no navega (onForgotPassword
+// queda sin usar).
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
 // pasar siempre por /login.

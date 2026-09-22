@@ -6,6 +6,7 @@ import com.blawdgourmet.blawdtrack.couriers.service.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -39,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class CourierRegistrationTest {
     private static final String BODY = """
-            {"nationalId":"123456789","fullName":"Mensajero de prueba",
+            {"documentType":"CEDULA","documentNumber":"123456789","fullName":"Mensajero de prueba",
              "email":"courier69@example.com",
              "phone":"88888888","schedule":"Lunes a viernes, 08:00-17:00",
              "maxPackageWeightKg":25.50}
@@ -59,7 +60,7 @@ class CourierRegistrationTest {
     }
 
     private String token(String role, UserStatus status) {
-        var user = users.saveAndFlush(User.builder().nationalId("ACTOR69")
+        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("690000069")
                 .fullName("Actor").email("actor69@example.com").passwordHash("unused")
                 .status(status).role(roles.findByName(role).orElseThrow()).build());
         return jwt.generateToken(new UserPrincipal(user));
@@ -93,7 +94,7 @@ class CourierRegistrationTest {
     @ValueSource(strings = {"ADMIN_VENTAS", "MENSAJERO"})
     void otrosRolesNoPuedenRegistrar(String role) throws Exception {
         register(token(role, UserStatus.ACTIVE), BODY).andExpect(status().isForbidden());
-        assertThat(users.existsByNationalId("123456789")).isFalse();
+        assertThat(users.existsByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "123456789")).isFalse();
     }
 
     @Test
@@ -101,7 +102,7 @@ class CourierRegistrationTest {
         mvc.perform(post("/api/v1/couriers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isUnauthorized());
         register("invalid-token", BODY).andExpect(status().isUnauthorized());
-        assertThat(users.existsByNationalId("123456789")).isFalse();
+        assertThat(users.existsByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "123456789")).isFalse();
     }
 
     @Test
@@ -145,17 +146,17 @@ class CourierRegistrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"nationalId", "email"})
+    @ValueSource(strings = {"documentNumber", "email"})
     void duplicadosEnCualquierUsuarioSeRechazanSinCrearPerfil(String field) throws Exception {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
         long userCount = users.count();
         long courierCount = couriers.count();
-        String body = field.equals("nationalId") ? BODY.replace("123456789", " ACTOR69 ")
+        String body = field.equals("documentNumber") ? BODY.replace("123456789", " 690000069 ")
                 : BODY.replace("courier69@example.com", " ACTOR69@EXAMPLE.COM ");
         register(token, body).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"))
-                .andExpect(jsonPath("$.message").value(field.equals("nationalId")
-                        ? "La cédula ya está registrada" : "El correo ya está registrado"));
+                .andExpect(jsonPath("$.message").value(field.equals("documentNumber")
+                        ? "El documento ya está registrado" : "El correo ya está registrado"));
         assertThat(users.count()).isEqualTo(userCount);
         assertThat(couriers.count()).isEqualTo(courierCount);
     }
@@ -163,7 +164,7 @@ class CourierRegistrationTest {
     @Test
     void telefonoExistenteEnOtroUsuarioSeRechazaConMensajeEspecifico() throws Exception {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
-        users.saveAndFlush(User.builder().nationalId("EXISTING-PHONE")
+        users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("EXISTING-PHONE")
                 .fullName("Usuario existente").email("existing-phone@example.com")
                 .phone("88888888").passwordHash("unused")
                 .status(UserStatus.ACTIVE)

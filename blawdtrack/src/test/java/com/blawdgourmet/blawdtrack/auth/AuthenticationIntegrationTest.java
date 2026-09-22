@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.auth;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -46,7 +47,8 @@ class AuthenticationIntegrationTest {
     private User createUser(UserStatus status) {
         Role role = roles.save(Role.builder().name("TASK53_ROLE").build());
         return users.saveAndFlush(User.builder()
-                .nationalId("TASK53")
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("TASK53")
                 .fullName("Usuario de prueba")
                 .email(EMAIL)
                 .passwordHash(passwordEncoder.encode(PASSWORD))

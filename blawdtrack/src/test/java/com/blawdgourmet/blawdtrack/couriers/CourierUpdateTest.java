@@ -4,6 +4,7 @@ import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class CourierUpdateTest {
-    private static final String NATIONAL_ID = "COURIER74";
+    private static final String DOCUMENT_NUMBER = "COURIER74";
     private static final String ORIGINAL_NAME = "Mensajero original";
     private static final String ORIGINAL_EMAIL = "courier74@example.com";
     private static final String ORIGINAL_PHONE = "70000074";
@@ -53,29 +54,32 @@ class CourierUpdateTest {
     @Autowired private JwtService jwt;
     @Autowired private EntityManager entityManager;
 
+    private Long courierId;
+
     @BeforeEach
     void courierAndOtherUser() {
-        var user = users.saveAndFlush(User.builder().nationalId(NATIONAL_ID)
+        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber(DOCUMENT_NUMBER)
                 .fullName(ORIGINAL_NAME).email(ORIGINAL_EMAIL).phone(ORIGINAL_PHONE)
                 .passwordHash(ORIGINAL_PASSWORD_HASH).status(UserStatus.ACTIVE)
                 .role(roles.findByName("MENSAJERO").orElseThrow()).build());
-        couriers.saveAndFlush(Courier.builder().user(user).schedule(ORIGINAL_SCHEDULE)
+        var courier = couriers.saveAndFlush(Courier.builder().user(user).schedule(ORIGINAL_SCHEDULE)
                 .maxPackageWeightKg(new BigDecimal("25.50")).build());
-        users.saveAndFlush(User.builder().nationalId("OTHER74")
+        users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("OTHER74")
                 .fullName("Otro usuario").email(OTHER_EMAIL).phone(OTHER_PHONE)
                 .passwordHash("unused").status(UserStatus.ACTIVE)
                 .role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
+        courierId = courier.getId();
     }
 
     private String token(String role, UserStatus status) {
-        var user = users.saveAndFlush(User.builder().nationalId("ACTOR74")
+        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("ACTOR74")
                 .fullName("Actor").email("actor74@example.com").passwordHash("unused")
                 .status(status).role(roles.findByName(role).orElseThrow()).build());
         return jwt.generateToken(new UserPrincipal(user));
     }
 
-    private ResultActions update(String token, String nationalId, String body) throws Exception {
-        return mvc.perform(put("/api/v1/couriers/" + nationalId)
+    private ResultActions update(String token, Long courierId, String body) throws Exception {
+        return mvc.perform(put("/api/v1/couriers/" + courierId)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON).content(body));
     }
@@ -83,7 +87,7 @@ class CourierUpdateTest {
     private Courier reloadCourier() {
         entityManager.flush();
         entityManager.clear();
-        return couriers.findByUserNationalId(NATIONAL_ID).orElseThrow();
+        return couriers.findById(courierId).orElseThrow();
     }
 
     private void assertDataUnchanged() {
@@ -103,7 +107,7 @@ class CourierUpdateTest {
         Long userId = before.getId();
         String roleName = before.getRole().getName();
 
-        update(token, NATIONAL_ID, BODY).andExpect(status().isOk())
+        update(token, courierId, BODY).andExpect(status().isOk())
                 .andExpect(jsonPath("$.password").doesNotExist())
                 .andExpect(jsonPath("$.passwordHash").doesNotExist());
 
@@ -115,7 +119,8 @@ class CourierUpdateTest {
         assertThat(user.getPhone()).isEqualTo("72222274");
         assertThat(courier.getSchedule()).isEqualTo("Sábado y domingo, 09:00-14:00");
         assertThat(courier.getMaxPackageWeightKg()).isEqualByComparingTo("40.75");
-        assertThat(user.getNationalId()).isEqualTo(NATIONAL_ID);
+        assertThat(user.getDocumentType()).isEqualTo(DocumentType.CEDULA);
+        assertThat(user.getDocumentNumber()).isEqualTo(DOCUMENT_NUMBER);
         assertThat(user.getPasswordHash()).isEqualTo(ORIGINAL_PASSWORD_HASH);
         assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
         assertThat(user.getRole().getName()).isEqualTo(roleName).isEqualTo("MENSAJERO");
@@ -127,7 +132,7 @@ class CourierUpdateTest {
         String body = BODY.replace("courier74-nuevo@example.com", ORIGINAL_EMAIL)
                 .replace("72222274", ORIGINAL_PHONE);
 
-        update(token, NATIONAL_ID, body).andExpect(status().isOk());
+        update(token, courierId, body).andExpect(status().isOk());
 
         var courier = reloadCourier();
         assertThat(courier.getUser().getEmail()).isEqualTo(ORIGINAL_EMAIL);
@@ -141,7 +146,7 @@ class CourierUpdateTest {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
         String body = BODY.replace("courier74-nuevo@example.com", " OTHER74@EXAMPLE.COM ");
 
-        update(token, NATIONAL_ID, body).andExpect(status().isConflict())
+        update(token, courierId, body).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"))
                 .andExpect(jsonPath("$.message").value("El correo ya está registrado"));
         assertDataUnchanged();
@@ -152,7 +157,7 @@ class CourierUpdateTest {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
         String body = BODY.replace("72222274", OTHER_PHONE);
 
-        update(token, NATIONAL_ID, body).andExpect(status().isConflict())
+        update(token, courierId, body).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"))
                 .andExpect(jsonPath("$.message").value("El teléfono ya está registrado"));
         assertDataUnchanged();
@@ -162,7 +167,7 @@ class CourierUpdateTest {
     void cedulaInexistenteDevuelve404() throws Exception {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
 
-        update(token, "NO-EXISTE-74", BODY).andExpect(status().isNotFound())
+        update(token, 999999999L, BODY).andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("COURIER_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("Mensajero no encontrado"));
     }
@@ -170,7 +175,7 @@ class CourierUpdateTest {
     @ParameterizedTest
     @ValueSource(strings = {"ADMIN_VENTAS", "MENSAJERO"})
     void otrosRolesNoPuedenActualizar(String role) throws Exception {
-        update(token(role, UserStatus.ACTIVE), NATIONAL_ID, BODY).andExpect(status().isForbidden());
+        update(token(role, UserStatus.ACTIVE), courierId, BODY).andExpect(status().isForbidden());
         assertDataUnchanged();
     }
 
@@ -189,7 +194,7 @@ class CourierUpdateTest {
             default -> "{}";
         };
 
-        update(token, NATIONAL_ID, body).andExpect(status().isBadRequest())
+        update(token, courierId, body).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
         assertDataUnchanged();
     }
