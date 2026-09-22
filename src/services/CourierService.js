@@ -2,7 +2,7 @@ import axiosClient from '../api/axiosClient';
 
 export const registerCourier = async (courierData) => {
   try {
-    const response = await axiosClient.post('/couriers', courierData);
+    const response = await axiosClient.post('/v1/couriers', courierData);
     
     // Retornamos la respuesta del backend, pero garantizamos que incluya
     // 'success: true' para que el componente dispare la alerta de éxito
