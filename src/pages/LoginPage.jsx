@@ -13,54 +13,6 @@ import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import blawdtrackLogo from '../assets/Logo.png';
 
-// Candado de dos tonos (blanco + punto naranja), reconstruido a partir
-// del mockup — ahí también está armado con formas simples en vez de un
-// ícono importado.
-function LockIcon({ size = 26 }) {
-  const scale = size / 26;
-  return (
-    <Box sx={{ width: size, height: size, position: 'relative', flexShrink: 0 }}>
-      <Box
-        sx={{
-          position: 'absolute',
-          left: '50%',
-          top: 2 * scale,
-          width: 15 * scale,
-          height: 11 * scale,
-          border: `${2.5 * scale}px solid #fff`,
-          borderBottom: 'none',
-          borderRadius: '8px 8px 0 0',
-          transform: 'translateX(-50%)',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          left: '50%',
-          top: 10 * scale,
-          width: 19 * scale,
-          height: 13 * scale,
-          bgcolor: '#fff',
-          borderRadius: '2px',
-          transform: 'translateX(-50%)',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          left: '50%',
-          top: 15 * scale,
-          width: 3 * scale,
-          height: 3 * scale,
-          bgcolor: 'secondary.main',
-          borderRadius: '50%',
-          transform: 'translateX(-50%)',
-        }}
-      />
-    </Box>
-  );
-}
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateForm(data) {
@@ -116,8 +68,8 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-      <Container maxWidth="sm">
-        <Paper elevation={3} sx={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #E4DED7' }}>
+      <Container maxWidth={false}>
+        <Paper elevation={0} sx={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #E4DED7' }}>
           <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />
 
           <Box
@@ -154,14 +106,11 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-              <LockIcon size={26} />
-              <Typography variant="h4" component="h1">
-                Iniciar sesión
-              </Typography>
-            </Box>
+            <Typography variant="h4" component="h1">
+              Iniciar sesión
+            </Typography>
             <Typography sx={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', mt: 1 }}>
-              Ingresa con tu correo y contraseña para acceder al panel de BlawdTrack.
+              Ingresa con tu correo y contraseña. El sistema te llevará al panel de tu rol.
             </Typography>
           </Box>
 
@@ -248,6 +197,16 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
                 </>
               )}
             </Button>
+
+            {/* '#2F7D4F' es el mismo verde de éxito que usa StatusMessage.jsx;
+                el theme no define theme.palette.success, así que se repite el
+                valor fijo en vez de inventar un token nuevo. */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#2F7D4F', flexShrink: 0 }} />
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                Conexión a internet requerida · contraseñas encriptadas
+              </Typography>
+            </Box>
           </Box>
         </Paper>
       </Container>
