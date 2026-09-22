@@ -45,8 +45,8 @@ public class AdminServiceImpl implements AdminService {
         String documentNumber = request.documentNumber().trim();
         String correo = request.correoElectronico().trim().toLowerCase();
 
-        if (userRepository.existsByNationalId(cedula)) {
-            throw new DuplicateResourceException("DUPLICATE_NATIONAL_ID",
+        if (userRepository.existsByDocumentTypeAndDocumentNumber(request.documentType(), documentNumber)) {
+            throw new DuplicateResourceException("DOCUMENTO_DUPLICADO",
                     "The entered identity document is already associated with another registered user in the system.");
         }
 
