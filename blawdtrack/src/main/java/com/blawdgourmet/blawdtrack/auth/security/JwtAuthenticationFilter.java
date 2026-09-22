@@ -55,10 +55,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.clearContext();
                 } else {
                     User usuarioActual = userRepository.findById(id).orElse(null);
-                    if (usuarioActual == null || !usuarioActual.isActive()) {
+                    if (usuarioActual == null) {
                         SecurityContextHolder.clearContext();
                     } else {
-                        autenticarEnContexto(claims, usuarioActual);
+                        autenticarEnContexto(claims, usuarioActual, usuarioActual.isActive());
                     }
                 }
             } catch (JwtException | IllegalArgumentException ex) {
@@ -69,15 +69,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void autenticarEnContexto(Claims claims, User usuarioActual) {
+    private void autenticarEnContexto(Claims claims, User usuarioActual, boolean usuarioActivo) {
         String correo = claims.getSubject();
         String nationalId = claims.get("nationalId", String.class);
         String fullName = claims.get("fullName", String.class);
         String rolesClaim = claims.get("roles", String.class);
 
-        List<GrantedAuthority> authorities = Arrays.stream(rolesClaim.split(","))
+        List<GrantedAuthority> authorities = usuarioActivo
+            ? Arrays.stream(rolesClaim.split(","))
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+            : List.of();
 
         String rol = usuarioActual.getRole() == null ? null : usuarioActual.getRole().getName();
         AuthenticatedUser principal = new AuthenticatedUser(usuarioActual.getId(), nationalId, fullName, rol, correo);
