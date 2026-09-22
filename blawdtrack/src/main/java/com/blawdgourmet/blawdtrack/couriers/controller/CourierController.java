@@ -18,6 +18,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/couriers")
 @RequiredArgsConstructor
@@ -40,6 +42,11 @@ public class CourierController {
     public CourierResponse deactivate(@PathVariable Long id,
                                       @AuthenticationPrincipal AuthenticatedUser actor) {
         return service.deactivate(id, actor);
+    }
+
+    @GetMapping
+    public List<CourierResponse> list() {
+        return service.list();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

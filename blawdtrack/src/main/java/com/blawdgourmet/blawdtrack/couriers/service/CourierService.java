@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CourierService {
@@ -103,5 +105,13 @@ public class CourierService {
             audit.logAction(AuditAction.COURIER_DEACTIVATED, actor, user, changes.describe());
         }
         return CourierResponse.from(courier);
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public List<CourierResponse> list() {
+        return couriers.findAllByOrderByUserFullNameAsc().stream()
+                .map(CourierResponse::from)
+                .toList();
     }
 }
