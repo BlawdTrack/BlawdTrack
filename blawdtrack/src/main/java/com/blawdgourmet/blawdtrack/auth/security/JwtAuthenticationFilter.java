@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -83,7 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void autenticarEnContexto(Claims claims) {
         String correo = claims.getSubject();
         Long id = claims.get("id", Long.class);
-        String nationalId = claims.get("nationalId", String.class);
+        DocumentType documentType = DocumentType.valueOf(claims.get("documentType", String.class));
+        String documentNumber = claims.get("documentNumber", String.class);
         String fullName = claims.get("fullName", String.class);
         String rolesClaim = claims.get("roles", String.class);
 
@@ -98,7 +100,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .map(authority -> authority.substring(ROLE_PREFIX.length()))
                 .orElse(null);
 
-        AuthenticatedUser principal = new AuthenticatedUser(id, nationalId, fullName, rol, correo);
+        AuthenticatedUser principal = new AuthenticatedUser(id, documentType, documentNumber, fullName, rol, correo);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, authorities);
