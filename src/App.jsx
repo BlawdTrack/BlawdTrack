@@ -2,6 +2,10 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
+import SalesHomePage from './pages/SalesHomePage';
+import CourierHomePage from './pages/CourierHomePage';
+import { useAuth } from './hooks/useAuth';
+import { getHomeRoute } from './utils/roleRoutes';
 
 // Reemplaza el TODO anterior ("falta definir un router... temporalmente
 // se renderizan ambas pantallas apiladas") con rutas reales. Cada pantalla
@@ -12,18 +16,39 @@ import LoginPage from './pages/LoginPage';
 // feature/HU002/restablecimiento-Alvaro y todavía no está en develop.
 // Vuelve a agregarse cuando se integre esa rama. Sin ruta, el enlace
 // "¿Olvidaste tu contraseña?" no navega (onForgotPassword queda sin usar).
+
+// T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
+// pasar siempre por /login.
+function RootRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={user ? getHomeRoute(user.role) : '/login'} replace />;
+}
+
 function LoginRoute() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  return <LoginPage onLoginSuccess={() => navigate('/administradores')} />;
+  // Sesión ya activa (restaurada al refrescar, o entrando directo a
+  // /login): la manda a su inicio en vez de mostrarle el formulario.
+  if (user) {
+    return <Navigate to={getHomeRoute(user.role)} replace />;
+  }
+
+  return (
+    <LoginPage
+      onLoginSuccess={(response) => navigate(getHomeRoute(response.user.role), { replace: true })}
+    />
+  );
 }
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
+      <Route path="/ventas" element={<SalesHomePage />} />
+      <Route path="/mensajero" element={<CourierHomePage />} />
       {/* Vista de Administradores (HU008) */}
       <Route path="/administradores" element={<AdminManagement />} />
     </Routes>
