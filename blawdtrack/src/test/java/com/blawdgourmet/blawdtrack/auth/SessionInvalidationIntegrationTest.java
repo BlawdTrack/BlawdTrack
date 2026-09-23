@@ -230,19 +230,9 @@ class SessionInvalidationIntegrationTest {
         expectSessionClosed(callProtected(token));
     }
 
-    @Test
-    void usuarioInactivoPorSetStatusRecibe401SoloPorElEstado() throws Exception {
-        User user = createSuperUser();
-        String token = jwt.generateToken(new UserPrincipal(user));
-        expectAccepted(callProtected(token));
-
-        // setStatus no incrementa la versión: la versión del token sigue coincidiendo con la de la BD.
-        user.setStatus(UserStatus.INACTIVE);
-        users.saveAndFlush(user);
-        User reloaded = reload(user);
-        assertThat(reloaded.isActive()).isFalse();
-        assertThat(reloaded.getTokenVersion()).isEqualTo(jwt.extractTokenVersion(jwt.validateToken(token)));
-
-        expectSessionClosed(callProtected(token));
-    }
+    // usuarioInactivoPorSetStatusRecibe401SoloPorElEstado se eliminó en la #81: documentaba que
+    // setStatus no incrementaba la versión del token. Ese escenario ya no es reproducible tras
+    // restringir setStatus (@Setter(AccessLevel.NONE)) en User, que fuerza el uso de changeStatus
+    // como único punto de entrada para cambiar el estado. El defecto que este test documentaba
+    // queda cerrado por diseño.
 }

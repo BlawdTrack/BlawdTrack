@@ -5,6 +5,7 @@ import {
   getStoredUser,
   clearAuthSession,
   hasActiveSession,
+  buildUserFromLoginResponse,
 } from '../utils/authStorage';
 import { getLoginError } from '../utils/authErrors';
 import { AuthContext } from './authContextInstance';
@@ -32,7 +33,7 @@ export function AuthProvider({ children }) {
     try {
       const response = await loginService(email, password);
       saveAuthSession(response);
-      setUser(response.user);
+      setUser(buildUserFromLoginResponse(response));
       return response;
     } catch (err) {
       setError(getLoginError(err));

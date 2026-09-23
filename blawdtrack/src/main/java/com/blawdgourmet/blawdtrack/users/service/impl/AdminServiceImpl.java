@@ -51,7 +51,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         if (userRepository.existsByEmail(correo)) {
-            throw new DuplicateResourceException("CORREO_DUPLICADO",
+            throw new DuplicateResourceException("DUPLICATE_EMAIL",
                     "The email address entered is already registered in the system.");
         }
 

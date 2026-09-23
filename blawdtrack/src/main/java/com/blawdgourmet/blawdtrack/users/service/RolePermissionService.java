@@ -1,13 +1,10 @@
 package com.blawdgourmet.blawdtrack.users.service;
 
-import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
-import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.dto.RolePermissionsResponse;
-import com.blawdgourmet.blawdtrack.users.model.Permission;
-import com.blawdgourmet.blawdtrack.users.repository.PermissionRepository;
-import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
-import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,10 +12,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.dto.RolePermissionsResponse;
+import com.blawdgourmet.blawdtrack.users.model.Permission;
+import com.blawdgourmet.blawdtrack.users.repository.PermissionRepository;
+import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
+import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -45,25 +47,25 @@ public class RolePermissionService {
     public RolePermissionsResponse replace(Long roleId, Set<Long> permissionIds) {
         // El JWT puede conservar un rol anterior: confirmar el estado actual en la base.
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var actor = users.findByEmail(email).orElseThrow(() -> new AccessDeniedException("Acceso denegado"));
+        var actor = users.findByEmail(email).orElseThrow(() -> new AccessDeniedException("Access denied"));
         if (!actor.isActive() || !RoleName.SUPER_USER.equals(actor.getRole().getName())) {
-            throw new AccessDeniedException("Acceso denegado");
+            throw new AccessDeniedException("Access denied");
         }
 
         var role = roles.findById(roleId).orElseThrow(() ->
-                new RolePermissionException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
+                new RolePermissionException(HttpStatus.NOT_FOUND, "Role not found"));
         Set<String> allowed = OPERATIONAL_PERMISSIONS.get(role.getName());
         if (allowed == null) {
             throw new RolePermissionException(HttpStatus.FORBIDDEN,
-                    "Este rol no admite modificaciones de permisos");
+                    "This role does not accept permission changes");
         }
         Set<Permission> selected = new HashSet<>(permissions.findAllById(permissionIds));
         if (selected.size() != permissionIds.size()) {
-            throw new RolePermissionException(HttpStatus.BAD_REQUEST, "Uno o más permisos no existen");
+            throw new RolePermissionException(HttpStatus.BAD_REQUEST, "One or more permissions do not exist");
         }
         if (selected.stream().anyMatch(p -> !allowed.contains(p.getCode()))) {
             throw new RolePermissionException(HttpStatus.FORBIDDEN,
-                    "El rol solicita permisos fuera de sus funciones");
+                    "The role is requesting permissions outside its scope");
         }
         role.setPermissions(selected);
         roles.saveAndFlush(role);

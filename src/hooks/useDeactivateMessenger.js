@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from './useAuth';
 import { deactivateCourier } from '../services/CourierService';
 
 export const useDeactivateMessenger = () => {
@@ -8,13 +8,13 @@ export const useDeactivateMessenger = () => {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState(null);
 
-  const deactivate = async (nationalId) => {
+  const deactivate = async (id) => {
     setIsLoading(true);
     setError(null);
     setStatus(null);
 
     try {
-      await deactivateCourier(nationalId);
+      await deactivateCourier(id);
       return { success: true, status: 200 };
     } catch (requestError) {
       const responseStatus = requestError.response?.status ?? null;

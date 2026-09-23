@@ -5,6 +5,7 @@ import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierHasActiveAssignmentsException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
 import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/couriers")
@@ -33,6 +36,17 @@ public class CourierController {
                                   @Valid @RequestBody UpdateCourierRequest request,
                                   @AuthenticationPrincipal AuthenticatedUser actor) {
         return service.update(id, request, actor);
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    public CourierResponse deactivate(@PathVariable Long id,
+                                      @AuthenticationPrincipal AuthenticatedUser actor) {
+        return service.deactivate(id, actor);
+    }
+
+    @GetMapping
+    public List<CourierResponse> list() {
+        return service.list();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -54,6 +68,12 @@ public class CourierController {
     public ResponseEntity<ErrorResponse> notFound(CourierNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
                 .code("COURIER_NOT_FOUND").message(ex.getMessage()).status(404).build());
+    }
+
+    @ExceptionHandler(CourierHasActiveAssignmentsException.class)
+    public ResponseEntity<ErrorResponse> hasActiveAssignments(CourierHasActiveAssignmentsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder()
+                .code("COURIER_HAS_ACTIVE_ASSIGNMENTS").message(ex.getMessage()).status(409).build());
     }
 
     // Las restricciones únicas también protegen frente a registros simultáneos.
