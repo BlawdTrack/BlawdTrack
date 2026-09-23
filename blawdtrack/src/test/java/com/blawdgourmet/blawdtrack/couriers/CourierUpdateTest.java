@@ -55,27 +55,27 @@ class CourierUpdateTest {
 
     @BeforeEach
     void courierAndOtherUser() {
-        var user = users.saveAndFlush(User.builder().nationalId(NATIONAL_ID)
+        var user = users.saveAndFlush(User.builder().documentId(NATIONAL_ID)
                 .fullName(ORIGINAL_NAME).email(ORIGINAL_EMAIL).phone(ORIGINAL_PHONE)
                 .passwordHash(ORIGINAL_PASSWORD_HASH).status(UserStatus.ACTIVE)
                 .role(roles.findByName("MENSAJERO").orElseThrow()).build());
         couriers.saveAndFlush(Courier.builder().user(user).schedule(ORIGINAL_SCHEDULE)
                 .maxPackageWeightKg(new BigDecimal("25.50")).build());
-        users.saveAndFlush(User.builder().nationalId("OTHER74")
+        users.saveAndFlush(User.builder().documentId("OTHER74")
                 .fullName("Otro usuario").email(OTHER_EMAIL).phone(OTHER_PHONE)
                 .passwordHash("unused").status(UserStatus.ACTIVE)
                 .role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
     }
 
     private String token(String role, UserStatus status) {
-        var user = users.saveAndFlush(User.builder().nationalId("ACTOR74")
+        var user = users.saveAndFlush(User.builder().documentId("ACTOR74")
                 .fullName("Actor").email("actor74@example.com").passwordHash("unused")
                 .status(status).role(roles.findByName(role).orElseThrow()).build());
         return jwt.generateToken(new UserPrincipal(user));
     }
 
-    private ResultActions update(String token, String nationalId, String body) throws Exception {
-        return mvc.perform(put("/api/v1/couriers/" + nationalId)
+    private ResultActions update(String token, String documentId, String body) throws Exception {
+        return mvc.perform(put("/api/v1/couriers/" + documentId)
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON).content(body));
     }
@@ -83,7 +83,7 @@ class CourierUpdateTest {
     private Courier reloadCourier() {
         entityManager.flush();
         entityManager.clear();
-        return couriers.findByUserNationalId(NATIONAL_ID).orElseThrow();
+        return couriers.findByUserDocumentId(NATIONAL_ID).orElseThrow();
     }
 
     private void assertDataUnchanged() {
@@ -115,7 +115,7 @@ class CourierUpdateTest {
         assertThat(user.getPhone()).isEqualTo("72222274");
         assertThat(courier.getSchedule()).isEqualTo("Sábado y domingo, 09:00-14:00");
         assertThat(courier.getMaxPackageWeightKg()).isEqualByComparingTo("40.75");
-        assertThat(user.getNationalId()).isEqualTo(NATIONAL_ID);
+        assertThat(user.getDocumentId()).isEqualTo(NATIONAL_ID);
         assertThat(user.getPasswordHash()).isEqualTo(ORIGINAL_PASSWORD_HASH);
         assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
         assertThat(user.getRole().getName()).isEqualTo(roleName).isEqualTo("MENSAJERO");

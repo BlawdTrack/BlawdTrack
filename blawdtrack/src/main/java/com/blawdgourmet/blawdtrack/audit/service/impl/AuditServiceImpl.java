@@ -29,7 +29,7 @@ public class AuditServiceImpl implements AuditService {
 
         String detalle = "The Super User '%s' (ID %s) created the Sales Administrator '%s' (ID %s, email %s)."
                 .formatted(actor.nombreCompleto(), actor.cedula(),
-                        administradorCreado.getFullName(), administradorCreado.getNationalId(),
+                        administradorCreado.getFullName(), administradorCreado.getDocumentId(),
                         administradorCreado.getEmail());
 
         AuditLog registro = AuditLog.builder()

@@ -43,7 +43,7 @@ class RolePermissionIntegrationTest {
     private String token(String roleName) {
         var role = roles.findByName(roleName).orElseThrow();
         var user = users.saveAndFlush(User.builder()
-                .nationalId("RP-" + roleName).fullName("Prueba permisos")
+                .documentId("RP-" + roleName).fullName("Prueba permisos")
                 .email("rp-" + roleName + "@example.test").passwordHash("hash")
                 .status(UserStatus.ACTIVE).role(role).build());
         return jwt.generateToken(new UserPrincipal(user));

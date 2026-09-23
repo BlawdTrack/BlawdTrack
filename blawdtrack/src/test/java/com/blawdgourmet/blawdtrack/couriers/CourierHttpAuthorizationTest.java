@@ -40,7 +40,7 @@ class CourierHttpAuthorizationTest {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/v1/couriers"))
                 .header("Authorization", "Bearer " + token).header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString("""
-                        {"nationalId":"HTTP70","fullName":"Prueba HTTP","email":"new-http@example.test",
+                        {"documentId":"HTTP70","fullName":"Prueba HTTP","email":"new-http@example.test",
                          "phone":"88888888","schedule":"Lunes a viernes","maxPackageWeightKg":20}
                         """)).build();
         try (var client = HttpClient.newHttpClient()) {

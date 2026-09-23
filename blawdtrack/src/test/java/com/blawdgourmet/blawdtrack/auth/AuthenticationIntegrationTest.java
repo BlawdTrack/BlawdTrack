@@ -46,7 +46,7 @@ class AuthenticationIntegrationTest {
     private User createUser(UserStatus status) {
         Role role = roles.save(Role.builder().name("TASK53_ROLE").build());
         return users.saveAndFlush(User.builder()
-                .nationalId("TASK53")
+                .documentId("TASK53")
                 .fullName("Usuario de prueba")
                 .email(EMAIL)
                 .passwordHash(passwordEncoder.encode(PASSWORD))

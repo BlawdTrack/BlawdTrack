@@ -54,7 +54,7 @@ class UserRepositoryTest {
     @Test
     void findByEmail_conCorreoExistente_devuelveUsuarioConRolYPermisos() {
         User user = User.builder()
-                .nationalId("0101010101")
+                .documentId("0101010101")
                 .fullName("Genesis Silesky")
                 .email("genesis@blawdtrack.com")
                 .passwordHash("hash-no-real")

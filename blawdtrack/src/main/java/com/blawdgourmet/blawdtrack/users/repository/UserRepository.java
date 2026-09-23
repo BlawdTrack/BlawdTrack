@@ -1,10 +1,11 @@
 package com.blawdgourmet.blawdtrack.users.repository;
 
-import com.blawdgourmet.blawdtrack.users.model.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.blawdgourmet.blawdtrack.users.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -26,10 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {"role", "role.permissions"})
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByNationalId(String nationalId);
+    Optional<User> findByDocumentId(String documentId);
     boolean existsByEmail(String email);
     boolean existsByEmailIgnoreCase(String email);
-    boolean existsByNationalId(String nationalId);
+    boolean existsByDocumentId(String documentId);
     boolean existsByPhone(String phone);
 
     // Excluyen al propio usuario para no dar un 409 falso al guardar sin cambios.

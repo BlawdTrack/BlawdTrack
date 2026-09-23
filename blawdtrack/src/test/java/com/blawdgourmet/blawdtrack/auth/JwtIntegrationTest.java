@@ -55,7 +55,7 @@ class JwtIntegrationTest {
     void loginEmiteJwtFirmadoConExpiracionYPermiteAccesoSinSesion() throws Exception {
         Role role = roles.save(Role.builder().name("TASK55_ROLE").build());
         User user = users.saveAndFlush(User.builder()
-                .nationalId("TASK55").fullName("Usuario JWT")
+                .documentId("TASK55").fullName("Usuario JWT")
                 .email("task55@example.com")
                 .passwordHash(passwordEncoder.encode("Task55-password!"))
                 .status(UserStatus.ACTIVE).role(role).build());

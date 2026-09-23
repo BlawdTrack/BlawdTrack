@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class CourierRegistrationTest {
     private static final String BODY = """
-            {"nationalId":"123456789","fullName":"Mensajero de prueba",
+            {"documentId":"123456789","fullName":"Mensajero de prueba",
              "email":"courier69@example.com",
              "phone":"88888888","schedule":"Lunes a viernes, 08:00-17:00",
              "maxPackageWeightKg":25.50}
@@ -59,7 +59,7 @@ class CourierRegistrationTest {
     }
 
     private String token(String role, UserStatus status) {
-        var user = users.saveAndFlush(User.builder().nationalId("ACTOR69")
+        var user = users.saveAndFlush(User.builder().documentId("ACTOR69")
                 .fullName("Actor").email("actor69@example.com").passwordHash("unused")
                 .status(status).role(roles.findByName(role).orElseThrow()).build());
         return jwt.generateToken(new UserPrincipal(user));
@@ -93,7 +93,7 @@ class CourierRegistrationTest {
     @ValueSource(strings = {"ADMIN_VENTAS", "MENSAJERO"})
     void otrosRolesNoPuedenRegistrar(String role) throws Exception {
         register(token(role, UserStatus.ACTIVE), BODY).andExpect(status().isForbidden());
-        assertThat(users.existsByNationalId("123456789")).isFalse();
+        assertThat(users.existsByDocumentId("123456789")).isFalse();
     }
 
     @Test
@@ -101,7 +101,7 @@ class CourierRegistrationTest {
         mvc.perform(post("/api/v1/couriers").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isUnauthorized());
         register("invalid-token", BODY).andExpect(status().isUnauthorized());
-        assertThat(users.existsByNationalId("123456789")).isFalse();
+        assertThat(users.existsByDocumentId("123456789")).isFalse();
     }
 
     @Test
@@ -145,16 +145,16 @@ class CourierRegistrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"nationalId", "email"})
+    @ValueSource(strings = {"documentId", "email"})
     void duplicadosEnCualquierUsuarioSeRechazanSinCrearPerfil(String field) throws Exception {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
         long userCount = users.count();
         long courierCount = couriers.count();
-        String body = field.equals("nationalId") ? BODY.replace("123456789", " ACTOR69 ")
+        String body = field.equals("documentId") ? BODY.replace("123456789", " ACTOR69 ")
                 : BODY.replace("courier69@example.com", " ACTOR69@EXAMPLE.COM ");
         register(token, body).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"))
-                .andExpect(jsonPath("$.message").value(field.equals("nationalId")
+                .andExpect(jsonPath("$.message").value(field.equals("documentId")
                         ? "La cédula ya está registrada" : "El correo ya está registrado"));
         assertThat(users.count()).isEqualTo(userCount);
         assertThat(couriers.count()).isEqualTo(courierCount);
@@ -163,7 +163,7 @@ class CourierRegistrationTest {
     @Test
     void telefonoExistenteEnOtroUsuarioSeRechazaConMensajeEspecifico() throws Exception {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
-        users.saveAndFlush(User.builder().nationalId("EXISTING-PHONE")
+        users.saveAndFlush(User.builder().documentId("EXISTING-PHONE")
                 .fullName("Usuario existente").email("existing-phone@example.com")
                 .phone("88888888").passwordHash("unused")
                 .status(UserStatus.ACTIVE)

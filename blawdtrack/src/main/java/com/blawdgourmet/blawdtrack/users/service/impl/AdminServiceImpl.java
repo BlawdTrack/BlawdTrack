@@ -42,15 +42,15 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public AdminRegistrationResponse registrarAdministrador(AdminRegistrationRequest request, AuthenticatedUser actor) {
 
-        String cedula = request.cedulaIdentidad().trim();
-        String correo = request.correoElectronico().trim().toLowerCase();
+        String cedula = normalizarDocumento(request.cedulaIdentidad());
+        String correo = request.correoElectronico().trim();
 
-        if (userRepository.existsByNationalId(cedula)) {
+        if (userRepository.existsByDocumentId(cedula)) {
             throw new DuplicateResourceException("CEDULA_DUPLICADA",
                     "The entered identity document is already associated with another registered user in the system.");
         }
 
-        if (userRepository.existsByEmail(correo)) {
+        if (userRepository.existsByEmailIgnoreCase(correo)) {
             throw new DuplicateResourceException("CORREO_DUPLICADO",
                     "The email address entered is already registered in the system.");
         }
@@ -60,7 +60,7 @@ public class AdminServiceImpl implements AdminService {
                         "The role '" + RoleName.SALES_ADMIN + "' is not registered in the roles table."));
 
         User nuevoAdministrador = User.builder()
-                .nationalId(cedula)
+                .documentId(cedula)
                 .fullName(request.nombreCompleto().trim())
                 .email(correo)
                 .passwordHash(passwordEncoder.encode(request.contrasenaInicial()))
@@ -75,12 +75,16 @@ public class AdminServiceImpl implements AdminService {
 
         return new AdminRegistrationResponse(
                 administradorGuardado.getId(),
-                administradorGuardado.getNationalId(),
+                administradorGuardado.getDocumentId(),
                 administradorGuardado.getFullName(),
                 administradorGuardado.getEmail(),
                 administradorGuardado.getPhone(),
                 administradorGuardado.getRole().getName(),
                 administradorGuardado.getStatus()
-        );
-    }
+                );
+        }
+
+        private String normalizarDocumento(String documento) {
+                return documento.trim().replaceAll("[\\s-]", "");
+        }
 }

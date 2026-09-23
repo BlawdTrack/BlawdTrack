@@ -48,7 +48,7 @@ class CourierCredentialsIntegrationTest {
         List<MimeMessage> delivered = new ArrayList<>();
         when(sender.createMimeMessage()).thenAnswer(i -> new MimeMessage(Session.getInstance(new Properties())));
         doAnswer(i -> { delivered.add(i.getArgument(0)); return null; }).when(sender).send(any(MimeMessage.class));
-        var actor = users.saveAndFlush(User.builder().nationalId("ACTOR70E2E")
+        var actor = users.saveAndFlush(User.builder().documentId("ACTOR70E2E")
                 .fullName("Administrador de prueba").email("actor70e2e@example.test").passwordHash("unused")
                 .status(UserStatus.ACTIVE).role(roles.findByName("SUPER_USUARIO").orElseThrow()).build());
         String token = jwt.generateToken(new UserPrincipal(actor));
@@ -57,7 +57,7 @@ class CourierCredentialsIntegrationTest {
             for (int i = 0; i < 2; i++) {
                 String email = "courier70e2e" + i + "@example.test";
                 String body = """
-                        {"nationalId":"E2E70%d","fullName":"Mensajero prueba",
+                        {"documentId":"E2E70%d","fullName":"Mensajero prueba",
                          "email":"%s","password":"ClaveElegidaPorCliente!",
                          "phone":"8888888%d","schedule":"Lunes a viernes","maxPackageWeightKg":20}
                         """.formatted(i, email, i);

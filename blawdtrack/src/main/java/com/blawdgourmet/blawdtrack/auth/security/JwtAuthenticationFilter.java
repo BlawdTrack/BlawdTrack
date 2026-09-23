@@ -1,13 +1,10 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
-import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,10 +12,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Filtro de autenticación sin estado. Construye el principal únicamente a partir
@@ -59,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void autenticarEnContexto(Claims claims) {
         String correo = claims.getSubject();
         Long id = claims.get("id", Long.class);
-        String nationalId = claims.get("nationalId", String.class);
+        String documentId = claims.get("documentId", String.class);
         String fullName = claims.get("fullName", String.class);
         String rolesClaim = claims.get("roles", String.class);
 
@@ -74,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .map(authority -> authority.substring(ROLE_PREFIX.length()))
                 .orElse(null);
 
-        AuthenticatedUser principal = new AuthenticatedUser(id, nationalId, fullName, rol, correo);
+        AuthenticatedUser principal = new AuthenticatedUser(id, documentId, fullName, rol, correo);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, authorities);

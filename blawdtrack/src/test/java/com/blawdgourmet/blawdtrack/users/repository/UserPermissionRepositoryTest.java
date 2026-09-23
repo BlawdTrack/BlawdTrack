@@ -31,7 +31,7 @@ class UserPermissionRepositoryTest {
                 .permissions(Set.of(assigned))
                 .build());
         User user = userRepository.save(User.builder()
-                .nationalId("101010101")
+                .documentId("101010101")
                 .fullName("Mensajero de prueba")
                 .email("mensajero@prueba.test")
                 .passwordHash("hash")

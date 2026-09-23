@@ -1,19 +1,27 @@
 package com.blawdgourmet.blawdtrack.couriers.controller;
 
-import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
-import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
-import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
-import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
-import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
+import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/couriers")
@@ -26,10 +34,10 @@ public class CourierController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
     }
 
-    @PutMapping("/{nationalId}")
-    public CourierResponse update(@PathVariable String nationalId,
+    @PutMapping("/{documentId}")
+    public CourierResponse update(@PathVariable String documentId,
                                   @Valid @RequestBody UpdateCourierRequest request) {
-        return service.update(nationalId, request);
+        return service.update(documentId, request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

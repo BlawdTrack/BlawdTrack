@@ -1,16 +1,18 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.stream.Collectors;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtService {
@@ -46,7 +48,7 @@ public class JwtService {
                 .subject(principal.getUsername())
                 .claim("id", principal.getId())
                 .claim("roles", roles)
-                .claim("nationalId", principal.getUser().getNationalId())
+                .claim("documentId", principal.getUser().getDocumentId())
                 .claim("fullName", principal.getUser().getFullName())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))

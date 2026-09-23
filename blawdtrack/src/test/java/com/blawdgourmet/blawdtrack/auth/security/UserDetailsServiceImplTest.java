@@ -41,7 +41,7 @@ class UserDetailsServiceImplTest {
 
         return User.builder()
                 .id(1L)
-                .nationalId("0101010101")
+                .documentId("0101010101")
                 .fullName("Genesis Silesky")
                 .email("genesis@blawdtrack.com")
                 .passwordHash("hash-no-real")
