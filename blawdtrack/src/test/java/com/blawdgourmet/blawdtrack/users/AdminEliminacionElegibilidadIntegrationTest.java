@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -42,7 +43,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     void superUsuarioConsultaAdministradorSinSesionReciente() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-sin-sesion@example.test", null);
 
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getNationalId())
+        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.elegibleParaEliminar").value(true))
@@ -54,7 +55,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     void superUsuarioConsultaAdministradorConSesionReciente() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-con-sesion@example.test", LocalDateTime.now());
 
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getNationalId())
+        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.elegibleParaEliminar").value(false))
@@ -81,10 +82,10 @@ class AdminEliminacionElegibilidadIntegrationTest {
     void rolesOperativosNoPuedenConsultar() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-objetivo@example.test", null);
 
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getNationalId())
+        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
                 .andExpect(status().isForbidden());
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getNationalId())
+        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.COURIER)))
                 .andExpect(status().isForbidden());
     }
@@ -97,7 +98,8 @@ class AdminEliminacionElegibilidadIntegrationTest {
 
     private User guardarUsuario(String rol, String correo, LocalDateTime lastLoginAt) {
         User user = User.builder()
-            .nationalId(String.format("9-0000-%04d", nationalIdSequence.getAndIncrement()))
+            .documentType(DocumentType.CEDULA)
+            .documentNumber(String.format("9-0000-%04d", nationalIdSequence.getAndIncrement()))
                 .fullName("Administrador de prueba")
                 .email(correo)
                 .passwordHash("hash")

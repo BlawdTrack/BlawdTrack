@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
 import com.blawdgourmet.blawdtrack.users.model.Role;
@@ -42,7 +43,8 @@ class AdminServiceImplTest {
 
     @Test
     void cedulaInexistenteLanzaExcepcionDeAdministradorNoExistente() {
-        when(userRepository.findByNationalId("1-2345-6789")).thenReturn(Optional.empty());
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
+            .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.validarElegibilidadEliminacion("1-2345-6789"))
                 .isInstanceOf(AdminNotFoundException.class)
@@ -52,23 +54,26 @@ class AdminServiceImplTest {
     @Test
     void usuarioConRolDistintoNoSeConsideraAdministrador() {
         User mensajero = usuarioConRol(RoleName.COURIER);
-        when(userRepository.findByNationalId(mensajero.getNationalId())).thenReturn(Optional.of(mensajero));
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, mensajero.getDocumentNumber()))
+            .thenReturn(Optional.of(mensajero));
 
-        assertThatThrownBy(() -> service.validarElegibilidadEliminacion(mensajero.getNationalId()))
+        assertThatThrownBy(() -> service.validarElegibilidadEliminacion(mensajero.getDocumentNumber()))
                 .isInstanceOf(AdminNotFoundException.class);
     }
 
     @Test
     void loginNuloOVencidoEsElegibleParaEliminar() {
         User sinLogin = usuarioConRol(RoleName.SALES_ADMIN);
-        when(userRepository.findByNationalId(sinLogin.getNationalId())).thenReturn(Optional.of(sinLogin));
-        AdminEliminacionElegibilidadResponse sinSesion = service.validarElegibilidadEliminacion(sinLogin.getNationalId());
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, sinLogin.getDocumentNumber()))
+            .thenReturn(Optional.of(sinLogin));
+        AdminEliminacionElegibilidadResponse sinSesion = service.validarElegibilidadEliminacion(sinLogin.getDocumentNumber());
 
         User loginVencido = usuarioConRol(RoleName.SALES_ADMIN);
-        loginVencido.setNationalId("2-3456-7890");
+        loginVencido.setDocumentNumber("2-3456-7890");
         loginVencido.setLastLoginAt(LocalDateTime.now().minusHours(2));
-        when(userRepository.findByNationalId(loginVencido.getNationalId())).thenReturn(Optional.of(loginVencido));
-        AdminEliminacionElegibilidadResponse vencida = service.validarElegibilidadEliminacion(loginVencido.getNationalId());
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, loginVencido.getDocumentNumber()))
+            .thenReturn(Optional.of(loginVencido));
+        AdminEliminacionElegibilidadResponse vencida = service.validarElegibilidadEliminacion(loginVencido.getDocumentNumber());
 
         assertThat(sinSesion.elegibleParaEliminar()).isTrue();
         assertThat(sinSesion.tieneSesionActiva()).isFalse();
@@ -80,10 +85,11 @@ class AdminServiceImplTest {
     void loginRecienteImpideEliminarYExplicaElMotivo() {
         User administrador = usuarioConRol(RoleName.SALES_ADMIN);
         administrador.setLastLoginAt(LocalDateTime.now().minusMinutes(5));
-        when(userRepository.findByNationalId(administrador.getNationalId())).thenReturn(Optional.of(administrador));
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, administrador.getDocumentNumber()))
+            .thenReturn(Optional.of(administrador));
 
         AdminEliminacionElegibilidadResponse response =
-                service.validarElegibilidadEliminacion(administrador.getNationalId());
+            service.validarElegibilidadEliminacion(administrador.getDocumentNumber());
 
         assertThat(response.tieneSesionActiva()).isTrue();
         assertThat(response.elegibleParaEliminar()).isFalse();
@@ -93,7 +99,8 @@ class AdminServiceImplTest {
     private User usuarioConRol(String nombreRol) {
         return User.builder()
                 .id(5L)
-                .nationalId("1-2345-6789")
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("1-2345-6789")
                 .fullName("Ana Perez")
                 .email("ana@example.test")
                 .passwordHash("hash")

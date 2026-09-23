@@ -18,9 +18,9 @@ import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadRespons
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
-import com.blawdgourmet.blawdtrack.users.validation.ValidCedula;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -49,7 +49,7 @@ public class AdminController {
     @GetMapping("/{cedula}/elegibilidad-eliminacion")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<AdminEliminacionElegibilidadResponse> validarElegibilidadEliminacion(
-            @PathVariable @ValidCedula String cedula) {
+            @PathVariable @Pattern(regexp = "(?=.{5,20}$)[A-Za-z0-9\\s-]+") String cedula) {
         return ResponseEntity.ok(adminService.validarElegibilidadEliminacion(cedula));
     }
 }

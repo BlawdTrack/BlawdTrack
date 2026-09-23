@@ -2,6 +2,8 @@ package com.blawdgourmet.blawdtrack.users.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +14,7 @@ import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationException;
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
@@ -104,7 +107,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(String cedula) {
-        User administrador = userRepository.findByNationalId(cedula)
+        User administrador = Arrays.stream(DocumentType.values())
+                .map(tipo -> userRepository.findByDocumentTypeAndDocumentNumber(tipo, cedula))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
                 .filter(usuario -> usuario.getRole() != null
                         && RoleName.SALES_ADMIN.equals(usuario.getRole().getName()))
                 .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
@@ -119,7 +126,7 @@ public class AdminServiceImpl implements AdminService {
 
         return new AdminEliminacionElegibilidadResponse(
                 administrador.getId(),
-                administrador.getNationalId(),
+                administrador.getDocumentNumber(),
                 administrador.getFullName(),
                 administrador.getStatus(),
                 tieneSesionActiva,
