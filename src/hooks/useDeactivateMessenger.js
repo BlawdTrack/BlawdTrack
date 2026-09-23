@@ -1,40 +1,45 @@
-// src/hooks/useDeactivateMessenger.js
 import { useState } from 'react';
-/**
- * HOOK PERSONALIZADO DE LÓGICA DE NEGOCIO Y PETICIONES HTTP
- * 
- * - Encapsula el consumo del endpoint DELETE /api/messengers/:id.
- * - Mantiene el estado del ciclo de vida de la petición (`loading`, `error`).
- * - Puede ser importado por cualquier vista, tabla o formulario sin acoplamiento a componentes visuales.
- */
-export const useDeactivateMessenger = (apiUrl = 'http://localhost:8080/api/messengers') => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+import { useAuth } from './useAuth';
+import { deactivateCourier } from '../services/CourierService';
 
-  const deactivateMessenger = async (messengerId) => {
-    setLoading(true);
+export const useDeactivateMessenger = () => {
+  const { logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState(null);
+
+  const deactivate = async (id) => {
+    setIsLoading(true);
     setError(null);
+    setStatus(null);
 
     try {
-      const response = await fetch(`${apiUrl}/${messengerId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await deactivateCourier(id);
+      return { success: true, status: 200 };
+    } catch (requestError) {
+      const responseStatus = requestError.response?.status ?? null;
+      const message =
+        requestError.response?.data?.message ||
+        requestError.message ||
+        'Error inesperado al intentar desactivar el mensajero.';
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: No se pudo desactivar el mensajero`);
+      setError(message);
+      setStatus(responseStatus);
+
+      if (responseStatus === 401) {
+        logout();
       }
 
-      return true; // Éxito
-    } catch (err) {
-      setError(err.message || 'Error de conexión');
-      return false; // Fallo
+      return { success: false, status: responseStatus, error: message };
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return { deactivateMessenger, loading, error };
+  const clearError = () => {
+    setError(null);
+    setStatus(null);
+  };
+
+  return { deactivate, isLoading, error, status, clearError };
 };

@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.common.security;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import org.springframework.security.core.AuthenticatedPrincipal;
 
 /**
@@ -7,7 +8,8 @@ import org.springframework.security.core.AuthenticatedPrincipal;
  */
 public record AuthenticatedUser(
         Long id,
-        String cedula,
+        DocumentType documentType,
+        String documentNumber,
         String nombreCompleto,
         String rol,
         String correo

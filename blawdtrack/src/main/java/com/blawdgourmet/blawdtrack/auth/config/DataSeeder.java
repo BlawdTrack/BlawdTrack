@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.auth.config;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
@@ -135,7 +136,8 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         User admin = User.builder()
-                .nationalId("000000000")
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("000000000")
                 .fullName("Alicia (Default Super User)")
                 .email(adminEmail)
                 .passwordHash(passwordEncoder.encode("ChangeMe123"))

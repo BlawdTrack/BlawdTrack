@@ -1,20 +1,42 @@
-import React from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
+import LoginPage from './pages/LoginPage';
+import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
+import { MessengerFleetList } from './components/MessengerFleetList';
 
-// TODO: Falta definir un router (ej. react-router-dom) para navegar entre pantallas.
-// Temporalmente se renderizan ambas pantallas para pruebas de UI (HU008 y HU003).
+// Reemplaza el TODO anterior ("falta definir un router... temporalmente
+// se renderizan ambas pantallas apiladas") con rutas reales. Cada pantalla
+// vive en su propia ruta en vez de mostrarse todas a la vez.
+
+function LoginRoute() {
+  const navigate = useNavigate();
+
+  return (
+    <LoginPage
+      onLoginSuccess={() => navigate('/administradores')}
+      onForgotPassword={() => navigate('/recuperar-contrasena')}
+    />
+  );
+}
+
+function PasswordRecoveryRoute() {
+  const navigate = useNavigate();
+
+  return <PasswordRecoveryTestPage onBackToLogin={() => navigate('/login')} />;
+}
+
 function App() {
   return (
-    <div>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginRoute />} />
+      <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
+      <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
       {/* Vista de Administradores (HU008) */}
-      <AdminManagement />
-      
-      <hr style={{ margin: '40px 0', border: '1px solid #ccc' }} />
-      
-      {/* Vista de Registro de Mensajeros (HU003) */}
-      <CourierRegistrationPage />
-    </div>
+      <Route path="/administradores" element={<AdminManagement />} />
+      <Route path="/mensajeros" element={<MessengerFleetList />} />
+    </Routes>
   );
 }
 

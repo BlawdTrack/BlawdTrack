@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+
 @Entity
 @Table(name = "usuarios")
 @Getter
@@ -32,8 +34,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cedula", nullable = false, unique = true, length = 20)
-    private String nationalId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_documento", nullable = false, length = 20)
+    private DocumentType documentType;
+
+    @Column(name = "numero_documento", nullable = false, length = 20)
+    private String documentNumber;
 
     @Column(name = "nombre_completo", nullable = false, length = 120)
     private String fullName;
@@ -50,10 +56,16 @@ public class User {
     @Column(name = "fecha_ultimo_inicio_sesion")
     private LocalDateTime lastLoginAt;
 
+    @Setter(AccessLevel.NONE)
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
+
+    @Setter(AccessLevel.NONE)
+    @Column(name = "version_token", nullable = false)
+    @Builder.Default
+    private int tokenVersion = 0;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)
@@ -61,5 +73,22 @@ public class User {
 
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
+    }
+
+    /**
+     * Cambia el estado de la cuenta y cierra las sesiones ya emitidas: si el estado
+     * realmente cambia, incrementa la versión del token. Si el nuevo estado es igual
+     * al actual no hace nada. Usar este método en lugar de {@code setStatus}, que no
+     * incrementa la versión.
+     */
+    public void changeStatus(UserStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("El estado no puede ser nulo");
+        }
+        if (this.status == newStatus) {
+            return;
+        }
+        this.status = newStatus;
+        this.tokenVersion++;
     }
 }
