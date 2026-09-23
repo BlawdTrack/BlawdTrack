@@ -53,10 +53,14 @@ public class AuditServiceImpl implements AuditService {
     public void registrarEliminacionAdministrador(AuthenticatedUser actor, User administradorEliminado) {
         User actorReferencia = userRepository.getReferenceById(actor.id());
 
-        String detalle = "El Super Usuario '%s' (cédula %s) eliminó al Administrador de Ventas '%s' (cédula %s, correo %s)."
-                .formatted(actor.nombreCompleto(), actor.cedula(),
-                        administradorEliminado.getFullName(), administradorEliminado.getNationalId(),
-                        administradorEliminado.getEmail());
+        String detalle = "El Super Usuario '%s' (documento %s) eliminó al Administrador de Ventas '%s' (documento %s, correo %s)."
+                .formatted(
+                        actor.nombreCompleto(),
+                        actor.documentType() + "-" + actor.documentNumber(),
+                        administradorEliminado.getFullName(),
+                        administradorEliminado.getDocumentType() + "-" + administradorEliminado.getDocumentNumber(),
+                        administradorEliminado.getEmail()
+                );
 
         AuditLog registro = AuditLog.builder()
                 .actor(actorReferencia)
@@ -67,6 +71,8 @@ public class AuditServiceImpl implements AuditService {
                 .build();
 
         auditLogRepository.save(registro);
+    }
+
     /** Exige una transacción activa: la traza se confirma o revierte junto con el cambio. */
     @Override
     @Transactional(propagation = Propagation.MANDATORY)

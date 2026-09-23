@@ -97,8 +97,9 @@ public class AdminServiceImpl implements AdminService {
             throw new AccessDeniedException("Acceso denegado");
         }
 
-        User administradorAEliminar = userRepository.findByNationalId(cedula)
-                .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
+        User administradorAEliminar = userRepository.findByDocumentNumber(cedula)
+                .orElseGet(() -> userRepository.findByNationalId(cedula)
+                        .orElseThrow(() -> new AdminNotFoundException("Administrador no existente")));
 
         if (!RoleName.SALES_ADMIN.equals(administradorAEliminar.getRole() == null ? null : administradorAEliminar.getRole().getName())) {
             throw new AccessDeniedException("Acceso denegado");

@@ -1,9 +1,27 @@
 package com.blawdgourmet.blawdtrack.users.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "usuarios")
@@ -22,8 +40,43 @@ public class User {
     @Column(name = "tipo_documento", nullable = false, length = 20)
     private DocumentType documentType;
 
+    @Transient
+    private String nationalId;
+
     @Column(name = "numero_documento", nullable = false, length = 20)
     private String documentNumber;
+
+    @PrePersist
+    @PreUpdate
+    private void synchronizeLegacyDocumentAlias() {
+        if (documentType == null) {
+            documentType = DocumentType.CEDULA;
+        }
+        if (documentNumber == null || documentNumber.isBlank()) {
+            documentNumber = nationalId;
+        }
+        if (nationalId == null || nationalId.isBlank()) {
+            nationalId = documentNumber;
+        }
+    }
+
+    public String getNationalId() {
+        return documentNumber;
+    }
+
+    public void setNationalId(String nationalId) {
+        this.nationalId = nationalId;
+        this.documentNumber = nationalId;
+    }
+
+    public String getCedula() {
+        return documentNumber;
+    }
+
+    public void setCedula(String cedula) {
+        this.documentNumber = cedula;
+        this.nationalId = cedula;
+    }
 
     @Column(name = "nombre_completo", nullable = false, length = 120)
     private String fullName;
