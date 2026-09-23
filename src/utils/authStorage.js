@@ -8,14 +8,19 @@
 const TOKEN_KEY = 'token';
 const USER_KEY = 'blawdtrack_user';
 
-// El backend real (rama feature/HU001-LuisMadrigal) devuelve
-// { token, tokenType, expiresInSeconds, user: { id, fullName, email, role } },
-// no el shape plano que se asumía antes. Solo se guarda el token (clave
-// compartida con axiosClient.js) y el objeto 'user' anidado.
+// El backend real (POST /api/v1/auth/login, LoginResponse.java) devuelve un
+// objeto plano: { token, type, id, fullName, email, role, permissions } —
+// no anida los datos del usuario bajo una clave 'user'. Se arma aquí el
+// objeto de usuario a partir de esos campos planos antes de guardarlo.
+export function buildUserFromLoginResponse(authResponse) {
+  const { id, fullName, email, role, permissions } = authResponse;
+  return { id, fullName, email, role, permissions };
+}
+
 export function saveAuthSession(authResponse) {
-  const { token, user } = authResponse;
+  const { token } = authResponse;
   localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  localStorage.setItem(USER_KEY, JSON.stringify(buildUserFromLoginResponse(authResponse)));
 }
 
 export function getStoredToken() {
@@ -29,9 +34,9 @@ export function getStoredUser() {
   try {
     return JSON.parse(raw);
   } catch {
-    // Datos corruptos o de un formato viejo: se descartan en vez de
-    // reventar la app.
-    clearAuthSession();
+    // Datos corruptos o de un formato viejo: se descarta solo esta entrada,
+    // sin arrastrar el borrado del token (que puede seguir siendo válido).
+    localStorage.removeItem(USER_KEY);
     return null;
   }
 }
