@@ -26,7 +26,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
                         AccessDeniedException accessDeniedException) throws IOException {
 
         ApiError error = ApiError.builder()
-                .code("ACCESO_DENEGADO")
+                .code("ACCESS_DENIED")
                 .message("You do not have the required permissions (Super User role) to perform this action.")
                 .status(HttpStatus.FORBIDDEN.value())
                 .build();

@@ -36,12 +36,12 @@ public class PasswordResetToken {
     private String tokenHash;
 
     @Column(name = "fecha_expiracion", nullable = false)
-    private LocalDateTime fechaExpiracion;
+    private LocalDateTime expirationDate;
 
     @Column(name = "usado", nullable = false)
     @Builder.Default
-    private boolean usado = false;
+    private boolean used = false;
 
     @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime createdAt;
 }

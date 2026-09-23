@@ -5,6 +5,7 @@ import {
   getStoredUser,
   clearAuthSession,
   hasActiveSession,
+  buildUserFromLoginResponse,
 } from '../utils/authStorage';
 import { getLoginError } from '../utils/authErrors';
 import { getHomeRoute, UNKNOWN_ROLE_ERROR } from '../utils/roleRoutes';
@@ -62,7 +63,7 @@ export function AuthProvider({ children }) {
       }
 
       saveAuthSession(response);
-      setUser(response.user);
+      setUser(buildUserFromLoginResponse(response));
       return response;
     } catch (err) {
       if (!err.isRoleValidation) {

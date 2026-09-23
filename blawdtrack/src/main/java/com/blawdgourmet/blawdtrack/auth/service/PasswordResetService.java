@@ -19,4 +19,6 @@ public interface PasswordResetService {
      * @return el resultado de la operación; ver {@link PasswordResetResult}
      */
     PasswordResetResult requestPasswordReset(String email);
+
+    void confirmPasswordReset(String rawToken, String newPassword);
 }
