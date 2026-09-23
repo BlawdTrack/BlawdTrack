@@ -1,4 +1,5 @@
-import { Box } from '@mui/material';
+
+import { Box, Paper } from '@mui/material';
 
 import AdminRegistrationHeader from '../components/adminRegistration/AdminRegistrationHeader.jsx';
 import AdminRegistrationForm from '../components/adminRegistration/AdminRegistrationForm.jsx';
@@ -14,63 +15,32 @@ export default function AdminRegistrationPage() {
   } = useAdminRegistrationForm();
 
   return (
-    <Box
+    <Paper
+      component="section"
+      elevation={0}
+      aria-labelledby="admin-registration-title"
       sx={{
-        minHeight: '100vh',
-        backgroundColor: '#F7F6F3',
-        p: {
-          xs: 0,
-          md: 2
-        }
+        width: '100%',
+        boxSizing: 'border-box',
+        p: { xs: 2, sm: 3, md: 3.5 },
+        bgcolor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: '16px',
+        textAlign: 'left'
       }}
     >
-      <Box
-        sx={{
-          maxWidth: '1440px',
-          minHeight: {
-            xs: '100vh',
-            md: 'calc(100vh - 32px)'
-          },
-          margin: '0 auto',
-          backgroundColor: '#ffffff',
-          borderRadius: {
-            xs: 0,
-            md: '16px'
-          },
-          overflow: 'hidden',
-          boxShadow: {
-            xs: 'none',
-            md: '0 10px 35px rgba(0,0,0,0.08)'
-          }
-        }}
-      >
-        <AdminRegistrationHeader />
+      <AdminRegistrationHeader />
 
-        <Box
-          component="main"
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            px: {
-              xs: 2.2,
-              md: 4
-            },
-            py: {
-              xs: 2.5,
-              md: 5.5
-            }
-          }}
-        >
-          <AdminRegistrationForm
-            formData={formData}
-            errors={errors}
-            message={message}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-          />
-        </Box>
+      <Box sx={{ mt: 3 }}>
+        <AdminRegistrationForm
+          formData={formData}
+          errors={errors}
+          message={message}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+        />
       </Box>
-    </Box>
+    </Paper>
   );
 }

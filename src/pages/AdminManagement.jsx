@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Button, 
-  Typography, 
-  TextField, 
-  Avatar, 
-  Paper, 
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Avatar,
+  Paper,
   Divider,
   Snackbar,
   Alert,
@@ -15,6 +16,8 @@ import {
 } from '@mui/material';
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
+import AdminRegistrationCard from '../components/adminRegistration/AdminRegistrationCard.jsx';
+
 import {
   deleteAdministrator,
   getAdministrators
@@ -28,7 +31,7 @@ const AdminManagement = () => {
   // Estados limpios: arreglos vacíos sin datos falsos
   const [admins, setAdmins] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
-  
+
   // Estados para manejar la carga de la API
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,8 +63,8 @@ const AdminManagement = () => {
     setSelectedAdmin(null);
   };
 
-const handleDeleteConfirm = async (cedula) => {
-    //Validación preventiva: Evitar peticiones si no hay cédula
+  const handleDeleteConfirm = async (cedula) => {
+    // Validación preventiva: Evitar peticiones si no hay cédula
     if (!cedula) {
       console.error('Intento de eliminación fallido: Cédula indefinida o vacía.');
       setError('No se puede procesar la solicitud porque faltan datos del administrador.');
@@ -71,7 +74,7 @@ const handleDeleteConfirm = async (cedula) => {
 
     try {
       setError(null);
-      
+
       // 1. Enviar la cédula requerida al backend
       await deleteAdministrator(cedula);
 
@@ -128,17 +131,17 @@ const handleDeleteConfirm = async (cedula) => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f4f3ef', minHeight: '100vh', pb: { xs: 12, md: 4 } }}>
-      <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
-        
+      <Box sx={{ maxWidth: '1280px', mx: 'auto' }}>
+
         {/* BUSCADOR */}
         <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4, bgcolor: '#ffffff' }}>
           <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
-            <Typography 
-              variant="overline" 
-              sx={{ 
-                color: '#1b3e32', 
-                fontWeight: 'bold', 
-                display: 'block', 
+            <Typography
+              variant="overline"
+              sx={{
+                color: '#1b3e32',
+                fontWeight: 'bold',
+                display: 'block',
                 textAlign: 'left',
                 fontSize: '0.8rem'
               }}
@@ -147,11 +150,11 @@ const handleDeleteConfirm = async (cedula) => {
             </Typography>
           </Box>
           <Box sx={{ p: 2.5, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-            <TextField 
-              fullWidth variant="outlined" placeholder="1-2345-6789" size="small" 
+            <TextField
+              fullWidth variant="outlined" placeholder="1-2345-6789" size="small"
               sx={{ bgcolor: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
-            <Button 
+            <Button
               variant="contained" disableElevation
               sx={{ bgcolor: '#1b3e32', color: '#fff', fontWeight: 'bold', px: 4, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
             >
@@ -199,7 +202,7 @@ const handleDeleteConfirm = async (cedula) => {
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-end', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}>
-                      <Button 
+                      <Button
                         variant="outlined" color="error" onClick={() => handleOpenModal(user)}
                         sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold', py: 0.5 }}
                       >
@@ -213,6 +216,11 @@ const handleDeleteConfirm = async (cedula) => {
             )}
           </Box>
         </Paper>
+
+        {/* REGISTRO DE ADMINISTRADOR - HU-006 */}
+        <Box sx={{ mb: 4 }}>
+          <AdminRegistrationCard />
+        </Box>
 
         {/* AUDITORÍA */}
         <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', bgcolor: '#ffffff' }}>

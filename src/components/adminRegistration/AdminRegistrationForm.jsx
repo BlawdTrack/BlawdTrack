@@ -1,43 +1,51 @@
+
 import { Box, Button, TextField, Typography } from '@mui/material';
 
 const inputStyles = {
   '& .MuiOutlinedInput-root': {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'background.paper',
     borderRadius: '10px',
 
     '& fieldset': {
-      borderColor: '#DCD4CA'
+      borderColor: 'divider'
     },
 
     '&:hover fieldset': {
-      borderColor: '#BFB6AC'
+      borderColor: 'text.secondary'
     },
 
     '&.Mui-focused fieldset': {
-      borderColor: '#1A3C34'
+      borderColor: 'primary.main'
     }
   },
 
   '& .MuiInputBase-input': {
-    padding: '13px 15px',
-    fontSize: '15px'
+    padding: '11px 14px',
+    fontSize: '14px'
+  },
+
+  '& .MuiFormHelperText-root': {
+    marginLeft: 0,
+    textAlign: 'left'
   }
 };
 
 const labelStyles = {
+  display: 'block',
   fontSize: '12px',
   fontWeight: 700,
-  color: '#6B6560',
+  color: 'text.secondary',
   textTransform: 'uppercase',
   letterSpacing: '0.4px',
-  mb: 0.7
+  mb: 0.7,
+  textAlign: 'left'
 };
 
 const fields = [
   {
     name: 'fullName',
     label: 'Nombre completo',
-    placeholder: 'Ej. Carlos Andrés Mora',
+    placeholder: 'Ej. Rodrigo Castillo Pérez',
     type: 'text',
     autoComplete: 'name'
   },
@@ -84,29 +92,27 @@ function AdminField({
   const id = `admin-${name}`;
 
   return (
-    <Box>
+    <Box sx={{ minWidth: 0, textAlign: 'left' }}>
       <Typography
         component="label"
         htmlFor={id}
-        sx={{
-          ...labelStyles,
-          display: 'block'
-        }}
+        sx={labelStyles}
       >
         {label}
       </Typography>
 
       <TextField
         id={id}
-        fullWidth
         name={name}
         type={type}
         autoComplete={autoComplete}
-        value={value}
+        value={value ?? ''}
         onChange={onChange}
         placeholder={placeholder}
         error={Boolean(error)}
-        helperText={error}
+        helperText={error || ''}
+        fullWidth
+        size="small"
         sx={inputStyles}
       />
     </Box>
@@ -127,26 +133,20 @@ export default function AdminRegistrationForm({
       noValidate
       sx={{
         width: '100%',
-        maxWidth: '700px',
-        backgroundColor: '#F1ECE7',
-        borderRadius: '16px',
-        p: {
-          xs: 2.2,
-          sm: 3,
-          md: 4
-        }
+        textAlign: 'left'
       }}
     >
-      {/* Campos del formulario */}
+      {/* Cuatro campos en escritorio; distribución adaptable en móvil */}
       <Box
         sx={{
           display: 'grid',
           gridTemplateColumns: {
-            xs: '1fr',
-            sm: '1fr 1fr'
+            xs: 'minmax(0, 1fr)',
+            sm: 'repeat(2, minmax(0, 1fr))',
+            lg: 'repeat(4, minmax(0, 1fr))'
           },
-          columnGap: '28px',
-          rowGap: '18px'
+          columnGap: 2.5,
+          rowGap: 2.2
         }}
       >
         {fields.map((field) => (
@@ -160,14 +160,15 @@ export default function AdminRegistrationForm({
         ))}
       </Box>
 
-      {/* El frontend aún no registra administradores */}
+      {/* Informa sobre la validación; no afirma que se creó una cuenta */}
       {message && (
         <Typography
           role="status"
           sx={{
-            color: '#1A3C34',
+            mt: 2,
+            color: 'primary.main',
             fontSize: '13px',
-            mt: 2
+            textAlign: 'left'
           }}
         >
           {message}
@@ -176,34 +177,38 @@ export default function AdminRegistrationForm({
 
       <Button
         type="submit"
-        fullWidth
         variant="contained"
         disableElevation
         sx={{
-          mt: 3,
-          backgroundColor: '#1A3C34',
-          color: '#ffffff',
+          mt: 2.8,
+          px: 2.7,
+          minHeight: 46,
+          width: 'auto',
+          maxWidth: '100%',
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
           borderRadius: '10px',
-          py: 1.5,
           textTransform: 'none',
-          fontSize: '15px',
+          fontSize: '14px',
           fontWeight: 700,
 
           '&:hover': {
-            backgroundColor: '#143029'
+            bgcolor: 'primary.dark'
           }
         }}
       >
-        Registrar administrador
+        Crear administrador
 
         <Box
           component="span"
+          aria-hidden="true"
           sx={{
-            width: '12px',
-            height: '12px',
+            width: 12,
+            height: 12,
             borderRadius: '50%',
-            backgroundColor: '#FF6C0E',
-            ml: 1
+            bgcolor: 'secondary.main',
+            ml: 1.2,
+            flexShrink: 0
           }}
         />
       </Button>
