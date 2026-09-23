@@ -29,7 +29,7 @@ export const DeactivateMessengerModal = ({
   if (!courier) return null;
 
   const handleConfirm = async () => {
-    const result = await deactivate(courier.nationalId);
+    const result = await deactivate(courier.id);
 
     if (result.success) {
       onDeactivateSuccess();
@@ -91,7 +91,7 @@ export const DeactivateMessengerModal = ({
               {courier.fullName}
             </Typography>
             <Typography variant="body2" sx={{ color: '#6B7280' }}>
-              {courier.nationalId} · {courier.schedule}
+              {courier.documentNumber} · {courier.schedule}
             </Typography>
           </Box>
         </Box>
