@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.users.service;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
@@ -18,5 +19,5 @@ public interface AdminService {
     /**
      * Deletes a sales administrator after validating business rules and recording audit data.
      */
-    AdminDeletionResponse eliminarAdministrador(String documentNumber, AuthenticatedUser actor);
+    AdminDeletionResponse eliminarAdministrador(DocumentType documentType, String documentNumber, AuthenticatedUser actor);
 }

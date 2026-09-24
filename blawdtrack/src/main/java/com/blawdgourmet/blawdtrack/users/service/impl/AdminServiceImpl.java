@@ -1,7 +1,5 @@
 package com.blawdgourmet.blawdtrack.users.service.impl;
 
-import java.util.Arrays;
-
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,13 +14,13 @@ import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
-import com.blawdgourmet.blawdtrack.users.exception.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
 
 import lombok.RequiredArgsConstructor;
@@ -95,16 +93,13 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public AdminDeletionResponse eliminarAdministrador(String documentNumber, AuthenticatedUser actor) {
+    public AdminDeletionResponse eliminarAdministrador(
+            DocumentType documentType, String documentNumber, AuthenticatedUser actor) {
         if (actor == null || actor.id() == null) {
             throw new AccessDeniedException("Acceso denegado");
         }
 
-        User administradorAEliminar = Arrays.stream(DocumentType.values())
-                .map(tipo -> userRepository.findByDocumentTypeAndDocumentNumber(tipo, documentNumber))
-                .filter(java.util.Optional::isPresent)
-                .map(java.util.Optional::get)
-                .findFirst()
+        User administradorAEliminar = userRepository.findByDocumentTypeAndDocumentNumber(documentType, documentNumber)
                 .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
 
         if (!RoleName.SALES_ADMIN.equals(administradorAEliminar.getRole() == null ? null : administradorAEliminar.getRole().getName())) {

@@ -34,6 +34,8 @@ import jakarta.persistence.EntityManager;
 @Transactional
 class AdminDeletionIntegrationTest {
 
+    private static final String RUTA = "/api/v1/admins/{documentType}/{documentNumber}";
+
     @Autowired private MockMvc mvc;
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
@@ -56,12 +58,17 @@ class AdminDeletionIntegrationTest {
     }
 
     private User createAdmin(String documentNumber, UserStatus status) {
-        Role role = roles.findByName(RoleName.SALES_ADMIN).orElseThrow();
+        return createUser(RoleName.SALES_ADMIN, DocumentType.CEDULA, documentNumber, status);
+    }
+
+    private User createUser(String roleName, DocumentType documentType, String documentNumber, UserStatus status) {
+        Role role = roles.findByName(roleName).orElseThrow();
         return users.saveAndFlush(User.builder()
-                .documentType(DocumentType.CEDULA)
+                .documentType(documentType)
                 .documentNumber(documentNumber)
-                .fullName("Administrador prueba")
-                .email(documentNumber.toLowerCase() + "@example.test")
+                .fullName("Usuario prueba")
+                .email(roleName.toLowerCase() + "-" + documentType.name().toLowerCase() + "-"
+                        + documentNumber.toLowerCase() + "@example.test")
                 .passwordHash("hash")
                 .status(status)
                 .role(role)
@@ -70,9 +77,9 @@ class AdminDeletionIntegrationTest {
 
     @Test
     void superUsuarioPuedeEliminarAdministradorInactivo() throws Exception {
-        User admin = createAdmin("ADM-001", UserStatus.INACTIVE);
+        User admin = createAdmin("9-0000-0001", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
+        mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Administrador eliminado correctamente."));
@@ -89,7 +96,7 @@ class AdminDeletionIntegrationTest {
 
     @Test
     void administradorInexistenteDevuelve404YNoGeneraAuditoria() throws Exception {
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", "NO-EXISTE")
+        mvc.perform(delete(RUTA, DocumentType.CEDULA, "9-0000-0099")
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Administrador no existente"));
@@ -99,9 +106,9 @@ class AdminDeletionIntegrationTest {
 
     @Test
     void mensajeroNoPuedeEliminarAdministrador() throws Exception {
-        User admin = createAdmin("ADM-002", UserStatus.INACTIVE);
+        User admin = createAdmin("9-0000-0002", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
+        mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.COURIER)))
                 .andExpect(status().isForbidden());
 
@@ -111,9 +118,9 @@ class AdminDeletionIntegrationTest {
 
     @Test
     void administradorDeVentasNoPuedeEliminarAdministrador() throws Exception {
-        User admin = createAdmin("ADM-003", UserStatus.INACTIVE);
+        User admin = createAdmin("9-0000-0003", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
+        mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SALES_ADMIN)))
                 .andExpect(status().isForbidden());
 
@@ -123,9 +130,9 @@ class AdminDeletionIntegrationTest {
 
     @Test
     void solicitudSinJwtDevuelve401() throws Exception {
-        createAdmin("ADM-004", UserStatus.INACTIVE);
+        createAdmin("9-0000-0004", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", "ADM-004"))
+        mvc.perform(delete(RUTA, DocumentType.CEDULA, "9-0000-0004"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -133,7 +140,7 @@ class AdminDeletionIntegrationTest {
     void intentarEliminarSuperUsuarioSeBloquea() throws Exception {
         User superUser = users.saveAndFlush(User.builder()
                 .documentType(DocumentType.CEDULA)
-                .documentNumber("ADM-005")
+                .documentNumber("9-0000-0005")
                 .fullName("Super Usuario")
                 .email("super-delete@example.test")
                 .passwordHash("hash")
@@ -141,7 +148,7 @@ class AdminDeletionIntegrationTest {
                 .role(roles.findByName(RoleName.SUPER_USER).orElseThrow())
                 .build());
 
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", superUser.getDocumentNumber())
+        mvc.perform(delete(RUTA, superUser.getDocumentType(), superUser.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isForbidden());
 
@@ -151,9 +158,9 @@ class AdminDeletionIntegrationTest {
 
     @Test
     void administradorConSesionActivaSeBloquea() throws Exception {
-        User admin = createAdmin("ADM-006", UserStatus.ACTIVE);
+        User admin = createAdmin("9-0000-0006", UserStatus.ACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
+        mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("El administrador tiene una sesión activa. Cierre primero la sesión antes de eliminarlo."));
@@ -163,10 +170,55 @@ class AdminDeletionIntegrationTest {
     }
 
     @Test
-    void auditoriaPermaneceTrasEliminarAdministrador() throws Exception {
-        User admin = createAdmin("ADM-007", UserStatus.INACTIVE);
+    void mismoNumeroDeDocumentoBajoOtroTipoEliminaAlAdministradorCorrecto() throws Exception {
+        // Una CEDULA y un DIMEX pueden compartir los mismos 11-12 dígitos (unicidad por tipo + número).
+        User mensajero = createUser(RoleName.COURIER, DocumentType.CEDULA, "12345678901", UserStatus.INACTIVE);
+        User admin = createUser(RoleName.SALES_ADMIN, DocumentType.DIMEX, "12345678901", UserStatus.INACTIVE);
+        String token = bearerFor(RoleName.SUPER_USER);
 
-        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
+        mvc.perform(delete(RUTA, DocumentType.DIMEX, "12345678901").header("Authorization", token))
+                .andExpect(status().isOk());
+
+        entityManager.clear();
+        assertThat(users.findById(admin.getId())).isEmpty();
+        assertThat(users.findById(mensajero.getId())).isPresent();
+    }
+
+    @Test
+    void mismoNumeroConTipoDeUnUsuarioQueNoEsAdministradorNoElimina() throws Exception {
+        User mensajero = createUser(RoleName.COURIER, DocumentType.CEDULA, "12345678901", UserStatus.INACTIVE);
+        createUser(RoleName.SALES_ADMIN, DocumentType.DIMEX, "12345678901", UserStatus.INACTIVE);
+
+        mvc.perform(delete(RUTA, DocumentType.CEDULA, "12345678901")
+                        .header("Authorization", bearerFor(RoleName.SUPER_USER)))
+                .andExpect(status().isForbidden());
+
+        entityManager.clear();
+        assertThat(users.findById(mensajero.getId())).isPresent();
+        assertThat(audits.findAll()).isEmpty();
+    }
+
+    @Test
+    void tipoDeDocumentoDesconocidoDevuelve400() throws Exception {
+        mvc.perform(delete(RUTA, "NIT", "123456789")
+                        .header("Authorization", bearerFor(RoleName.SUPER_USER)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void numeroDeDocumentoInvalidoDevuelve400() throws Exception {
+        mvc.perform(delete(RUTA, DocumentType.CEDULA, "abc")
+                        .header("Authorization", bearerFor(RoleName.SUPER_USER)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void auditoriaPermaneceTrasEliminarAdministrador() throws Exception {
+        User admin = createAdmin("9-0000-0007", UserStatus.INACTIVE);
+
+        mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isOk());
 
@@ -174,7 +226,7 @@ class AdminDeletionIntegrationTest {
         assertThat(audits.findAll()).anySatisfy(audit -> {
             assertThat(audit.getAction()).isEqualTo("ELIMINAR_ADMINISTRADOR");
             assertThat(audit.getActor()).isNotNull();
-            assertThat(audit.getDetails()).contains("ADM-007");
+            assertThat(audit.getDetails()).contains("9-0000-0007");
             assertThat(audit.getTimestamp()).isNotNull();
         });
     }

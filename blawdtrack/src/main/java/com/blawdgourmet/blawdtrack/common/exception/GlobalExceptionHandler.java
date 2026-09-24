@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
-import com.blawdgourmet.blawdtrack.users.exception.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
+import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 
 /**
  * Traduce las excepciones de la aplicación al formato unificado de errores (estándar P05).
