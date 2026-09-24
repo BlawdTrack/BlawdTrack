@@ -121,6 +121,33 @@ class AdminEliminacionElegibilidadIntegrationTest {
     }
 
     @Test
+    void rolesOperativosConDocumentoInvalidoRecibenForbiddenYNoValidacion() throws Exception {
+        // La autorizacion debe resolverse antes del binding/validacion: un rol sin permiso
+        // no debe enterarse de si el formato de lo que envio es valido.
+        String tokenSalesAdmin = token(RoleName.SALES_ADMIN);
+        String tokenCourier = token(RoleName.COURIER);
+
+        mvc.perform(get(RUTA, DocumentType.CEDULA, "abc")
+                        .header("Authorization", "Bearer " + tokenSalesAdmin))
+                .andExpect(status().isForbidden());
+        mvc.perform(get(RUTA, "NIT", "123456789")
+                        .header("Authorization", "Bearer " + tokenSalesAdmin))
+                .andExpect(status().isForbidden());
+        mvc.perform(get(RUTA, DocumentType.CEDULA, "abc")
+                        .header("Authorization", "Bearer " + tokenCourier))
+                .andExpect(status().isForbidden());
+        mvc.perform(get(RUTA, "NIT", "123456789")
+                        .header("Authorization", "Bearer " + tokenCourier))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void solicitudSinTokenConDocumentoInvalidoDevuelve401() throws Exception {
+        mvc.perform(get(RUTA, "NIT", "abc"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void solicitudSinTokenDevuelve401() throws Exception {
         mvc.perform(get(RUTA, DocumentType.CEDULA, "1-2345-6789"))
                 .andExpect(status().isUnauthorized());

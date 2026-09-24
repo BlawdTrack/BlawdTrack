@@ -3,11 +3,13 @@ package com.blawdgourmet.blawdtrack.auth.config;
 import com.blawdgourmet.blawdtrack.auth.security.JwtAuthenticationFilter;
 import com.blawdgourmet.blawdtrack.auth.security.RestAccessDeniedHandler;
 import com.blawdgourmet.blawdtrack.auth.security.RestAuthenticationEntryPoint;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import jakarta.servlet.DispatcherType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.ProviderManager;
@@ -65,6 +67,12 @@ public class SecurityConfig {
                         // Las solicitudes HTTP directas siguen requiriendo autenticación.
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
+                        // La autorizacion se resuelve aqui, antes del binding y la validacion de los
+                        // parametros: con solo @PreAuthorize, un rol sin permiso recibiria un 400 de
+                        // validacion en lugar del 403 (@PreAuthorize se evalua al invocar el metodo).
+                        // @PreAuthorize en el controlador se mantiene como segunda barrera.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/admins/*/*/elegibilidad-eliminacion")
+                                .hasRole(RoleName.SUPER_USER)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
