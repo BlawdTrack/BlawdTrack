@@ -18,5 +18,5 @@ public interface AdminService {
     /**
      * Deletes a sales administrator after validating business rules and recording audit data.
      */
-    AdminDeletionResponse eliminarAdministrador(String cedula, AuthenticatedUser actor);
+    AdminDeletionResponse eliminarAdministrador(String documentNumber, AuthenticatedUser actor);
 }

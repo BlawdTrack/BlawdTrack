@@ -43,13 +43,13 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
-    @DeleteMapping("/{cedula}")
+    @DeleteMapping("/{documentNumber}")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<AdminDeletionResponse> eliminarAdministrador(
-            @PathVariable String cedula,
+            @PathVariable String documentNumber,
             @AuthenticationPrincipal AuthenticatedUser actor) {
 
-        AdminDeletionResponse respuesta = adminService.eliminarAdministrador(cedula, actor);
+        AdminDeletionResponse respuesta = adminService.eliminarAdministrador(documentNumber, actor);
         return ResponseEntity.ok(respuesta);
     }
 }

@@ -39,18 +39,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<UserSessionState> findSessionStateById(@Param("id") Long id);
 
     Optional<User> findByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
-    Optional<User> findByDocumentNumber(String documentNumber);
-
-    @Query("select u from User u where u.documentNumber = :nationalId")
-    Optional<User> findByNationalId(String nationalId);
 
     boolean existsByEmail(String email);
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
-    boolean existsByDocumentNumber(String documentNumber);
-
-    @Query("select case when count(u) > 0 then true else false end from User u where u.documentNumber = :nationalId")
-    boolean existsByNationalId(String nationalId);
     boolean existsByPhone(String phone);
 
     // Excluyen al propio usuario para no dar un 409 falso al guardar sin cambios.

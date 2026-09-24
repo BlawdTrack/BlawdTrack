@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -43,7 +44,8 @@ class AdminDeletionIntegrationTest {
     private String bearerFor(String roleName) {
         Role role = roles.findByName(roleName).orElseThrow();
         User actor = users.saveAndFlush(User.builder()
-                .nationalId("ACTOR-" + roleName)
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("ACTOR-" + roleName)
                 .fullName("Actor " + roleName)
                 .email("actor-" + roleName.toLowerCase() + "@example.test")
                 .passwordHash("hash")
@@ -53,12 +55,13 @@ class AdminDeletionIntegrationTest {
         return "Bearer " + jwt.generateToken(new UserPrincipal(actor));
     }
 
-    private User createAdmin(String nationalId, UserStatus status) {
+    private User createAdmin(String documentNumber, UserStatus status) {
         Role role = roles.findByName(RoleName.SALES_ADMIN).orElseThrow();
         return users.saveAndFlush(User.builder()
-                .nationalId(nationalId)
+                .documentType(DocumentType.CEDULA)
+                .documentNumber(documentNumber)
                 .fullName("Administrador prueba")
-                .email(nationalId.toLowerCase() + "@example.test")
+                .email(documentNumber.toLowerCase() + "@example.test")
                 .passwordHash("hash")
                 .status(status)
                 .role(role)
@@ -69,24 +72,24 @@ class AdminDeletionIntegrationTest {
     void superUsuarioPuedeEliminarAdministradorInactivo() throws Exception {
         User admin = createAdmin("ADM-001", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{cedula}", admin.getNationalId())
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Administrador eliminado correctamente."));
 
         entityManager.clear();
-        assertThat(users.findByNationalId(admin.getNationalId())).isEmpty();
+        assertThat(users.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber())).isEmpty();
 
         assertThat(audits.findAll()).anySatisfy(audit -> {
             assertThat(audit.getAction()).isEqualTo("ELIMINAR_ADMINISTRADOR");
-            assertThat(audit.getDetails()).contains(admin.getNationalId());
+            assertThat(audit.getDetails()).contains(admin.getDocumentNumber());
             assertThat(audit.getActor()).isNotNull();
         });
     }
 
     @Test
     void administradorInexistenteDevuelve404YNoGeneraAuditoria() throws Exception {
-        mvc.perform(delete("/api/v1/admins/{cedula}", "NO-EXISTE")
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", "NO-EXISTE")
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Administrador no existente"));
@@ -98,11 +101,11 @@ class AdminDeletionIntegrationTest {
     void mensajeroNoPuedeEliminarAdministrador() throws Exception {
         User admin = createAdmin("ADM-002", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{cedula}", admin.getNationalId())
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.COURIER)))
                 .andExpect(status().isForbidden());
 
-        assertThat(users.findByNationalId(admin.getNationalId())).isPresent();
+        assertThat(users.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber())).isPresent();
         assertThat(audits.findAll()).isEmpty();
     }
 
@@ -110,11 +113,11 @@ class AdminDeletionIntegrationTest {
     void administradorDeVentasNoPuedeEliminarAdministrador() throws Exception {
         User admin = createAdmin("ADM-003", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{cedula}", admin.getNationalId())
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SALES_ADMIN)))
                 .andExpect(status().isForbidden());
 
-        assertThat(users.findByNationalId(admin.getNationalId())).isPresent();
+        assertThat(users.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber())).isPresent();
         assertThat(audits.findAll()).isEmpty();
     }
 
@@ -122,14 +125,15 @@ class AdminDeletionIntegrationTest {
     void solicitudSinJwtDevuelve401() throws Exception {
         createAdmin("ADM-004", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{cedula}", "ADM-004"))
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", "ADM-004"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void intentarEliminarSuperUsuarioSeBloquea() throws Exception {
         User superUser = users.saveAndFlush(User.builder()
-                .nationalId("ADM-005")
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("ADM-005")
                 .fullName("Super Usuario")
                 .email("super-delete@example.test")
                 .passwordHash("hash")
@@ -137,11 +141,11 @@ class AdminDeletionIntegrationTest {
                 .role(roles.findByName(RoleName.SUPER_USER).orElseThrow())
                 .build());
 
-        mvc.perform(delete("/api/v1/admins/{cedula}", superUser.getNationalId())
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", superUser.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isForbidden());
 
-        assertThat(users.findByNationalId(superUser.getNationalId())).isPresent();
+        assertThat(users.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, superUser.getDocumentNumber())).isPresent();
         assertThat(audits.findAll()).isEmpty();
     }
 
@@ -149,12 +153,12 @@ class AdminDeletionIntegrationTest {
     void administradorConSesionActivaSeBloquea() throws Exception {
         User admin = createAdmin("ADM-006", UserStatus.ACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{cedula}", admin.getNationalId())
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("El administrador tiene una sesión activa. Cierre primero la sesión antes de eliminarlo."));
 
-        assertThat(users.findByNationalId(admin.getNationalId())).isPresent();
+        assertThat(users.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber())).isPresent();
         assertThat(audits.findAll()).isEmpty();
     }
 
@@ -162,7 +166,7 @@ class AdminDeletionIntegrationTest {
     void auditoriaPermaneceTrasEliminarAdministrador() throws Exception {
         User admin = createAdmin("ADM-007", UserStatus.INACTIVE);
 
-        mvc.perform(delete("/api/v1/admins/{cedula}", admin.getNationalId())
+        mvc.perform(delete("/api/v1/admins/{documentNumber}", admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
                 .andExpect(status().isOk());
 
