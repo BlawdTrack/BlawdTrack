@@ -35,7 +35,7 @@ public class CourierController {
     }
 
     @PutMapping("/{id}")
-    public CourierResponse update(@PathVariable Long id,
+    public CourierResponse update(@PathVariable String id,
                                   @Valid @RequestBody UpdateCourierRequest request) {
         return service.update(id, request);
     }

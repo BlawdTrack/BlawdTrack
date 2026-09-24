@@ -57,9 +57,8 @@ public class CourierService {
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
-    public CourierResponse update(Long id, UpdateCourierRequest request) {
-        var courier = couriers.findById(id)
-                .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+    public CourierResponse update(String id, UpdateCourierRequest request) {
+        var courier = resolveCourier(id);
         var user = courier.getUser();
         uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());
         user.setFullName(request.fullName());
@@ -70,5 +69,20 @@ public class CourierService {
         users.saveAndFlush(user);
         couriers.saveAndFlush(courier);
         return CourierResponse.from(courier);
+    }
+
+    private Courier resolveCourier(String id) {
+        if (id == null || id.isBlank()) {
+            throw new CourierNotFoundException("Mensajero no encontrado");
+        }
+        String normalized = id.trim();
+        try {
+            Long numericId = Long.valueOf(normalized);
+            return couriers.findById(numericId)
+                    .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+        } catch (NumberFormatException ex) {
+            return couriers.findByUserDocumentId(normalized)
+                    .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+        }
     }
 }
