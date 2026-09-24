@@ -45,8 +45,8 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
 
-        @Value("${security.jwt.expiration-ms}")
-        private long jwtExpirationMs;
+    @Value("${security.jwt.expiration-ms}")
+    private long jwtExpirationMs;
 
     @Override
     @Transactional
@@ -98,9 +98,16 @@ public class AdminServiceImpl implements AdminService {
 
     /**
      * Considera activa una sesión cuando el último inicio exitoso ocurrió dentro
-     * de la vigencia configurada del token JWT. Esta comprobación es deliberadamente
-     * acotada: el filtro JWT actual no consulta la base de datos en cada petición;
-     * esa revalidación corresponde a la task #75.
+     * de la vigencia configurada del token JWT ({@code jwtExpirationMs}).
+     * <p>
+     * Es una aproximación por expiración, no un estado real de sesión. El filtro
+     * JWT sí valida en cada petición que el usuario exista, esté activo y que
+     * {@code tokenVersion} coincida, pero hoy no existe un endpoint de logout y
+     * nada incrementa {@code tokenVersion} ni limpia {@code lastLoginAt} al cerrar
+     * sesión (solo {@code User.changeStatus} sube la versión, al desactivar a un
+     * usuario). Por eso un administrador que cerró sesión sigue figurando como
+     * "sesión activa" hasta que se cumple {@code jwtExpirationMs} desde su último
+     * inicio. Corregirlo requiere un logout en el backend, que es una task aparte.
      */
     @Override
     @Transactional(readOnly = true)

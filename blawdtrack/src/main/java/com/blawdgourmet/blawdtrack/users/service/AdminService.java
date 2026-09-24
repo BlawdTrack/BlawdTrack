@@ -16,5 +16,14 @@ public interface AdminService {
      */
     AdminRegistrationResponse registrarAdministrador(AdminRegistrationRequest request, AuthenticatedUser actor);
 
+    /**
+     * Checks whether a "Sales Administrator" can be deleted (HU-008 / T01). An administrator is
+     * eligible only when they have no active session.
+     *
+     * @param documentType   document type of the administrator to check.
+     * @param documentNumber document number of the administrator to check.
+     * @return eligibility result, with the reason when the administrator cannot be deleted.
+     * @throws AdminNotFoundException if no Sales Administrator matches the given document.
+     */
     AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(DocumentType documentType, String documentNumber);
 }

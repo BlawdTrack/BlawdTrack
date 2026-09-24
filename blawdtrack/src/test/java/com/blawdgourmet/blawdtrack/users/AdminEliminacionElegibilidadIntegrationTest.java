@@ -22,12 +22,7 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
-@SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:blawdtrack-elegibilidad-test;MODE=MySQL;DB_CLOSE_DELAY=-1",
-        "spring.datasource.driver-class-name=org.h2.Driver",
-        "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
+@SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 class AdminEliminacionElegibilidadIntegrationTest {

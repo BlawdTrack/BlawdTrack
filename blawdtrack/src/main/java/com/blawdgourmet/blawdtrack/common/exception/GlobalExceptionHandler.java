@@ -63,16 +63,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
-        @ExceptionHandler(AdminNotFoundException.class)
-        public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
-                ApiError error = ApiError.builder()
-                                .code("ADMINISTRADOR_NO_EXISTENTE")
-                                .message(ex.getMessage())
-                                .status(HttpStatus.NOT_FOUND.value())
-                                .build();
+    @ExceptionHandler(AdminNotFoundException.class)
+    public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("ADMINISTRADOR_NO_EXISTENTE")
+                .message(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
 
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ApiError> manejarDuplicado(DuplicateResourceException ex) {
