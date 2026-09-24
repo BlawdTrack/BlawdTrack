@@ -2,16 +2,11 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import AdminManagement from './pages/AdminManagement';
-import CourierRegistrationPage from './pages/CourierRegistrationPage';
-import LoginPage from './pages/LoginPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
+import { MessengerFleetList } from './components/MessengerFleetList';
 import { useAuth } from './hooks/useAuth';
 import { getHomeRoute } from './utils/roleRoutes';
-import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
-import { MessengerFleetList } from './components/MessengerFleetList';
 
 // Reemplaza el TODO anterior ("falta definir un router... temporalmente
 // se renderizan ambas pantallas apiladas") con rutas reales. Cada pantalla
