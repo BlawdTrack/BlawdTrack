@@ -32,6 +32,10 @@ const DeleteAdminModal = ({
     }
     return name.substring(0, 2).toUpperCase();
   };
+  const documentNumber = adminData.documentNumber
+    || adminData.identification
+    || adminData.nationalId
+    || adminData.id;
 
   return (
     <Dialog 
@@ -84,7 +88,7 @@ const DeleteAdminModal = ({
               {adminData.name}
             </Typography>
             <Typography variant="body2" color="#666666">
-              {adminData.identification || adminData.id} - {adminData.email}
+              {documentNumber} - {adminData.email}
             </Typography>
           </Box>
         </Box>
@@ -121,7 +125,7 @@ const DeleteAdminModal = ({
         </Button>
         <Button
           onClick={() =>
-            onConfirm(adminData.identification || adminData.nationalId || adminData.id)
+            onConfirm(documentNumber)
           }
           disabled={isSubmitting}
           variant="contained"

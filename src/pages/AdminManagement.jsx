@@ -60,6 +60,10 @@ const AdminManagement = () => {
 
   const handleCloseModal = () => {
     if (isDeleting) return;
+    closeDeleteModal();
+  };
+
+  const closeDeleteModal = () => {
     setIsModalOpen(false);
     setSelectedAdmin(null);
     setDeleteError(null);
@@ -102,13 +106,21 @@ const AdminManagement = () => {
 
       // 2. Buscar el administrador a eliminar para el log de auditoría
       const adminToDelete = admins.find(
-        (admin) => admin.identification === cedula || admin.nationalId === cedula || admin.id === cedula
+        (admin) =>
+          admin.documentNumber === cedula
+          || admin.identification === cedula
+          || admin.nationalId === cedula
+          || admin.id === cedula
       );
 
       // 3. Actualizar dinámicamente la lista de usuarios en pantalla filtrando por cédula
       setAdmins((currentAdmins) =>
         currentAdmins.filter(
-          (admin) => admin.identification !== cedula && admin.nationalId !== cedula && admin.id !== cedula
+          (admin) =>
+            admin.documentNumber !== cedula
+            && admin.identification !== cedula
+            && admin.nationalId !== cedula
+            && admin.id !== cedula
         )
       );
 
@@ -136,7 +148,7 @@ const AdminManagement = () => {
         setAuditLogs((currentLogs) => [newLog, ...currentLogs]);
       }
 
-      handleCloseModal();
+      closeDeleteModal();
       setToastOpen(true);
     } catch (err) {
       console.error('Error al eliminar administrador:', err);
