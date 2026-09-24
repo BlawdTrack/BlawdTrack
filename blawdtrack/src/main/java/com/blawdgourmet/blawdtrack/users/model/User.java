@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -42,8 +44,26 @@ public class User {
     @Column(name = "numero_documento", length = 50)
     private String documentNumber;
 
+    @Deprecated
     @Column(name = "cedula", nullable = false, unique = true, length = 20)
     private String documentId;
+
+    @PrePersist
+    @PreUpdate
+    void syncLegacyDocumentFields() {
+        if (documentType != null && documentNumber != null && (documentId == null || documentId.isBlank())) {
+            documentId = documentNumber;
+        }
+        if (documentType == null && documentId != null) {
+            documentType = DocumentType.CEDULA;
+        }
+        if (documentNumber == null && documentId != null) {
+            documentNumber = documentId;
+        }
+        if (documentId == null && documentNumber != null) {
+            documentId = documentNumber;
+        }
+    }
 
     @Column(name = "nombre_completo", nullable = false, length = 120)
     private String fullName;

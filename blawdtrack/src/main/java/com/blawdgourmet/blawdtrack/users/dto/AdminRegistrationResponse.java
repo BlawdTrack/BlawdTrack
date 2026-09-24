@@ -4,7 +4,7 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 public record AdminRegistrationResponse(
         Long id,
-        String cedulaIdentidad,
+        String documentNumber,
         String nombreCompleto,
         String correoElectronico,
         String numeroTelefono,

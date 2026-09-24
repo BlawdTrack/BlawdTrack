@@ -26,13 +26,6 @@ public class AdminUniquenessValidator {
             );
         }
 
-        if (documentNumber != null && userRepository.existsByDocumentId(documentNumber)) {
-            throw new DuplicateResourceException(
-                    "DOCUMENTO_DUPLICADO",
-                    "The entered identity document is already associated with another registered user in the system."
-            );
-        }
-
         if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new DuplicateResourceException(
                     "DUPLICATE_EMAIL",

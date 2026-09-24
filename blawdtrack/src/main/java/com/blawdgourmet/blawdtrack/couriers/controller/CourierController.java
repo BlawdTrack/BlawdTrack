@@ -34,10 +34,10 @@ public class CourierController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
     }
 
-    @PutMapping("/{documentId}")
-    public CourierResponse update(@PathVariable String documentId,
+    @PutMapping("/{id}")
+    public CourierResponse update(@PathVariable Long id,
                                   @Valid @RequestBody UpdateCourierRequest request) {
-        return service.update(documentId, request);
+        return service.update(id, request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

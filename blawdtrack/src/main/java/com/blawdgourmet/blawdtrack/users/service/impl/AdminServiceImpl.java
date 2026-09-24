@@ -103,7 +103,7 @@ public class AdminServiceImpl implements AdminService {
 
         return new AdminRegistrationResponse(
                 administradorGuardado.getId(),
-                administradorGuardado.getDocumentId(),
+                administradorGuardado.getDocumentNumber(),
                 administradorGuardado.getFullName(),
                 administradorGuardado.getEmail(),
                 administradorGuardado.getPhone(),

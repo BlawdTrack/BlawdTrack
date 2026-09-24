@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -141,6 +142,8 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         User admin = User.builder()
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("000000000")
                 .documentId("000000000")
                 .fullName("Alicia (Default Super User)")
                 .email(adminEmail)

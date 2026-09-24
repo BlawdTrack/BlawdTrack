@@ -12,6 +12,7 @@ import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -33,12 +34,17 @@ public class CourierService {
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public CourierResponse register(CreateCourierRequest request) {
-        uniquenessValidator.validateNew(request.documentId(), request.email(), request.phone());
+        DocumentType documentType = request.documentType() == null ? DocumentType.CEDULA : request.documentType();
+        String documentNumber = request.documentNumber();
+        uniquenessValidator.validateNew(documentType, documentNumber, request.email(), request.phone());
         var role = roles.findByName(RoleName.COURIER)
                 .orElseThrow(() -> new IllegalStateException("El rol MENSAJERO no está configurado"));
         String temporaryPassword = temporaryPasswords.generate();
         var user = users.saveAndFlush(User.builder()
-                .documentId(request.documentId()).fullName(request.fullName())
+                .documentType(documentType)
+                .documentNumber(documentNumber)
+                .documentId(documentNumber)
+                .fullName(request.fullName())
                 .email(request.email()).phone(request.phone())
                 .passwordHash(passwordEncoder.encode(temporaryPassword))
                 .status(UserStatus.ACTIVE).role(role).build());
@@ -51,8 +57,8 @@ public class CourierService {
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
-        public CourierResponse update(String documentId, UpdateCourierRequest request) {
-                var courier = couriers.findByUserDocumentId(documentId)
+    public CourierResponse update(Long id, UpdateCourierRequest request) {
+        var courier = couriers.findById(id)
                 .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
         var user = courier.getUser();
         uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());

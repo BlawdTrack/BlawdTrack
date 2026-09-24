@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -38,8 +39,8 @@ class AdminRegistrationValidationTest {
 
     private String token(String role, UserStatus status) {
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-        var user = users.saveAndFlush(User.builder().documentId("ACTOR_" + suffix)
-                .fullName("Actor admin").email("actor-" + suffix + "@example.com").passwordHash("unused")
+        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("ACTOR_" + suffix)
+                .documentId("ACTOR_" + suffix).fullName("Actor admin").email("actor-" + suffix + "@example.com").passwordHash("unused")
                 .status(status).role(roles.findByName(role).orElseThrow()).build());
         return jwt.generateToken(new UserPrincipal(user));
     }
@@ -97,7 +98,8 @@ class AdminRegistrationValidationTest {
 
     @Test
     void rechazaDocumentoDuplicadoConSeparadores() throws Exception {
-        users.saveAndFlush(User.builder().documentId("123456789").fullName("Existente").email("otro@example.com")
+        users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("123456789")
+                .documentId("123456789").fullName("Existente").email("otro@example.com")
                 .passwordHash("unused").status(UserStatus.ACTIVE).role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
         mvc.perform(post("/api/v1/admins")
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))
@@ -111,7 +113,8 @@ class AdminRegistrationValidationTest {
 
     @Test
     void rechazaCorreoDuplicadoSinDistinguirMayusculas() throws Exception {
-        users.saveAndFlush(User.builder().documentId("987654321").fullName("Existente").email("duplicado@example.com")
+        users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("987654321")
+                .documentId("987654321").fullName("Existente").email("duplicado@example.com")
                 .passwordHash("unused").status(UserStatus.ACTIVE).role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
         mvc.perform(post("/api/v1/admins")
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))

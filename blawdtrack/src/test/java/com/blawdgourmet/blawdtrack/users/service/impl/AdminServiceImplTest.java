@@ -24,6 +24,7 @@ import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -57,9 +58,9 @@ class AdminServiceImplTest {
     void registraAdministradorConDocumentoYCorreoValidosYUnicos() {
         var service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService);
         var role = Role.builder().name(RoleName.SALES_ADMIN).build();
-        var actor = new AuthenticatedUser(10L, "999999999", "Super usuario", "SUPER_USUARIO", "super@example.com");
+        var actor = new AuthenticatedUser(10L, DocumentType.CEDULA, "999999999", "Super usuario", "SUPER_USUARIO", "super@example.com");
         var request = request("1-2345-6789", "Admin@Example.com");
-        when(userRepository.existsByDocumentId("123456789")).thenReturn(false);
+        when(userRepository.existsByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "123456789")).thenReturn(false);
         when(userRepository.existsByEmailIgnoreCase("admin@example.com")).thenReturn(false);
         when(roleRepository.findByName(RoleName.SALES_ADMIN)).thenReturn(java.util.Optional.of(role));
         when(passwordEncoder.encode("Clave1234")).thenReturn("hash");
@@ -71,24 +72,24 @@ class AdminServiceImplTest {
 
         var response = service.registrarAdministrador(request, actor);
 
-        assertThat(response.cedulaIdentidad()).isEqualTo("123456789");
+        assertThat(response.documentNumber()).isEqualTo("123456789");
         assertThat(response.correoElectronico()).isEqualTo("admin@example.com");
-        verify(userRepository).existsByDocumentId("123456789");
+        verify(userRepository).existsByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "123456789");
         verify(userRepository).existsByEmailIgnoreCase("admin@example.com");
-        verify(userRepository).saveAndFlush(argThat(user -> "123456789".equals(user.getDocumentId())));
+        verify(userRepository).saveAndFlush(argThat(user -> "123456789".equals(user.getDocumentNumber())));
         verify(auditService).registrarCreacionAdministrador(eq(actor),
-                argThat(user -> user.getId() != null && "123456789".equals(user.getDocumentId())));
+                argThat(user -> user.getId() != null && "123456789".equals(user.getDocumentNumber())));
     }
 
     @Test
     void rechazaDocumentoDuplicadoAunqueCambienLosSeparadores() {
         var service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService);
-        when(userRepository.existsByDocumentId("123456789")).thenReturn(true);
+        when(userRepository.existsByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "123456789")).thenReturn(true);
 
         assertThatThrownBy(() -> service.registrarAdministrador(request(" 1-2345-6789 ", "nuevo@example.com"), null))
                 .hasMessageContaining("identity document");
 
-        verify(userRepository).existsByDocumentId("123456789");
+        verify(userRepository).existsByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "123456789");
         verify(userRepository, never()).existsByEmailIgnoreCase(any());
         verify(userRepository, never()).save(any());
     }
@@ -96,7 +97,7 @@ class AdminServiceImplTest {
     @Test
     void rechazaCorreoDuplicadoSinDistinguirMayusculas() {
         var service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService);
-        when(userRepository.existsByDocumentId("123456789")).thenReturn(false);
+        when(userRepository.existsByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "123456789")).thenReturn(false);
         when(userRepository.existsByEmailIgnoreCase("admin@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> service.registrarAdministrador(request("123456789", " Admin@Example.com "), null))

@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.couriers.service;
 
 import org.springframework.stereotype.Component;
 
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -11,9 +12,10 @@ import lombok.RequiredArgsConstructor;
 public class CourierUniquenessValidator {
     private final UserRepository users;
 
-    public void validateNew(String documentId, String email, String phone) {
-        if (users.existsByDocumentId(documentId)) {
-            throw new DuplicateCourierException("La cédula ya está registrada");
+    public void validateNew(DocumentType documentType, String documentNumber, String email, String phone) {
+        if (documentType != null && documentNumber != null
+                && users.existsByDocumentTypeAndDocumentNumber(documentType, documentNumber)) {
+            throw new DuplicateCourierException("El documento ya está registrado");
         }
         if (users.existsByEmailIgnoreCase(email)) {
             throw new DuplicateCourierException("El correo ya está registrado");

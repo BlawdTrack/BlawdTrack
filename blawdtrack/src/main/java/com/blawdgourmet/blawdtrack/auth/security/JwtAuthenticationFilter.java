@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -61,7 +62,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void autenticarEnContexto(Claims claims) {
         String correo = claims.getSubject();
         Long id = claims.get("id", Long.class);
-        String documentId = claims.get("documentId", String.class);
+        String documentTypeValue = claims.get("documentType", String.class);
+        DocumentType documentType = documentTypeValue == null ? null : DocumentType.valueOf(documentTypeValue);
+        String documentNumber = claims.get("documentNumber", String.class);
         String fullName = claims.get("fullName", String.class);
         String rolesClaim = claims.get("roles", String.class);
 
@@ -76,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .map(authority -> authority.substring(ROLE_PREFIX.length()))
                 .orElse(null);
 
-        AuthenticatedUser principal = new AuthenticatedUser(id, documentId, fullName, rol, correo);
+        AuthenticatedUser principal = new AuthenticatedUser(id, documentType, documentNumber, fullName, rol, correo);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, authorities);
