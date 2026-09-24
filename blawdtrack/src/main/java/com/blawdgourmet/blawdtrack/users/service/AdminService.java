@@ -15,5 +15,5 @@ public interface AdminService {
      */
     AdminRegistrationResponse registrarAdministrador(AdminRegistrationRequest request, AuthenticatedUser actor);
 
-    AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(String cedula);
+    AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(String documentNumber);
 }

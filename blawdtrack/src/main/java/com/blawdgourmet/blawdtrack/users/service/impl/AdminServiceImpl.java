@@ -106,9 +106,9 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     @Transactional(readOnly = true)
-    public AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(String cedula) {
+    public AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(String documentNumber) {
         User administrador = Arrays.stream(DocumentType.values())
-                .map(tipo -> userRepository.findByDocumentTypeAndDocumentNumber(tipo, cedula))
+                .map(tipo -> userRepository.findByDocumentTypeAndDocumentNumber(tipo, documentNumber))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()

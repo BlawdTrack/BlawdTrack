@@ -46,10 +46,10 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
-    @GetMapping("/{cedula}/elegibilidad-eliminacion")
+    @GetMapping("/{documentNumber}/elegibilidad-eliminacion")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<AdminEliminacionElegibilidadResponse> validarElegibilidadEliminacion(
-            @PathVariable @Pattern(regexp = "(?=.{5,20}$)[A-Za-z0-9\\s-]+") String cedula) {
-        return ResponseEntity.ok(adminService.validarElegibilidadEliminacion(cedula));
+            @PathVariable @Pattern(regexp = "(?=.{5,20}$)[A-Za-z0-9\\s-]+") String documentNumber) {
+        return ResponseEntity.ok(adminService.validarElegibilidadEliminacion(documentNumber));
     }
 }

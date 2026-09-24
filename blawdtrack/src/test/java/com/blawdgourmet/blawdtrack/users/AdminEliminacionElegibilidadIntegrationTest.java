@@ -43,7 +43,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     void superUsuarioConsultaAdministradorSinSesionReciente() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-sin-sesion@example.test", null);
 
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
+        mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.elegibleParaEliminar").value(true))
@@ -55,7 +55,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     void superUsuarioConsultaAdministradorConSesionReciente() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-con-sesion@example.test", LocalDateTime.now());
 
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
+        mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.elegibleParaEliminar").value(false))
@@ -65,7 +65,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
 
     @Test
     void cedulaInexistenteDevuelve404ConCodigoDeNegocio() throws Exception {
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", "1-2345-6780")
+        mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", "1-2345-6780")
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("ADMINISTRADOR_NO_EXISTENTE"));
@@ -73,7 +73,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
 
     @Test
     void cedulaInvalidaDevuelve400() throws Exception {
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", "abc")
+        mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", "abc")
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isBadRequest());
     }
@@ -82,17 +82,17 @@ class AdminEliminacionElegibilidadIntegrationTest {
     void rolesOperativosNoPuedenConsultar() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-objetivo@example.test", null);
 
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
+        mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
                 .andExpect(status().isForbidden());
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", admin.getDocumentNumber())
+        mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.COURIER)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void solicitudSinTokenDevuelve401() throws Exception {
-        mvc.perform(get("/api/v1/admins/{cedula}/elegibilidad-eliminacion", "1-2345-6789"))
+        mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", "1-2345-6789"))
                 .andExpect(status().isUnauthorized());
     }
 
