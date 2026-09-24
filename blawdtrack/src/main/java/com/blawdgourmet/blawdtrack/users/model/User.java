@@ -82,11 +82,23 @@ public class User {
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
+    @Column(name = "token_version", nullable = false)
+    @Builder.Default
+    private int tokenVersion = 0;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)
     private Role role;
 
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
+    }
+
+    public void changeStatus(UserStatus newStatus) {
+        if (this.status == newStatus) {
+            return;
+        }
+        this.status = newStatus;
+        this.tokenVersion++;
     }
 }

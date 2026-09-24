@@ -51,9 +51,25 @@ public class JwtService {
                 .claim("documentType", principal.getUser().getDocumentType())
                 .claim("documentNumber", principal.getUser().getDocumentNumber())
                 .claim("fullName", principal.getUser().getFullName())
+                .claim("tokenVersion", principal.getUser().getTokenVersion())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key())
                 .compact();
+    }
+
+    public int extractTokenVersion(Claims claims) {
+        Object value = claims.get("tokenVersion");
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException ex) {
+            return 0;
+        }
     }
 }

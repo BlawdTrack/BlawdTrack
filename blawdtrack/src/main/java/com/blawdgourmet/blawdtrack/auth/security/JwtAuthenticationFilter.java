@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +15,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.User;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
+import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -39,6 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String ROLE_PREFIX = "ROLE_";
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -46,17 +52,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader(HEADER);
 
-        if (header != null && header.startsWith(PREFIX)) {
+        if (header != null && header.startsWith(PREFIX) && !esRutaPublica(request)) {
             String token = header.substring(PREFIX.length());
             try {
                 Claims claims = jwtService.validateToken(token);
+                if (!esRutaDeAutorizacionDeRoles(request)) {
+                    validarSesionActual(claims);
+                }
                 autenticarEnContexto(claims);
             } catch (JwtException | IllegalArgumentException ex) {
                 SecurityContextHolder.clearContext();
+                restAuthenticationEntryPoint.commence(request, response, new BadCredentialsException("Invalid token", ex));
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void validarSesionActual(Claims claims) {
+        Long id = claims.get("id", Long.class);
+        if (id == null) {
+            throw new JwtException("Missing user id in token");
+        }
+
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            throw new JwtException("User not found");
+        }
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new JwtException("User is inactive");
+        }
+
+        int tokenVersionEnToken = jwtService.extractTokenVersion(claims);
+        if (tokenVersionEnToken != user.getTokenVersion()) {
+            throw new JwtException("Token version mismatch");
+        }
+    }
+
+    private boolean esRutaPublica(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.startsWith("/api/v1/auth/")
+                || uri.startsWith("/swagger-ui/")
+                || uri.startsWith("/v3/api-docs")
+                || uri.startsWith("/actuator/health")
+                || "/error".equals(uri);
+    }
+
+    private boolean esRutaDeAutorizacionDeRoles(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.matches("/api/v1/roles/\\d+/permissions");
     }
 
     private void autenticarEnContexto(Claims claims) {

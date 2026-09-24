@@ -1,11 +1,19 @@
 package com.blawdgourmet.blawdtrack.couriers.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
@@ -30,6 +38,7 @@ public class CourierService {
     private final TemporaryPasswordGenerator temporaryPasswords;
     private final ApplicationEventPublisher events;
     private final CourierUniquenessValidator uniquenessValidator;
+    private final AuditService auditService;
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
@@ -61,6 +70,9 @@ public class CourierService {
         var courier = resolveCourier(id);
         var user = courier.getUser();
         uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());
+
+        String details = buildAuditDetails(user, courier, request);
+
         user.setFullName(request.fullName());
         user.setEmail(request.email());
         user.setPhone(request.phone());
@@ -68,7 +80,62 @@ public class CourierService {
         courier.setMaxPackageWeightKg(request.maxPackageWeightKg());
         users.saveAndFlush(user);
         couriers.saveAndFlush(courier);
+
+        if (!details.isBlank()) {
+            var principal = (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            auditService.logAction(AuditAction.COURIER_UPDATED, principal, user, details);
+        }
+
         return CourierResponse.from(courier);
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public List<CourierResponse> list() {
+        return couriers.findAllByOrderByUserFullNameAsc().stream()
+                .map(CourierResponse::from)
+                .toList();
+    }
+
+    private String buildAuditDetails(User user, Courier courier, UpdateCourierRequest request) {
+        List<String> fields = new ArrayList<>();
+
+        if (!equals(user.getFullName(), request.fullName())) {
+            fields.add("fullName");
+        }
+        if (!equals(user.getEmail(), request.email())) {
+            fields.add("email");
+        }
+        if (!equals(user.getPhone(), request.phone())) {
+            fields.add("phone");
+        }
+        if (!equals(courier.getSchedule(), request.schedule())) {
+            fields.add("schedule");
+        }
+        if (!equals(courier.getMaxPackageWeightKg(), request.maxPackageWeightKg())) {
+            fields.add("maxPackageWeightKg");
+        }
+
+        return String.join(", ", fields);
+    }
+
+    private boolean equals(Object left, Object right) {
+        if (left == null && right == null) {
+            return true;
+        }
+        if (left == null || right == null) {
+            return false;
+        }
+        if (left instanceof BigDecimal leftDecimal && right instanceof BigDecimal rightDecimal) {
+            return leftDecimal.compareTo(rightDecimal) == 0;
+        }
+        if (left instanceof BigDecimal leftDecimal && right instanceof String rightText) {
+            return leftDecimal.compareTo(new BigDecimal(rightText)) == 0;
+        }
+        if (left instanceof String leftText && right instanceof BigDecimal rightDecimal) {
+            return new BigDecimal(leftText).compareTo(rightDecimal) == 0;
+        }
+        return left.equals(right);
     }
 
     private Courier resolveCourier(String id) {

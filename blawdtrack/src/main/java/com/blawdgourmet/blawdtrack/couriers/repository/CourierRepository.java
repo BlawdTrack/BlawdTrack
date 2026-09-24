@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.couriers.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -13,4 +14,7 @@ public interface CourierRepository extends JpaRepository<Courier, Long> {
 
     @EntityGraph(attributePaths = "user")
     Optional<Courier> findByUserDocumentId(String documentId);
+
+    @EntityGraph(attributePaths = "user")
+    List<Courier> findAllByOrderByUserFullNameAsc();
 }
