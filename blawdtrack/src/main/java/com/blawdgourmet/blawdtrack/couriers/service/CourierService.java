@@ -1,29 +1,28 @@
 package com.blawdgourmet.blawdtrack.couriers.service;
 
-import java.util.List;
-
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.audit.service.ChangeSet;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.model.Courier;
+import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.User;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
+import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
+import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
-import com.blawdgourmet.blawdtrack.audit.service.AuditService;
-import com.blawdgourmet.blawdtrack.audit.service.ChangeSet;
-import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
-import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
-import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.model.Courier;
-import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
-import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.model.User;
-import com.blawdgourmet.blawdtrack.users.model.UserStatus;
-import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
-import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
