@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { login as loginService } from '../services/AuthService';
 import {
   saveAuthSession,
@@ -9,6 +9,7 @@ import {
 } from '../utils/authStorage';
 import { getLoginError } from '../utils/authErrors';
 import { getHomeRoute, UNKNOWN_ROLE_ERROR } from '../utils/roleRoutes';
+import { SESSION_EXPIRED_ERROR, setSessionExpiredHandler } from '../api/sessionExpiry';
 import { AuthContext } from './authContextInstance';
 
 // Este archivo solo exporta el componente AuthProvider a propósito, para
@@ -82,8 +83,23 @@ export function AuthProvider({ children }) {
 
   const resetError = () => setError(null);
 
+  // T17: sesión vencida o rechazada por el backend (401 NO_AUTENTICADO, o
+  // exp vencido detectado al navegar). Limpia la sesión y deja el aviso
+  // para el login; la redirección la hace ProtectedRoute al ver user = null.
+  const expireSession = useCallback(() => {
+    clearAuthSession();
+    setUser(null);
+    setError(SESSION_EXPIRED_ERROR);
+  }, []);
+
+  // El interceptor de axios vive fuera de React: se le registra este handler
+  // para que pueda avisar cuando llegue un 401 de un endpoint protegido.
+  useEffect(() => setSessionExpiredHandler(expireSession), [expireSession]);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, error, resetError }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, loading, error, resetError, expireSession }}
+    >
       {children}
     </AuthContext.Provider>
   );

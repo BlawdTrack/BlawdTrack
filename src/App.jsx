@@ -6,6 +6,7 @@ import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
 import { MessengerFleetList } from './components/MessengerFleetList';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 import { getHomeRoute } from './utils/roleRoutes';
 
@@ -50,12 +51,16 @@ function App() {
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
-      <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
-      <Route path="/ventas" element={<SalesHomePage />} />
-      <Route path="/mensajero" element={<CourierHomePage />} />
-      {/* Vista de Administradores (HU008) */}
-      <Route path="/administradores" element={<AdminManagement />} />
-      <Route path="/mensajeros" element={<MessengerFleetList />} />
+      {/* T17: /login y /recuperar-contrasena son públicas; todo lo que va
+          dentro de ProtectedRoute exige sesión válida. */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
+        <Route path="/ventas" element={<SalesHomePage />} />
+        <Route path="/mensajero" element={<CourierHomePage />} />
+        {/* Vista de Administradores (HU008) */}
+        <Route path="/administradores" element={<AdminManagement />} />
+        <Route path="/mensajeros" element={<MessengerFleetList />} />
+      </Route>
     </Routes>
   );
 }
