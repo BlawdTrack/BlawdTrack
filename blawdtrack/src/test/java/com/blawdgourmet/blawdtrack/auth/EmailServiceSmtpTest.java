@@ -1,11 +1,16 @@
 package com.blawdgourmet.blawdtrack.auth;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import com.blawdgourmet.blawdtrack.auth.service.EmailService;
+import jakarta.mail.Multipart;
+import jakarta.mail.Part;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
@@ -16,17 +21,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-
-import com.blawdgourmet.blawdtrack.auth.service.EmailService;
-
-import jakarta.mail.Multipart;
-import jakarta.mail.Part;
-import jakarta.mail.Session;
-import jakarta.mail.internet.MimeMessage;
 
 /** Comprueba el transporte SMTP real contra un receptor local, sin correos externos. */
 class EmailServiceSmtpTest {
@@ -97,9 +91,7 @@ class EmailServiceSmtpTest {
             String line;
             while ((line = input.readLine()) != null) {
                 if (line.startsWith("EHLO ") || line.startsWith("HELO ")) {
-                    reply(output, "250-localhost");
-                    reply(output, "250-SMTPUTF8");
-                    reply(output, "250 OK");
+                    reply(output, "250 localhost");
                 } else if (line.startsWith("MAIL FROM:") || line.startsWith("RCPT TO:")) {
                     envelope.append(line).append('\n');
                     reply(output, "250 OK");
@@ -112,14 +104,8 @@ class EmailServiceSmtpTest {
                 } else if (line.equals("QUIT")) {
                     reply(output, "221 Bye");
                     break;
-                } else if (line.equals("RSET") || line.equals("NOOP") || line.equals("HELP")) {
-                    reply(output, "250 OK");
-                } else if (line.startsWith("STARTTLS")) {
-                    reply(output, "220 Ready to start TLS");
-                } else if (line.startsWith("AUTH ")) {
-                    reply(output, "235 2.7.0 Authentication successful");
                 } else {
-                    reply(output, "250 OK");
+                    throw new IOException("Unexpected SMTP command in test");
                 }
             }
             return new Capture(envelope.toString(), data.toString().getBytes(StandardCharsets.UTF_8));

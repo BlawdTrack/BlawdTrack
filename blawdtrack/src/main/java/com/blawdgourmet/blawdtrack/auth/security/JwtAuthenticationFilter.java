@@ -1,23 +1,9 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
-import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -25,6 +11,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Filtro de autenticación sin estado. Construye el principal a partir de los claims
@@ -55,15 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(PREFIX.length());
             try {
                 Claims claims = jwtService.validateToken(token);
-                Long id = claims.get("id", Long.class);
-
-                if (id != null && isSessionValid(claims)) {
-                    User usuarioActual = userRepository.findById(id).orElse(null);
-                    if (usuarioActual != null && usuarioActual.isActive()) {
-                        autenticarEnContexto(claims, usuarioActual);
-                    } else {
-                        SecurityContextHolder.clearContext();
-                    }
+                if (isSessionValid(claims)) {
+                    autenticarEnContexto(claims);
                 } else {
                     SecurityContextHolder.clearContext();
                 }
@@ -91,26 +81,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .isPresent();
     }
 
-    private void autenticarEnContexto(Claims claims, User usuarioActual) {
+    private void autenticarEnContexto(Claims claims) {
         String correo = claims.getSubject();
         Long id = claims.get("id", Long.class);
         String documentTypeClaim = claims.get("documentType", String.class);
-        DocumentType documentType = documentTypeClaim == null || documentTypeClaim.isBlank()
-                ? null
-                : DocumentType.valueOf(documentTypeClaim);
+        DocumentType documentType = documentTypeClaim == null ? null : DocumentType.valueOf(documentTypeClaim);
         String documentNumber = claims.get("documentNumber", String.class);
         String fullName = claims.get("fullName", String.class);
         String rolesClaim = claims.get("roles", String.class);
 
-        List<GrantedAuthority> authorities = (rolesClaim == null || rolesClaim.isBlank())
-                ? List.of()
-                : Arrays.stream(rolesClaim.split(","))
-                        .filter(role -> !role.isBlank())
-                        .map(role -> new SimpleGrantedAuthority(role.startsWith(ROLE_PREFIX) ? role : ROLE_PREFIX + role))
-                        .collect(Collectors.toList());
+        List<GrantedAuthority> authorities = Arrays.stream(rolesClaim.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
-        String roleName = usuarioActual.getRole() == null ? null : usuarioActual.getRole().getName();
-        AuthenticatedUser principal = new AuthenticatedUser(id, documentType, documentNumber, fullName, roleName, correo);
+        String rol = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> authority.startsWith(ROLE_PREFIX))
+                .findFirst()
+                .map(authority -> authority.substring(ROLE_PREFIX.length()))
+                .orElse(null);
+
+        AuthenticatedUser principal = new AuthenticatedUser(id, documentType, documentNumber, fullName, rol, correo);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, authorities);
