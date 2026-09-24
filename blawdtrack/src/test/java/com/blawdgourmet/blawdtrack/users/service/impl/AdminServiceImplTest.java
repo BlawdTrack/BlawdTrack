@@ -42,7 +42,7 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void cedulaInexistenteLanzaExcepcionDeAdministradorNoExistente() {
+    void documentoInexistenteLanzaExcepcionDeAdministradorNoExistente() {
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
             .thenReturn(Optional.empty());
 

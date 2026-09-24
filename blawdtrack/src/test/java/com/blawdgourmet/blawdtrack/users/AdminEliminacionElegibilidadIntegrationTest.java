@@ -37,7 +37,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
 
-    private final AtomicInteger nationalIdSequence = new AtomicInteger(1);
+    private final AtomicInteger documentNumberSequence = new AtomicInteger(1);
 
     @Test
     void superUsuarioConsultaAdministradorSinSesionReciente() throws Exception {
@@ -64,7 +64,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     }
 
     @Test
-    void cedulaInexistenteDevuelve404ConCodigoDeNegocio() throws Exception {
+    void documentoInexistenteDevuelve404ConCodigoDeNegocio() throws Exception {
         mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", "1-2345-6780")
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isNotFound())
@@ -72,7 +72,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     }
 
     @Test
-    void cedulaInvalidaDevuelve400() throws Exception {
+    void documentoInvalidoDevuelve400() throws Exception {
         mvc.perform(get("/api/v1/admins/{documentNumber}/elegibilidad-eliminacion", "abc")
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isBadRequest());
@@ -99,7 +99,7 @@ class AdminEliminacionElegibilidadIntegrationTest {
     private User guardarUsuario(String rol, String correo, LocalDateTime lastLoginAt) {
         User user = User.builder()
             .documentType(DocumentType.CEDULA)
-            .documentNumber(String.format("9-0000-%04d", nationalIdSequence.getAndIncrement()))
+            .documentNumber(String.format("9-0000-%04d", documentNumberSequence.getAndIncrement()))
                 .fullName("Administrador de prueba")
                 .email(correo)
                 .passwordHash("hash")

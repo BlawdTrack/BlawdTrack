@@ -126,6 +126,7 @@ public class AdminServiceImpl implements AdminService {
 
         return new AdminEliminacionElegibilidadResponse(
                 administrador.getId(),
+                administrador.getDocumentType(),
                 administrador.getDocumentNumber(),
                 administrador.getFullName(),
                 administrador.getStatus(),

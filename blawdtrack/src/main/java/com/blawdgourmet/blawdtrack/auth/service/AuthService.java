@@ -10,6 +10,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.auth.dto.LoginRequest;
 import com.blawdgourmet.blawdtrack.auth.dto.LoginResponse;
@@ -28,6 +29,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
+    @Transactional
     public LoginResponse authenticate(LoginRequest request) {
         Authentication authentication;
         try {
@@ -44,8 +46,9 @@ public class AuthService {
         }
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
-        principal.getUser().setLastLoginAt(LocalDateTime.now());
-        userRepository.save(principal.getUser());
+        LocalDateTime now = LocalDateTime.now();
+        principal.getUser().setLastLoginAt(now);
+        userRepository.updateLastLoginAt(principal.getId(), now);
         String token = jwtService.generateToken(principal);
 
         List<String> permissions = principal.getUser().getRole().getPermissions()
