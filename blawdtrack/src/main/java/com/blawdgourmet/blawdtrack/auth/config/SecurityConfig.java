@@ -9,7 +9,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.ProviderManager;
@@ -70,9 +69,9 @@ public class SecurityConfig {
                         // La autorizacion se resuelve aqui, antes del binding y la validacion de los
                         // parametros: con solo @PreAuthorize, un rol sin permiso recibiria un 400 de
                         // validacion en lugar del 403 (@PreAuthorize se evalua al invocar el metodo).
+                        // Todos los endpoints de AdminController son exclusivos del Super Usuario;
                         // @PreAuthorize en el controlador se mantiene como segunda barrera.
-                        .requestMatchers(HttpMethod.GET, "/api/v1/admins/*/*/elegibilidad-eliminacion")
-                                .hasRole(RoleName.SUPER_USER)
+                        .requestMatchers("/api/v1/admins/**").hasRole(RoleName.SUPER_USER)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
