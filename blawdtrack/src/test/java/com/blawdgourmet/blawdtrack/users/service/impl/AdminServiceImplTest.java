@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +48,7 @@ class AdminServiceImplTest {
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
             .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.validarElegibilidadEliminacion("1-2345-6789"))
+        assertThatThrownBy(() -> service.validarElegibilidadEliminacion(DocumentType.CEDULA, "1-2345-6789"))
                 .isInstanceOf(AdminNotFoundException.class)
                 .hasMessage("Administrador no existente");
     }
@@ -57,7 +59,7 @@ class AdminServiceImplTest {
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, mensajero.getDocumentNumber()))
             .thenReturn(Optional.of(mensajero));
 
-        assertThatThrownBy(() -> service.validarElegibilidadEliminacion(mensajero.getDocumentNumber()))
+        assertThatThrownBy(() -> service.validarElegibilidadEliminacion(DocumentType.CEDULA, mensajero.getDocumentNumber()))
                 .isInstanceOf(AdminNotFoundException.class);
     }
 
@@ -66,14 +68,14 @@ class AdminServiceImplTest {
         User sinLogin = usuarioConRol(RoleName.SALES_ADMIN);
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, sinLogin.getDocumentNumber()))
             .thenReturn(Optional.of(sinLogin));
-        AdminEliminacionElegibilidadResponse sinSesion = service.validarElegibilidadEliminacion(sinLogin.getDocumentNumber());
+        AdminEliminacionElegibilidadResponse sinSesion = service.validarElegibilidadEliminacion(DocumentType.CEDULA, sinLogin.getDocumentNumber());
 
         User loginVencido = usuarioConRol(RoleName.SALES_ADMIN);
         loginVencido.setDocumentNumber("2-3456-7890");
         loginVencido.setLastLoginAt(LocalDateTime.now().minusHours(2));
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, loginVencido.getDocumentNumber()))
             .thenReturn(Optional.of(loginVencido));
-        AdminEliminacionElegibilidadResponse vencida = service.validarElegibilidadEliminacion(loginVencido.getDocumentNumber());
+        AdminEliminacionElegibilidadResponse vencida = service.validarElegibilidadEliminacion(DocumentType.CEDULA, loginVencido.getDocumentNumber());
 
         assertThat(sinSesion.elegibleParaEliminar()).isTrue();
         assertThat(sinSesion.tieneSesionActiva()).isFalse();
@@ -89,11 +91,30 @@ class AdminServiceImplTest {
             .thenReturn(Optional.of(administrador));
 
         AdminEliminacionElegibilidadResponse response =
-            service.validarElegibilidadEliminacion(administrador.getDocumentNumber());
+            service.validarElegibilidadEliminacion(DocumentType.CEDULA, administrador.getDocumentNumber());
 
+        assertThat(response.documentType()).isEqualTo(DocumentType.CEDULA);
+        assertThat(response.documentNumber()).isEqualTo(administrador.getDocumentNumber());
         assertThat(response.tieneSesionActiva()).isTrue();
         assertThat(response.elegibleParaEliminar()).isFalse();
         assertThat(response.motivoNoElegible()).isNotBlank();
+    }
+
+    @Test
+    void consultaSoloElTipoDeDocumentoSolicitado() {
+        User administrador = usuarioConRol(RoleName.SALES_ADMIN);
+        administrador.setDocumentType(DocumentType.DIMEX);
+        administrador.setDocumentNumber("12345678901");
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.DIMEX, "12345678901"))
+            .thenReturn(Optional.of(administrador));
+
+        AdminEliminacionElegibilidadResponse response =
+            service.validarElegibilidadEliminacion(DocumentType.DIMEX, "12345678901");
+
+        assertThat(response.documentType()).isEqualTo(DocumentType.DIMEX);
+        assertThat(response.documentNumber()).isEqualTo("12345678901");
+        verify(userRepository, never()).findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "12345678901");
+        verify(userRepository, never()).findByDocumentTypeAndDocumentNumber(DocumentType.PASAPORTE, "12345678901");
     }
 
     private User usuarioConRol(String nombreRol) {

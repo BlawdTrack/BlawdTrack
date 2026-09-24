@@ -2,8 +2,6 @@ package com.blawdgourmet.blawdtrack.users.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -106,12 +104,9 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     @Transactional(readOnly = true)
-    public AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(String documentNumber) {
-        User administrador = Arrays.stream(DocumentType.values())
-                .map(tipo -> userRepository.findByDocumentTypeAndDocumentNumber(tipo, documentNumber))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst()
+    public AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(
+            DocumentType documentType, String documentNumber) {
+        User administrador = userRepository.findByDocumentTypeAndDocumentNumber(documentType, documentNumber)
                 .filter(usuario -> usuario.getRole() != null
                         && RoleName.SALES_ADMIN.equals(usuario.getRole().getName()))
                 .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
