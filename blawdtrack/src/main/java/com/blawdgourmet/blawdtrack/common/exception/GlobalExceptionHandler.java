@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,6 +18,23 @@ import com.blawdgourmet.blawdtrack.common.dto.ApiError;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> manejarPeticionMalFormada(HttpMessageNotReadableException ex) {
+        String message = "The request payload is malformed or contains unsupported values.";
+        if (ex.getMostSpecificCause() != null && ex.getMostSpecificCause().getMessage() != null
+                && ex.getMostSpecificCause().getMessage().contains("documentType")) {
+            message = "The documentType value must be one of CEDULA, DIMEX or PASAPORTE.";
+        }
+
+        ApiError error = ApiError.builder()
+                .code("MALFORMED_REQUEST")
+                .message(message)
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return ResponseEntity.badRequest().body(error);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> manejarValidacion(MethodArgumentNotValidException ex) {

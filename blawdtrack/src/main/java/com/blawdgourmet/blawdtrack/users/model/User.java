@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +19,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuarios",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_usuarios_tipo_documento_numero_documento",
+                columnNames = {"tipo_documento", "numero_documento"}
+        ))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,6 +34,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_documento", length = 20)
+    private DocumentType documentType;
+
+    @Column(name = "numero_documento", length = 50)
+    private String documentNumber;
 
     @Column(name = "cedula", nullable = false, unique = true, length = 20)
     private String documentId;

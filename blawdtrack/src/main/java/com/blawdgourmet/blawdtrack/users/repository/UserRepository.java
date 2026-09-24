@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -28,9 +29,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     Optional<User> findByDocumentId(String documentId);
+    Optional<User> findByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
     boolean existsByEmail(String email);
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByDocumentId(String documentId);
+    boolean existsByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
     boolean existsByPhone(String phone);
 
     // Excluyen al propio usuario para no dar un 409 falso al guardar sin cambios.

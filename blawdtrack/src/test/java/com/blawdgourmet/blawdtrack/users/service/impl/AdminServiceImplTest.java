@@ -1,5 +1,25 @@
 package com.blawdgourmet.blawdtrack.users.service.impl;
 
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
@@ -8,27 +28,12 @@ import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unused")
 class AdminServiceImplTest {
 
     private static Validator validator;
@@ -55,10 +60,10 @@ class AdminServiceImplTest {
         var actor = new AuthenticatedUser(10L, "999999999", "Super usuario", "SUPER_USUARIO", "super@example.com");
         var request = request("1-2345-6789", "Admin@Example.com");
         when(userRepository.existsByDocumentId("123456789")).thenReturn(false);
-        when(userRepository.existsByEmailIgnoreCase("Admin@Example.com")).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCase("admin@example.com")).thenReturn(false);
         when(roleRepository.findByName(RoleName.SALES_ADMIN)).thenReturn(java.util.Optional.of(role));
         when(passwordEncoder.encode("Clave1234")).thenReturn("hash");
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+        when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(20L);
             return user;
@@ -67,10 +72,10 @@ class AdminServiceImplTest {
         var response = service.registrarAdministrador(request, actor);
 
         assertThat(response.cedulaIdentidad()).isEqualTo("123456789");
-        assertThat(response.correoElectronico()).isEqualTo("Admin@Example.com");
+        assertThat(response.correoElectronico()).isEqualTo("admin@example.com");
         verify(userRepository).existsByDocumentId("123456789");
-        verify(userRepository).existsByEmailIgnoreCase("Admin@Example.com");
-        verify(userRepository).save(argThat(user -> "123456789".equals(user.getDocumentId())));
+        verify(userRepository).existsByEmailIgnoreCase("admin@example.com");
+        verify(userRepository).saveAndFlush(argThat(user -> "123456789".equals(user.getDocumentId())));
         verify(auditService).registrarCreacionAdministrador(eq(actor),
                 argThat(user -> user.getId() != null && "123456789".equals(user.getDocumentId())));
     }
@@ -92,12 +97,12 @@ class AdminServiceImplTest {
     void rechazaCorreoDuplicadoSinDistinguirMayusculas() {
         var service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService);
         when(userRepository.existsByDocumentId("123456789")).thenReturn(false);
-        when(userRepository.existsByEmailIgnoreCase("Admin@Example.com")).thenReturn(true);
+        when(userRepository.existsByEmailIgnoreCase("admin@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> service.registrarAdministrador(request("123456789", " Admin@Example.com "), null))
                 .hasMessageContaining("email address");
 
-        verify(userRepository).existsByEmailIgnoreCase("Admin@Example.com");
+        verify(userRepository).existsByEmailIgnoreCase("admin@example.com");
         verify(userRepository, never()).save(any());
     }
 

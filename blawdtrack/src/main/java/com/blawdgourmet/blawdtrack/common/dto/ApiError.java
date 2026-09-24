@@ -13,19 +13,19 @@ import lombok.Getter;
 @Builder
 public class ApiError {
 
-    private String code;
-    private String message;
-    private int status;
+    private final String code;
+    private final String message;
+    private final int status;
 
     @Builder.Default
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private final LocalDateTime timestamp = LocalDateTime.now();
 
-    private List<CampoError> errores;
+    private final List<CampoError> errores;
 
     @Getter
     @Builder
     public static class CampoError {
-        private String campo;
-        private String mensaje;
+        private final String campo;
+        private final String mensaje;
     }
 }
