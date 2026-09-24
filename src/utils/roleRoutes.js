@@ -7,9 +7,10 @@ export const ROLE_HOME_ROUTES = {
 };
 
 // Devuelve la ruta de inicio del rol, o null si el rol no esta en el mapa
-// (rol desconocido o ausente).
+// (rol desconocido o ausente). Object.hasOwn evita que claves heredadas del
+// prototipo ("constructor", "toString"...) pasen como roles validos.
 export function getHomeRoute(role) {
-  return ROLE_HOME_ROUTES[role] ?? null;
+  return Object.hasOwn(ROLE_HOME_ROUTES, role) ? ROLE_HOME_ROUTES[role] : null;
 }
 
 // Error que se muestra en el login cuando el backend responde con un rol

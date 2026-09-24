@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
     try {
       const response = await loginService(email, password);
 
-      if (!getHomeRoute(response.user?.role)) {
+      if (!getHomeRoute(response.role)) {
         // Rol que el backend devuelve pero el frontend no reconoce: se
         // trata igual que un login fallido, no se guarda la sesión.
         setError(UNKNOWN_ROLE_ERROR);

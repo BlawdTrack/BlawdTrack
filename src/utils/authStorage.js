@@ -8,11 +8,13 @@
 const TOKEN_KEY = 'token';
 const USER_KEY = 'blawdtrack_user';
 
-// El backend real (POST /api/v1/auth/login, LoginResponse.java) devuelve
-// { token, tokenType, expiresInSeconds, user: { id, fullName, email, role } }:
-// los datos del usuario van anidados bajo 'user', no en el nivel superior.
+// El backend vivo (blawdtrack/, auth/dto/LoginResponse.java) devuelve un
+// objeto plano: { token, type, id, fullName, email, role, permissions } —
+// no anida los datos del usuario bajo una clave 'user'. Se arma aquí el
+// objeto de usuario a partir de esos campos planos antes de guardarlo.
 export function buildUserFromLoginResponse(authResponse) {
-  return authResponse.user;
+  const { id, fullName, email, role, permissions } = authResponse;
+  return { id, fullName, email, role, permissions };
 }
 
 export function saveAuthSession(authResponse) {

@@ -4,6 +4,7 @@ import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
+import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
 import { MessengerFleetList } from './components/MessengerFleetList';
 import { useAuth } from './hooks/useAuth';
 import { getHomeRoute } from './utils/roleRoutes';
@@ -11,12 +12,6 @@ import { getHomeRoute } from './utils/roleRoutes';
 // Reemplaza el TODO anterior ("falta definir un router... temporalmente
 // se renderizan ambas pantallas apiladas") con rutas reales. Cada pantalla
 // vive en su propia ruta en vez de mostrarse todas a la vez.
-
-// La ruta "/recuperar-contrasena" (PasswordRecoveryTestPage, HU-002) se
-// deja fuera por ahora, aunque el código ya esté en develop: se integra en
-// un cambio aparte, dedicado a HU-002, para no mezclarla con T12. Sin
-// ruta, el enlace "¿Olvidaste tu contraseña?" no navega (onForgotPassword
-// queda sin usar).
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
 // pasar siempre por /login.
@@ -37,9 +32,16 @@ function LoginRoute() {
 
   return (
     <LoginPage
-      onLoginSuccess={(response) => navigate(getHomeRoute(response.user.role), { replace: true })}
+      onLoginSuccess={(response) => navigate(getHomeRoute(response.role), { replace: true })}
+      onForgotPassword={() => navigate('/recuperar-contrasena')}
     />
   );
+}
+
+function PasswordRecoveryRoute() {
+  const navigate = useNavigate();
+
+  return <PasswordRecoveryTestPage onBackToLogin={() => navigate('/login')} />;
 }
 
 function App() {
@@ -47,6 +49,7 @@ function App() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginRoute />} />
+      <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
       <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
       <Route path="/ventas" element={<SalesHomePage />} />
       <Route path="/mensajero" element={<CourierHomePage />} />
