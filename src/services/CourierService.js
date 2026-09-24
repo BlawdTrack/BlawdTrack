@@ -2,7 +2,7 @@ import axiosClient from '../api/axiosClient';
 
 export const registerCourier = async (courierData) => {
   try {
-    const response = await axiosClient.post('/couriers', courierData);
+    const response = await axiosClient.post('/v1/couriers', courierData);
     
     // Retornamos la respuesta del backend, pero garantizamos que incluya
     // 'success: true' para que el componente dispare la alerta de éxito
@@ -15,4 +15,16 @@ export const registerCourier = async (courierData) => {
     console.error('Error al registrar mensajero:', error);
     throw error; // Lanza el error para que el catch del componente lo atrape
   }
+};
+
+export const listCouriers = async () => {
+  const response = await axiosClient.get('/v1/couriers');
+  return response.data;
+};
+
+export const deactivateCourier = async (id) => {
+  const response = await axiosClient.patch(
+    `/v1/couriers/${encodeURIComponent(id)}/deactivate`
+  );
+  return response.data;
 };

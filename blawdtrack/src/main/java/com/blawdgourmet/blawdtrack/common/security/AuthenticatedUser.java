@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.common.security;
 
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import org.springframework.security.core.AuthenticatedPrincipal;
 
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
