@@ -72,6 +72,13 @@ public class SecurityConfig {
                         // Todos los endpoints de AdminController son exclusivos del Super Usuario;
                         // @PreAuthorize en el controlador se mantiene como segunda barrera.
                         .requestMatchers("/api/v1/admins/**").hasRole(RoleName.SUPER_USER)
+                        // Hoy todos los endpoints bajo /api/v1/couriers y /api/v1/roles son exclusivos
+                        // del Super Usuario. Si se agrega uno bajo el mismo prefijo para otro rol (por
+                        // ejemplo, un mensajero consultando sus propios datos), su regla mas especifica
+                        // debe declararse ANTES de estas dos: Spring Security aplica la primera que
+                        // coincide, y estas reglas de prefijo bloquearian a ese rol con un 403.
+                        .requestMatchers("/api/v1/couriers/**").hasRole(RoleName.SUPER_USER)
+                        .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
