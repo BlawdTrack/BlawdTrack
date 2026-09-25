@@ -4,6 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,11 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -26,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/admins")
 @RequiredArgsConstructor
+@Validated
 public class AdminController {
 
     private final AdminService adminService;
@@ -38,5 +44,12 @@ public class AdminController {
 
         AdminRegistrationResponse respuesta = adminService.registrarAdministrador(request, actor);
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+    }
+
+    @GetMapping("/{documentNumber}/elegibilidad-eliminacion")
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public ResponseEntity<AdminEliminacionElegibilidadResponse> validarElegibilidadEliminacion(
+            @PathVariable @Pattern(regexp = "(?=.{5,20}$)[A-Za-z0-9\\s-]+") String documentNumber) {
+        return ResponseEntity.ok(adminService.validarElegibilidadEliminacion(documentNumber));
     }
 }
