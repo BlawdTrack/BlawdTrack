@@ -19,6 +19,11 @@ export function buildUserFromLoginResponse(authResponse) {
 
 export function saveAuthSession(authResponse) {
   const { token } = authResponse;
+  // Sin token no hay sesión: evita guardar la cadena "undefined" en localStorage
+  // y dejar una sesión a medias (usuario guardado, token inválido).
+  if (typeof token !== 'string' || token.length === 0) {
+    throw new Error('La respuesta del backend no incluye un token de sesión.');
+  }
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(buildUserFromLoginResponse(authResponse)));
 }
