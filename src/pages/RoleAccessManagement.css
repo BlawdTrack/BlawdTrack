@@ -475,7 +475,7 @@
 
 @media (max-width: 640px) {
   .role-access-page {
-    padding: 18px 14px 100px;
+    padding: 18px 14px 32px;
   }
 
   .access-back-button {
@@ -567,51 +567,11 @@
   }
 }
 
-.role-access-mobile-nav {
-  display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .access-primary-button,
   .access-secondary-button,
   .access-toggle,
   .access-toggle > span {
     transition: none;
-  }
-}
-
-@media (max-width: 599px) {
-  .role-access-mobile-nav {
-    position: fixed;
-    z-index: 10;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: block;
-    padding: 6px 8px max(10px, env(safe-area-inset-bottom));
-    border-top: 1px solid #e4ded7;
-    border-radius: 18px 18px 0 0;
-    background: #fff;
-    box-shadow: 0 -4px 16px rgba(26, 60, 52, 0.08);
-  }
-
-  .role-access-mobile-nav .MuiBottomNavigation-root {
-    height: 54px;
-    background: transparent;
-  }
-
-  .role-access-mobile-nav .MuiBottomNavigationAction-root {
-    min-width: 0;
-    padding: 5px 0;
-    color: #7a736a;
-  }
-
-  .role-access-mobile-nav .MuiBottomNavigationAction-root.Mui-selected {
-    color: #ff6c0e;
-  }
-
-  .role-access-mobile-nav .MuiBottomNavigationAction-label {
-    font-size: 10px;
-    font-weight: 600;
   }
 }

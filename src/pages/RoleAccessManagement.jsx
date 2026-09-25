@@ -1,14 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
-import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined';
 import CheckRounded from '@mui/icons-material/CheckRounded';
-import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
-import LocalShippingOutlined from '@mui/icons-material/LocalShippingOutlined';
 import RestartAltRounded from '@mui/icons-material/RestartAltRounded';
 import SaveOutlined from '@mui/icons-material/SaveOutlined';
 import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
-import { BottomNavigation, BottomNavigationAction, CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import Toast from '../components/Toast';
 import {
   hasRoleAccessConfiguration,
@@ -251,18 +248,6 @@ function RoleAccessManagement() {
           </p>
         </aside>
       </div>
-      <nav className="role-access-mobile-nav" aria-label="Navegación principal">
-        <BottomNavigation
-          showLabels
-          value="/gestion-roles"
-          onChange={(_, value) => navigate(value)}
-        >
-          <BottomNavigationAction label="Acceso" value="/administradores" icon={<AdminPanelSettingsOutlined />} />
-          <BottomNavigationAction label="Mensajeros" value="/mensajeros" icon={<LocalShippingOutlined />} />
-          <BottomNavigationAction label="Admins" value="/administradores" icon={<GroupsOutlined />} />
-          <BottomNavigationAction label="Permisos" value="/gestion-roles" icon={<SecurityOutlined />} />
-        </BottomNavigation>
-      </nav>
       <Toast
         open={toast.open}
         message={toast.message}
