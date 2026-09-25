@@ -50,7 +50,7 @@ export function PasswordRecoveryTestPage({ onBackToLogin }) {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: { xs: 1.5, sm: 4 } }}>
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
           <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />

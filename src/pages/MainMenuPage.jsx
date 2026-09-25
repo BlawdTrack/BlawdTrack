@@ -16,7 +16,7 @@ export default function MainMenuPage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        minHeight: { xs: 'calc(100vh - 84px)', md: '100vh' },
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
