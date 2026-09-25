@@ -9,8 +9,6 @@ import {
   Divider,
   Snackbar,
   Alert,
-  BottomNavigation,
-  BottomNavigationAction,
   CircularProgress
 } from '@mui/material';
 
@@ -321,15 +319,6 @@ const AdminManagement = () => {
         </Alert>
       </Snackbar>
 
-      {/* NAVEGACIÓN MÓVIL EXACTA AL MOCKUP */}
-      <Box sx={{ display: { xs: 'block', sm: 'none' }, position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, bgcolor: '#ffffff', borderTopLeftRadius: 24, borderTopRightRadius: 24, boxShadow: '0px -4px 12px rgba(0,0,0,0.05)', pt: 1, pb: 2 }}>
-        <BottomNavigation showLabels value="admins" sx={{ bgcolor: 'transparent', height: 'auto', '& .MuiBottomNavigationAction-root': { minWidth: 'auto', padding: '8px 0' }, '& .Mui-selected': { color: '#ff6d00 !important' }, '& .MuiBottomNavigationAction-label': { fontSize: '0.75rem', fontWeight: '600', mt: 0.5 } }}>
-          <BottomNavigationAction label="Acceso" value="acceso" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
-          <BottomNavigationAction label="Mensajeros" value="mensajeros" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
-          <BottomNavigationAction label="Admins" value="admins" icon={<Box sx={{ width: 28, height: 28, bgcolor: '#ff6d00', borderRadius: 2 }} />} />
-          <BottomNavigationAction label="Permisos" value="permisos" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
-        </BottomNavigation>
-      </Box>
     </Box>
   );
 };

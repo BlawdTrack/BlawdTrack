@@ -8,6 +8,7 @@ export const NAVIGATION_GROUPS = [
   {
     id: 'security',
     title: 'Seguridad y acceso',
+    shortTitle: 'Acceso',
     items: [
       {
         id: 'password-reset',
@@ -20,6 +21,7 @@ export const NAVIGATION_GROUPS = [
   {
     id: 'couriers',
     title: 'Mensajeros',
+    shortTitle: 'Mensajeros',
     items: [
       { id: 'courier-create', label: 'Crear mensajero', path: ROUTES.COURIER_CREATE, roles: [ROLES.SUPER_USER] },
       { id: 'courier-update', label: 'Actualizar mensajero', path: null, roles: [ROLES.SUPER_USER] },
@@ -29,6 +31,7 @@ export const NAVIGATION_GROUPS = [
   {
     id: 'admins',
     title: 'Administradores',
+    shortTitle: 'Admins',
     items: [
       { id: 'admin-create', label: 'Crear administrador', path: null, roles: [ROLES.SUPER_USER] },
       { id: 'admin-delete', label: 'Eliminar administrador', path: ROUTES.ADMIN_DELETE, roles: [ROLES.SUPER_USER] },
@@ -37,6 +40,7 @@ export const NAVIGATION_GROUPS = [
   {
     id: 'permissions',
     title: 'Roles y permisos',
+    shortTitle: 'Permisos',
     items: [{ id: 'roles-permissions', label: 'Roles y permisos', path: null, roles: [ROLES.SUPER_USER] }],
   },
 ];
