@@ -25,68 +25,68 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class AdminEliminacionElegibilidadIntegrationTest {
+class AdminDeletionEligibilityIntegrationTest {
 
     @Autowired private MockMvc mvc;
     @Autowired private JwtService jwt;
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
 
-    private static final String RUTA = "/api/v1/admins/{documentType}/{documentNumber}/elegibilidad-eliminacion";
+    private static final String PATH = "/api/v1/admins/{documentType}/{documentNumber}/elegibilidad-eliminacion";
 
     private final AtomicInteger documentNumberSequence = new AtomicInteger(1);
 
     @Test
-    void superUsuarioConsultaAdministradorSinSesionReciente() throws Exception {
+    void superUserQueriesAdminWithoutRecentSession() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-sin-sesion@example.test", null);
 
-        mvc.perform(get(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
+        mvc.perform(get(PATH, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.documentType").value("CEDULA"))
                 .andExpect(jsonPath("$.documentNumber").value(admin.getDocumentNumber()))
-                .andExpect(jsonPath("$.elegibleParaEliminar").value(true))
-                .andExpect(jsonPath("$.tieneSesionActiva").value(false))
-                .andExpect(jsonPath("$.motivoNoElegible").doesNotExist());
+                .andExpect(jsonPath("$.eligibleForDeletion").value(true))
+                .andExpect(jsonPath("$.hasActiveSession").value(false))
+                .andExpect(jsonPath("$.ineligibilityReason").doesNotExist());
     }
 
     @Test
-    void superUsuarioConsultaAdministradorConSesionReciente() throws Exception {
+    void superUserQueriesAdminWithRecentSession() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-con-sesion@example.test", LocalDateTime.now());
 
-        mvc.perform(get(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
+        mvc.perform(get(PATH, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.elegibleParaEliminar").value(false))
-                .andExpect(jsonPath("$.tieneSesionActiva").value(true))
-                .andExpect(jsonPath("$.motivoNoElegible").isNotEmpty());
+                .andExpect(jsonPath("$.eligibleForDeletion").value(false))
+                .andExpect(jsonPath("$.hasActiveSession").value(true))
+                .andExpect(jsonPath("$.ineligibilityReason").isNotEmpty());
     }
 
     @Test
-    void documentoInexistenteDevuelve404ConCodigoDeNegocio() throws Exception {
-        mvc.perform(get(RUTA, DocumentType.CEDULA, "1-2345-6780")
+    void unknownDocumentReturns404WithBusinessCode() throws Exception {
+        mvc.perform(get(PATH, DocumentType.CEDULA, "1-2345-6780")
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("ADMINISTRADOR_NO_EXISTENTE"));
     }
 
     @Test
-    void documentoInvalidoDevuelve400() throws Exception {
-        mvc.perform(get(RUTA, DocumentType.CEDULA, "abc")
+    void invalidDocumentReturns400() throws Exception {
+        mvc.perform(get(PATH, DocumentType.CEDULA, "abc")
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void tipoDeDocumentoDesconocidoDevuelve400() throws Exception {
-        mvc.perform(get(RUTA, "NIT", "123456789")
+    void unknownDocumentTypeReturns400() throws Exception {
+        mvc.perform(get(PATH, "NIT", "123456789")
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test
-    void mismoNumeroDeDocumentoBajoOtroTipoResuelveAlAdministradorCorrecto() throws Exception {
+    void sameDocumentNumberUnderAnotherTypeResolvesToTheRightAdmin() throws Exception {
         // Una CEDULA y un DIMEX pueden compartir los mismos 11-12 dígitos (unicidad por tipo + número).
         guardarUsuario(RoleName.COURIER, "mensajero-mismo-numero@example.test",
                 DocumentType.CEDULA, "12345678901", null);
@@ -95,61 +95,61 @@ class AdminEliminacionElegibilidadIntegrationTest {
 
         String tokenSuperUsuario = token(RoleName.SUPER_USER);
 
-        mvc.perform(get(RUTA, DocumentType.DIMEX, "12345678901")
+        mvc.perform(get(PATH, DocumentType.DIMEX, "12345678901")
                         .header("Authorization", "Bearer " + tokenSuperUsuario))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(admin.getId()))
                 .andExpect(jsonPath("$.documentType").value("DIMEX"))
                 .andExpect(jsonPath("$.documentNumber").value("12345678901"));
 
-        mvc.perform(get(RUTA, DocumentType.CEDULA, "12345678901")
+        mvc.perform(get(PATH, DocumentType.CEDULA, "12345678901")
                         .header("Authorization", "Bearer " + tokenSuperUsuario))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("ADMINISTRADOR_NO_EXISTENTE"));
     }
 
     @Test
-    void rolesOperativosNoPuedenConsultar() throws Exception {
+    void operationalRolesCannotQuery() throws Exception {
         User admin = guardarUsuario(RoleName.SALES_ADMIN, "admin-objetivo@example.test", null);
 
-        mvc.perform(get(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
+        mvc.perform(get(PATH, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
                 .andExpect(status().isForbidden());
-        mvc.perform(get(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
+        mvc.perform(get(PATH, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.COURIER)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void rolesOperativosConDocumentoInvalidoRecibenForbiddenYNoValidacion() throws Exception {
+    void operationalRolesWithInvalidDocumentGetForbiddenNotValidation() throws Exception {
         // La autorizacion debe resolverse antes del binding/validacion: un rol sin permiso
         // no debe enterarse de si el formato de lo que envio es valido.
         String tokenSalesAdmin = token(RoleName.SALES_ADMIN);
         String tokenCourier = token(RoleName.COURIER);
 
-        mvc.perform(get(RUTA, DocumentType.CEDULA, "abc")
+        mvc.perform(get(PATH, DocumentType.CEDULA, "abc")
                         .header("Authorization", "Bearer " + tokenSalesAdmin))
                 .andExpect(status().isForbidden());
-        mvc.perform(get(RUTA, "NIT", "123456789")
+        mvc.perform(get(PATH, "NIT", "123456789")
                         .header("Authorization", "Bearer " + tokenSalesAdmin))
                 .andExpect(status().isForbidden());
-        mvc.perform(get(RUTA, DocumentType.CEDULA, "abc")
+        mvc.perform(get(PATH, DocumentType.CEDULA, "abc")
                         .header("Authorization", "Bearer " + tokenCourier))
                 .andExpect(status().isForbidden());
-        mvc.perform(get(RUTA, "NIT", "123456789")
+        mvc.perform(get(PATH, "NIT", "123456789")
                         .header("Authorization", "Bearer " + tokenCourier))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void solicitudSinTokenConDocumentoInvalidoDevuelve401() throws Exception {
-        mvc.perform(get(RUTA, "NIT", "abc"))
+    void requestWithoutTokenAndInvalidDocumentReturns401() throws Exception {
+        mvc.perform(get(PATH, "NIT", "abc"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void solicitudSinTokenDevuelve401() throws Exception {
-        mvc.perform(get(RUTA, DocumentType.CEDULA, "1-2345-6789"))
+    void requestWithoutTokenReturns401() throws Exception {
+        mvc.perform(get(PATH, DocumentType.CEDULA, "1-2345-6789"))
                 .andExpect(status().isUnauthorized());
     }
 

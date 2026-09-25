@@ -14,7 +14,7 @@ import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.model.Role;
@@ -111,30 +111,30 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     @Transactional(readOnly = true)
-    public AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(
+    public AdminDeletionEligibilityResponse validateDeletionEligibility(
             DocumentType documentType, String documentNumber) {
-        User administrador = userRepository.findByDocumentTypeAndDocumentNumber(documentType, documentNumber)
-                .filter(usuario -> usuario.getRole() != null
-                        && RoleName.SALES_ADMIN.equals(usuario.getRole().getName()))
+        User admin = userRepository.findByDocumentTypeAndDocumentNumber(documentType, documentNumber)
+                .filter(user -> user.getRole() != null
+                        && RoleName.SALES_ADMIN.equals(user.getRole().getName()))
                 .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
 
-        LocalDateTime ahora = LocalDateTime.now();
-        boolean tieneSesionActiva = administrador.getLastLoginAt() != null
-                && ahora.isBefore(administrador.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS));
-        boolean elegible = !tieneSesionActiva;
-        String motivo = elegible
+        LocalDateTime now = LocalDateTime.now();
+        boolean hasActiveSession = admin.getLastLoginAt() != null
+                && now.isBefore(admin.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS));
+        boolean eligible = !hasActiveSession;
+        String reason = eligible
                 ? null
                 : "El administrador tiene una sesión activa. Debe cerrarla antes de eliminarlo.";
 
-        return new AdminEliminacionElegibilidadResponse(
-                administrador.getId(),
-                administrador.getDocumentType(),
-                administrador.getDocumentNumber(),
-                administrador.getFullName(),
-                administrador.getStatus(),
-                tieneSesionActiva,
-                elegible,
-                motivo
+        return new AdminDeletionEligibilityResponse(
+                admin.getId(),
+                admin.getDocumentType(),
+                admin.getDocumentNumber(),
+                admin.getFullName(),
+                admin.getStatus(),
+                hasActiveSession,
+                eligible,
+                reason
         );
     }
 }

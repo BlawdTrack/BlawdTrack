@@ -2,7 +2,7 @@ package com.blawdgourmet.blawdtrack.users.service;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
-import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 
@@ -25,5 +25,5 @@ public interface AdminService {
      * @return eligibility result, with the reason when the administrator cannot be deleted.
      * @throws AdminNotFoundException if no Sales Administrator matches the given document.
      */
-    AdminEliminacionElegibilidadResponse validarElegibilidadEliminacion(DocumentType documentType, String documentNumber);
+    AdminDeletionEligibilityResponse validateDeletionEligibility(DocumentType documentType, String documentNumber);
 }

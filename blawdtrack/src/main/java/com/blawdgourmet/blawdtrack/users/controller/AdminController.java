@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDocumentRequest;
-import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
@@ -45,9 +45,9 @@ public class AdminController {
 
     @GetMapping("/{documentType}/{documentNumber}/elegibilidad-eliminacion")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
-    public ResponseEntity<AdminEliminacionElegibilidadResponse> validarElegibilidadEliminacion(
+    public ResponseEntity<AdminDeletionEligibilityResponse> validateDeletionEligibility(
             @Valid AdminDocumentRequest request) {
         return ResponseEntity.ok(
-                adminService.validarElegibilidadEliminacion(request.documentType(), request.documentNumber()));
+                adminService.validateDeletionEligibility(request.documentType(), request.documentNumber()));
     }
 }
