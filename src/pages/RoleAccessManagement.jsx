@@ -1,22 +1,25 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import CheckRounded from '@mui/icons-material/CheckRounded';
+import LockOutlined from '@mui/icons-material/LockOutlined';
 import RestartAltRounded from '@mui/icons-material/RestartAltRounded';
 import SaveOutlined from '@mui/icons-material/SaveOutlined';
-import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
+import SearchRounded from '@mui/icons-material/SearchRounded';
 import { CircularProgress } from '@mui/material';
 import Toast from '../components/Toast';
 import {
+  getRoleAccessConfigurationErrors,
   hasRoleAccessConfiguration,
-  PERMISSION_GROUPS,
   ROLE_ACCESS_CATALOG,
 } from '../config/roleAccessCatalog';
+import { findCourierByDocumentNumber } from '../services/CourierService';
 import { replaceRolePermissions } from '../services/RoleAccessService';
 import './RoleAccessManagement.css';
 
 const getPermissionCodes = (role) => new Set(
-  role.permissions.filter((permission) => permission.defaultGranted)
+  role.permissions
+    .filter((permission) => permission.editable && permission.defaultGranted)
     .map((permission) => permission.code)
 );
 
@@ -41,91 +44,140 @@ const getSaveError = (error) => {
     || 'No se pudieron aplicar los cambios. Inténtalo de nuevo.';
 };
 
+const getSearchError = (error) => {
+  if (error.response?.status === 401) {
+    return 'Tu sesión expiró. Inicia sesión nuevamente para continuar.';
+  }
+  if (error.response?.status === 403) {
+    return 'No tienes permiso para consultar los mensajeros.';
+  }
+  return error.response?.data?.message
+    || error.message
+    || 'No se pudo completar la búsqueda. Inténtalo de nuevo.';
+};
+
+const getInitials = (name) => name
+  .trim()
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((part) => part[0])
+  .join('')
+  .toUpperCase();
+
 function RoleAccessManagement() {
   const navigate = useNavigate();
-  const [selectedRoleCode, setSelectedRoleCode] = useState(ROLE_ACCESS_CATALOG[0].code);
-  const [permissionsByRole, setPermissionsByRole] = useState(() => (
+  const [permissionCodesByRole, setPermissionCodesByRole] = useState(() => (
     Object.fromEntries(ROLE_ACCESS_CATALOG.map((role) => [
       role.code,
       getPermissionCodes(role),
     ]))
   ));
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingChanges, setIsSavingChanges] = useState(false);
+  const [searchDocument, setSearchDocument] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchedCourier, setSearchedCourier] = useState(null);
+  const [searchError, setSearchError] = useState('');
+  const [searchMessage, setSearchMessage] = useState('');
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  const rolesWithChanges = ROLE_ACCESS_CATALOG.filter((role) => (
+    role.editable
+    && !sameSet(permissionCodesByRole[role.code], getPermissionCodes(role))
+  ));
+  const canSaveChanges = rolesWithChanges.length > 0
+    && rolesWithChanges.every(hasRoleAccessConfiguration)
+    && !isSavingChanges;
 
-  const selectedRole = useMemo(
-    () => ROLE_ACCESS_CATALOG.find((role) => role.code === selectedRoleCode),
-    [selectedRoleCode]
-  );
-  const selectedPermissionCodes = permissionsByRole[selectedRoleCode];
-  const originalPermissionCodes = getPermissionCodes(selectedRole);
-  const hasChanges = !sameSet(selectedPermissionCodes, originalPermissionCodes);
-  const canSave = hasRoleAccessConfiguration(selectedRole);
-  const permissionGroups = PERMISSION_GROUPS.map((group) => ({
-    ...group,
-    permissions: selectedRole.permissions.filter(
-      (permission) => permission.group === group.id
-    ),
-  })).filter((group) => group.permissions.length > 0);
+  const handleSearch = async (event) => {
+    event.preventDefault();
+    const documentNumber = searchDocument.trim();
+    if (!/\d/.test(documentNumber)) {
+      setSearchedCourier(null);
+      setSearchMessage('');
+      setSearchError('Ingresa una cédula válida para realizar la búsqueda.');
+      return;
+    }
 
-  const handlePermissionToggle = (permissionCode) => {
-    setPermissionsByRole((current) => {
-      const next = new Set(current[selectedRoleCode]);
+    setIsSearching(true);
+    setSearchedCourier(null);
+    setSearchError('');
+    setSearchMessage('');
+    try {
+      const courier = await findCourierByDocumentNumber(documentNumber);
+      if (!courier) {
+        setSearchMessage('No se encontró un mensajero con esa cédula.');
+        return;
+      }
+      setSearchedCourier(courier);
+    } catch (error) {
+      console.error('Error al buscar mensajero para la gestión de roles:', error);
+      setSearchError(getSearchError(error));
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handlePermissionToggle = (roleCode, permissionCode) => {
+    setPermissionCodesByRole((current) => {
+      const next = new Set(current[roleCode]);
       if (next.has(permissionCode)) {
         next.delete(permissionCode);
       } else {
         next.add(permissionCode);
       }
-      return { ...current, [selectedRoleCode]: next };
+      return { ...current, [roleCode]: next };
     });
   };
 
   const handleReset = () => {
-    setPermissionsByRole((current) => ({
-      ...current,
-      [selectedRoleCode]: getPermissionCodes(selectedRole),
-    }));
+    setPermissionCodesByRole((current) => Object.fromEntries(
+      ROLE_ACCESS_CATALOG.map((role) => [
+        role.code,
+        role.editable ? getPermissionCodes(role) : current[role.code],
+      ])
+    ));
   };
 
   const handleSave = async () => {
-    if (!canSave || !hasChanges || isSaving) return;
-
-    const permissionIds = selectedRole.permissions
-      .filter((permission) => selectedPermissionCodes.has(permission.code))
-      .map((permission) => permission.id);
-
-    setIsSaving(true);
+    if (!canSaveChanges) return;
+    const savedRoleNames = [];
+    setIsSavingChanges(true);
     try {
-      const result = await replaceRolePermissions(selectedRole.id, permissionIds);
-      if (result.role !== selectedRole.code || !Array.isArray(result.permissions)) {
-        throw new Error('El backend devolvió una respuesta inesperada al guardar permisos.');
+      for (const role of rolesWithChanges) {
+        const selectedPermissionCodes = permissionCodesByRole[role.code];
+        const permissionIds = role.permissions
+          .filter((permission) => (
+            permission.editable && selectedPermissionCodes.has(permission.code)
+          ))
+          .map((permission) => permission.id);
+
+        try {
+          const result = await replaceRolePermissions(role.id, permissionIds);
+          if (result.role !== role.code || !Array.isArray(result.permissions)) {
+            throw new Error('El backend devolvió una respuesta inesperada al guardar permisos.');
+          }
+          setPermissionCodesByRole((current) => ({
+            ...current,
+            [role.code]: new Set(result.permissions),
+          }));
+          savedRoleNames.push(role.name);
+        } catch (error) {
+          console.error(`Error al guardar la matriz de ${role.name}:`, error);
+          const message = savedRoleNames.length > 0
+            ? `Se guardaron los cambios de ${savedRoleNames.join(', ')}, pero no se pudo guardar ${role.name}. ${getSaveError(error)}`
+            : getSaveError(error);
+          setToast({ open: true, severity: 'error', message });
+          return;
+        }
       }
-      const savedCodes = new Set(result.permissions);
-      setPermissionsByRole((current) => ({
-        ...current,
-        [selectedRoleCode]: savedCodes,
-      }));
       setToast({
         open: true,
         severity: 'success',
-        message: `Matriz de ${selectedRole.name} actualizada para todas las cuentas con este rol.`,
+        message: `Matriz actualizada para: ${savedRoleNames.join(', ')}.`,
       });
-    } catch (error) {
-      console.error('Error al guardar la matriz de permisos:', error);
-      setToast({ open: true, severity: 'error', message: getSaveError(error) });
     } finally {
-      setIsSaving(false);
+      setIsSavingChanges(false);
     }
   };
-
-  const missingConfiguration = [];
-  if (!selectedRole.id) missingConfiguration.push('el ID del rol');
-  if (!selectedRole.permissions.every((permission) => permission.id)) {
-    missingConfiguration.push('los IDs de sus permisos');
-  }
-  if (!selectedRole.currentPermissionsConfigured) {
-    missingConfiguration.push('los permisos actuales del rol');
-  }
 
   return (
     <main className="role-access-page">
@@ -139,49 +191,63 @@ function RoleAccessManagement() {
           Volver a administración
         </button>
 
-        <header className="access-page-heading">
-          <div className="access-heading-icon" aria-hidden="true">
-            <SecurityOutlined />
-          </div>
-          <div>
-            <span className="access-eyebrow">SEGURIDAD Y ACCESOS</span>
-            <h1>Gestionamiento de roles</h1>
-            <p>Configura los permisos disponibles para cada perfil del sistema.</p>
-          </div>
-        </header>
-
-        <section className="access-card user-search-card" aria-labelledby="role-picker-title">
-          <div className="access-card-label" id="role-picker-title">ROL A CONFIGURAR</div>
-          <div className="access-role-picker" aria-label="Seleccionar rol">
-            {ROLE_ACCESS_CATALOG.map((role) => (
-              <button
-                className={`access-role-chip${role.code === selectedRoleCode ? ' is-selected' : ''}`}
-                key={role.code}
-                type="button"
-                onClick={() => setSelectedRoleCode(role.code)}
-                aria-pressed={role.code === selectedRoleCode}
-              >
-                {role.name}
-              </button>
-            ))}
-          </div>
+        <section className="access-card user-search-card" aria-labelledby="user-search-title">
+          <label className="access-card-label" htmlFor="role-user-search" id="user-search-title">
+            USUARIO A CONFIGURAR
+          </label>
+          <form className="user-search-form" onSubmit={handleSearch}>
+            <input
+              id="role-user-search"
+              type="search"
+              value={searchDocument}
+              onChange={(event) => setSearchDocument(event.target.value)}
+              placeholder="Cédula del usuario · ej. 1-0345-0678"
+              aria-describedby="user-search-scope"
+              disabled={isSearching}
+            />
+            <button className="access-primary-button" type="submit" disabled={isSearching}>
+              {isSearching
+                ? <CircularProgress size={19} color="inherit" />
+                : <SearchRounded aria-hidden="true" />}
+              {isSearching ? 'Buscando...' : 'Buscar usuario'}
+            </button>
+          </form>
+          <p className="access-search-scope" id="user-search-scope">
+            La API disponible permite consultar mensajeros; no hay un endpoint de búsqueda para otros roles.
+          </p>
+          {searchError && <p className="access-inline-error" role="alert">{searchError}</p>}
+          {searchMessage && <p className="access-search-message" role="status">{searchMessage}</p>}
+          {searchedCourier && (
+            <div className="access-user-preview" role="status">
+              <span className="access-user-avatar" aria-hidden="true">
+                {getInitials(searchedCourier.fullName)}
+              </span>
+              <div className="access-user-details">
+                <strong>{searchedCourier.fullName}</strong>
+                <span>
+                  {searchedCourier.documentNumber}
+                  {' · rol actual: '}
+                  {searchedCourier.role || 'Mensajero'}
+                </span>
+              </div>
+            </div>
+          )}
         </section>
 
-        <section className="access-card access-matrix-card" aria-labelledby="access-matrix-title">
+        <section className="access-matrix-card" aria-labelledby="access-matrix-title">
           <div className="access-matrix-heading">
             <div>
               <div className="access-matrix-title-row">
-                <SecurityOutlined aria-hidden="true" />
                 <h2 id="access-matrix-title">Matriz de control de acceso</h2>
               </div>
-              <p>Permisos configurables para {selectedRole.name}.</p>
+              <p>Permisos organizados por perfil: Super Usuario, Administrador de Ventas y Mensajero.</p>
             </div>
             <div className="access-matrix-actions">
               <button
                 className="access-secondary-button"
                 type="button"
                 onClick={handleReset}
-                disabled={isSaving}
+                disabled={rolesWithChanges.length === 0 || isSavingChanges}
               >
                 <RestartAltRounded aria-hidden="true" />
                 Restablecer predeterminados
@@ -190,9 +256,9 @@ function RoleAccessManagement() {
                 className="access-primary-button"
                 type="button"
                 onClick={handleSave}
-                disabled={!canSave || !hasChanges || isSaving}
+                disabled={!canSaveChanges}
               >
-                {isSaving
+                {isSavingChanges
                   ? <CircularProgress size={19} color="inherit" />
                   : <SaveOutlined aria-hidden="true" />}
                 Aplicar cambios
@@ -200,51 +266,67 @@ function RoleAccessManagement() {
             </div>
           </div>
 
-          {permissionGroups.map((group) => (
-            <section className="access-permission-group" key={group.id}>
-              <div className={`access-group-heading access-group-${group.id}`}>
-                <span aria-hidden="true" />
-                <h3>{group.title}</h3>
-                <span className="access-group-count">{group.permissions.length} permisos</span>
-              </div>
-              {group.permissions.map((permission) => {
-                const isSelected = selectedPermissionCodes.has(permission.code);
-                return (
-                  <div className="access-permission-row" key={permission.code}>
-                    <div className="access-permission-name">
-                      <span>{permission.description}</span>
-                    </div>
-                    <button
-                      className={`access-toggle${isSelected ? ' is-on' : ''}`}
-                      type="button"
-                      role="switch"
-                      aria-checked={isSelected}
-                      aria-label={`${permission.description}: ${isSelected ? 'permitido' : 'denegado'}`}
-                      onClick={() => handlePermissionToggle(permission.code)}
+          {ROLE_ACCESS_CATALOG.map((role) => {
+            const selectedPermissionCodes = permissionCodesByRole[role.code];
+            const configurationErrors = getRoleAccessConfigurationErrors(role);
+
+            return (
+              <section className="access-role-section" key={role.code}>
+                <div className="access-group-heading">
+                  <span aria-hidden="true" />
+                  <h3>{role.name}</h3>
+                  <span className="access-group-count">{role.permissions.length} permisos</span>
+                  {!role.editable && (
+                    <span className="access-fixed-label">
+                      <LockOutlined aria-hidden="true" />
+                      Fijos
+                    </span>
+                  )}
+                </div>
+
+                {role.permissions.map((permission) => {
+                  const isSelected = permission.editable
+                    ? selectedPermissionCodes.has(permission.code)
+                    : permission.defaultGranted;
+
+                  return (
+                    <div
+                      className={`access-permission-row${permission.editable ? '' : ' is-fixed'}`}
+                      key={permission.code}
                     >
-                      <span>{isSelected && <CheckRounded aria-hidden="true" />}</span>
-                    </button>
-                  </div>
-                );
-              })}
-            </section>
-          ))}
+                      <span className="access-permission-name">{permission.description}</span>
+                      <button
+                        className={`access-toggle${isSelected ? ' is-on' : ''}${permission.editable ? '' : ' is-disabled'}`}
+                        type="button"
+                        role="switch"
+                        aria-checked={isSelected}
+                        aria-label={`${permission.description}: ${isSelected ? 'permitido' : 'denegado'}${permission.editable ? '' : ', no editable'}`}
+                        onClick={() => handlePermissionToggle(role.code, permission.code)}
+                        disabled={!permission.editable || isSavingChanges}
+                      >
+                        <span>{isSelected && <CheckRounded aria-hidden="true" />}</span>
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {configurationErrors.length > 0 && (
+                  <p className="access-role-configuration" role="status">
+                    Guardado no disponible: configura {configurationErrors.join(', ')}.
+                  </p>
+                )}
+              </section>
+            );
+          })}
         </section>
 
-        {!canSave && (
-          <aside className="access-inline-error" role="status">
-            No existe un GET para obtener los IDs ni los permisos actuales. Para habilitar el
-            guardado configura {missingConfiguration.join(', ')} en el entorno frontend.
-          </aside>
-        )}
-
         <aside className="access-security-note">
-          <SecurityOutlined aria-hidden="true" />
           <p>
-            El guardado reemplaza la matriz completa del rol {selectedRole.name} en
-            `roles_permisos`, por lo que afecta a todas las cuentas que lo tienen.
-            El backend solo acepta los permisos mostrados; cualquier otro permiso
-            asociado al rol se eliminará. No cambia roles individuales por cédula.
+            El backend actual solo permite guardar los permisos operativos habilitados para
+            Administrador de Ventas y Mensajero. Los permisos fijos de Super Usuario y los
+            renglones aún no soportados por la API se muestran sin edición. Guardar reemplaza
+            la matriz completa del rol para todas las cuentas que lo tienen; no cambia el rol
+            individual de una persona.
           </p>
         </aside>
       </div>

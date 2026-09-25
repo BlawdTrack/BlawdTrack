@@ -6,6 +6,12 @@ It does not expose a read endpoint for role IDs, permission IDs, or the current
 permission set. The frontend therefore keeps saving disabled until those
 values are supplied from the system database.
 
+The user search uses the existing `GET /api/v1/couriers` endpoint and matches
+the submitted document number against the returned courier list. It can only
+find messengers: the backend has no generic user-search endpoint. The Super
+Usuario rows and sales-permission rows not supported by the current role
+permissions API are displayed as read-only and are never sent in a save request.
+
 Set these Vite environment variables when building the frontend:
 
 | Variable | Value |
@@ -41,3 +47,9 @@ The backend only accepts the operational permissions defined for each role and
 then replaces the role's entire permission set. Any other permission currently
 attached to that role will be removed by a successful update; review the current
 database assignments before enabling this feature.
+
+The read-only presentation also includes `IMPORTACION_VALIDAR`,
+`PAQUETE_DUPLICADOS_CONSULTAR`, `PAQUETE_CONSULTAR_POR_MENSAJERO`,
+`PAQUETE_CONSULTAR_POR_ESTADO`, and `NOTIFICACION_GESTIONAR` as mockup rows.
+These are not currently accepted by the backend and do not need ID environment
+variables.
