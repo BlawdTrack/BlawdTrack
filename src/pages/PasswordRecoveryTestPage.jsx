@@ -11,7 +11,7 @@ import {
 import { requestPasswordReset } from '../services/PasswordRecoveryService';
 import { Toast } from '../components/Toast';
 
-// Pantalla de PRUEBA para T06 (HU-002): solo valida la integración con el
+// Pantalla de PRUEBA para T06: solo valida la integración con el
 // endpoint de solicitud de recuperación y el patrón de notificación tipo
 // toast pedido en la tarea. La pantalla final (con el diseño completo de
 // las vistas B1/B2 del mockup) la está construyendo otro compañero;
