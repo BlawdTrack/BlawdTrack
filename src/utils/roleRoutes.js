@@ -1,9 +1,19 @@
-// Mapa de rol de negocio -> ruta de inicio (T12). T17 reutiliza este mismo
-// mapa para restringir rutas por rol.
+// Roles de negocio tal como los devuelve el backend (strings en español, no
+// los nombres de RoleName.java). Se usan para declarar qué roles pueden entrar
+// a cada grupo de rutas (prop allowedRoles de ProtectedRoute).
+export const ROLES = {
+  SUPER_USUARIO: 'SUPER_USUARIO',
+  ADMIN_VENTAS: 'ADMIN_VENTAS',
+  MENSAJERO: 'MENSAJERO',
+};
+
+// Mapa de rol de negocio -> ruta de inicio (T12). El inicio de cada rol debe
+// estar dentro del grupo de rutas que ese rol puede ver (ver App.jsx); si no,
+// ProtectedRoute lo mandaría a un inicio al que no puede entrar.
 export const ROLE_HOME_ROUTES = {
-  SUPER_USUARIO: '/administradores',
-  ADMIN_VENTAS: '/ventas',
-  MENSAJERO: '/mensajero',
+  [ROLES.SUPER_USUARIO]: '/administradores',
+  [ROLES.ADMIN_VENTAS]: '/ventas',
+  [ROLES.MENSAJERO]: '/mensajero',
 };
 
 // Devuelve la ruta de inicio del rol, o null si el rol no esta en el mapa

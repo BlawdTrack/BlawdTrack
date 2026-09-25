@@ -79,3 +79,91 @@ describe('ProtectedRoute (T17)', () => {
     expect(expireSession).toHaveBeenCalled();
   });
 });
+
+describe('ProtectedRoute con allowedRoles (restricción por rol, HU-001)', () => {
+  const expireSession = vi.fn();
+  const VALID_TOKEN_EXP = Math.floor(Date.now() / 1000) + 3600;
+
+  function loginAs(role) {
+    const user = { ...USER, role };
+    localStorage.setItem('token', fakeJwt(VALID_TOKEN_EXP));
+    localStorage.setItem('blawdtrack_user', JSON.stringify(user));
+    useAuth.mockReturnValue({ user, expireSession });
+  }
+
+  // "/solo-super" exige SUPER_USUARIO; "/administradores" y "/mensajero" son los
+  // inicios de SUPER_USUARIO y MENSAJERO, fuera de ese grupo.
+  function renderRoles(path, allowedRoles) {
+    return render(
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/login" element={<div>Pantalla de login</div>} />
+          <Route element={<ProtectedRoute allowedRoles={allowedRoles} />}>
+            <Route path="/solo-super" element={<div>Solo súper usuario</div>} />
+          </Route>
+          <Route path="/administradores" element={<div>Inicio de súper usuario</div>} />
+          <Route path="/mensajero" element={<div>Inicio de mensajero</div>} />
+          <Route path="/ventas" element={<div>Inicio de ventas</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    expireSession.mockReset();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('un rol permitido ve la ruta', () => {
+    loginAs('SUPER_USUARIO');
+    renderRoles('/solo-super', ['SUPER_USUARIO']);
+    expect(screen.getByText('Solo súper usuario')).toBeTruthy();
+  });
+
+  it('un rol NO permitido vuelve a su propio inicio, sin cerrar la sesión', () => {
+    loginAs('MENSAJERO');
+    renderRoles('/solo-super', ['SUPER_USUARIO']);
+    expect(screen.queryByText('Solo súper usuario')).toBeNull();
+    expect(screen.getByText('Inicio de mensajero')).toBeTruthy();
+    expect(expireSession).not.toHaveBeenCalled();
+    expect(localStorage.getItem('token')).not.toBeNull();
+  });
+
+  it('cada rol no permitido vuelve a SU inicio, no a uno fijo', () => {
+    loginAs('ADMIN_VENTAS');
+    renderRoles('/solo-super', ['SUPER_USUARIO']);
+    expect(screen.getByText('Inicio de ventas')).toBeTruthy();
+  });
+
+  it('sin allowedRoles basta con tener sesión, sea cual sea el rol', () => {
+    loginAs('MENSAJERO');
+    renderRoles('/solo-super', undefined);
+    expect(screen.getByText('Solo súper usuario')).toBeTruthy();
+  });
+
+  it('con allowedRoles pero sin sesión sigue mandando a /login', () => {
+    useAuth.mockReturnValue({ user: null, expireSession });
+    renderRoles('/solo-super', ['SUPER_USUARIO']);
+    expect(screen.getByText('Pantalla de login')).toBeTruthy();
+  });
+
+  it('mala configuración (el inicio del rol está en el grupo que no puede ver): no hay bucle infinito, falla cerrado', () => {
+    // MENSAJERO cuyo inicio (/mensajero) se declaró dentro de un grupo solo para SUPER_USUARIO.
+    loginAs('MENSAJERO');
+    render(
+      <MemoryRouter initialEntries={['/mensajero']}>
+        <Routes>
+          <Route path="/login" element={<div>Pantalla de login</div>} />
+          <Route element={<ProtectedRoute allowedRoles={['SUPER_USUARIO']} />}>
+            <Route path="/mensajero" element={<div>Inicio de mensajero</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+    expect(screen.queryByText('Inicio de mensajero')).toBeNull();
+  });
+});

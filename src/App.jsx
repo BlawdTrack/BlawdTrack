@@ -8,7 +8,7 @@ import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
 import { MessengerFleetList } from './components/MessengerFleetList';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
-import { getHomeRoute } from './utils/roleRoutes';
+import { ROLES, getHomeRoute } from './utils/roleRoutes';
 
 // Reemplaza el TODO anterior ("falta definir un router... temporalmente
 // se renderizan ambas pantallas apiladas") con rutas reales. Cada pantalla
@@ -51,15 +51,24 @@ function App() {
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
-      {/* T17: /login y /recuperar-contrasena son públicas; todo lo que va
-          dentro de ProtectedRoute exige sesión válida. */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
-        <Route path="/ventas" element={<SalesHomePage />} />
-        <Route path="/mensajero" element={<CourierHomePage />} />
+      {/* T17: /login y /recuperar-contrasena son públicas. Todo lo demás exige
+          sesión válida y va en el grupo del rol que puede verlo (allowedRoles):
+          una pantalla nueva se agrega DENTRO del grupo que le corresponde, y si
+          es para cualquier rol autenticado, en un grupo <ProtectedRoute />
+          sin allowedRoles. Un rol fuera del grupo vuelve a su propio inicio.
+          El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
+          rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USUARIO]} />}>
         {/* Vista de Administradores (HU008) */}
         <Route path="/administradores" element={<AdminManagement />} />
+        <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
         <Route path="/mensajeros" element={<MessengerFleetList />} />
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN_VENTAS]} />}>
+        <Route path="/ventas" element={<SalesHomePage />} />
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.MENSAJERO]} />}>
+        <Route path="/mensajero" element={<CourierHomePage />} />
       </Route>
     </Routes>
   );
