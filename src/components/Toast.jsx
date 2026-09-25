@@ -23,6 +23,8 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Box
+        role="status"
+        aria-live="polite"
         sx={{
           bgcolor: '#ffffff',
           borderRadius: '10px',
