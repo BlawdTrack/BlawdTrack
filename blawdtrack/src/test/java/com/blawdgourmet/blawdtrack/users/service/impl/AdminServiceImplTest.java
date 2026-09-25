@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.dto.AdminEliminacionElegibilidadResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -42,58 +44,77 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void documentoInexistenteLanzaExcepcionDeAdministradorNoExistente() {
+    void unknownDocumentThrowsAdminNotFound() {
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
             .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.validarElegibilidadEliminacion("1-2345-6789"))
+        assertThatThrownBy(() -> service.validateDeletionEligibility(DocumentType.CEDULA, "1-2345-6789"))
                 .isInstanceOf(AdminNotFoundException.class)
                 .hasMessage("Administrador no existente");
     }
 
     @Test
-    void usuarioConRolDistintoNoSeConsideraAdministrador() {
+    void userWithDifferentRoleIsNotConsideredAdmin() {
         User mensajero = usuarioConRol(RoleName.COURIER);
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, mensajero.getDocumentNumber()))
             .thenReturn(Optional.of(mensajero));
 
-        assertThatThrownBy(() -> service.validarElegibilidadEliminacion(mensajero.getDocumentNumber()))
+        assertThatThrownBy(() -> service.validateDeletionEligibility(DocumentType.CEDULA, mensajero.getDocumentNumber()))
                 .isInstanceOf(AdminNotFoundException.class);
     }
 
     @Test
-    void loginNuloOVencidoEsElegibleParaEliminar() {
-        User sinLogin = usuarioConRol(RoleName.SALES_ADMIN);
-        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, sinLogin.getDocumentNumber()))
-            .thenReturn(Optional.of(sinLogin));
-        AdminEliminacionElegibilidadResponse sinSesion = service.validarElegibilidadEliminacion(sinLogin.getDocumentNumber());
+    void nullOrExpiredLoginIsEligibleForDeletion() {
+        User withoutLogin = usuarioConRol(RoleName.SALES_ADMIN);
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, withoutLogin.getDocumentNumber()))
+            .thenReturn(Optional.of(withoutLogin));
+        AdminDeletionEligibilityResponse withoutSession = service.validateDeletionEligibility(DocumentType.CEDULA, withoutLogin.getDocumentNumber());
 
-        User loginVencido = usuarioConRol(RoleName.SALES_ADMIN);
-        loginVencido.setDocumentNumber("2-3456-7890");
-        loginVencido.setLastLoginAt(LocalDateTime.now().minusHours(2));
-        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, loginVencido.getDocumentNumber()))
-            .thenReturn(Optional.of(loginVencido));
-        AdminEliminacionElegibilidadResponse vencida = service.validarElegibilidadEliminacion(loginVencido.getDocumentNumber());
+        User expiredLogin = usuarioConRol(RoleName.SALES_ADMIN);
+        expiredLogin.setDocumentNumber("2-3456-7890");
+        expiredLogin.setLastLoginAt(LocalDateTime.now().minusHours(2));
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, expiredLogin.getDocumentNumber()))
+            .thenReturn(Optional.of(expiredLogin));
+        AdminDeletionEligibilityResponse expired = service.validateDeletionEligibility(DocumentType.CEDULA, expiredLogin.getDocumentNumber());
 
-        assertThat(sinSesion.elegibleParaEliminar()).isTrue();
-        assertThat(sinSesion.tieneSesionActiva()).isFalse();
-        assertThat(vencida.elegibleParaEliminar()).isTrue();
-        assertThat(vencida.tieneSesionActiva()).isFalse();
+        assertThat(withoutSession.eligibleForDeletion()).isTrue();
+        assertThat(withoutSession.hasActiveSession()).isFalse();
+        assertThat(expired.eligibleForDeletion()).isTrue();
+        assertThat(expired.hasActiveSession()).isFalse();
     }
 
     @Test
-    void loginRecienteImpideEliminarYExplicaElMotivo() {
+    void recentLoginBlocksDeletionAndExplainsWhy() {
         User administrador = usuarioConRol(RoleName.SALES_ADMIN);
         administrador.setLastLoginAt(LocalDateTime.now().minusMinutes(5));
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, administrador.getDocumentNumber()))
             .thenReturn(Optional.of(administrador));
 
-        AdminEliminacionElegibilidadResponse response =
-            service.validarElegibilidadEliminacion(administrador.getDocumentNumber());
+        AdminDeletionEligibilityResponse response =
+            service.validateDeletionEligibility(DocumentType.CEDULA, administrador.getDocumentNumber());
 
-        assertThat(response.tieneSesionActiva()).isTrue();
-        assertThat(response.elegibleParaEliminar()).isFalse();
-        assertThat(response.motivoNoElegible()).isNotBlank();
+        assertThat(response.documentType()).isEqualTo(DocumentType.CEDULA);
+        assertThat(response.documentNumber()).isEqualTo(administrador.getDocumentNumber());
+        assertThat(response.hasActiveSession()).isTrue();
+        assertThat(response.eligibleForDeletion()).isFalse();
+        assertThat(response.ineligibilityReason()).isNotBlank();
+    }
+
+    @Test
+    void queriesOnlyTheRequestedDocumentType() {
+        User administrador = usuarioConRol(RoleName.SALES_ADMIN);
+        administrador.setDocumentType(DocumentType.DIMEX);
+        administrador.setDocumentNumber("12345678901");
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.DIMEX, "12345678901"))
+            .thenReturn(Optional.of(administrador));
+
+        AdminDeletionEligibilityResponse response =
+            service.validateDeletionEligibility(DocumentType.DIMEX, "12345678901");
+
+        assertThat(response.documentType()).isEqualTo(DocumentType.DIMEX);
+        assertThat(response.documentNumber()).isEqualTo("12345678901");
+        verify(userRepository, never()).findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "12345678901");
+        verify(userRepository, never()).findByDocumentTypeAndDocumentNumber(DocumentType.PASAPORTE, "12345678901");
     }
 
     private User usuarioConRol(String nombreRol) {

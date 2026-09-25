@@ -14,8 +14,6 @@ import com.blawdgourmet.blawdtrack.auth.exception.ContrasenaReutilizadaException
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 
-import jakarta.validation.ConstraintViolationException;
-
 /**
  * Traduce las excepciones de la aplicación al formato unificado de errores (estándar P05).
  * Cubre las excepciones relevantes para el registro y la elegibilidad de eliminación de administradores (HU-006 y HU-008/T01).
@@ -65,27 +63,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
-        @ExceptionHandler(ConstraintViolationException.class)
-        public ResponseEntity<ApiError> manejarViolacionDeRestriccion(ConstraintViolationException ex) {
-                ApiError error = ApiError.builder()
-                                .code("VALIDATION_ERROR")
-                                .message("One or more fields do not meet the required validation rules.")
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .build();
+    @ExceptionHandler(AdminNotFoundException.class)
+    public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("ADMINISTRADOR_NO_EXISTENTE")
+                .message(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
 
-                return ResponseEntity.badRequest().body(error);
-        }
-
-        @ExceptionHandler(AdminNotFoundException.class)
-        public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
-                ApiError error = ApiError.builder()
-                                .code("ADMINISTRADOR_NO_EXISTENTE")
-                                .message(ex.getMessage())
-                                .status(HttpStatus.NOT_FOUND.value())
-                                .build();
-
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ApiError> manejarDuplicado(DuplicateResourceException ex) {

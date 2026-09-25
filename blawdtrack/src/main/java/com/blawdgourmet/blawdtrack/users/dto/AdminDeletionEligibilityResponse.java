@@ -3,14 +3,14 @@ package com.blawdgourmet.blawdtrack.users.dto;
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
-public record AdminEliminacionElegibilidadResponse(
+public record AdminDeletionEligibilityResponse(
         Long id,
         DocumentType documentType,
         String documentNumber,
         String fullName,
         UserStatus status,
-        boolean tieneSesionActiva,
-        boolean elegibleParaEliminar,
-        String motivoNoElegible
+        boolean hasActiveSession,
+        boolean eligibleForDeletion,
+        String ineligibilityReason
 ) {
 }
