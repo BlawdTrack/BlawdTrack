@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Container,
   Paper,
@@ -6,9 +6,12 @@ import {
   Typography,
   TextField,
   MenuItem,
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material';
-import { registerCourier } from '../services/CourierService';
+import { useCourier } from '../hooks/useCourier';
+import { validateCourierForm } from '../utils/courierFormValidation';
+import { StatusMessage } from '../components/StatusMessage';
 
 // 1. Importamos la imagen desde la carpeta assets
 import logo from '../assets/Logo.png';
@@ -28,10 +31,10 @@ function BlawdTrackLogo() {
       }}
     >
       {/* 2. Reemplazamos el SVG por la etiqueta img llamando a la variable 'logo' */}
-      <img 
-        src={logo} 
-        alt="BlawdTrack Logo" 
-        style={{ width: '34px', height: '34px', objectFit: 'contain' }} 
+      <img
+        src={logo}
+        alt="BlawdTrack Logo"
+        style={{ width: '34px', height: '34px', objectFit: 'contain' }}
       />
     </Box>
   );
@@ -60,6 +63,21 @@ const INITIAL_FORM_DATA = {
   schedule: '',
   maxPackageWeightKg: ''
 };
+
+// Visual order of the inputs, used to focus the first one with an error.
+const FIELD_ORDER = [
+  'fullName',
+  'phone',
+  'email',
+  'documentType',
+  'documentNumber',
+  'schedule',
+  'maxPackageWeightKg'
+];
+
+const LABEL_SX = { fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' };
+const INPUT_SX = { backgroundColor: '#ffffff', borderRadius: 2 };
+const ROW_SX = { display: 'flex', gap: 2.5, flexDirection: { xs: 'column', sm: 'row' } };
 
 // Returns the weight as a number, or null when blank or not numeric.
 // Number('') is 0, so a blank value must never be coerced silently;
@@ -92,6 +110,17 @@ function buildCourierPayload(formData) {
 
 export function CourierRegistrationPage() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const {
+    isSubmitting,
+    isSuccess,
+    registeredEmail,
+    fieldErrors,
+    globalMessage,
+    severity,
+    register,
+    setValidationErrors,
+    clearFieldError
+  } = useCourier();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -99,19 +128,46 @@ export function CourierRegistrationPage() {
       ...previousData,
       [name]: value
     }));
+    clearFieldError(name);
+  };
+
+  const focusFirstError = (errors) => {
+    const firstField = FIELD_ORDER.find((name) => errors[name]);
+    // Every input has id === field name, so the DOM lookup is enough.
+    if (firstField) document.getElementById(firstField)?.focus();
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    try {
-      const response = await registerCourier(buildCourierPayload(formData));
-      if (response?.success) {
-        alert('Mensajero registrado con éxito');
-      }
-    } catch (error) {
-      alert('Error al registrar el mensajero');
+    if (isSubmitting) return;
+
+    const clientErrors = validateCourierForm(formData);
+    if (Object.keys(clientErrors).length > 0) {
+      setValidationErrors(clientErrors);
+      focusFirstError(clientErrors);
+      return;
+    }
+
+    const outcome = await register(buildCourierPayload(formData));
+    if (outcome?.ok) {
+      setFormData(INITIAL_FORM_DATA);
+    } else if (outcome) {
+      focusFirstError(outcome.fieldErrors);
     }
   };
+
+  // Props shared by every input: value, change handler, inline error and
+  // accessibility wiring (MUI links helperText through aria-describedby).
+  const fieldProps = (name) => ({
+    id: name,
+    name,
+    value: formData[name],
+    onChange: handleChange,
+    error: Boolean(fieldErrors[name]),
+    helperText: fieldErrors[name] || undefined,
+    fullWidth: true,
+    sx: INPUT_SX
+  });
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -160,6 +216,7 @@ export function CourierRegistrationPage() {
 
         <Box
           component="form"
+          noValidate
           onSubmit={handleSubmit}
           sx={{
             p: { xs: 2.5, sm: 4 },
@@ -168,66 +225,46 @@ export function CourierRegistrationPage() {
             gap: 2.5
           }}
         >
-          <Box sx={{ display: 'flex', gap: 2.5, flexDirection: { xs: 'column', sm: 'row' } }}>
+          {isSuccess && (
+            <StatusMessage
+              severity="success"
+              message={`Mensajero registrado correctamente. Se envió un correo a ${registeredEmail} con la contraseña temporal; deberá cambiarla en su primer ingreso.`}
+            />
+          )}
+          {globalMessage && <StatusMessage severity={severity} message={globalMessage} />}
+
+          <Box sx={ROW_SX}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+              <Typography variant="caption" component="label" htmlFor="fullName" sx={LABEL_SX}>
                 NOMBRE COMPLETO
               </Typography>
-              <TextField
-                fullWidth
-                required
-                name="fullName"
-                placeholder="Ej. María José Solano"
-                value={formData.fullName}
-                onChange={handleChange}
-                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
-              />
+              <TextField {...fieldProps('fullName')} required placeholder="Ej. María José Solano" />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+              <Typography variant="caption" component="label" htmlFor="phone" sx={LABEL_SX}>
                 TELÉFONO (OPCIONAL)
               </Typography>
-              <TextField
-                fullWidth
-                name="phone"
-                type="tel"
-                placeholder="8888-8888"
-                value={formData.phone}
-                onChange={handleChange}
-                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
-              />
+              <TextField {...fieldProps('phone')} type="tel" placeholder="8888-8888" />
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 2.5, flexDirection: { xs: 'column', sm: 'row' } }}>
+          <Box sx={ROW_SX}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+              <Typography variant="caption" component="label" htmlFor="email" sx={LABEL_SX}>
                 CORREO ELECTRÓNICO
               </Typography>
               <TextField
-                fullWidth
+                {...fieldProps('email')}
                 required
-                name="email"
                 type="email"
                 placeholder="nombre@blawdgourmet.com"
-                value={formData.email}
-                onChange={handleChange}
-                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
               />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+              <Typography variant="caption" component="label" htmlFor="documentType" sx={LABEL_SX}>
                 TIPO DE DOCUMENTO
               </Typography>
-              <TextField
-                select
-                fullWidth
-                required
-                name="documentType"
-                value={formData.documentType}
-                onChange={handleChange}
-                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
-              >
+              <TextField {...fieldProps('documentType')} select required>
                 {DOCUMENT_TYPE_OPTIONS.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
@@ -237,51 +274,31 @@ export function CourierRegistrationPage() {
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 2.5, flexDirection: { xs: 'column', sm: 'row' } }}>
+          <Box sx={ROW_SX}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+              <Typography variant="caption" component="label" htmlFor="documentNumber" sx={LABEL_SX}>
                 NÚMERO DE DOCUMENTO
               </Typography>
-              <TextField
-                fullWidth
-                required
-                name="documentNumber"
-                placeholder="1-2345-6789"
-                value={formData.documentNumber}
-                onChange={handleChange}
-                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
-              />
+              <TextField {...fieldProps('documentNumber')} required placeholder="1-2345-6789" />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+              <Typography variant="caption" component="label" htmlFor="schedule" sx={LABEL_SX}>
                 HORARIO
               </Typography>
-              <TextField
-                fullWidth
-                required
-                name="schedule"
-                placeholder="Ej. 6:00 am – 2:00 pm"
-                value={formData.schedule}
-                onChange={handleChange}
-                sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
-              />
+              <TextField {...fieldProps('schedule')} required placeholder="Ej. 6:00 am – 2:00 pm" />
             </Box>
           </Box>
 
           <Box sx={{ width: { xs: '100%', sm: '48.5%' } }}>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#4a4a4a', mb: 0.8, display: 'block' }}>
+            <Typography variant="caption" component="label" htmlFor="maxPackageWeightKg" sx={LABEL_SX}>
               CAPACIDAD MÁXIMA DE CARGA (KG)
             </Typography>
             <TextField
-              fullWidth
+              {...fieldProps('maxPackageWeightKg')}
               required
-              name="maxPackageWeightKg"
               type="number"
               placeholder="Ej. 25"
-              value={formData.maxPackageWeightKg}
-              onChange={handleChange}
               slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-              sx={{ backgroundColor: '#ffffff', borderRadius: 2 }}
             />
           </Box>
 
@@ -290,6 +307,7 @@ export function CourierRegistrationPage() {
             fullWidth
             variant="contained"
             size="large"
+            disabled={isSubmitting}
             sx={{
               mt: 2,
               py: 1.8,
@@ -307,17 +325,26 @@ export function CourierRegistrationPage() {
               gap: 1.2
             }}
           >
-            Registrar mensajero
-            <Box
-              component="span"
-              sx={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                backgroundColor: '#ff6b00',
-                display: 'inline-block'
-              }}
-            />
+            {isSubmitting ? (
+              <>
+                <CircularProgress size={20} color="inherit" />
+                Registrando…
+              </>
+            ) : (
+              <>
+                Registrar mensajero
+                <Box
+                  component="span"
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: '#ff6b00',
+                    display: 'inline-block'
+                  }}
+                />
+              </>
+            )}
           </Button>
         </Box>
       </Paper>
