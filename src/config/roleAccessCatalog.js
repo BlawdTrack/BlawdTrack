@@ -23,12 +23,8 @@ const visualOnlySalesPermissions = [
   { code: 'NOTIFICACION_GESTIONAR', description: 'Gestionar notificaciones' },
 ];
 
-const makeOperationalPermissions = (codes, defaults, configuredCodes) => {
-  const configured = configuredCodes === undefined
-    ? null
-    : new Set(configuredCodes.split(',').map((code) => code.trim()).filter(Boolean));
-
-  return codes.map((code) => {
+const makeOperationalPermissions = (codes, defaults) => (
+  codes.map((code) => {
     const definition = operationalPermissions.find((permission) => permission.code === code);
     if (!definition) {
       throw new Error(`No existe una definición para el permiso ${code}.`);
@@ -36,20 +32,11 @@ const makeOperationalPermissions = (codes, defaults, configuredCodes) => {
 
     return {
       ...definition,
-      id: parseId(import.meta.env[`VITE_ACCESS_PERMISSION_${code}_ID`]),
       editable: true,
-      defaultGranted: configured
-        ? configured.has(code)
-        : defaults.includes(code),
+      defaultGranted: defaults.includes(code),
     };
-  });
-};
-
-const parseId = (value) => {
-  if (!value) return null;
-  const id = Number(value);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-};
+  })
+);
 
 const adminSalesCodes = [
   'PAQUETE_IMPORTAR',
@@ -79,7 +66,6 @@ export const ROLE_ACCESS_CATALOG = [
     code: 'SUPER_USUARIO',
     name: 'Super Usuario',
     editable: false,
-    currentPermissionsConfigured: true,
     permissions: [
       'Gestionar usuarios',
       'Gestionar roles y permisos',
@@ -96,10 +82,7 @@ export const ROLE_ACCESS_CATALOG = [
   {
     code: 'ADMIN_VENTAS',
     name: 'Administrador de Ventas',
-    id: parseId(import.meta.env.VITE_ACCESS_ROLE_ADMIN_VENTAS_ID),
     editable: true,
-    currentPermissionsConfigured:
-      import.meta.env.VITE_ACCESS_ROLE_ADMIN_VENTAS_PERMISSIONS !== undefined,
     permissions: [
       ...makeOperationalPermissions(
         adminSalesEditableCodes,
@@ -115,8 +98,7 @@ export const ROLE_ACCESS_CATALOG = [
           'REPORTE_IMPRIMIR',
           'COMPROBANTE_CONSULTAR',
           'COSTO_CONSULTAR',
-        ],
-        import.meta.env.VITE_ACCESS_ROLE_ADMIN_VENTAS_PERMISSIONS
+        ]
       ),
       ...visualOnlySalesPermissions.map((permission) => ({
         ...permission,
@@ -128,10 +110,7 @@ export const ROLE_ACCESS_CATALOG = [
   {
     code: 'MENSAJERO',
     name: 'Mensajero',
-    id: parseId(import.meta.env.VITE_ACCESS_ROLE_MENSAJERO_ID),
     editable: true,
-    currentPermissionsConfigured:
-      import.meta.env.VITE_ACCESS_ROLE_MENSAJERO_PERMISSIONS !== undefined,
     permissions: makeOperationalPermissions(
       [
         'PAQUETE_CONSULTAR_ASIGNADOS',
@@ -142,8 +121,7 @@ export const ROLE_ACCESS_CATALOG = [
         'PAQUETE_CONSULTAR_ASIGNADOS',
         'PAQUETE_ACTUALIZAR_ESTADO',
         'COSTO_VIAJE_REGISTRAR',
-      ],
-      import.meta.env.VITE_ACCESS_ROLE_MENSAJERO_PERMISSIONS
+      ]
     ).map((permission) => ({
       ...permission,
       description: {
@@ -154,22 +132,3 @@ export const ROLE_ACCESS_CATALOG = [
     })),
   },
 ];
-
-export const getRoleAccessConfigurationErrors = (role) => {
-  if (!role?.editable) return [];
-
-  const missing = [];
-  if (!role.id) missing.push('el ID del rol');
-  if (!role.permissions.filter((permission) => permission.editable)
-    .every((permission) => Boolean(permission.id))) {
-    missing.push('los IDs de sus permisos editables');
-  }
-  if (!role.currentPermissionsConfigured) {
-    missing.push('los permisos actuales del rol');
-  }
-  return missing;
-};
-
-export const hasRoleAccessConfiguration = (role) => (
-  role?.editable && getRoleAccessConfigurationErrors(role).length === 0
-);
