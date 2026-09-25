@@ -18,7 +18,10 @@ import { ROLES, getHomeRoute } from './utils/roleRoutes';
 // pasar siempre por /login.
 function RootRedirect() {
   const { user } = useAuth();
-  return <Navigate to={user ? getHomeRoute(user.role) : '/login'} replace />;
+  // Un rol sin inicio mapeado no debería existir (AuthContext no lo permite);
+  // si pasara, se trata como sin sesión en vez de navegar a "null".
+  const homeRoute = user ? getHomeRoute(user.role) : null;
+  return <Navigate to={homeRoute ?? '/login'} replace />;
 }
 
 function LoginRoute() {
@@ -27,8 +30,11 @@ function LoginRoute() {
 
   // Sesión ya activa (restaurada al refrescar, o entrando directo a
   // /login): la manda a su inicio en vez de mostrarle el formulario.
-  if (user) {
-    return <Navigate to={getHomeRoute(user.role)} replace />;
+  // Con un rol sin inicio mapeado (no debería existir) se muestra el formulario
+  // en vez de navegar a "null"; ProtectedRoute ya se encarga de cerrar esa sesión.
+  const homeRoute = user ? getHomeRoute(user.role) : null;
+  if (homeRoute) {
+    return <Navigate to={homeRoute} replace />;
   }
 
   return (

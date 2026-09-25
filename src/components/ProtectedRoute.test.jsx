@@ -82,13 +82,14 @@ describe('ProtectedRoute (T17)', () => {
 
 describe('ProtectedRoute con allowedRoles (restricción por rol, HU-001)', () => {
   const expireSession = vi.fn();
+  const logout = vi.fn();
   const VALID_TOKEN_EXP = Math.floor(Date.now() / 1000) + 3600;
 
   function loginAs(role) {
     const user = { ...USER, role };
     localStorage.setItem('token', fakeJwt(VALID_TOKEN_EXP));
     localStorage.setItem('blawdtrack_user', JSON.stringify(user));
-    useAuth.mockReturnValue({ user, expireSession });
+    useAuth.mockReturnValue({ user, expireSession, logout });
   }
 
   // "/solo-super" exige SUPER_USUARIO; "/administradores" y "/mensajero" son los
@@ -112,6 +113,7 @@ describe('ProtectedRoute con allowedRoles (restricción por rol, HU-001)', () =>
   beforeEach(() => {
     localStorage.clear();
     expireSession.mockReset();
+    logout.mockReset();
   });
 
   afterEach(() => {
@@ -165,5 +167,32 @@ describe('ProtectedRoute con allowedRoles (restricción por rol, HU-001)', () =>
       </MemoryRouter>
     );
     expect(screen.queryByText('Inicio de mensajero')).toBeNull();
+    // Aquí el rol SÍ es conocido: no se cierra la sesión, solo se falla cerrado.
+    expect(logout).not.toHaveBeenCalled();
+  });
+
+  // Rol sin inicio mapeado (desconocido o ausente): AuthContext no deja crear un
+  // 'user' así, pero ProtectedRoute lo maneja por si esa garantía se rompiera.
+  describe.each([
+    ['ROL_INEXISTENTE'],
+    ['constructor'],
+    [undefined],
+  ])('con el rol sin inicio mapeado %s', (role) => {
+    it('en un grupo con allowedRoles: cierra la sesión y manda a /login, sin pantalla en blanco', () => {
+      loginAs(role);
+      renderRoles('/solo-super', ['SUPER_USUARIO']);
+      expect(screen.getByText('Pantalla de login')).toBeTruthy();
+      expect(screen.queryByText('Solo súper usuario')).toBeNull();
+      expect(logout).toHaveBeenCalled();
+      expect(expireSession).not.toHaveBeenCalled();
+    });
+
+    it('en un grupo sin allowedRoles también: no basta con tener sesión', () => {
+      loginAs(role);
+      renderRoles('/solo-super', undefined);
+      expect(screen.getByText('Pantalla de login')).toBeTruthy();
+      expect(screen.queryByText('Solo súper usuario')).toBeNull();
+      expect(logout).toHaveBeenCalled();
+    });
   });
 });

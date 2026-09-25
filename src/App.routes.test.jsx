@@ -97,6 +97,43 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     expect(screen.queryByText(SCREENS[route])).toBeNull();
   });
 
+  // Un 'user' con rol sin inicio mapeado no puede existir con AuthContext real;
+  // se simula con useAuth mockeado. Ninguna pantalla debe quedar en blanco ni
+  // navegar a "null": todo termina en /login y se cierra la sesión.
+  describe.each([['ROL_INEXISTENTE'], ['toString'], [undefined]])(
+    'con un usuario de rol sin inicio mapeado (%s)',
+    (role) => {
+      function loginAsUnknownRole() {
+        const logout = vi.fn();
+        const user = { id: 1, fullName: 'Usuario de prueba', email: 'prueba@test.com', role };
+        localStorage.setItem('token', 'token-no-jwt');
+        localStorage.setItem('blawdtrack_user', JSON.stringify(user));
+        useAuth.mockReturnValue({ user, expireSession: vi.fn(), logout });
+        return logout;
+      }
+
+      it.each(Object.keys(SCREENS))('entrar por URL a %s termina en /login y cierra la sesión', (route) => {
+        const logout = loginAsUnknownRole();
+        renderAt(route);
+        expect(screen.getByText('Pantalla de login')).toBeTruthy();
+        expect(screen.queryByText(SCREENS[route])).toBeNull();
+        expect(logout).toHaveBeenCalled();
+      });
+
+      it('/login muestra el formulario en vez de navegar a "null"', () => {
+        loginAsUnknownRole();
+        renderAt('/login');
+        expect(screen.getByText('Pantalla de login')).toBeTruthy();
+      });
+
+      it('/ manda a /login', () => {
+        loginAsUnknownRole();
+        renderAt('/');
+        expect(screen.getByText('Pantalla de login')).toBeTruthy();
+      });
+    }
+  );
+
   it('/recuperar-contrasena sigue siendo pública', () => {
     useAuth.mockReturnValue({ user: null, expireSession: vi.fn() });
     renderAt('/recuperar-contrasena');
