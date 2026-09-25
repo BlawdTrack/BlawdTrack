@@ -3,6 +3,7 @@ import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
 import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
+import RoleAccessManagement from './pages/RoleAccessManagement';
 import { MessengerFleetList } from './components/MessengerFleetList';
 
 // Reemplaza el TODO anterior ("falta definir un router... temporalmente
@@ -35,6 +36,7 @@ function App() {
       <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
       {/* Vista de Administradores (HU008) */}
       <Route path="/administradores" element={<AdminManagement />} />
+      <Route path="/gestion-roles" element={<RoleAccessManagement />} />
       <Route path="/mensajeros" element={<MessengerFleetList />} />
     </Routes>
   );
