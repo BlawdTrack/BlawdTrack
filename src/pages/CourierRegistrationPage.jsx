@@ -11,7 +11,7 @@ import {
 import { registerCourier } from '../services/CourierService';
 
 // 1. Importamos la imagen desde la carpeta assets
-import logo from '../assets/logo.png';
+import logo from '../assets/Logo.png';
 
 function BlawdTrackLogo() {
   return (
