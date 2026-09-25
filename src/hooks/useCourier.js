@@ -55,6 +55,10 @@ export const useCourier = () => {
     setFieldErrors(errors);
   };
 
+  const setFieldError = (name, message) => {
+    setFieldErrors((previous) => ({ ...previous, [name]: message }));
+  };
+
   const clearFieldError = (name) => {
     setFieldErrors((previous) => {
       if (!previous[name]) return previous;
@@ -73,6 +77,7 @@ export const useCourier = () => {
     severity,
     register,
     setValidationErrors,
+    setFieldError,
     clearFieldError,
   };
 };

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourierRegistrationPage } from './CourierRegistrationPage';
 import { registerCourier } from '../services/CourierService';
@@ -8,12 +8,25 @@ vi.mock('../services/CourierService', () => ({ registerCourier: vi.fn() }));
 
 const httpError = (status, data) => ({ response: { status, data } });
 
+async function pickTime(user, label, hour, period) {
+  await user.click(screen.getByRole('textbox', { name: label }));
+  const pick = (name, text) =>
+    user.click(within(screen.getByRole('listbox', { name })).getAllByRole('option', { name: text })[0]);
+  await pick(/: hora$/i, hour);
+  await pick(/: am o pm$/i, period);
+  await user.click(screen.getByRole('button', { name: 'Listo' }));
+}
+
 async function fillForm(user) {
   await user.type(screen.getByLabelText(/nombre completo/i), 'Ana Lucía Bermúdez');
   await user.type(screen.getByLabelText(/correo electrónico/i), 'ana@blawdgourmet.com');
   await user.type(screen.getByLabelText(/número de documento/i), '1-1204-0388');
-  await user.type(screen.getByLabelText(/horario/i), '8:00 am – 4:00 pm');
-  await user.type(screen.getByLabelText(/capacidad máxima/i), '20');
+  await pickTime(user, /hora de entrada/i, '08', 'am');
+  await pickTime(user, /hora de salida/i, '04', 'pm');
+  await user.click(screen.getByRole('textbox', { name: /capacidad máxima/i }));
+  screen.getByRole('listbox', { name: /capacidad máxima/i }).focus();
+  await user.keyboard('{ArrowDown>19/}');
+  await user.click(screen.getByRole('button', { name: 'Listo' }));
 }
 
 const submit = (user) => user.click(screen.getByRole('button', { name: /registrar mensajero/i }));
@@ -36,7 +49,7 @@ describe('CourierRegistrationPage', () => {
     expect(status).toHaveTextContent('contraseña temporal');
     expect(screen.getByLabelText(/nombre completo/i)).toHaveValue('');
     expect(registerCourier).toHaveBeenCalledWith(
-      expect.objectContaining({ documentType: 'CEDULA', maxPackageWeightKg: 20 })
+      expect.objectContaining({ documentType: 'CEDULA', maxPackageWeightKg: 20, schedule: '8:00 am – 4:00 pm' })
     );
   });
 

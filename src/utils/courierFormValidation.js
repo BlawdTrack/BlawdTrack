@@ -11,6 +11,7 @@ const MESSAGES = {
   emailRequired: 'Ingresa el correo electrónico.',
   emailFormat: 'Ingresa un correo electrónico válido.',
   schedule: 'Ingresa el horario.',
+  scheduleOrder: 'La hora de salida debe ser posterior a la de entrada.',
   weight: 'Ingresa un número positivo (hasta 8 enteros y 2 decimales).',
 };
 
@@ -28,7 +29,12 @@ export function validateCourierForm(formData) {
     errors.email = MESSAGES.emailFormat;
   }
 
-  if (!formData.schedule.trim()) errors.schedule = MESSAGES.schedule;
+  if (!formData.schedule.trim()) {
+    errors.schedule = MESSAGES.schedule;
+  } else if (formData.scheduleStart && formData.scheduleEnd && formData.scheduleEnd <= formData.scheduleStart) {
+    // "HH:MM" 24h strings compare correctly as text.
+    errors.schedule = MESSAGES.scheduleOrder;
+  }
 
   const weightText = formData.maxPackageWeightKg.trim();
   const weight = Number(weightText);
