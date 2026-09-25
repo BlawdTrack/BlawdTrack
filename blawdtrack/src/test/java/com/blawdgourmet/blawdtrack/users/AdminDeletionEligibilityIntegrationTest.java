@@ -32,7 +32,7 @@ class AdminDeletionEligibilityIntegrationTest {
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
 
-    private static final String PATH = "/api/v1/admins/{documentType}/{documentNumber}/elegibilidad-eliminacion";
+    private static final String PATH = "/api/v1/admins/{documentType}/{documentNumber}/deletion-eligibility";
 
     private final AtomicInteger documentNumberSequence = new AtomicInteger(1);
 

@@ -43,7 +43,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
-    @GetMapping("/{documentType}/{documentNumber}/elegibilidad-eliminacion")
+    @GetMapping("/{documentType}/{documentNumber}/deletion-eligibility")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<AdminDeletionEligibilityResponse> validateDeletionEligibility(
             @Valid AdminDocumentRequest request) {
