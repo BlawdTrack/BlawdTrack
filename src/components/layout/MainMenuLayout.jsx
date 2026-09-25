@@ -43,6 +43,7 @@ export default function MainMenuLayout() {
         </Box>
         <SidebarUserFooter
           fullName={user.fullName}
+          email={user.email}
           roleLabel={ROLE_LABELS[user.role] ?? user.role}
           onLogout={handleLogout}
         />
