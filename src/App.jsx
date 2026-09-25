@@ -2,7 +2,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
-import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
+import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import { MessengerFleetList } from './components/MessengerFleetList';
 
 // Reemplaza el TODO anterior ("falta definir un router... temporalmente
@@ -23,7 +23,7 @@ function LoginRoute() {
 function PasswordRecoveryRoute() {
   const navigate = useNavigate();
 
-  return <PasswordRecoveryTestPage onBackToLogin={() => navigate('/login')} />;
+  return <PasswordRecoveryRequestPage onBackToLogin={() => navigate('/login')} />;
 }
 
 function App() {
