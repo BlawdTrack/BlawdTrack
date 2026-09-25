@@ -1,5 +1,7 @@
 package com.blawdgourmet.blawdtrack.users.model;
 
+import java.time.LocalDateTime;
+
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 
 import jakarta.persistence.Column;
@@ -52,6 +54,10 @@ public class User {
     @Column(name = "telefono", unique = true, length = 20)
     private String phone;
 
+    @Column(name = "fecha_ultimo_inicio_sesion")
+    private LocalDateTime lastLoginAt;
+
+    @Setter(AccessLevel.NONE)
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     @Builder.Default

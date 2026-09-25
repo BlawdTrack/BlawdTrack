@@ -1,9 +1,11 @@
 package com.blawdgourmet.blawdtrack.users.repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -37,6 +39,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("select u.status as status, u.tokenVersion as tokenVersion from User u where u.id = :id")
     Optional<UserSessionState> findSessionStateById(@Param("id") Long id);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update User u set u.lastLoginAt = :lastLoginAt where u.id = :id")
+    int updateLastLoginAt(@Param("id") Long id, @Param("lastLoginAt") LocalDateTime lastLoginAt);
 
     Optional<User> findByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
 
