@@ -50,6 +50,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.MANDATORY)
     public void registrarEliminacionAdministrador(AuthenticatedUser actor, User administradorEliminado) {
         User actorReferencia = userRepository.getReferenceById(actor.id());
 
