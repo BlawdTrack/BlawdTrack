@@ -9,6 +9,7 @@ import { ROLES, ROLE_HOME_ROUTES, getHomeRoute } from './utils/roleRoutes';
 // el rol (varias hacen peticiones al backend al montarse).
 vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla administradores</div> }));
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
+vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
 vi.mock('./pages/SalesHomePage', () => ({ default: () => <div>Pantalla ventas</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/PasswordRecoveryTestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
@@ -24,13 +25,14 @@ const SCREENS = {
   '/administradores': 'Pantalla administradores',
   '/registro-mensajero': 'Pantalla registro de mensajero',
   '/mensajeros': 'Pantalla flota de mensajeros',
+  '/editar-mensajero': 'Pantalla edición de mensajero',
   '/ventas': 'Pantalla ventas',
   '/mensajero': 'Pantalla mensajero',
 };
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
 const ALLOWED_ROUTES = {
-  [ROLES.SUPER_USUARIO]: ['/administradores', '/registro-mensajero', '/mensajeros'],
+  [ROLES.SUPER_USUARIO]: ['/administradores', '/registro-mensajero', '/mensajeros', '/editar-mensajero'],
   [ROLES.ADMIN_VENTAS]: ['/ventas'],
   [ROLES.MENSAJERO]: ['/mensajero'],
 };
