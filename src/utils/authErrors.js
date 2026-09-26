@@ -10,6 +10,14 @@ const CONNECTION_MESSAGE =
   'No pudimos conectar con el servidor. Revisa tu conexión a internet e intenta de nuevo.';
 const GENERIC_MESSAGE = 'No se pudo iniciar sesión. Intenta de nuevo en unos minutos.';
 
+// El backend vivo (blawdtrack/, AuthController) responde 401 con el mismo
+// code AUTH_FAILED para credenciales incorrectas y para cuenta inactiva; lo
+// único que los distingue es el texto ("Invalid email or password" /
+// "The account is inactive"). Es frágil: lo correcto es que el backend
+// devuelva CUENTA_INACTIVA (403) y CREDENCIALES_INVALIDAS (401), que abajo
+// se siguen soportando. Cuando eso pase, este respaldo se puede quitar.
+const INACTIVE_TEXT_PATTERN = /inactive|disabled/i;
+
 // Recibe el error de axios y devuelve { message, severity } para StatusMessage.
 export function getLoginError(err) {
   const response = err?.response;
@@ -26,6 +34,12 @@ export function getLoginError(err) {
   }
   if (code === 'CREDENCIALES_INVALIDAS') {
     return { message: CREDENTIALS_MESSAGE, severity: 'error' };
+  }
+  if (code === 'AUTH_FAILED') {
+    const backendMessage = response.data?.message ?? '';
+    return INACTIVE_TEXT_PATTERN.test(backendMessage)
+      ? { message: INACTIVE_ACCOUNT_MESSAGE, severity: 'warning' }
+      : { message: CREDENTIALS_MESSAGE, severity: 'error' };
   }
 
   // Respaldo por estado HTTP si el código no llega en el cuerpo.
