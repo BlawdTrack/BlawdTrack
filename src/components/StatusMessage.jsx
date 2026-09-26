@@ -13,8 +13,13 @@ const VARIANTS = {
 export function StatusMessage({ severity = 'error', message }) {
   const variant = VARIANTS[severity] || VARIANTS.error;
 
+  // Errors and warnings interrupt (assertive); success is announced politely.
+  const isUrgent = severity !== 'success';
+
   return (
     <Box
+      role={isUrgent ? 'alert' : 'status'}
+      aria-live={isUrgent ? 'assertive' : 'polite'}
       sx={{
         bgcolor: variant.bg,
         border: `1px solid ${variant.border}`,
