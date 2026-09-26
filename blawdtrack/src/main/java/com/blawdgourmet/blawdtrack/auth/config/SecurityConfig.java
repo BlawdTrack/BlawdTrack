@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.auth.config;
 import com.blawdgourmet.blawdtrack.auth.security.JwtAuthenticationFilter;
 import com.blawdgourmet.blawdtrack.auth.security.RestAccessDeniedHandler;
 import com.blawdgourmet.blawdtrack.auth.security.RestAuthenticationEntryPoint;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import jakarta.servlet.DispatcherType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +66,19 @@ public class SecurityConfig {
                         // Las solicitudes HTTP directas siguen requiriendo autenticación.
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
+                        // La autorizacion se resuelve aqui, antes del binding y la validacion de los
+                        // parametros: con solo @PreAuthorize, un rol sin permiso recibiria un 400 de
+                        // validacion en lugar del 403 (@PreAuthorize se evalua al invocar el metodo).
+                        // Todos los endpoints de AdminController son exclusivos del Super Usuario;
+                        // @PreAuthorize en el controlador se mantiene como segunda barrera.
+                        .requestMatchers("/api/v1/admins/**").hasRole(RoleName.SUPER_USER)
+                        // Hoy todos los endpoints bajo /api/v1/couriers y /api/v1/roles son exclusivos
+                        // del Super Usuario. Si se agrega uno bajo el mismo prefijo para otro rol (por
+                        // ejemplo, un mensajero consultando sus propios datos), su regla mas especifica
+                        // debe declararse ANTES de estas dos: Spring Security aplica la primera que
+                        // coincide, y estas reglas de prefijo bloquearian a ese rol con un 403.
+                        .requestMatchers("/api/v1/couriers/**").hasRole(RoleName.SUPER_USER)
+                        .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
