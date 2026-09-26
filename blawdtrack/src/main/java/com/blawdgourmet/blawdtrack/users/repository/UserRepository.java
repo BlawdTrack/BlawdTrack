@@ -45,6 +45,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int updateLastLoginAt(@Param("id") Long id, @Param("lastLoginAt") LocalDateTime lastLoginAt);
 
     Optional<User> findByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
+
     boolean existsByEmail(String email);
     boolean existsByEmailIgnoreCase(String email);
     boolean existsByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
