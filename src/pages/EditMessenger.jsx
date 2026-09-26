@@ -5,10 +5,7 @@ import {
   Typography,
   TextField,
   Button,
-  Alert,
   CircularProgress,
-  Snackbar,
-  Divider,
   Chip,
   Avatar,
   Switch,
@@ -511,7 +508,7 @@ export function EditMessenger({ initialCedula = '' }) {
                 type="submit"
                 variant="contained"
                 disabled={submitting}
-                sx={{ bgcolor: '#1A3C34', color: '#ffffff', fontWeight: 'bold', px: 4, py: 1.5, textTransform: 'none', borderRadius: 2,.hover: { bgcolor: '#122921' } }}
+                sx={{ bgcolor: '#1A3C34', color: '#ffffff', fontWeight: 'bold', px: 4, py: 1.5, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
               >
                 {submitting ? <CircularProgress size={24} color="inherit" /> : 'Guardar cambios'}
               </Button>
