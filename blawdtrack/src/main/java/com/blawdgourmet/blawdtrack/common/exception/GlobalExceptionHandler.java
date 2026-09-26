@@ -79,6 +79,8 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.badRequest().body(error);
+	}
+	
     @ExceptionHandler(AdminNotFoundException.class)
     public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
         ApiError error = ApiError.builder()
