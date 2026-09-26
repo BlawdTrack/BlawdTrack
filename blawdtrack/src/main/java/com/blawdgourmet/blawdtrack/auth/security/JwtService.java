@@ -1,21 +1,21 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 @Component
 public class JwtService {
-
-    private static final String TOKEN_VERSION_CLAIM = "tokenVersion";
 
     @Value("${security.jwt.secret}")
     private String secret;
@@ -48,22 +48,28 @@ public class JwtService {
                 .subject(principal.getUsername())
                 .claim("id", principal.getId())
                 .claim("roles", roles)
-                .claim("documentType", principal.getUser().getDocumentType().name())
+                .claim("documentType", principal.getUser().getDocumentType())
                 .claim("documentNumber", principal.getUser().getDocumentNumber())
                 .claim("fullName", principal.getUser().getFullName())
-                .claim(TOKEN_VERSION_CLAIM, principal.getTokenVersion())
+                .claim("tokenVersion", principal.getUser().getTokenVersion())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key())
                 .compact();
     }
 
-    /**
-     * Versión de sesión con la que se emitió el token. Los tokens anteriores a la
-     * introducción del claim no lo traen y se consideran versión 0.
-     */
     public int extractTokenVersion(Claims claims) {
-        Integer version = claims.get(TOKEN_VERSION_CLAIM, Integer.class);
-        return version == null ? 0 : version;
+        Object value = claims.get("tokenVersion");
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException ex) {
+            return 0;
+        }
     }
 }

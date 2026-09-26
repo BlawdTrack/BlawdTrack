@@ -1,40 +1,36 @@
 package com.blawdgourmet.blawdtrack.couriers.service;
 
-import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
-import com.blawdgourmet.blawdtrack.audit.service.AuditService;
-import com.blawdgourmet.blawdtrack.audit.service.ChangeSet;
-import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
-import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
-import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.model.Courier;
-import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
-import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.model.User;
-import com.blawdgourmet.blawdtrack.users.model.UserStatus;
-import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
-import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.model.Courier;
+import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.User;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
+import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
+import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CourierService {
-    // Nombres de campo que se registran en el historial de auditoría (nunca sus valores).
-    private static final String FIELD_FULL_NAME = "fullName";
-    private static final String FIELD_EMAIL = "email";
-    private static final String FIELD_PHONE = "phone";
-    private static final String FIELD_SCHEDULE = "schedule";
-    private static final String FIELD_MAX_PACKAGE_WEIGHT = "maxPackageWeightKg";
-    private static final String FIELD_STATUS = "status";
-
     private final UserRepository users;
     private final RoleRepository roles;
     private final CourierRepository couriers;
@@ -42,18 +38,22 @@ public class CourierService {
     private final TemporaryPasswordGenerator temporaryPasswords;
     private final ApplicationEventPublisher events;
     private final CourierUniquenessValidator uniquenessValidator;
-    private final CourierDeactivationValidator deactivationValidator;
-    private final AuditService audit;
+    private final AuditService auditService;
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public CourierResponse register(CreateCourierRequest request) {
-        uniquenessValidator.validateNew(request.documentType(), request.documentNumber(), request.email(), request.phone());
+        DocumentType documentType = request.documentType() == null ? DocumentType.CEDULA : request.documentType();
+        String documentNumber = request.documentNumber();
+        uniquenessValidator.validateNew(documentType, documentNumber, request.email(), request.phone());
         var role = roles.findByName(RoleName.COURIER)
                 .orElseThrow(() -> new IllegalStateException("El rol MENSAJERO no está configurado"));
         String temporaryPassword = temporaryPasswords.generate();
         var user = users.saveAndFlush(User.builder()
-                .documentType(request.documentType()).documentNumber(request.documentNumber()).fullName(request.fullName())
+                .documentType(documentType)
+                .documentNumber(documentNumber)
+                .documentId(documentNumber)
+                .fullName(request.fullName())
                 .email(request.email()).phone(request.phone())
                 .passwordHash(passwordEncoder.encode(temporaryPassword))
                 .status(UserStatus.ACTIVE).role(role).build());
@@ -66,18 +66,13 @@ public class CourierService {
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
-    public CourierResponse update(Long courierId, UpdateCourierRequest request, AuthenticatedUser actor) {
-        var courier = couriers.findById(courierId)
-                .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+    public CourierResponse update(String id, UpdateCourierRequest request) {
+        var courier = resolveCourier(id);
         var user = courier.getUser();
         uniquenessValidator.validateUpdate(user.getId(), request.email(), request.phone());
-        // Se compara antes de aplicar los setters, mientras la entidad conserva los valores actuales.
-        var changes = new ChangeSet()
-                .track(FIELD_FULL_NAME, user.getFullName(), request.fullName())
-                .track(FIELD_EMAIL, user.getEmail(), request.email())
-                .track(FIELD_PHONE, user.getPhone(), request.phone())
-                .track(FIELD_SCHEDULE, courier.getSchedule(), request.schedule())
-                .track(FIELD_MAX_PACKAGE_WEIGHT, courier.getMaxPackageWeightKg(), request.maxPackageWeightKg());
+
+        String details = buildAuditDetails(user, courier, request);
+
         user.setFullName(request.fullName());
         user.setEmail(request.email());
         user.setPhone(request.phone());
@@ -85,25 +80,12 @@ public class CourierService {
         courier.setMaxPackageWeightKg(request.maxPackageWeightKg());
         users.saveAndFlush(user);
         couriers.saveAndFlush(courier);
-        if (!changes.isEmpty()) {
-            audit.logAction(AuditAction.COURIER_UPDATED, actor, user, changes.describe());
-        }
-        return CourierResponse.from(courier);
-    }
 
-    @Transactional
-    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
-    public CourierResponse deactivate(Long courierId, AuthenticatedUser actor) {
-        var courier = couriers.findById(courierId)
-                .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
-        deactivationValidator.validateCanDeactivate(courierId);
-        var user = courier.getUser();
-        var changes = new ChangeSet().track(FIELD_STATUS, user.getStatus(), UserStatus.INACTIVE);
-        user.changeStatus(UserStatus.INACTIVE);
-        users.saveAndFlush(user);
-        if (!changes.isEmpty()) {
-            audit.logAction(AuditAction.COURIER_DEACTIVATED, actor, user, changes.describe());
+        if (!details.isBlank()) {
+            var principal = (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            auditService.logAction(AuditAction.COURIER_UPDATED, principal, user, details);
         }
+
         return CourierResponse.from(courier);
     }
 
@@ -113,5 +95,61 @@ public class CourierService {
         return couriers.findAllByOrderByUserFullNameAsc().stream()
                 .map(CourierResponse::from)
                 .toList();
+    }
+
+    private String buildAuditDetails(User user, Courier courier, UpdateCourierRequest request) {
+        List<String> fields = new ArrayList<>();
+
+        if (!equals(user.getFullName(), request.fullName())) {
+            fields.add("fullName");
+        }
+        if (!equals(user.getEmail(), request.email())) {
+            fields.add("email");
+        }
+        if (!equals(user.getPhone(), request.phone())) {
+            fields.add("phone");
+        }
+        if (!equals(courier.getSchedule(), request.schedule())) {
+            fields.add("schedule");
+        }
+        if (!equals(courier.getMaxPackageWeightKg(), request.maxPackageWeightKg())) {
+            fields.add("maxPackageWeightKg");
+        }
+
+        return String.join(", ", fields);
+    }
+
+    private boolean equals(Object left, Object right) {
+        if (left == null && right == null) {
+            return true;
+        }
+        if (left == null || right == null) {
+            return false;
+        }
+        if (left instanceof BigDecimal leftDecimal && right instanceof BigDecimal rightDecimal) {
+            return leftDecimal.compareTo(rightDecimal) == 0;
+        }
+        if (left instanceof BigDecimal leftDecimal && right instanceof String rightText) {
+            return leftDecimal.compareTo(new BigDecimal(rightText)) == 0;
+        }
+        if (left instanceof String leftText && right instanceof BigDecimal rightDecimal) {
+            return new BigDecimal(leftText).compareTo(rightDecimal) == 0;
+        }
+        return left.equals(right);
+    }
+
+    private Courier resolveCourier(String id) {
+        if (id == null || id.isBlank()) {
+            throw new CourierNotFoundException("Mensajero no encontrado");
+        }
+        String normalized = id.trim();
+        try {
+            Long numericId = Long.valueOf(normalized);
+            return couriers.findById(numericId)
+                    .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+        } catch (NumberFormatException ex) {
+            return couriers.findByUserDocumentId(normalized)
+                    .orElseThrow(() -> new CourierNotFoundException("Mensajero no encontrado"));
+        }
     }
 }

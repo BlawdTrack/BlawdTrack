@@ -1,7 +1,8 @@
 package com.blawdgourmet.blawdtrack.common.security;
 
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import org.springframework.security.core.AuthenticatedPrincipal;
+
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 
 /**
  * Representa al usuario autenticado en la solicitud actual (principal de Spring Security).

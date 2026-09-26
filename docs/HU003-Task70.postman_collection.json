@@ -66,8 +66,8 @@
             "type": "text/javascript",
             "exec": [
               "const run = Date.now().toString();",
-              "pm.collectionVariables.set(\"nationalId\", \"70\" + run);",
-              "pm.collectionVariables.set(\"otherNationalId\", \"71\" + run);",
+              "pm.collectionVariables.set(\"documentId\", \"70\" + run);",
+              "pm.collectionVariables.set(\"otherDocumentId\", \"71\" + run);",
               "pm.collectionVariables.set(\"otherEmail\", \"otro70.\" + run + \"@example.test\");",
               "pm.collectionVariables.unset(\"adminToken\");",
               "pm.collectionVariables.unset(\"courierToken\");",
@@ -110,7 +110,7 @@
         "url": "{{baseUrl}}/api/v1/couriers",
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nationalId\": \"{{nationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{courierEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "raw": "{\r\n  \"documentId\": \"{{documentId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{courierEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -155,7 +155,7 @@
         "url": "{{baseUrl}}/api/v1/couriers",
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nationalId\": \"{{nationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "raw": "{\r\n  \"documentId\": \"{{documentId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -199,7 +199,7 @@
         "url": "{{baseUrl}}/api/v1/couriers",
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{courierEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "raw": "{\r\n  \"documentId\": \"{{otherDocumentId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{courierEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -243,7 +243,7 @@
         "url": "{{baseUrl}}/api/v1/couriers",
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"correo-invalido\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 0\r\n}",
+          "raw": "{\r\n  \"documentId\": \"{{otherDocumentId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"correo-invalido\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 0\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -280,7 +280,7 @@
         "url": "{{baseUrl}}/api/v1/couriers",
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "raw": "{\r\n  \"documentId\": \"{{otherDocumentId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -361,7 +361,7 @@
         "url": "{{baseUrl}}/api/v1/couriers",
         "body": {
           "mode": "raw",
-          "raw": "{\r\n  \"nationalId\": \"{{otherNationalId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
+          "raw": "{\r\n  \"documentId\": \"{{otherDocumentId}}\",\r\n  \"fullName\": \"Mensajero Evidencia HU003\",\r\n  \"email\": \"{{otherEmail}}\",\r\n  \"phone\": \"88888888\",\r\n  \"schedule\": \"Lunes a viernes, 08:00-17:00\",\r\n  \"maxPackageWeightKg\": 25.5\r\n}",
           "options": {
             "raw": {
               "language": "json"

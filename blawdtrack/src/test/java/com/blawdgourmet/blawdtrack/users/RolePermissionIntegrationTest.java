@@ -3,7 +3,6 @@ package com.blawdgourmet.blawdtrack.users;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.auth.config.DataSeeder;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -44,7 +43,7 @@ class RolePermissionIntegrationTest {
     private String token(String roleName) {
         var role = roles.findByName(roleName).orElseThrow();
         var user = users.saveAndFlush(User.builder()
-                .documentType(DocumentType.CEDULA).documentNumber("RP-" + roleName).fullName("Prueba permisos")
+                .documentId("RP-" + roleName).fullName("Prueba permisos")
                 .email("rp-" + roleName + "@example.test").passwordHash("hash")
                 .status(UserStatus.ACTIVE).role(role).build());
         return jwt.generateToken(new UserPrincipal(user));
@@ -148,14 +147,14 @@ class RolePermissionIntegrationTest {
     void superUsuarioInactivoNoPuedeModificarPermisosAunqueConserveSuToken() throws Exception {
         String bearer = "Bearer " + token(RoleName.SUPER_USER);
         var actor = users.findByEmail("rp-" + RoleName.SUPER_USER + "@example.test").orElseThrow();
-        actor.changeStatus(UserStatus.INACTIVE);
+        actor.setStatus(UserStatus.INACTIVE);
         users.saveAndFlush(actor);
 
         mvc.perform(put("/api/v1/roles/{roleId}/permissions",
                         roles.findByName(RoleName.COURIER).orElseThrow().getId())
                         .header("Authorization", bearer).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"permissionIds\":[]}"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test

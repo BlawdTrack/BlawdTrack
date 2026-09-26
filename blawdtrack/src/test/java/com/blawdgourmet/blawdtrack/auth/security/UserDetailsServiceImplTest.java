@@ -1,6 +1,5 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -42,8 +41,7 @@ class UserDetailsServiceImplTest {
 
         return User.builder()
                 .id(1L)
-                .documentType(DocumentType.CEDULA)
-                .documentNumber("0101010101")
+                .documentId("0101010101")
                 .fullName("Genesis Silesky")
                 .email("genesis@blawdtrack.com")
                 .passwordHash("hash-no-real")

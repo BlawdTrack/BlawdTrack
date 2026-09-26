@@ -1,15 +1,9 @@
 package com.blawdgourmet.blawdtrack.couriers;
 
-import com.blawdgourmet.blawdtrack.couriers.model.Courier;
-import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
-import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.model.User;
-import com.blawdgourmet.blawdtrack.users.model.UserStatus;
-import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
-import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.validation.Validator;
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,10 +16,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import com.blawdgourmet.blawdtrack.couriers.model.Courier;
+import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.User;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
+import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
+import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import jakarta.persistence.EntityManager;
+import jakarta.validation.Validator;
 
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:courier-test;MODE=MySQL;DB_CLOSE_DELAY=-1",
@@ -47,8 +47,7 @@ class CourierPersistenceTest {
     @BeforeEach
     void createAccount() {
         user = users.saveAndFlush(User.builder()
-                .documentType(DocumentType.CEDULA)
-                .documentNumber("123456789")
+                .documentId("123456789")
                 .fullName("Mensajero de prueba")
                 .email("mensajero@example.test")
                 .phone("88888888")
@@ -69,8 +68,7 @@ class CourierPersistenceTest {
         assertThat(found.getSchedule()).isEqualTo("Lunes a viernes, 08:00-17:00");
         assertThat(found.getMaxPackageWeightKg()).isEqualByComparingTo("25.50");
         assertThat(found.getUser().getEmail()).isEqualTo("mensajero@example.test");
-        assertThat(found.getUser().getDocumentType()).isEqualTo(DocumentType.CEDULA);
-        assertThat(found.getUser().getDocumentNumber()).isEqualTo("123456789");
+        assertThat(found.getUser().getDocumentId()).isEqualTo("123456789");
         assertThat(found.getUser().getPhone()).isEqualTo("88888888");
         assertThat(found.getUser().getPasswordHash()).isEqualTo("hash-solo-para-pruebas");
         assertThat(found.getUser().getStatus()).isEqualTo(UserStatus.ACTIVE);
@@ -83,8 +81,8 @@ class CourierPersistenceTest {
                 "SELECT COUNT(*) FROM \"flyway_schema_history\" WHERE \"version\" = '2' AND \"success\" = TRUE",
                 Integer.class)).isEqualTo(1);
         jdbc.update("""
-                INSERT INTO usuarios (tipo_documento, numero_documento, nombre_completo, correo, contrasena_hash, rol_id)
-                VALUES ('CEDULA', '987654321', 'Otro mensajero', 'otro@example.test', 'hash-prueba', ?)
+                INSERT INTO usuarios (cedula, nombre_completo, correo, contrasena_hash, rol_id)
+                VALUES ('987654321', 'Otro mensajero', 'otro@example.test', 'hash-prueba', ?)
                 """, user.getRole().getId());
         assertThat(users.findByEmail("otro@example.test").orElseThrow().getStatus())
                 .isEqualTo(UserStatus.ACTIVE);
