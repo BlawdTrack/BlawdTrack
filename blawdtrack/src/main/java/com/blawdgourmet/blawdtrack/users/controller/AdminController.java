@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,8 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.dto.AdminDocumentRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDocumentRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
@@ -49,5 +51,15 @@ public class AdminController {
             @Valid AdminDocumentRequest request) {
         return ResponseEntity.ok(
                 adminService.validateDeletionEligibility(request.documentType(), request.documentNumber()));
+    }
+
+    @DeleteMapping("/{documentType}/{documentNumber}")
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public ResponseEntity<AdminDeletionResponse> eliminarAdministrador(
+            @Valid AdminDocumentRequest request,
+            @AuthenticationPrincipal AuthenticatedUser actor) {
+        AdminDeletionResponse respuesta = adminService.eliminarAdministrador(
+                request.documentType(), request.documentNumber(), actor);
+        return ResponseEntity.ok(respuesta);
     }
 }

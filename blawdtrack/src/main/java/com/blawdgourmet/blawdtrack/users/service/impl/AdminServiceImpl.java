@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.security.access.AccessDeniedException;
+
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationException;
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
@@ -15,6 +17,7 @@ import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
@@ -137,5 +140,34 @@ public class AdminServiceImpl implements AdminService {
                 eligible,
                 reason
         );
+    }
+
+    @Override
+    @Transactional
+    public AdminDeletionResponse eliminarAdministrador(
+            DocumentType documentType, String documentNumber, AuthenticatedUser actor) {
+
+        User user = userRepository.findByDocumentTypeAndDocumentNumber(documentType, documentNumber)
+                .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
+
+        if (user.getRole() == null || !RoleName.SALES_ADMIN.equals(user.getRole().getName())) {
+            throw new AccessDeniedException("No se puede eliminar un usuario que no es Administrador de Ventas.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        boolean hasActiveSession = user.getStatus() == UserStatus.ACTIVE
+                || (user.getLastLoginAt() != null
+                        && now.isBefore(user.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS)));
+
+        if (hasActiveSession) {
+            throw new AdminSessionActiveException(
+                    "El administrador tiene una sesión activa. Cierre primero la sesión antes de eliminarlo.");
+        }
+
+        auditService.registrarEliminacionAdministrador(actor, user);
+        userRepository.delete(user);
+        userRepository.flush();
+
+        return new AdminDeletionResponse("Administrador eliminado correctamente.");
     }
 }
