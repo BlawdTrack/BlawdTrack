@@ -22,6 +22,29 @@ export const listCouriers = async () => {
   return response.data;
 };
 
+export const findCourierByDocumentNumber = async (documentNumber) => {
+  const normalizedDocument = documentNumber.replace(/\D/g, '');
+  if (!normalizedDocument) {
+    throw new Error('Ingresa una cédula válida para realizar la búsqueda.');
+  }
+
+  const couriers = await listCouriers();
+  if (!Array.isArray(couriers)) {
+    throw new Error('La respuesta del backend no contiene una lista de mensajeros.');
+  }
+
+  const courier = couriers.find((candidate) => (
+    String(candidate.documentNumber ?? '').replace(/\D/g, '') === normalizedDocument
+  ));
+
+  if (!courier) return null;
+  if (!courier.id || !courier.fullName || !courier.documentNumber) {
+    throw new Error('La respuesta del backend contiene datos incompletos del mensajero.');
+  }
+
+  return courier;
+};
+
 export const deactivateCourier = async (id) => {
   const response = await axiosClient.patch(
     `/v1/couriers/${encodeURIComponent(id)}/deactivate`

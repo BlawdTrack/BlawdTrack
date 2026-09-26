@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
+import RoleAccessManagement from './pages/RoleAccessManagement';
 import { MessengerFleetList } from './components/MessengerFleetList';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
@@ -57,22 +58,19 @@ function App() {
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
-      {/* T17: /login y /recuperar-contrasena son públicas. Todo lo demás exige
-          sesión válida y va en el grupo del rol que puede verlo (allowedRoles):
-          una pantalla nueva se agrega DENTRO del grupo que le corresponde, y si
-          es para cualquier rol autenticado, en un grupo <ProtectedRoute />
-          sin allowedRoles. Un rol fuera del grupo vuelve a su propio inicio.
-          El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
-          rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
+      {/* Las rutas administrativas requieren una sesión de Super Usuario. */}
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USUARIO]} />}>
         {/* Vista de Administradores (HU008) */}
         <Route path="/administradores" element={<AdminManagement />} />
         <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
+        <Route path="/gestion-roles" element={<RoleAccessManagement />} />
         <Route path="/mensajeros" element={<MessengerFleetList />} />
       </Route>
+
       <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN_VENTAS]} />}>
         <Route path="/ventas" element={<SalesHomePage />} />
       </Route>
+
       <Route element={<ProtectedRoute allowedRoles={[ROLES.MENSAJERO]} />}>
         <Route path="/mensajero" element={<CourierHomePage />} />
       </Route>
