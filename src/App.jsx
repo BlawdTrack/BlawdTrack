@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
+import EditMessenger from './pages/EditMessenger';
 import { MessengerFleetList } from './components/MessengerFleetList';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
@@ -69,6 +70,8 @@ function App() {
         <Route path="/administradores" element={<AdminManagement />} />
         <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
         <Route path="/mensajeros" element={<MessengerFleetList />} />
+        <Route path="/editar-mensajero" element={<EditMessenger />} />
+        <Route path="/editar-mensajero/:cedula" element={<EditMessenger />} />
       </Route>
       <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN_VENTAS]} />}>
         <Route path="/ventas" element={<SalesHomePage />} />
