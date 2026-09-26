@@ -1,5 +1,9 @@
 package com.blawdgourmet.blawdtrack.users.model;
 
+import java.time.LocalDateTime;
+
+import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,10 +14,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -77,6 +80,10 @@ public class User {
     @Column(name = "telefono", unique = true, length = 20)
     private String phone;
 
+    @Column(name = "fecha_ultimo_inicio_sesion")
+    private LocalDateTime lastLoginAt;
+
+    @Setter(AccessLevel.NONE)
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     @Builder.Default

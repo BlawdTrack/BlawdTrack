@@ -8,9 +8,18 @@ const normalizeAdministrator = (administrator) => {
     throw new Error('La respuesta del backend contiene un administrador sin identificador.');
   }
 
-  const name = administrator.name ?? administrator.fullName;
+  const name = administrator.name
+    ?? administrator.fullName
+    ?? administrator.nombreCompleto;
+  const email = administrator.email
+    ?? administrator.correoElectronico;
+  const documentNumber = administrator.documentNumber
+    ?? administrator.numeroDocumento
+    ?? administrator.identification
+    ?? administrator.nationalId
+    ?? '';
 
-  if (!name || !administrator.email) {
+  if (!name || !email) {
     throw new Error('La respuesta del backend contiene datos incompletos del administrador.');
   }
 
@@ -18,8 +27,9 @@ const normalizeAdministrator = (administrator) => {
     ...administrator,
     id: administrator.id,
     name,
-    email: administrator.email,
-    identification: administrator.identification ?? administrator.nationalId ?? ''
+    email,
+    documentNumber,
+    identification: documentNumber
   };
 };
 
