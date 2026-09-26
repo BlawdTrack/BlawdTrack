@@ -11,7 +11,8 @@ vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla adminis
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
 vi.mock('./pages/SalesHomePage', () => ({ default: () => <div>Pantalla ventas</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
-vi.mock('./pages/PasswordRecoveryTestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
+vi.mock('./pages/PasswordRecoveryRequestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
+vi.mock('./pages/NewPasswordPage', () => ({ default: () => <div>Pantalla nueva contraseña</div> }));
 vi.mock('./pages/LoginPage', () => ({ default: () => <div>Pantalla de login</div> }));
 vi.mock('./components/MessengerFleetList', () => ({
   MessengerFleetList: () => <div>Pantalla flota de mensajeros</div>,
@@ -138,5 +139,11 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     useAuth.mockReturnValue({ user: null, expireSession: vi.fn() });
     renderAt('/recuperar-contrasena');
     expect(screen.getByText('Pantalla recuperación')).toBeTruthy();
+  });
+
+  it('/recovery (destino del enlace del correo) es pública, con y sin sesión', () => {
+    useAuth.mockReturnValue({ user: null, expireSession: vi.fn() });
+    renderAt('/recovery?token=abc');
+    expect(screen.getByText('Pantalla nueva contraseña')).toBeTruthy();
   });
 });

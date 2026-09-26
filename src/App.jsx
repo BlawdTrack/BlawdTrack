@@ -4,7 +4,8 @@ import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
-import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
+import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
+import NewPasswordPage from './pages/NewPasswordPage';
 import { MessengerFleetList } from './components/MessengerFleetList';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
@@ -48,7 +49,20 @@ function LoginRoute() {
 function PasswordRecoveryRoute() {
   const navigate = useNavigate();
 
-  return <PasswordRecoveryTestPage onBackToLogin={() => navigate('/login')} />;
+  return <PasswordRecoveryRequestPage onBackToLogin={() => navigate('/login')} />;
+}
+
+// T05: destino del enlace del correo. "/recovery?token=..." es el valor por
+// defecto de MAIL_LINK_URL en el backend (pendiente de confirmar con ellos).
+function NewPasswordRoute() {
+  const navigate = useNavigate();
+
+  return (
+    <NewPasswordPage
+      onGoToLogin={() => navigate('/login', { replace: true })}
+      onRequestNewLink={() => navigate('/recuperar-contrasena')}
+    />
+  );
 }
 
 function App() {
@@ -57,7 +71,8 @@ function App() {
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
-      {/* T17: /login y /recuperar-contrasena son públicas. Todo lo demás exige
+      <Route path="/recovery" element={<NewPasswordRoute />} />
+      {/* T17: /login, /recuperar-contrasena y /recovery son públicas. Todo lo demás exige
           sesión válida y va en el grupo del rol que puede verlo (allowedRoles):
           una pantalla nueva se agrega DENTRO del grupo que le corresponde, y si
           es para cualquier rol autenticado, en un grupo <ProtectedRoute />
