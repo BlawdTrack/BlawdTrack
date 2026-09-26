@@ -97,17 +97,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
-    @ExceptionHandler(AdminNotFoundException.class)
-    public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
-        ApiError error = ApiError.builder()
-                .code("ADMINISTRADOR_NO_EXISTENTE")
-                .message(ex.getMessage())
-                .status(HttpStatus.NOT_FOUND.value())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
-
     @ExceptionHandler(AdminSessionActiveException.class)
     public ResponseEntity<ApiError> manejarSesionActiva(AdminSessionActiveException ex) {
         ApiError error = ApiError.builder()
