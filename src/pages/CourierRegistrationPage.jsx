@@ -27,6 +27,9 @@ const DOCUMENT_PLACEHOLDERS = {
   PASAPORTE: 'Ej. A12345678'
 };
 
+// On phones the form uses 2 columns; wide fields span both.
+const SPAN_2_SX = { gridColumn: { xs: 'span 2', md: 'auto' } };
+
 const INITIAL_FORM_DATA = {
   documentType: 'CEDULA',
   documentNumber: '',
@@ -176,8 +179,8 @@ export function CourierRegistrationPage() {
     sx: INPUT_SX
   });
 
-  const renderField = (name, label, extra) => (
-    <Box>
+  const renderField = (name, label, extra, span2 = false) => (
+    <Box sx={span2 ? SPAN_2_SX : undefined}>
       <Typography variant="caption" component="label" htmlFor={name} sx={LABEL_SX}>
         {label}
       </Typography>
@@ -186,7 +189,7 @@ export function CourierRegistrationPage() {
   );
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#FAF8F5', py: 4, px: { xs: 2, sm: 4 } }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#FAF8F5', py: { xs: 1.5, sm: 4 }, px: { xs: 1.5, sm: 4 } }}>
       <Paper
         elevation={0}
         sx={{
@@ -196,11 +199,11 @@ export function CourierRegistrationPage() {
           border: '1px solid #E4DED7',
           backgroundColor: '#fff',
           boxShadow: '0 12px 30px rgba(26,60,52,.06)',
-          p: { xs: 2.5, sm: 3.5 },
+          p: { xs: 2, sm: 3.5 },
           textAlign: 'left'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 1.5, sm: 3 } }}>
           <Box
             sx={{
               width: 34,
@@ -219,7 +222,7 @@ export function CourierRegistrationPage() {
           </Typography>
         </Box>
 
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2.5 } }}>
           {isSuccess && (
             <StatusMessage
               severity="success"
@@ -231,12 +234,12 @@ export function CourierRegistrationPage() {
           <Box
             sx={{
               display: 'grid',
-              gap: '18px 22px',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: { xs: '10px 12px', sm: '18px 22px' },
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
               alignItems: 'start'
             }}
           >
-            {renderField('fullName', 'NOMBRE COMPLETO', { required: true, placeholder: 'Ej. Ana Lucía Bermúdez' })}
+            {renderField('fullName', 'NOMBRE COMPLETO', { required: true, placeholder: 'Ej. Ana Lucía Bermúdez' }, true)}
             <Box>
               <Typography variant="caption" component="label" htmlFor="documentType" sx={LABEL_SX}>
                 TIPO DE DOCUMENTO
@@ -251,8 +254,25 @@ export function CourierRegistrationPage() {
             </Box>
             {renderField('documentNumber', 'NÚMERO DE DOCUMENTO', { required: true, placeholder: DOCUMENT_PLACEHOLDERS[formData.documentType] })}
             {renderField('phone', 'TELÉFONO (OPCIONAL)', { type: 'tel', placeholder: '8888-8888' })}
-            {renderField('email', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' })}
+            {renderField('email', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' }, true)}
             <Box>
+              <Typography variant="caption" component="label" htmlFor="maxPackageWeightKg" sx={LABEL_SX}>
+                CAPACIDAD MÁXIMA DE CARGA (KG)
+              </Typography>
+              <WeightWheelField
+                id="maxPackageWeightKg"
+                label="Capacidad máxima de carga"
+                value={formData.maxPackageWeightKg}
+                error={Boolean(fieldErrors.maxPackageWeightKg)}
+                onChange={(v) => handleChange({ target: { name: 'maxPackageWeightKg', value: v } })}
+              />
+              {fieldErrors.maxPackageWeightKg && (
+                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
+                  {fieldErrors.maxPackageWeightKg}
+                </Typography>
+              )}
+            </Box>
+            <Box sx={SPAN_2_SX}>
               <Typography variant="caption" component="label" htmlFor="schedule" sx={LABEL_SX}>
                 HORARIO
               </Typography>
@@ -279,26 +299,9 @@ export function CourierRegistrationPage() {
                 </Typography>
               )}
             </Box>
-            <Box>
-              <Typography variant="caption" component="label" htmlFor="maxPackageWeightKg" sx={LABEL_SX}>
-                CAPACIDAD MÁXIMA DE CARGA (KG)
-              </Typography>
-              <WeightWheelField
-                id="maxPackageWeightKg"
-                label="Capacidad máxima de carga"
-                value={formData.maxPackageWeightKg}
-                error={Boolean(fieldErrors.maxPackageWeightKg)}
-                onChange={(v) => handleChange({ target: { name: 'maxPackageWeightKg', value: v } })}
-              />
-              {fieldErrors.maxPackageWeightKg && (
-                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
-                  {fieldErrors.maxPackageWeightKg}
-                </Typography>
-              )}
-            </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
             <Button
               type="submit"
               variant="contained"
@@ -309,7 +312,7 @@ export function CourierRegistrationPage() {
                 textTransform: 'none',
                 fontWeight: 600,
                 px: 2.75,
-                py: 1.5,
+                py: { xs: 1.25, sm: 1.5 },
                 borderRadius: '10px',
                 gap: 1.2,
                 boxShadow: 'none'

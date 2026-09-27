@@ -2,17 +2,13 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
-import SalesHomePage from './pages/SalesHomePage';
-import CourierHomePage from './pages/CourierHomePage';
+import MainMenuPage from './pages/MainMenuPage';
 import PasswordRecoveryTestPage from './pages/PasswordRecoveryTestPage';
 import { MessengerFleetList } from './components/MessengerFleetList';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { useAuth } from './hooks/useAuth';
-import { ROLES, getHomeRoute } from './utils/roleRoutes';
-
-// Reemplaza el TODO anterior ("falta definir un router... temporalmente
-// se renderizan ambas pantallas apiladas") con rutas reales. Cada pantalla
-// vive en su propia ruta en vez de mostrarse todas a la vez.
+import MainMenuLayout from './components/layout/MainMenuLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import { ROLES } from './config/roles';
+import { ROUTES } from './config/routes';
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
 // pasar siempre por /login.
@@ -39,8 +35,8 @@ function LoginRoute() {
 
   return (
     <LoginPage
-      onLoginSuccess={(response) => navigate(getHomeRoute(response.role), { replace: true })}
-      onForgotPassword={() => navigate('/recuperar-contrasena')}
+      onLoginSuccess={() => navigate(ROUTES.MAIN_MENU)}
+      onForgotPassword={() => navigate(ROUTES.PASSWORD_RECOVERY)}
     />
   );
 }
@@ -48,33 +44,23 @@ function LoginRoute() {
 function PasswordRecoveryRoute() {
   const navigate = useNavigate();
 
-  return <PasswordRecoveryTestPage onBackToLogin={() => navigate('/login')} />;
+  return <PasswordRecoveryTestPage onBackToLogin={() => navigate(ROUTES.LOGIN)} />;
 }
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<RootRedirect />} />
-      <Route path="/login" element={<LoginRoute />} />
-      <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
-      {/* T17: /login y /recuperar-contrasena son públicas. Todo lo demás exige
-          sesión válida y va en el grupo del rol que puede verlo (allowedRoles):
-          una pantalla nueva se agrega DENTRO del grupo que le corresponde, y si
-          es para cualquier rol autenticado, en un grupo <ProtectedRoute />
-          sin allowedRoles. Un rol fuera del grupo vuelve a su propio inicio.
-          El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
-          rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USUARIO]} />}>
-        {/* Vista de Administradores (HU008) */}
-        <Route path="/administradores" element={<AdminManagement />} />
-        <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
-        <Route path="/mensajeros" element={<MessengerFleetList />} />
-      </Route>
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN_VENTAS]} />}>
-        <Route path="/ventas" element={<SalesHomePage />} />
-      </Route>
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.MENSAJERO]} />}>
-        <Route path="/mensajero" element={<CourierHomePage />} />
+      <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+      <Route path={ROUTES.LOGIN} element={<LoginRoute />} />
+      <Route path={ROUTES.PASSWORD_RECOVERY} element={<PasswordRecoveryRoute />} />
+
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
+        <Route element={<MainMenuLayout />}>
+          <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
+          <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
+          <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
+          <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
+        </Route>
       </Route>
     </Routes>
   );

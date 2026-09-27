@@ -67,7 +67,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: { xs: 1.5, sm: 4 } }}>
       <Container maxWidth={false}>
         <Paper elevation={0} sx={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid #E4DED7' }}>
           <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />
@@ -77,8 +77,8 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               px: { xs: 3, sm: 6 },
-              pt: 4.5,
-              pb: 5,
+              pt: { xs: 3, sm: 4.5 },
+              pb: { xs: 3, sm: 5 },
               textAlign: 'center',
             }}
           >
