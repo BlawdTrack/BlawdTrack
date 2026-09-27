@@ -290,7 +290,7 @@ export function EditMessenger({ initialCedula = '' }) {
   return (
     <Box className="edit-messenger-container">
       {/* Flota de Mensajeros — cuadro blanco que encapsula todo */}
-      <Paper elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', mb: 4, bgcolor: '#ffffff', overflowX: 'auto' }}>
+      <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #E4DED7', mb: 4, bgcolor: '#ffffff', overflowX: 'auto' }}>
         <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h5" className="edit-messenger-title" sx={{ fontSize: 22 }}>
             Flota de mensajeros
@@ -299,66 +299,51 @@ export function EditMessenger({ initialCedula = '' }) {
             Selecciona un mensajero para editar sus datos
           </Typography>
         </Box>
-        <Table sx={{ minWidth: 600, width: '100%' }}>
-          <TableHead>
+        <TableContainer>
+          <Table sx={{ minWidth: 600, width: '100%' }}>
+            <TableHead>
               <TableRow>
-                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Mensajero</TableCell>
-                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Cédula</TableCell>
-                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Horario</TableCell>
-                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Carga</TableCell>
-                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Estado</TableCell>
+                <TableCell sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Mensajero</TableCell>
+                <TableCell sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Cédula</TableCell>
+                <TableCell sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Horario</TableCell>
+                <TableCell sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Carga</TableCell>
+                <TableCell sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Estado</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {couriersList.map((courier) => {
                 const courierId = getCourierId(courier);
                 const isSelected = selectedCourierId === courierId;
-                const rowBg = isSelected ? '#F7F3EE' : '#ffffff';
-                const avatarBg = isSelected ? '#1A3C34' : '#F5F0EB';
-                const avatarColor = isSelected ? '#ffffff' : '#5E564E';
-                
                 return (
                   <TableRow
                     key={courierId}
-                    sx={{ bgcolor: rowBg, cursor: 'pointer', ':hover': { bgcolor: '#F0E9E5' } }}
+                    sx={{ bgcolor: isSelected ? '#F7F3EE' : '#ffffff', cursor: 'pointer', ':hover': { bgcolor: '#F0E9E5' } }}
                     onClick={() => handleRowClick(courier)}
                   >
-                    <TableCell component="td" sx={{ px: 4, py: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar
-                        sx={{
-                          bgcolor: avatarBg,
-                          color: avatarColor,
-                          fontWeight: 'bold',
-                          width: 32,
-                          height: 32
-                        }}
-                      >
-                        {getInitials(courier.fullName || courier.nombre)}
-                      </Avatar>
-                      <span sx={{ fontWeight: 500, color: '#1F2421' }}>{courier.fullName || courier.nombre}</span>
+                    <TableCell sx={{ px: 4, py: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ bgcolor: isSelected ? '#1A3C34' : '#F5F0EB', color: isSelected ? '#ffffff' : '#5E564E', fontWeight: 'bold', width: 32, height: 32 }}>
+                          {getInitials(courier.fullName || courier.nombre)}
+                        </Avatar>
+                        <Typography sx={{ fontWeight: 500, color: '#1F2421', fontSize: 14 }}>
+                          {courier.fullName || courier.nombre}
+                        </Typography>
+                      </Box>
                     </TableCell>
-                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                    <TableCell sx={{ px: 4, py: 2, fontSize: 12, color: '#5E564E' }}>
                       {courier.documentNumber || courier.idCard || courier.cedula || courier.id || ''}
                     </TableCell>
-                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                    <TableCell sx={{ px: 4, py: 2, fontSize: 12, color: '#5E564E' }}>
                       {courier.schedule || courier.horario || ''}
                     </TableCell>
-                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                    <TableCell sx={{ px: 4, py: 2, fontSize: 12, color: '#5E564E' }}>
                       {courier.maxLoadCapacityKg || courier.cap || courier.capacidad || ''} kg
                     </TableCell>
-                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                    <TableCell sx={{ px: 4, py: 2 }}>
                       {courier.status === 'ACTIVE' || !courier.estado ? (
-                        <Chip
-                          label='Activo'
-                          size="small"
-                          sx={{ bgcolor: '#E9F3EC', color: '#2F7D4F', fontWeight: 600 }}
-                        />
+                        <Chip label="Activo" size="small" sx={{ bgcolor: '#E9F3EC', color: '#2F7D4F', fontWeight: 600 }} />
                       ) : (
-                        <Chip
-                          label='Inactivo'
-                          size="small"
-                          sx={{ bgcolor: '#FCEDEA', color: '#C0392B', fontWeight: 600 }}
-                        />
+                        <Chip label="Inactivo" size="small" sx={{ bgcolor: '#FCEDEA', color: '#C0392B', fontWeight: 600 }} />
                       )}
                     </TableCell>
                   </TableRow>
@@ -366,15 +351,15 @@ export function EditMessenger({ initialCedula = '' }) {
               })}
               {couriersList.length === 0 && (
                 <TableRow>
-                  <TableCell component="td" colSpan={7} sx={{ textAlign: 'center', py: 12, color: '#9E968D' }}>
+                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 8, color: '#9E968D' }}>
                     No hay mensajeros disponibles
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-        </Box>
-        </Paper>
+        </TableContainer>
+      </Paper>
 
       {/* Formulario de Edición */}
       {currentCourier ? (
