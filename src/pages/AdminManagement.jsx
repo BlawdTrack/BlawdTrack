@@ -9,8 +9,6 @@ import {
   Divider,
   Snackbar,
   Alert,
-  BottomNavigation,
-  BottomNavigationAction,
   CircularProgress
 } from '@mui/material';
 
@@ -166,12 +164,12 @@ const AdminManagement = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f4f3ef', minHeight: '100vh', pb: { xs: 12, md: 4 } }}>
+    <Box sx={{ p: { xs: 1.5, md: 4 }, bgcolor: '#f4f3ef', minHeight: { md: '100vh' } }}>
       <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
         
         {/* BUSCADOR */}
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4, bgcolor: '#ffffff' }}>
-          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: { xs: 1.5, md: 4 }, bgcolor: '#ffffff' }}>
+          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid #e0e0e0' }}>
             <Typography 
               variant="overline" 
               sx={{ 
@@ -185,14 +183,14 @@ const AdminManagement = () => {
               BUSCAR ADMINISTRADOR POR CÉDULA
             </Typography>
           </Box>
-          <Box sx={{ p: 2.5, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, display: 'flex', flexDirection: 'row', gap: { xs: 1, sm: 2 } }}>
             <TextField 
               fullWidth variant="outlined" placeholder="1-2345-6789" size="small" 
               sx={{ bgcolor: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
             <Button 
               variant="contained" disableElevation
-              sx={{ bgcolor: '#1b3e32', color: '#fff', fontWeight: 'bold', px: 4, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
+              sx={{ bgcolor: '#1b3e32', color: '#fff', fontWeight: 'bold', px: { xs: 2, sm: 4 }, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
             >
               Buscar
             </Button>
@@ -200,8 +198,8 @@ const AdminManagement = () => {
         </Paper>
 
         {/* LISTA DE ADMINISTRADORES */}
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: 4, bgcolor: '#ffffff' }}>
-          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: { xs: 1.5, md: 4 }, bgcolor: '#ffffff' }}>
+          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid #e0e0e0' }}>
             <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
               Administradores
             </Typography>
@@ -255,7 +253,7 @@ const AdminManagement = () => {
 
         {/* AUDITORÍA */}
         <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', bgcolor: '#ffffff' }}>
-          <Box sx={{ p: 2.5, borderBottom: '1px solid #e0e0e0' }}>
+          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid #e0e0e0' }}>
             <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
               Auditoría de eliminaciones y creaciones
             </Typography>
@@ -270,7 +268,7 @@ const AdminManagement = () => {
               auditLogs.map((log, index) => (
                 <React.Fragment key={log.id}>
                   <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: '220px' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: { sm: '220px' } }}>
                       <Typography variant="body2" sx={{ color: '#666' }}>{log.date}</Typography>
                       <Typography variant="caption" sx={{ px: 1.5, py: 0.5, borderRadius: 1.5, fontWeight: 'bold', bgcolor: log.isCreation ? '#e8f5e9' : '#ffebee', color: log.isCreation ? '#2e7d32' : '#c62828' }}>
                         {log.action}
@@ -299,7 +297,7 @@ const AdminManagement = () => {
       />
 
       {/* TOAST */}
-      <Snackbar open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} sx={{ mb: { xs: 12, md: 0 } }}>
+      <Snackbar open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} sx={{ mb: { xs: 10, md: 0 } }}>
         <Alert severity="success" sx={{ width: '100%', bgcolor: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 2 }}>
           Administrador eliminado correctamente.
         </Alert>
@@ -310,7 +308,7 @@ const AdminManagement = () => {
         autoHideDuration={6000}
         onClose={() => setDeleteError(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        sx={{ mb: { xs: 12, md: 0 } }}
+        sx={{ mb: { xs: 10, md: 0 } }}
       >
         <Alert
           severity="error"
@@ -321,15 +319,6 @@ const AdminManagement = () => {
         </Alert>
       </Snackbar>
 
-      {/* NAVEGACIÓN MÓVIL EXACTA AL MOCKUP */}
-      <Box sx={{ display: { xs: 'block', sm: 'none' }, position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, bgcolor: '#ffffff', borderTopLeftRadius: 24, borderTopRightRadius: 24, boxShadow: '0px -4px 12px rgba(0,0,0,0.05)', pt: 1, pb: 2 }}>
-        <BottomNavigation showLabels value="admins" sx={{ bgcolor: 'transparent', height: 'auto', '& .MuiBottomNavigationAction-root': { minWidth: 'auto', padding: '8px 0' }, '& .Mui-selected': { color: '#ff6d00 !important' }, '& .MuiBottomNavigationAction-label': { fontSize: '0.75rem', fontWeight: '600', mt: 0.5 } }}>
-          <BottomNavigationAction label="Acceso" value="acceso" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
-          <BottomNavigationAction label="Mensajeros" value="mensajeros" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
-          <BottomNavigationAction label="Admins" value="admins" icon={<Box sx={{ width: 28, height: 28, bgcolor: '#ff6d00', borderRadius: 2 }} />} />
-          <BottomNavigationAction label="Permisos" value="permisos" icon={<Box sx={{ width: 26, height: 26, bgcolor: '#e0e0e0', borderRadius: 1.5 }} />} />
-        </BottomNavigation>
-      </Box>
     </Box>
   );
 };
