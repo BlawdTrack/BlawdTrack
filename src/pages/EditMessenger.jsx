@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -9,7 +9,15 @@ import {
   Chip,
   Avatar,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { useCourier } from '../hooks/useCourier';
@@ -23,10 +31,10 @@ export function EditMessenger({ initialCedula = '' }) {
   const { user, logout } = useAuth();
   const { loading: submitting, updateCourier, getCourierByCedula } = useCourier();
 
-  const [searchCedula, setSearchCedula] = useState(initialCedula);
+  const [couriersList, setCouriersList] = useState([]);
   const [currentCourier, setCurrentCourier] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState(null);
+  const [selectedCourierId, setSelectedCourierId] = useState(null);
+  const [isLoadingCouriers, setIsLoadingCouriers] = useState(true);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -63,8 +71,29 @@ export function EditMessenger({ initialCedula = '' }) {
   // Normalizar cédula para búsqueda insensible a tipo de documento o formato
   const normalizeId = (id) => (id || '').toString().replace(/[-\s]/g, '').toLowerCase();
 
+  const getCourierId = (courier) => 
+    courier.documentNumber || courier.idCard || courier.cedula || courier.id || courier.nationalId;
+
+  const loadCouriersList = useCallback(async () => {
+    setIsLoadingCouriers(true);
+    try {
+      const data = await listCouriers();
+      setCouriersList(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error al cargar la flota de mensajeros:', err);
+      setCouriersList([]);
+    } finally {
+      setIsLoadingCouriers(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCouriersList();
+  }, [loadCouriersList]);
+
   const loadMessengerData = (courier) => {
     setCurrentCourier(courier);
+    setSelectedCourierId(getCourierId(courier));
     const initialVals = {
       fullName: courier.fullName || courier.nombre || '',
       schedule: courier.schedule || courier.horario || '',
@@ -78,77 +107,22 @@ export function EditMessenger({ initialCedula = '' }) {
     setUpdateError(null);
   };
 
-  const handleSearch = async (e) => {
-    if (e) e.preventDefault();
-    const query = searchCedula.trim();
-    if (!query) {
-      setSearchError('Por favor ingrese la cédula del mensajero a buscar.');
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchError(null);
-
-    try {
-      // Intentar obtener de API
-      const fetched = await getCourierByCedula(query);
-      if (fetched) {
-        loadMessengerData(fetched);
-        setToast({
-          open: true,
-          message: `Mensajero ${fetched.fullName || fetched.nombre} cargado correctamente.`,
-          severity: 'success'
-        });
-        setIsSearching(false);
-        return;
-      }
-    } catch (err) {
-      // Buscar en lista local de respaldo si la API no encuentra o no responde
-      try {
-        const list = await listCouriers();
-        const normQuery = normalizeId(query);
-        const found = list.find((m) =>
-          normalizeId(m.documentNumber || m.idCard || m.cedula || m.id || m.nationalId) === normQuery
-        );
-
-        if (found) {
-          loadMessengerData(found);
-          setSearchError(null);
-          setToast({
-            open: true,
-            message: `Mensajero ${found.fullName || found.nombre} encontrado.`,
-            severity: 'success'
-          });
-          setIsSearching(false);
-          return;
-        }
-      } catch (listErr) {
-        console.error('Error al listar mensajeros:', listErr);
-      }
-
-      const msg = err.response?.data?.message || 'Mensajero no encontrado con la cédula proporcionada.';
-      setSearchError(msg);
-      setCurrentCourier(null);
-    } finally {
-      setIsSearching(false);
-    }
+  const handleRowClick = (courier) => {
+    loadMessengerData(courier);
   };
 
+  // Cargar por cédula inicial si se proporciona
   useEffect(() => {
-    if (initialCedula) {
-      handleSearch();
-    } else {
-      // Cargar el primer mensajero por defecto si existe en lista
-      listCouriers()
-        .then((data) => {
-          if (Array.isArray(data) && data.length > 0) {
-            setSearchCedula(data[0].documentNumber || data[0].idCard || data[0].cedula || '');
-            loadMessengerData(data[0]);
-          }
-        })
-        .catch(() => {});
+    if (initialCedula && couriersList.length > 0) {
+      const normInitial = normalizeId(initialCedula);
+      const found = couriersList.find((m) =>
+        normalizeId(getCourierId(m)) === normInitial
+      );
+      if (found) {
+        loadMessengerData(found);
+      }
     }
-  }, [initialCedula]);
+  }, [initialCedula, couriersList]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -338,71 +312,135 @@ export function EditMessenger({ initialCedula = '' }) {
         </Typography>
       </Box>
 
-      {/* Buscador de Mensajero por Cédula */}
-      <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #E4DED7', p: 3, mb: 4, bgcolor: '#ffffff' }}>
-        <Typography variant="overline" sx={{ color: '#1A3C34', fontWeight: 'bold', letterSpacing: '0.8px', display: 'block', mb: 1 }}>
-          BÚSQUEDA DE MENSAJERO POR CÉDULA / IDENTIFICACIÓN
+      {/* Encabezado de la flota */}
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h5" className="edit-messenger-title" sx={{ fontSize: 22 }}>
+          Flota de mensajeros
         </Typography>
-        <Box component="form" onSubmit={handleSearch} sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Ingrese cédula o número de documento (ej. 1-0345-0678)"
-            value={searchCedula}
-            onChange={(e) => setSearchCedula(e.target.value)}
-            sx={{ bgcolor: '#ffffff', borderRadius: 2 }}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSearching}
-            sx={{ bgcolor: '#1A3C34', color: '#ffffff', fontWeight: 'bold', px: 4, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
-          >
-            {isSearching ? <CircularProgress size={24} color="inherit" /> : 'Buscar'}
-          </Button>
-        </Box>
-        <Typography variant="caption" sx={{ color: '#9E968D', mt: 1, display: 'block' }}>
-          La búsqueda funciona independientemente del tipo de documento con el que fue registrado.
+        <Typography variant="body2" className="edit-messenger-subtitle" sx={{ fontSize: 14, color: '#6B6560' }}>
+          Selecciona un mensajero para editar sus datos
         </Typography>
-        {searchError && (
-          <Box sx={{ mt: 2 }}>
-            <StatusMessage severity="error" message={searchError} />
-          </Box>
-        )}
-      </Paper>
+      </Box>
+
+      {/* Flota de Mensajeros */}
+      <TableContainer component="Paper" elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', p: 3, mb: 4, bgcolor: '#ffffff' }}>
+        <TableContainer sx={{ p: 0 }}>
+          <Table sx={{ minWidth: 600 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell component="th" scope="col">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar
+                      sx={{
+                        bgcolor: '#EEEEEE',
+                        color: '#333333',
+                        fontWeight: 'bold',
+                        width: 32,
+                        height: 32
+                      }}
+                    >
+                      {getInitials((couriersList[0] || {}).fullName || (couriersList[0] || {}).nombre || '')}
+                    </Avatar>
+                    <span>Mensajero</span>
+                  </Box>
+                </TableCell>
+                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Cédula</TableCell>
+                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Horario</TableCell>
+                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Carga</TableCell>
+                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Estado</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {couriersList.map((courier) => {
+                const courierId = getCourierId(courier);
+                const isSelected = selectedCourierId === courierId;
+                const rowBg = isSelected ? '#F7F3EE' : '#ffffff';
+                const avatarBg = isSelected ? '#1A3C34' : '#F5F0EB';
+                const avatarColor = isSelected ? '#ffffff' : '#5E564E';
+                
+                return (
+                  <TableRow
+                    key={courierId}
+                    sx={{ bgcolor: rowBg, cursor: 'pointer', ':hover': { bgcolor: '#F0E9E5' } }}
+                    onClick={() => handleRowClick(courier)}
+                  >
+                    <TableCell component="td" sx={{ px: 4, py: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: avatarBg,
+                          color: avatarColor,
+                          fontWeight: 'bold',
+                          width: 32,
+                          height: 32
+                        }}
+                      >
+                        {getInitials(courier.fullName || courier.nombre)}
+                      </Avatar>
+                      <span sx={{ fontWeight: 500, color: '#1F2421' }}>{courier.fullName || courier.nombre}</span>
+                    </TableCell>
+                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                      {courier.documentNumber || courier.idCard || courier.cedula || courier.id || ''}
+                    </TableCell>
+                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                      {courier.schedule || courier.horario || ''}
+                    </TableCell>
+                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                      {courier.maxLoadCapacityKg || courier.cap || courier.capacidad || ''} kg
+                    </TableCell>
+                    <TableCell component="td" sx={{ px: 4, py: 3, fontSize: 12, color: '#5E564E' }}>
+                      {courier.status === 'ACTIVE' || !courier.estado ? (
+                        <Chip
+                          label='Activo'
+                          size="small"
+                          sx={{ bgcolor: '#E9F3EC', color: '#2F7D4F', fontWeight: 600 }}
+                        />
+                      ) : (
+                        <Chip
+                          label='Inactivo'
+                          size="small"
+                          sx={{ bgcolor: '#FCEDEA', color: '#C0392B', fontWeight: 600 }}
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {couriersList.length === 0 && (
+                <TableRow>
+                  <TableCell component="td" colSpan={7} sx={{ textAlign: 'center', py: 12, color: '#9E968D' }}>
+                    No hay mensajeros disponibles
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </TableContainer>
 
       {/* Formulario de Edición */}
       {currentCourier ? (
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #E4DED7', p: { xs: 2.5, md: 4 }, mb: 4, bgcolor: '#ffffff' }}>
+        <Paper elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', p: { xs: 2.5, md: 4 }, mb: 4, bgcolor: '#ffffff' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 2, mb: 3, borderBottom: '1px solid #E4DED7', flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Avatar sx={{ bgcolor: '#1A3C34', color: '#ffffff', fontWeight: 'bold', width: 44, height: 44 }}>
                 {getInitials(currentCourier.fullName || currentCourier.nombre)}
               </Avatar>
               <Box>
-                <Typography variant="h6" sx={{ color: '#1A3C34', fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ color: '#1A3C34', fontWeight: 600, fontSize: 18 }}>
                   Editar · {currentCourier.fullName || currentCourier.nombre}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9E968D' }}>
+                <Typography variant="body2" sx={{ color: '#9E968D', fontSize: 13 }}>
                   Cédula {currentCourier.documentNumber || currentCourier.idCard || currentCourier.cedula || currentCourier.id} · no editable
                 </Typography>
               </Box>
             </Box>
-            <Chip
-              label={formData.status === 'ACTIVE' ? 'Acceso Habilitado' : 'Acceso Revocado'}
-              sx={{
-                bgcolor: formData.status === 'ACTIVE' ? '#E9F3EC' : '#FCEDEA',
-                color: formData.status === 'ACTIVE' ? '#2F7D4F' : '#C0392B',
-                fontWeight: 700
-              }}
-            />
           </Box>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3, width: '100%' }}>
               <Box>
-                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block' }}>
-                  NOMBRE COMPLETO *
+                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.5px' }}>
+                  Nombre completo *
                 </Typography>
                 <TextField
                   fullWidth
@@ -412,13 +450,14 @@ export function EditMessenger({ initialCedula = '' }) {
                   error={Boolean(formErrors.fullName)}
                   helperText={formErrors.fullName}
                   placeholder="Nombre y apellidos"
-                  sx={{ bgcolor: '#ffffff', borderRadius: 2 }}
+                  InputProps={{ sx: { borderRadius: 2, fontSize: 14.5, border: '1.5px solid #DCD4CA' } }}
+                  sx={{ bgcolor: '#ffffff', '& .MuiOutlinedInput-root': { borderRadius: 2, '& fieldset': { borderColor: '#DCD4CA' } } }}
                 />
               </Box>
 
               <Box>
-                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block' }}>
-                  HORARIO *
+                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.5px' }}>
+                  Horario *
                 </Typography>
                 <TextField
                   fullWidth
@@ -428,15 +467,15 @@ export function EditMessenger({ initialCedula = '' }) {
                   error={Boolean(formErrors.schedule)}
                   helperText={formErrors.schedule}
                   placeholder="Ej. 6:00 am – 2:00 pm"
-                  sx={{ bgcolor: '#ffffff', borderRadius: 2 }}
+                  sx={{ bgcolor: '#ffffff', '& .MuiOutlinedInput-root': { borderRadius: 2, '& fieldset': { borderColor: '#DCD4CA' } } }}
                 />
               </Box>
             </Box>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3, width: '100%' }}>
               <Box>
-                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block' }}>
-                  CAPACIDAD MÁXIMA DE CARGA POR PAQUETE (KG) *
+                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.5px' }}>
+                  Capacidad máxima de carga (kg) *
                 </Typography>
                 <TextField
                   fullWidth
@@ -448,13 +487,13 @@ export function EditMessenger({ initialCedula = '' }) {
                   helperText={formErrors.maxLoadCapacityKg}
                   placeholder="Valor positivo (ej. 25)"
                   inputProps={{ min: "1", step: "any" }}
-                  sx={{ bgcolor: '#ffffff', borderRadius: 2 }}
+                  sx={{ bgcolor: '#ffffff', '& .MuiOutlinedInput-root': { borderRadius: 2, '& fieldset': { borderColor: '#DCD4CA' } } }}
                 />
               </Box>
 
               <Box>
-                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block' }}>
-                  NUEVA CONTRASEÑA (OPCIONAL)
+                <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#6B6560', mb: 0.8, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.5px' }}>
+                  Nueva contraseña (opcional)
                 </Typography>
                 <TextField
                   fullWidth
@@ -463,27 +502,27 @@ export function EditMessenger({ initialCedula = '' }) {
                   value={formData.password}
                   onChange={handleChange}
                   error={Boolean(formErrors.password)}
-                  helperText={formErrors.password || 'Dejar vacío si no desea modificar la contraseña'}
+                  helperText={formErrors.password || 'Dejar vacío para no cambiar'}
                   placeholder="••••••••"
-                  sx={{ bgcolor: '#ffffff', borderRadius: 2 }}
+                  sx={{ bgcolor: '#ffffff', '& .MuiOutlinedInput-root': { borderRadius: 2, '& fieldset': { borderColor: '#DCD4CA' } } }}
                 />
               </Box>
             </Box>
 
-            {/* Toggle de Estado de Acceso */}
-            <Box className="access-toggle-container">
+            {/* Estado de acceso */}
+            <Box sx={{ backgroundColor: '#F1ECE7', borderRadius: 3, padding: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
               <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1F2421' }}>
-                  Estado de acceso operativo
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1F2421', fontSize: 15 }}>
+                  Estado de acceso
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#6B6560', display: 'block' }}>
+                <Typography variant="caption" sx={{ color: '#6B6560', display: 'block', fontSize: 13, mt: 0.5 }}>
                   {formData.status === 'ACTIVE'
-                    ? 'Acceso activo. Al desactivarlo, se cerrará de inmediato la sesión del mensajero.'
-                    : 'Acceso revocado. El mensajero no puede iniciar sesión ni realizar entregas.'}
+                    ? 'Habilitado. Al revocarlo, la sesión activa se cierra de inmediato.'
+                    : 'Revocado. El mensajero no puede iniciar sesión.'}
                 </Typography>
                 {isStatusDisabled && (
-                  <Typography variant="caption" sx={{ color: '#C9860F', fontWeight: 600, mt: 0.5, display: 'block' }}>
-                    Cualquier cambio de estado debe realizarse antes de tener envíos en proceso y estando fuera de labores.
+                  <Typography variant="caption" sx={{ color: '#C0392B', fontWeight: 600, mt: 0.5, display: 'block', fontSize: 11 }}>
+                    Solo puedes cambiar el estado fuera de labores y sin envíos en proceso.
                   </Typography>
                 )}
               </Box>
@@ -494,21 +533,35 @@ export function EditMessenger({ initialCedula = '' }) {
                     onChange={handleStatusToggle}
                     disabled={isStatusDisabled}
                     color="success"
+                    sx={{ '& .MuiSwitch-thumb': { width: 18, height: 18 }, '& .MuiSwitch-track': { height: 22, borderRadius: 11 } }}
                   />
                 }
-                label={formData.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                label={
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1A3C34', fontSize: 13 }}>
+                    {formData.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                  </Typography>
+                }
+                sx={{ m: 0 }}
               />
             </Box>
 
             {updateError && <StatusMessage severity="error" message={updateError} />}
 
-            {/* Botones de Acción */}
             <Box sx={{ display: 'flex', gap: 2, mt: 1, flexWrap: 'wrap' }}>
               <Button
                 type="submit"
                 variant="contained"
                 disabled={submitting}
-                sx={{ bgcolor: '#1A3C34', color: '#ffffff', fontWeight: 'bold', px: 4, py: 1.5, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
+                sx={{
+                  bgcolor: '#1A3C34',
+                  color: '#ffffff',
+                  fontWeight: 'bold',
+                  px: 4,
+                  py: 1.5,
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  '&:hover': { bgcolor: '#122921' }
+                }}
               >
                 {submitting ? <CircularProgress size={24} color="inherit" /> : 'Guardar cambios'}
               </Button>
@@ -517,7 +570,15 @@ export function EditMessenger({ initialCedula = '' }) {
                 variant="outlined"
                 onClick={handleReset}
                 disabled={submitting}
-                sx={{ color: '#1A3C34', borderColor: '#DCD4CA', fontWeight: 'bold', px: 3, py: 1.5, textTransform: 'none', borderRadius: 2 }}
+                sx={{
+                  color: '#1A3C34',
+                  borderColor: '#DCD4CA',
+                  fontWeight: 'bold',
+                  px: 3,
+                  py: 1.5,
+                  textTransform: 'none',
+                  borderRadius: 2
+                }}
               >
                 Descartar
               </Button>
@@ -525,9 +586,9 @@ export function EditMessenger({ initialCedula = '' }) {
           </Box>
         </Paper>
       ) : (
-        <Paper elevation={0} sx={{ p: 4, textAlign: 'center', borderRadius: 3, border: '1px solid #E4DED7', bgcolor: '#ffffff', mb: 4 }}>
-          <Typography variant="body1" sx={{ color: '#6B6560' }}>
-            Ingrese una cédula en el buscador superior para cargar los datos del mensajero a modificar.
+        <Paper elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', p: 4, textAlign: 'center', bgcolor: '#ffffff', mb: 4 }}>
+          <Typography variant="body1" sx={{ color: '#6B6560', fontSize: 14 }}>
+            Selecciona un mensajero de la flota arriba para editar sus datos.
           </Typography>
         </Paper>
       )}
