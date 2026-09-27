@@ -1,9 +1,13 @@
-ALTER TABLE usuarios DROP INDEX uq_usuarios_cedula;
+ALTER TABLE usuarios
+    ADD tipo_documento VARCHAR(20) NULL;
 
-ALTER TABLE usuarios ADD COLUMN tipo_documento VARCHAR(20) NOT NULL DEFAULT 'CEDULA';
+ALTER TABLE usuarios
+    ADD numero_documento VARCHAR(50) NULL;
 
-ALTER TABLE usuarios RENAME COLUMN cedula TO numero_documento;
+UPDATE usuarios
+SET tipo_documento = 'CEDULA',
+    numero_documento = cedula
+WHERE tipo_documento IS NULL AND cedula IS NOT NULL;
 
-ALTER TABLE usuarios ALTER COLUMN tipo_documento DROP DEFAULT;
-
-ALTER TABLE usuarios ADD CONSTRAINT uq_usuarios_tipo_documento_numero_documento UNIQUE (tipo_documento, numero_documento);
+CREATE UNIQUE INDEX uq_usuarios_tipo_documento_numero_documento
+    ON usuarios (tipo_documento, numero_documento);

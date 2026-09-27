@@ -1,8 +1,18 @@
 package com.blawdgourmet.blawdtrack.auth.config;
 
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -10,13 +20,9 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.PermissionRepository;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -138,6 +144,7 @@ public class DataSeeder implements CommandLineRunner {
         User admin = User.builder()
                 .documentType(DocumentType.CEDULA)
                 .documentNumber("000000000")
+                .documentId("000000000")
                 .fullName("Alicia (Default Super User)")
                 .email(adminEmail)
                 .passwordHash(passwordEncoder.encode("ChangeMe123"))

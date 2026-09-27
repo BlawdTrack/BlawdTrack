@@ -1,43 +1,50 @@
 package com.blawdgourmet.blawdtrack.couriers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
+import org.springframework.mail.MailSendException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
-import com.blawdgourmet.blawdtrack.auth.service.EmailService;
-import com.blawdgourmet.blawdtrack.couriers.service.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
-import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.auth.service.EmailService;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.couriers.service.TemporaryPasswordGenerator;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.mail.MailSendException;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@SuppressWarnings({"unused", "deprecation"})
 class CourierRegistrationTest {
     private static final String BODY = """
             {"documentType":"CEDULA","documentNumber":"123456789","fullName":"Mensajero de prueba",
@@ -60,8 +67,8 @@ class CourierRegistrationTest {
     }
 
     private String token(String role, UserStatus status) {
-        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("690000069")
-                .fullName("Actor").email("actor69@example.com").passwordHash("unused")
+        var user = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("ACTOR69")
+                .documentId("ACTOR69").fullName("Actor").email("actor69@example.com").passwordHash("unused")
                 .status(status).role(roles.findByName(role).orElseThrow()).build());
         return jwt.generateToken(new UserPrincipal(user));
     }
@@ -151,7 +158,7 @@ class CourierRegistrationTest {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
         long userCount = users.count();
         long courierCount = couriers.count();
-        String body = field.equals("documentNumber") ? BODY.replace("123456789", " 690000069 ")
+        String body = field.equals("documentNumber") ? BODY.replace("123456789", " ACTOR69 ")
                 : BODY.replace("courier69@example.com", " ACTOR69@EXAMPLE.COM ");
         register(token, body).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("COURIER_CONFLICT"))
@@ -165,7 +172,7 @@ class CourierRegistrationTest {
     void telefonoExistenteEnOtroUsuarioSeRechazaConMensajeEspecifico() throws Exception {
         var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
         users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA).documentNumber("EXISTING-PHONE")
-                .fullName("Usuario existente").email("existing-phone@example.com")
+                .documentId("EXISTING-PHONE").fullName("Usuario existente").email("existing-phone@example.com")
                 .phone("88888888").passwordHash("unused")
                 .status(UserStatus.ACTIVE)
                 .role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
