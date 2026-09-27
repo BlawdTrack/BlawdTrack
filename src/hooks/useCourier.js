@@ -1,88 +1,151 @@
-import { useState } from 'react';
-import { registerCourier, updateCourier, getCourierByCedula } from '../services/CourierService';
+import { useRef, useState } from 'react';
+// Nota: Renombrar 'getCourierByCedula' a 'getCourierByDocumentNumber' en CourierService.js
+import { registerCourier, updateCourier, getCourierByDocumentNumber } from '../services/CourierService';
+import { normalizeCourierError } from '../utils/courierErrors';
 import { useAuth } from './useAuth';
 
 /**
- * Custom hook to manage courier-related operations and state
+ * Manages the courier registration/update requests and exposes outcomes.
  */
 export const useCourier = () => {
   const { logout } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  
+  // Estados unificados basados en develop
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [globalMessage, setGlobalMessage] = useState(null);
+  const [severity, setSeverity] = useState('error');
+  
+  // A ref blocks a second submit fired before the state update is rendered.
+  const inFlightRef = useRef(false);
 
-  const handleRegister = async (courierData) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
+  const clearFeedback = () => {
+    setIsSuccess(false);
+    setRegisteredEmail(null);
+    setFieldErrors({});
+    setGlobalMessage(null);
+  };
+
+  // ------------------------------------
+  // REGISTRO (Logica de Develop)
+  // ------------------------------------
+  const register = async (payload) => {
+    if (inFlightRef.current) return null;
+    inFlightRef.current = true;
+    setIsSubmitting(true);
+    clearFeedback();
 
     try {
-      const response = await registerCourier(courierData);
-      setSuccess(true);
-      return response;
-    } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Error executing courier registration';
-      setError(msg);
-      throw err;
+      const response = await registerCourier(payload);
+      setRegisteredEmail(response?.email ?? payload.email);
+      setIsSuccess(true);
+      return { ok: true };
+    } catch (error) {
+      const normalized = normalizeCourierError(error);
+      setFieldErrors(normalized.fieldErrors);
+      setGlobalMessage(normalized.globalMessage);
+      setSeverity(normalized.severity);
+      return { ok: false, fieldErrors: normalized.fieldErrors };
     } finally {
-      setLoading(false);
+      inFlightRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
-  const handleUpdate = async (idCard, courierData) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
+  // ------------------------------------
+  // ACTUALIZACIÓN (Lógica de tu Feature)
+  // ------------------------------------
+  const handleUpdate = async (documentNumber, courierData) => {
+    setIsSubmitting(true);
+    clearFeedback();
 
     try {
-      const response = await updateCourier(idCard, courierData);
-      setSuccess(true);
+      const response = await updateCourier(documentNumber, courierData);
+      setIsSuccess(true);
       return response;
     } catch (err) {
       if (err.response?.status === 401 && logout) {
         logout();
       }
       const msg = err.response?.data?.message || err.message || 'Error al actualizar datos del mensajero.';
-      setError(msg);
+      setGlobalMessage(msg);
+      setSeverity('error');
       throw err;
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleGetByCedula = async (idCard) => {
-    setLoading(true);
-    setError(null);
+  // ------------------------------------
+  // OBTENER MENSAJERO (Lógica de tu Feature adaptada)
+  // ------------------------------------
+  const handleGetByDocumentNumber = async (documentNumber) => {
+    setIsSubmitting(true);
+    clearFeedback();
 
     try {
-      const data = await getCourierByCedula(idCard);
+      const data = await getCourierByDocumentNumber(documentNumber);
       return data;
     } catch (err) {
       if (err.response?.status === 401 && logout) {
         logout();
       }
       const msg = err.response?.data?.message || err.message || 'Mensajero no encontrado.';
-      setError(msg);
+      setGlobalMessage(msg);
+      setSeverity('error');
       throw err;
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const resetState = () => {
-    setLoading(false);
-    setError(null);
-    setSuccess(false);
+  // ------------------------------------
+  // MANEJO DE ERRORES FRONTEND (Develop)
+  // ------------------------------------
+  const setValidationErrors = (errors) => {
+    setIsSuccess(false);
+    setGlobalMessage(null);
+    setFieldErrors(errors);
+  };
+
+  const setFieldError = (name, message) => {
+    setFieldErrors((previous) => ({ ...previous, [name]: message }));
+  };
+
+  const clearFieldError = (name) => {
+    setFieldErrors((previous) => {
+      if (!previous[name]) return previous;
+      const next = { ...previous };
+      delete next[name];
+      return next;
+    });
   };
 
   return {
-    loading,
-    error,
-    success,
-    registerCourier: handleRegister,
+    // Estados nativos de develop
+    isSubmitting,
+    isSuccess,
+    registeredEmail,
+    fieldErrors,
+    globalMessage,
+    severity,
+    
+    // Alias para compatibilidad con tu código actual de EditMessenger
+    loading: isSubmitting,
+    error: severity === 'error' ? globalMessage : null,
+    success: isSuccess,
+    
+    // Funciones
+    register,
+    registerCourier: register, // Alias por si lo estabas usando así
     updateCourier: handleUpdate,
-    getCourierByCedula: handleGetByCedula,
-    resetState
+    getCourierByDocumentNumber: handleGetByDocumentNumber,
+    resetState: clearFeedback,
+    setValidationErrors,
+    setFieldError,
+    clearFieldError,
   };
 };
 
