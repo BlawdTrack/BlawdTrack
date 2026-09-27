@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.dto.UserSessionState;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -37,22 +37,55 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Estado y versión de token de un usuario, sin cargar su rol ni los permisos.
      * Lo consulta el filtro JWT en cada petición para validar que la sesión sigue vigente.
      */
-    @Query("select u.status as status, u.tokenVersion as tokenVersion from User u where u.id = :id")
-    Optional<UserSessionState> findSessionStateById(@Param("id") Long id);
+    @Query("""
+            select u.status as status, u.tokenVersion as tokenVersion
+            from User u
+            where u.id = :id
+            """)
+    Optional<UserSessionState> findSessionStateById(
+            @Param("id") Long id
+    );
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update User u set u.lastLoginAt = :lastLoginAt where u.id = :id")
-    int updateLastLoginAt(@Param("id") Long id, @Param("lastLoginAt") LocalDateTime lastLoginAt);
+    @Modifying(
+            clearAutomatically = true,
+            flushAutomatically = true
+    )
+    @Query("""
+            update User u
+            set u.lastLoginAt = :lastLoginAt
+            where u.id = :id
+            """)
+    int updateLastLoginAt(
+            @Param("id") Long id,
+            @Param("lastLoginAt") LocalDateTime lastLoginAt
+    );
 
-    Optional<User> findByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
+    Optional<User> findByDocumentTypeAndDocumentNumber(
+            DocumentType documentType,
+            String documentNumber
+    );
 
     boolean existsByEmail(String email);
+
     boolean existsByEmailIgnoreCase(String email);
+
     boolean existsByDocumentId(String documentId);
-    boolean existsByDocumentTypeAndDocumentNumber(DocumentType documentType, String documentNumber);
+
+    boolean existsByDocumentTypeAndDocumentNumber(
+            DocumentType documentType,
+            String documentNumber
+    );
+
     boolean existsByPhone(String phone);
 
     // Excluyen al propio usuario para no dar un 409 falso al guardar sin cambios.
-    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
-    boolean existsByPhoneAndIdNot(String phone, Long id);
+    boolean existsByEmailIgnoreCaseAndIdNot(
+            String email,
+            Long id
+    );
+
+    boolean existsByPhoneAndIdNot(
+            String phone,
+            Long id
+    );
 }

@@ -1,10 +1,15 @@
 package com.blawdgourmet.blawdtrack.auth;
 
 import com.blawdgourmet.blawdtrack.users.model.Role;
+import com.blawdgourmet.blawdtrack.auth.security.JwtService;
+import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
+import com.blawdgourmet.blawdtrack.users.repository.PermissionRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -30,6 +35,8 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,7 +53,10 @@ class JwtIntegrationTest {
     @Autowired private MockMvc mvc;
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
+    @Autowired private PermissionRepository permissions;
+    @Autowired private EntityManager entityManager;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private JwtService jwtService;
     @Autowired private ObjectMapper objectMapper;
     @Value("${security.jwt.secret}") private String secret;
     @Value("${security.jwt.expiration-ms}") private long expirationMs;
@@ -89,11 +99,88 @@ class JwtIntegrationTest {
         mvc.perform(get("/test/jwt/me")).andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void tokenExistenteUsaPermisosActualizadosEnCadaSolicitud() throws Exception {
+        Permission permission = permissions.save(Permission.builder()
+                .code("TASK103_ACCESS").description("Acceso de prueba").build());
+        Role role = roles.saveAndFlush(Role.builder().name("TASK103_ROLE")
+                .permissions(new HashSet<>(Set.of(permission))).build());
+        users.saveAndFlush(User.builder().nationalId("TASK103")
+                .fullName("Usuario permisos").email("task103@example.com")
+                .passwordHash(passwordEncoder.encode("Task103-password!"))
+                .status(UserStatus.ACTIVE).role(role).build());
+
+        var login = mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"task103@example.com\",\"password\":\"Task103-password!\"}"))
+                .andExpect(status().isOk()).andReturn();
+        String token = objectMapper.readTree(login.getResponse().getContentAsString())
+                .get("token").asText();
+
+        mvc.perform(get("/test/jwt/permission").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        role.setPermissions(new HashSet<>());
+        role = roles.saveAndFlush(role);
+        entityManager.clear();
+        assertThat(roles.findById(role.getId()).orElseThrow().getPermissions()).isEmpty();
+        mvc.perform(get("/test/jwt/permission").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+
+        role = roles.findById(role.getId()).orElseThrow();
+        role.setPermissions(new HashSet<>(Set.of(permission)));
+        roles.saveAndFlush(role);
+        entityManager.clear();
+        mvc.perform(get("/test/jwt/permission").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void tokenExistenteUsaRolYEstadoActualYDejaDeServirSiElUsuarioSeElimina() throws Exception {
+        Role originalRole = roles.save(Role.builder().name("TASK103_ORIGINAL").build());
+        Role newRole = roles.save(Role.builder().name("TASK103_NEW").build());
+        User user = users.saveAndFlush(User.builder().nationalId("TASK103-STATE")
+                .fullName("Usuario sesión vigente").email("task103-state@example.com")
+                .passwordHash("unused").status(UserStatus.ACTIVE).role(originalRole).build());
+        String token = jwtService.generateToken(new UserPrincipal(user));
+
+        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        user.setRole(newRole);
+        users.saveAndFlush(user);
+        entityManager.clear();
+        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+
+        user = users.findById(user.getId()).orElseThrow();
+        user.setRole(originalRole);
+        user.setStatus(UserStatus.INACTIVE);
+        users.saveAndFlush(user);
+        entityManager.clear();
+        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+
+        user = users.findById(user.getId()).orElseThrow();
+        user.setStatus(UserStatus.ACTIVE);
+        users.saveAndFlush(user);
+        entityManager.clear();
+        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        users.deleteById(user.getId());
+        users.flush();
+        entityManager.clear();
+        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+    }
+
     @ParameterizedTest
-    @ValueSource(strings = {"expired", "wrong-signature", "missing-expiration", "missing-subject", "missing-roles"})
+    @ValueSource(strings = {"expired", "wrong-signature", "missing-expiration", "missing-subject", "missing-id", "missing-roles"})
     void tokensInvalidosNoPermitenAcceso(String scenario) throws Exception {
         var builder = Jwts.builder();
         if (!scenario.equals("missing-subject")) builder.subject("task55@example.com");
+        if (!scenario.equals("missing-id")) builder.claim("id", 1L);
         if (!scenario.equals("missing-roles")) builder.claim("roles", "ROLE_TASK55_ROLE");
         if (!scenario.equals("missing-expiration")) {
             builder.expiration(new Date(System.currentTimeMillis()
@@ -129,5 +216,13 @@ class JwtIntegrationTest {
         @GetMapping("/test/jwt/admin")
         @PreAuthorize("hasRole('SUPER_USER')")
         public String admin() { return "admin"; }
+
+        @GetMapping("/test/jwt/permission")
+        @PreAuthorize("hasAuthority('TASK103_ACCESS')")
+        public String permission() { return "allowed"; }
+
+        @GetMapping("/test/jwt/current-role")
+        @PreAuthorize("hasRole('TASK103_ORIGINAL')")
+        public String currentRole() { return "allowed"; }
     }
 }
