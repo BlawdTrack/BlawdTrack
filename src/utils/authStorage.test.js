@@ -13,23 +13,28 @@ const LOGIN_RESPONSE = {
   token: 'jwt-de-prueba',
   type: 'Bearer',
   id: 7,
-  fullName: 'Alicia Prueba',
-  email: 'alicia@blawdgourmet.com',
+  fullName: 'Super Usuario',
+  email: 'superadmin@blawdgourmet.com',
   role: 'SUPER_USUARIO',
   permissions: ['USER_CREATE', 'COURIER_READ'],
 };
 
 const EXPECTED_USER = {
   id: 7,
-  fullName: 'Alicia Prueba',
-  email: 'alicia@blawdgourmet.com',
+  fullName: 'Super Usuario',
+  email: 'superadmin@blawdgourmet.com',
   role: 'SUPER_USUARIO',
   permissions: ['USER_CREATE', 'COURIER_READ'],
 };
 
 const base64Url = (object) =>
-  btoa(JSON.stringify(object)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-const jwtWithExp = (exp) => `header.${base64Url({ exp })}.signature`;
+  btoa(JSON.stringify(object))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+const jwtWithExp = (exp) =>
+  `header.${base64Url({ exp })}.signature`;
 
 describe('authStorage con la respuesta plana del backend', () => {
   beforeEach(() => {
@@ -37,7 +42,9 @@ describe('authStorage con la respuesta plana del backend', () => {
   });
 
   it('buildUserFromLoginResponse toma los campos del nivel superior, incluidos los permisos', () => {
-    expect(buildUserFromLoginResponse(LOGIN_RESPONSE)).toEqual(EXPECTED_USER);
+    expect(buildUserFromLoginResponse(LOGIN_RESPONSE)).toEqual(
+      EXPECTED_USER
+    );
   });
 
   it('saveAuthSession guarda el token y el usuario con sus permisos', () => {
@@ -52,6 +59,7 @@ describe('authStorage con la respuesta plana del backend', () => {
     saveAuthSession(LOGIN_RESPONSE);
 
     const user = getStoredUser();
+
     expect(user.id).toBeDefined();
     expect(user.fullName).toBeDefined();
     expect(user.role).toBeDefined();
@@ -77,27 +85,38 @@ describe('authStorage con la respuesta plana del backend', () => {
   describe('hasActiveSession', () => {
     it('es false sin nada guardado o con solo una de las dos entradas', () => {
       expect(hasActiveSession()).toBe(false);
+
       localStorage.setItem('token', 'abc');
+
       expect(hasActiveSession()).toBe(false);
     });
 
     it('es true con un token que no es JWT (token de mock) y un usuario guardado', () => {
-      saveAuthSession({ ...LOGIN_RESPONSE, token: 'not-a-jwt' });
+      saveAuthSession({
+        ...LOGIN_RESPONSE,
+        token: 'not-a-jwt',
+      });
+
       expect(hasActiveSession()).toBe(true);
     });
 
     it('es true con un JWT que no ha vencido', () => {
       saveAuthSession({
         ...LOGIN_RESPONSE,
-        token: jwtWithExp(Math.floor(Date.now() / 1000) + 3600),
+        token: jwtWithExp(
+          Math.floor(Date.now() / 1000) + 3600
+        ),
       });
+
       expect(hasActiveSession()).toBe(true);
     });
 
     it('es false y limpia la sesión con un JWT vencido', () => {
       saveAuthSession({
         ...LOGIN_RESPONSE,
-        token: jwtWithExp(Math.floor(Date.now() / 1000) - 10),
+        token: jwtWithExp(
+          Math.floor(Date.now() / 1000) - 10
+        ),
       });
 
       expect(hasActiveSession()).toBe(false);
