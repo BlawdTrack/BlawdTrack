@@ -80,11 +80,13 @@ function App() {
           El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
           rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
+        {/* Mantenemos el MainMenuLayout de develop para que tu pantalla tenga menú */}
         <Route element={<MainMenuLayout />}>
           <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
           <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
           <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
           <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
+          <Route path="/gestion-roles" element={<RoleAccessManagement />} />
         </Route>
       </Route>
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
