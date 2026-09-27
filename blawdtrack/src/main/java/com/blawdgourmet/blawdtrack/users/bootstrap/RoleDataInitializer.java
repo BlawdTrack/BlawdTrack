@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class RoleDataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;

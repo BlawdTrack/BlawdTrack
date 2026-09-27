@@ -23,7 +23,7 @@ import com.blawdgourmet.blawdtrack.auth.dto.LoginRequest;
 import com.blawdgourmet.blawdtrack.auth.dto.LoginResponse;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;

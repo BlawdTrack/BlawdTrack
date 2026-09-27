@@ -26,7 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.model.Role;

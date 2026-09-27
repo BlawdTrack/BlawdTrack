@@ -8,26 +8,30 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
-import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
-import com.blawdgourmet.blawdtrack.users.repository.PermissionRepository;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Crea el Super Usuario por defecto para desarrollo/pruebas. Los roles y
+ * permisos base los siembra {@link com.blawdgourmet.blawdtrack.users.bootstrap.RoleDataInitializer},
+ * que corre antes (@Order) para que el rol Super Usuario ya exista aquí.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Order(2)
 public class DataSeeder implements CommandLineRunner {
 
     private static final String DEFAULT_SUPER_USER_EMAIL =
@@ -43,7 +47,6 @@ public class DataSeeder implements CommandLineRunner {
             "ChangeMe123";
 
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -248,6 +251,10 @@ public class DataSeeder implements CommandLineRunner {
             );
             return;
         }
+
+        Role superUserRole = roleRepository.findByName(RoleName.SUPER_USER)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Role not seeded: " + RoleName.SUPER_USER));
 
         User admin = User.builder()
                 .documentType(DocumentType.CEDULA)

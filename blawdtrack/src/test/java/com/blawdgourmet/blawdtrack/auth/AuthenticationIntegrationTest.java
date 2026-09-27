@@ -2,6 +2,9 @@ package com.blawdgourmet.blawdtrack.auth;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -21,6 +24,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -28,7 +32,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/** Task #53: endpoint, filtros, AuthenticationManager, BCrypt y repositorios reales con H2. */
+/**
+ * Task #53: endpoint, filtros, AuthenticationManager, BCrypt y repositorios reales con H2.
+ * Task #61 (T15): flujo completo de login por rol, usando los roles y permisos
+ * sembrados por RoleDataInitializer en lugar de datos de prueba inventados.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -118,6 +126,32 @@ class AuthenticationIntegrationTest {
 
         expectInvalidCredentials(login(EMAIL, user.getPasswordHash()));
         verifyNoInteractions(jwtService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {RoleName.SUPER_USER, RoleName.SALES_ADMIN, RoleName.COURIER})
+    void loginExitosoDevuelveElRolYLosPermisosSembradosParaCadaRol(String roleName) throws Exception {
+        Role role = roles.findByName(roleName)
+                .orElseThrow(() -> new IllegalStateException("Rol no sembrado por RoleDataInitializer: " + roleName));
+        String[] expectedPermissions = role.getPermissions().stream().map(Permission::getCode).toArray(String[]::new);
+        assertThat(expectedPermissions).isNotEmpty();
+
+        String email = "t15-%s@example.com".formatted(roleName.toLowerCase());
+        users.saveAndFlush(User.builder()
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("T15-" + roleName)
+                .fullName("Usuario " + roleName)
+                .email(email)
+                .passwordHash(passwordEncoder.encode(PASSWORD))
+                .status(UserStatus.ACTIVE)
+                .role(role)
+                .build());
+        when(jwtService.generateToken(any(UserPrincipal.class))).thenReturn("test-jwt");
+
+        login(email, PASSWORD)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value(roleName))
+                .andExpect(jsonPath("$.permissions", containsInAnyOrder(expectedPermissions)));
     }
 
     @ParameterizedTest
