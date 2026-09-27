@@ -373,8 +373,8 @@ export function EditMessenger({ initialCedula = '' }) {
               )}
             </TableBody>
           </Table>
-        </Paper>
         </Box>
+        </Paper>
 
       {/* Formulario de Edición */}
       {currentCourier ? (
