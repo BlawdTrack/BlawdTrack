@@ -13,6 +13,7 @@ import {
 } from '../config/roleAccessCatalog';
 import { findCourierByDocumentNumber } from '../services/CourierService';
 import './RoleAccessManagement.css';
+import { replaceRolePermissions } from '../services/RoleAccessService';
 
 const getPermissionCodes = (role) => new Set(
   role.permissions
@@ -70,6 +71,8 @@ function RoleAccessManagement() {
   const [searchError, setSearchError] = useState('');
   const [searchMessage, setSearchMessage] = useState('');
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const hasChanges = ROLE_ACCESS_CATALOG.some((role) => (
     role.editable
     && !sameSet(
@@ -130,10 +133,41 @@ function RoleAccessManagement() {
     ));
   };
 
-  const handleSave = () => {
-    if (!hasChanges) return;
-    setAppliedPermissionCodesByRole(copyPermissionCodesByRole(permissionCodesByRole));
-    setToast({ open: true, severity: 'success', message: 'Cambios aplicados.' });
+  const handleSave = async () => {
+    if (!hasChanges || isSaving) return;
+    setIsSaving(true);
+    setSaveError('');
+
+    const rolesToUpdate = ROLE_ACCESS_CATALOG.filter(
+      (role) => role.editable && !sameSet(
+        permissionCodesByRole[role.code],
+        appliedPermissionCodesByRole[role.code]
+      )
+    );
+
+    try {
+      for (const role of rolesToUpdate) {
+        const permissionIds = Array.from(permissionCodesByRole[role.code]);
+        await replaceRolePermissions(role.code, permissionIds);
+      }
+
+      setAppliedPermissionCodesByRole(copyPermissionCodesByRole(permissionCodesByRole));
+      setToast({ open: true, severity: 'success', message: 'Cambios aplicados correctamente.' });
+    } catch (error) {
+      console.error('Error al guardar los cambios de permisos:', error);
+      let errorMessage = 'No se pudo guardar los cambios.';
+      if (error.response?.status === 403) {
+        errorMessage = 'No tienes permiso para modificar los permisos de este rol. Verifica tu rol actual.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Tu sesión expiró. Inicia sesión nuevamente para continuar.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      setSaveError(errorMessage);
+      setToast({ open: true, severity: 'error', message: errorMessage });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -213,13 +247,21 @@ function RoleAccessManagement() {
                 className="access-primary-button"
                 type="button"
                 onClick={handleSave}
-                disabled={!hasChanges}
+                disabled={!hasChanges || isSaving}
               >
-                <SaveOutlined aria-hidden="true" />
-                Aplicar cambios
+                {isSaving
+                  ? <CircularProgress size={19} color="inherit" />
+                  : <SaveOutlined aria-hidden="true" />}
+                {isSaving ? 'Guardando...' : 'Aplicar cambios'}
               </button>
             </div>
           </div>
+
+          {saveError && (
+            <p className="access-inline-error" role="alert" style={{ marginTop: '1rem' }}>
+              {saveError}
+            </p>
+          )}
 
           {ROLE_ACCESS_CATALOG.map((role) => {
             const selectedPermissionCodes = permissionCodesByRole[role.code];
