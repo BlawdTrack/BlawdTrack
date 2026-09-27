@@ -289,19 +289,17 @@ export function EditMessenger({ initialCedula = '' }) {
 
   return (
     <Box className="edit-messenger-container">
-      {/* Encabezado de la flota */}
-      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h5" className="edit-messenger-title" sx={{ fontSize: 22 }}>
-          Flota de mensajeros
-        </Typography>
-        <Typography variant="body2" className="edit-messenger-subtitle" sx={{ fontSize: 14, color: '#6B6560' }}>
-          Selecciona un mensajero para editar sus datos
-        </Typography>
-      </Box>
-
-      {/* Flota de Mensajeros */}
-      <TableContainer component="Paper" elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', p: 0, mb: 4, bgcolor: '#ffffff' }}>
-        <Table sx={{ minWidth: 600 }}>
+      {/* Flota de Mensajeros — cuadro blanco que encapsula todo */}
+      <TableContainer component="Paper" elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', mb: 4, bgcolor: '#ffffff', overflowX: 'auto' }}>
+        <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+          <Typography variant="h5" className="edit-messenger-title" sx={{ fontSize: 22 }}>
+            Flota de mensajeros
+          </Typography>
+          <Typography variant="body2" className="edit-messenger-subtitle" sx={{ fontSize: 14, color: '#6B6560' }}>
+            Selecciona un mensajero para editar sus datos
+          </Typography>
+        </Box>
+        <Table sx={{ minWidth: 600, width: '100%' }}>
           <TableHead>
               <TableRow>
                 <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Mensajero</TableCell>
@@ -375,6 +373,7 @@ export function EditMessenger({ initialCedula = '' }) {
               )}
             </TableBody>
           </Table>
+        </Box>
         </TableContainer>
 
       {/* Formulario de Edición */}
