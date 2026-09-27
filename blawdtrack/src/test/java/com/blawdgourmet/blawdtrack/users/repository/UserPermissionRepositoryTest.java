@@ -1,6 +1,5 @@
 package com.blawdgourmet.blawdtrack.users.repository;
 
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -32,8 +31,7 @@ class UserPermissionRepositoryTest {
                 .permissions(Set.of(assigned))
                 .build());
         User user = userRepository.save(User.builder()
-                .documentType(DocumentType.CEDULA)
-                .documentNumber("101010101")
+                .documentId("101010101")
                 .fullName("Mensajero de prueba")
                 .email("mensajero@prueba.test")
                 .passwordHash("hash")

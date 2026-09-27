@@ -1,9 +1,10 @@
 package com.blawdgourmet.blawdtrack.couriers.dto;
 
-import com.blawdgourmet.blawdtrack.couriers.model.Courier;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
-import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import java.math.BigDecimal;
+
+import com.blawdgourmet.blawdtrack.couriers.model.Courier;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 public record CourierResponse(Long id, Long userId, DocumentType documentType, String documentNumber,
                               String fullName, String email, String phone, String schedule,
