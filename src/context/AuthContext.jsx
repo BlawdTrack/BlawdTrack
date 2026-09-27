@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { login as loginService } from '../services/AuthService';
 import {
   saveAuthSession,
@@ -8,6 +8,8 @@ import {
   buildUserFromLoginResponse,
 } from '../utils/authStorage';
 import { getLoginError } from '../utils/authErrors';
+import { getHomeRoute, UNKNOWN_ROLE_ERROR } from '../utils/roleRoutes';
+import { SESSION_EXPIRED_ERROR, setSessionExpiredHandler } from '../api/sessionExpiry';
 import { AuthContext } from './authContextInstance';
 
 // Este archivo solo exporta el componente AuthProvider a propósito, para
@@ -21,10 +23,29 @@ import { AuthContext } from './authContextInstance';
 // App, y viceversa). Con Context, todos comparten el mismo 'user', así
 // que al refrescar la página cualquier componente puede saber si ya hay
 // sesión activa sin volver a pasar por el formulario.
+
+// T12: 'user' solo llega a existir con un rol que tiene una ruta de inicio
+// conocida (ROLE_HOME_ROUTES). Así, fuera de este archivo, nadie necesita
+// volver a validar el rol: si hay 'user', su ruta de inicio existe. Una
+// sesión guardada con un rol que ya no se reconoce (por ejemplo, editada a
+// mano en localStorage) se limpia aquí en silencio, sin mensaje de error,
+// porque no es una acción del usuario en curso.
+function getValidStoredUser() {
+  if (!hasActiveSession()) return null;
+
+  const storedUser = getStoredUser();
+  if (!storedUser || !getHomeRoute(storedUser.role)) {
+    clearAuthSession();
+    return null;
+  }
+
+  return storedUser;
+}
+
 export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [user, setUser] = useState(() => (hasActiveSession() ? getStoredUser() : null));
+  const [user, setUser] = useState(getValidStoredUser);
 
   const login = async (email, password) => {
     setLoading(true);
@@ -32,11 +53,23 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await loginService(email, password);
+
+      if (!getHomeRoute(response.role)) {
+        // Rol que el backend devuelve pero el frontend no reconoce: se
+        // trata igual que un login fallido, no se guarda la sesión.
+        setError(UNKNOWN_ROLE_ERROR);
+        const roleError = new Error('ROL_NO_RECONOCIDO');
+        roleError.isRoleValidation = true;
+        throw roleError;
+      }
+
       saveAuthSession(response);
       setUser(buildUserFromLoginResponse(response));
       return response;
     } catch (err) {
-      setError(getLoginError(err));
+      if (!err.isRoleValidation) {
+        setError(getLoginError(err));
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -50,8 +83,23 @@ export function AuthProvider({ children }) {
 
   const resetError = () => setError(null);
 
+  // T17: sesión vencida o rechazada por el backend (401 NO_AUTENTICADO, o
+  // exp vencido detectado al navegar). Limpia la sesión y deja el aviso
+  // para el login; la redirección la hace ProtectedRoute al ver user = null.
+  const expireSession = useCallback(() => {
+    clearAuthSession();
+    setUser(null);
+    setError(SESSION_EXPIRED_ERROR);
+  }, []);
+
+  // El interceptor de axios vive fuera de React: se le registra este handler
+  // para que pueda avisar cuando llegue un 401 de un endpoint protegido.
+  useEffect(() => setSessionExpiredHandler(expireSession), [expireSession]);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, error, resetError }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, loading, error, resetError, expireSession }}
+    >
       {children}
     </AuthContext.Provider>
   );
