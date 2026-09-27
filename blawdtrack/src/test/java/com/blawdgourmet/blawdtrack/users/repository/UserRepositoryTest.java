@@ -1,6 +1,5 @@
 package com.blawdgourmet.blawdtrack.users.repository;
 
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -55,8 +54,7 @@ class UserRepositoryTest {
     @Test
     void findByEmail_conCorreoExistente_devuelveUsuarioConRolYPermisos() {
         User user = User.builder()
-                .documentType(DocumentType.CEDULA)
-                .documentNumber("0101010101")
+                .documentId("0101010101")
                 .fullName("Genesis Silesky")
                 .email("genesis@blawdtrack.com")
                 .passwordHash("hash-no-real")

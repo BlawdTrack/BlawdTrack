@@ -1,24 +1,30 @@
 package com.blawdgourmet.blawdtrack.couriers.controller;
 
-import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
-import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
-import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
-import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
-import com.blawdgourmet.blawdtrack.couriers.service.CourierHasActiveAssignmentsException;
-import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
-import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
-import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
+import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/couriers")
@@ -26,27 +32,20 @@ import java.util.List;
 public class CourierController {
     private final CourierService service;
 
+    @GetMapping
+    public List<CourierResponse> list() {
+        return service.list();
+    }
+
     @PostMapping
     public ResponseEntity<CourierResponse> register(@Valid @RequestBody CreateCourierRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
     }
 
     @PutMapping("/{id}")
-    public CourierResponse update(@PathVariable Long id,
-                                  @Valid @RequestBody UpdateCourierRequest request,
-                                  @AuthenticationPrincipal AuthenticatedUser actor) {
-        return service.update(id, request, actor);
-    }
-
-    @PatchMapping("/{id}/deactivate")
-    public CourierResponse deactivate(@PathVariable Long id,
-                                      @AuthenticationPrincipal AuthenticatedUser actor) {
-        return service.deactivate(id, actor);
-    }
-
-    @GetMapping
-    public List<CourierResponse> list() {
-        return service.list();
+    public CourierResponse update(@PathVariable String id,
+                                  @Valid @RequestBody UpdateCourierRequest request) {
+        return service.update(id, request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -68,12 +67,6 @@ public class CourierController {
     public ResponseEntity<ErrorResponse> notFound(CourierNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
                 .code("COURIER_NOT_FOUND").message(ex.getMessage()).status(404).build());
-    }
-
-    @ExceptionHandler(CourierHasActiveAssignmentsException.class)
-    public ResponseEntity<ErrorResponse> hasActiveAssignments(CourierHasActiveAssignmentsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder()
-                .code("COURIER_HAS_ACTIVE_ASSIGNMENTS").message(ex.getMessage()).status(409).build());
     }
 
     // Las restricciones únicas también protegen frente a registros simultáneos.

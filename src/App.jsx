@@ -10,8 +10,28 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { ROLES } from './config/roles';
 import { ROUTES } from './config/routes';
 
+// T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
+// pasar siempre por /login.
+function RootRedirect() {
+  const { user } = useAuth();
+  // Un rol sin inicio mapeado no debería existir (AuthContext no lo permite);
+  // si pasara, se trata como sin sesión en vez de navegar a "null".
+  const homeRoute = user ? getHomeRoute(user.role) : null;
+  return <Navigate to={homeRoute ?? '/login'} replace />;
+}
+
 function LoginRoute() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Sesión ya activa (restaurada al refrescar, o entrando directo a
+  // /login): la manda a su inicio en vez de mostrarle el formulario.
+  // Con un rol sin inicio mapeado (no debería existir) se muestra el formulario
+  // en vez de navegar a "null"; ProtectedRoute ya se encarga de cerrar esa sesión.
+  const homeRoute = user ? getHomeRoute(user.role) : null;
+  if (homeRoute) {
+    return <Navigate to={homeRoute} replace />;
+  }
 
   return (
     <LoginPage

@@ -8,74 +8,98 @@ import {
   hasActiveSession,
 } from './authStorage';
 
-const loginResponse = (token = 'plain-token') => ({
-  token,
+// Forma real del backend vivo (blawdtrack/, auth/dto/LoginResponse.java).
+const LOGIN_RESPONSE = {
+  token: 'jwt-de-prueba',
   type: 'Bearer',
-  id: 1,
-  fullName: 'Alicia Admin',
+  id: 7,
+  fullName: 'Alicia Prueba',
   email: 'alicia@blawdgourmet.com',
   role: 'SUPER_USUARIO',
-  permissions: ['USER_CREATE'],
-});
+  permissions: ['USER_CREATE', 'COURIER_READ'],
+};
+
+const EXPECTED_USER = {
+  id: 7,
+  fullName: 'Alicia Prueba',
+  email: 'alicia@blawdgourmet.com',
+  role: 'SUPER_USUARIO',
+  permissions: ['USER_CREATE', 'COURIER_READ'],
+};
 
 const base64Url = (object) =>
   btoa(JSON.stringify(object)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const jwtWithExp = (exp) => `header.${base64Url({ exp })}.signature`;
 
-beforeEach(() => localStorage.clear());
-
-describe('authStorage', () => {
-  it('builds the user from the flat login response without the token', () => {
-    expect(buildUserFromLoginResponse(loginResponse())).toEqual({
-      id: 1,
-      fullName: 'Alicia Admin',
-      email: 'alicia@blawdgourmet.com',
-      role: 'SUPER_USUARIO',
-      permissions: ['USER_CREATE'],
-    });
+describe('authStorage con la respuesta plana del backend', () => {
+  beforeEach(() => {
+    localStorage.clear();
   });
 
-  it('saves and reads the token and the user', () => {
-    saveAuthSession(loginResponse('abc'));
-    expect(getStoredToken()).toBe('abc');
-    expect(getStoredUser().email).toBe('alicia@blawdgourmet.com');
+  it('buildUserFromLoginResponse toma los campos del nivel superior, incluidos los permisos', () => {
+    expect(buildUserFromLoginResponse(LOGIN_RESPONSE)).toEqual(EXPECTED_USER);
+  });
+
+  it('saveAuthSession guarda el token y el usuario con sus permisos', () => {
+    saveAuthSession(LOGIN_RESPONSE);
+
+    expect(getStoredToken()).toBe('jwt-de-prueba');
+    expect(getStoredUser()).toEqual(EXPECTED_USER);
     expect(getStoredUser()).not.toHaveProperty('token');
   });
 
-  it('clears both entries', () => {
-    saveAuthSession(loginResponse());
+  it('el usuario guardado nunca queda con campos undefined con la respuesta real', () => {
+    saveAuthSession(LOGIN_RESPONSE);
+
+    const user = getStoredUser();
+    expect(user.id).toBeDefined();
+    expect(user.fullName).toBeDefined();
+    expect(user.role).toBeDefined();
+  });
+
+  it('clearAuthSession borra token y usuario', () => {
+    saveAuthSession(LOGIN_RESPONSE);
     clearAuthSession();
+
     expect(getStoredToken()).toBeNull();
     expect(getStoredUser()).toBeNull();
   });
 
-  it('discards corrupt user data without touching the token', () => {
+  it('descarta datos de usuario corruptos sin tocar el token', () => {
     localStorage.setItem('token', 'abc');
     localStorage.setItem('blawdtrack_user', '{not json');
+
     expect(getStoredUser()).toBeNull();
     expect(localStorage.getItem('blawdtrack_user')).toBeNull();
     expect(getStoredToken()).toBe('abc');
   });
 
   describe('hasActiveSession', () => {
-    it('is false with nothing stored or with only one of the two entries', () => {
+    it('es false sin nada guardado o con solo una de las dos entradas', () => {
       expect(hasActiveSession()).toBe(false);
       localStorage.setItem('token', 'abc');
       expect(hasActiveSession()).toBe(false);
     });
 
-    it('is true for a non-JWT token (mock token) with a stored user', () => {
-      saveAuthSession(loginResponse('not-a-jwt'));
+    it('es true con un token que no es JWT (token de mock) y un usuario guardado', () => {
+      saveAuthSession({ ...LOGIN_RESPONSE, token: 'not-a-jwt' });
       expect(hasActiveSession()).toBe(true);
     });
 
-    it('is true for a JWT that has not expired', () => {
-      saveAuthSession(loginResponse(jwtWithExp(Math.floor(Date.now() / 1000) + 3600)));
+    it('es true con un JWT que no ha vencido', () => {
+      saveAuthSession({
+        ...LOGIN_RESPONSE,
+        token: jwtWithExp(Math.floor(Date.now() / 1000) + 3600),
+      });
       expect(hasActiveSession()).toBe(true);
     });
 
-    it('is false and clears the session for an expired JWT', () => {
-      saveAuthSession(loginResponse(jwtWithExp(Math.floor(Date.now() / 1000) - 10)));
+    it('es false y limpia la sesión con un JWT vencido', () => {
+      saveAuthSession({
+        ...LOGIN_RESPONSE,
+        token: jwtWithExp(Math.floor(Date.now() / 1000) - 10),
+      });
+
       expect(hasActiveSession()).toBe(false);
       expect(getStoredToken()).toBeNull();
       expect(getStoredUser()).toBeNull();

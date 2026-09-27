@@ -4,44 +4,41 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.blawdgourmet.blawdtrack.auth.exception.TokenRestablecimientoInvalidoException;
 import com.blawdgourmet.blawdtrack.auth.exception.ContrasenaReutilizadaException;
+import com.blawdgourmet.blawdtrack.auth.exception.TokenRestablecimientoInvalidoException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
+import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
+import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 
 /**
  * Traduce las excepciones de la aplicación al formato unificado de errores (estándar P05).
- * Esta copia cubre únicamente las excepciones relevantes para el módulo de registro de administradores (HU-006).
+ * Cubre las excepciones relevantes para el registro y la elegibilidad de eliminación de administradores (HU-006 y HU-008/T01).
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        @ExceptionHandler(ContrasenaReutilizadaException.class)
-        public ResponseEntity<ApiError> manejarContrasenaReutilizada(ContrasenaReutilizadaException ex) {
-                ApiError error = ApiError.builder()
-                                .code("CONTRASENA_REUTILIZADA")
-                                .message(ex.getMessage())
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .build();
-
-                return ResponseEntity.badRequest().body(error);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> manejarPeticionMalFormada(HttpMessageNotReadableException ex) {
+        String message = "The request payload is malformed or contains unsupported values.";
+        if (ex.getMostSpecificCause() != null && ex.getMostSpecificCause().getMessage() != null
+                && ex.getMostSpecificCause().getMessage().contains("documentType")) {
+            message = "The documentType value must be one of CEDULA, DIMEX or PASAPORTE.";
         }
 
-        @ExceptionHandler(TokenRestablecimientoInvalidoException.class)
-        public ResponseEntity<ApiError> manejarTokenRestablecimientoInvalido(
-                        TokenRestablecimientoInvalidoException ex) {
-                ApiError error = ApiError.builder()
-                                .code("TOKEN_INVALIDO")
-                                .message(ex.getMessage())
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .build();
+        ApiError error = ApiError.builder()
+                .code("MALFORMED_REQUEST")
+                .message(message)
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
 
-                return ResponseEntity.badRequest().body(error);
-        }
+        return ResponseEntity.badRequest().body(error);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> manejarValidacion(MethodArgumentNotValidException ex) {
@@ -54,12 +51,45 @@ public class GlobalExceptionHandler {
 
         ApiError error = ApiError.builder()
                 .code("VALIDATION_ERROR")
-                .message("Uno o más campos no cumplen las reglas de validación requeridas.")
+                .message("One or more fields do not meet the required validation rules.")
                 .status(HttpStatus.BAD_REQUEST.value())
                 .errores(errores)
                 .build();
 
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(TokenRestablecimientoInvalidoException.class)
+    public ResponseEntity<ApiError> manejarTokenInvalido(TokenRestablecimientoInvalidoException ex) {
+        ApiError error = ApiError.builder()
+                .code("TOKEN_INVALIDO")
+                .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ContrasenaReutilizadaException.class)
+    public ResponseEntity<ApiError> manejarContrasenaReutilizada(ContrasenaReutilizadaException ex) {
+        ApiError error = ApiError.builder()
+                .code("CONTRASENA_REUTILIZADA")
+                .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return ResponseEntity.badRequest().body(error);
+	}
+	
+    @ExceptionHandler(AdminNotFoundException.class)
+    public ResponseEntity<ApiError> manejarAdministradorNoExistente(AdminNotFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("ADMINISTRADOR_NO_EXISTENTE")
+                .message(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
@@ -76,7 +106,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessConfigurationException.class)
     public ResponseEntity<ApiError> manejarConfiguracion(BusinessConfigurationException ex) {
         ApiError error = ApiError.builder()
-                                .code("INVALID_CONFIGURATION")
+                .code("CONFIGURACION_INVALIDA")
                 .message(ex.getMessage())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .build();
@@ -84,10 +114,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
+    @ExceptionHandler(AdminSessionActiveException.class)
+    public ResponseEntity<ApiError> manejarSesionActiva(AdminSessionActiveException ex) {
+        ApiError error = ApiError.builder()
+                .code("ADMINISTRADOR_CON_SESION_ACTIVA")
+                .message(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> manejarAccesoDenegado(AccessDeniedException ex) {
         ApiError error = ApiError.builder()
-                .code("ACCESS_DENIED")
+                .code("ACCESO_DENEGADO")
                 .message("You do not have the permissions required to perform this action.")
                 .status(HttpStatus.FORBIDDEN.value())
                 .build();

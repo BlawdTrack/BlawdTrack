@@ -1,10 +1,23 @@
 package com.blawdgourmet.blawdtrack.auth.entity;
 
-import com.blawdgourmet.blawdtrack.users.model.User;
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+
+import com.blawdgourmet.blawdtrack.users.model.User;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Solicitud de recuperación de contraseña (Task #62).
@@ -44,4 +57,12 @@ public class PasswordResetToken {
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime createdAt;
+
+    public boolean isUsado() {
+        return used;
+    }
+
+    public LocalDateTime getFechaExpiracion() {
+        return expirationDate;
+    }
 }

@@ -40,7 +40,7 @@ const WHEEL_STEP = 100;
 // and it always settles on an exact integer. onSelect(item, wraps): wraps counts
 // how many times the wheel crossed last -> first (e.g. 12 -> 01), letting the
 // parent flip am/pm.
-export function Wheel({ items, selected, onSelect, label }) {
+export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
   const n = items.length;
   const initial = Math.max(items.indexOf(selected), 0);
   const [pos, setPos] = useState(initial);
@@ -72,18 +72,23 @@ export function Wheel({ items, selected, onSelect, label }) {
   };
 
   const commit = (k) => {
-    animateTo(k);
-    if (k === committed.current) return;
-    const wraps = Math.floor(k / n) - Math.floor(committed.current / n);
-    committed.current = k;
-    onSelect(items[mod(k, n)], wraps);
+    const target = cyclic ? k : Math.min(Math.max(k, 0), n - 1);
+    animateTo(target);
+    if (target === committed.current) return;
+    const wraps = cyclic ? Math.floor(target / n) - Math.floor(committed.current / n) : 0;
+    committed.current = target;
+    onSelect(items[mod(target, n)], wraps);
   };
 
   // Follow external changes (dialog opened with another value, etc.).
   useEffect(() => {
     if (items[mod(committed.current, n)] === selected) return;
-    const delta = mod(items.indexOf(selected) - committed.current, n);
-    committed.current += delta > n / 2 ? delta - n : delta;
+    if (cyclic) {
+      const delta = mod(items.indexOf(selected) - committed.current, n);
+      committed.current += delta > n / 2 ? delta - n : delta;
+    } else {
+      committed.current = Math.max(items.indexOf(selected), 0);
+    }
     animateTo(committed.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
@@ -169,6 +174,8 @@ export function Wheel({ items, selected, onSelect, label }) {
       }}
     >
       {rows.map((k) => {
+        const inRange = cyclic || (k >= 0 && k <= n - 1);
+        if (!inRange) return null;
         const isSelected = k === base;
         return (
           <Box
@@ -273,7 +280,7 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
           <Box sx={{ position: 'relative', display: 'flex', zIndex: 1 }}>
             <Wheel items={HOURS} selected={draft.hour} onSelect={setHour} label={`${label}: hora`} />
             <Wheel items={MINUTES} selected={draft.minute} onSelect={set('minute')} label={`${label}: minutos`} />
-            <Wheel items={PERIODS} selected={draft.period} onSelect={set('period')} label={`${label}: am o pm`} />
+            <Wheel items={PERIODS} selected={draft.period} onSelect={set('period')} label={`${label}: am o pm`} cyclic={false} />
           </Box>
         </Box>
         <Button

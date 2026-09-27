@@ -1,42 +1,66 @@
 import { describe, it, expect } from 'vitest';
 import { getLoginError } from './authErrors';
 
-const httpError = (status, data) => ({ response: { status, data } });
+// Arma un error como el que produce axios ante una respuesta del backend.
+function httpError(status, code, message) {
+  return { response: { status, data: { code, message, status } } };
+}
 
-describe('getLoginError', () => {
-  it('reports a connection problem when there is no response', () => {
-    const out = getLoginError(new Error('Network Error'));
-    expect(out.severity).toBe('error');
-    expect(out.message).toMatch(/conectar con el servidor/);
-    expect(getLoginError(undefined).message).toMatch(/conectar con el servidor/);
+const CREDENTIALS = {
+  message: 'Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.',
+  severity: 'error',
+};
+const INACTIVE = {
+  message: 'Tu cuenta está inactiva. Contacta a un administrador de BlawdTrack para reactivarla.',
+  severity: 'warning',
+};
+
+describe('getLoginError con el backend vivo (blawdtrack/, code AUTH_FAILED)', () => {
+  it('401 AUTH_FAILED con "Invalid email or password" → credenciales incorrectas', () => {
+    expect(getLoginError(httpError(401, 'AUTH_FAILED', 'Invalid email or password'))).toEqual(CREDENTIALS);
   });
 
-  it('maps CUENTA_INACTIVA to a warning about the inactive account', () => {
-    const out = getLoginError(httpError(403, { code: 'CUENTA_INACTIVA' }));
-    expect(out.severity).toBe('warning');
-    expect(out.message).toMatch(/inactiva/);
+  it('401 AUTH_FAILED con "The account is inactive" → cuenta inactiva (ámbar)', () => {
+    expect(getLoginError(httpError(401, 'AUTH_FAILED', 'The account is inactive'))).toEqual(INACTIVE);
   });
 
-  it('maps CREDENCIALES_INVALIDAS to a generic credentials error that does not say which field failed', () => {
-    const out = getLoginError(httpError(401, { code: 'CREDENCIALES_INVALIDAS', message: 'x' }));
-    expect(out.severity).toBe('error');
-    expect(out.message).toMatch(/Correo o contraseña incorrectos/);
-    expect(out.message).not.toMatch(/solo el correo|solo la contraseña/i);
+  it('401 AUTH_FAILED sin mensaje → credenciales incorrectas (no revela nada más)', () => {
+    expect(getLoginError(httpError(401, 'AUTH_FAILED'))).toEqual(CREDENTIALS);
   });
 
-  it('falls back to the HTTP status when the body has no code', () => {
-    expect(getLoginError(httpError(403, {})).severity).toBe('warning');
-    expect(getLoginError(httpError(401, undefined)).message).toMatch(/incorrectos/);
+  it('el mensaje de credenciales no indica cuál dato falló', () => {
+    const { message } = getLoginError(httpError(401, 'AUTH_FAILED', 'Invalid email or password'));
+    expect(message.toLowerCase()).not.toMatch(/solo el correo|solo la contraseña|el correo no existe/);
+  });
+});
+
+describe('getLoginError con los códigos del contrato original', () => {
+  it('401 CREDENCIALES_INVALIDAS → credenciales incorrectas', () => {
+    expect(getLoginError(httpError(401, 'CREDENCIALES_INVALIDAS'))).toEqual(CREDENTIALS);
   });
 
-  it('prefers the code over the status', () => {
-    expect(getLoginError(httpError(401, { code: 'CUENTA_INACTIVA' })).severity).toBe('warning');
+  it('403 CUENTA_INACTIVA → cuenta inactiva (ámbar)', () => {
+    expect(getLoginError(httpError(403, 'CUENTA_INACTIVA'))).toEqual(INACTIVE);
   });
 
-  it('uses a generic message for anything else and never shows the backend message', () => {
-    const out = getLoginError(httpError(500, { code: 'INTERNAL_ERROR', message: 'stack trace' }));
-    expect(out.severity).toBe('error');
-    expect(out.message).toMatch(/No se pudo iniciar sesión/);
-    expect(out.message).not.toMatch(/stack trace/);
+  it('respaldo por estado HTTP cuando no llega code', () => {
+    expect(getLoginError({ response: { status: 401, data: {} } })).toEqual(CREDENTIALS);
+    expect(getLoginError({ response: { status: 403, data: {} } })).toEqual(INACTIVE);
+  });
+});
+
+describe('getLoginError - otros fallos', () => {
+  it('sin respuesta del servidor → mensaje de conexión', () => {
+    expect(getLoginError(new Error('Network Error')).message).toMatch(/conectar con el servidor/);
+  });
+
+  it.each([
+    [400, 'VALIDATION_ERROR'],
+    [500, 'INTERNAL_ERROR'],
+    [403, 'ACCESS_DENIED'],
+  ])('%s %s → mensaje genérico', (status, code) => {
+    const result = getLoginError(httpError(status, code));
+    expect(result.severity).toBe('error');
+    expect(result.message).toMatch(/No se pudo iniciar sesión/);
   });
 });

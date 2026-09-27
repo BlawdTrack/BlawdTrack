@@ -14,4 +14,8 @@ public enum AuditAction {
     COURIER_DEACTIVATED("DESACTIVAR_MENSAJERO");
 
     private final String code;
+
+    public String getCode() {
+        return code;
+    }
 }

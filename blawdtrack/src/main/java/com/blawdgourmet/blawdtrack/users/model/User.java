@@ -1,12 +1,34 @@
 package com.blawdgourmet.blawdtrack.users.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
 
 import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuarios",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_usuarios_tipo_documento_numero_documento",
+                columnNames = {"tipo_documento", "numero_documento"}
+        ))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,11 +41,32 @@ public class User {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_documento", nullable = false, length = 20)
+    @Column(name = "tipo_documento", length = 20)
     private DocumentType documentType;
 
-    @Column(name = "numero_documento", nullable = false, length = 20)
+    @Column(name = "numero_documento", length = 50)
     private String documentNumber;
+
+    @Deprecated
+    @Column(name = "cedula", nullable = false, unique = true, length = 20)
+    private String documentId;
+
+    @PrePersist
+    @PreUpdate
+    void syncLegacyDocumentFields() {
+        if (documentType != null && documentNumber != null && (documentId == null || documentId.isBlank())) {
+            documentId = documentNumber;
+        }
+        if (documentType == null && documentId != null) {
+            documentType = DocumentType.CEDULA;
+        }
+        if (documentNumber == null && documentId != null) {
+            documentNumber = documentId;
+        }
+        if (documentId == null && documentNumber != null) {
+            documentId = documentNumber;
+        }
+    }
 
     @Column(name = "nombre_completo", nullable = false, length = 120)
     private String fullName;
@@ -37,14 +80,16 @@ public class User {
     @Column(name = "telefono", unique = true, length = 20)
     private String phone;
 
+    @Column(name = "fecha_ultimo_inicio_sesion")
+    private LocalDateTime lastLoginAt;
+
     @Setter(AccessLevel.NONE)
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
-    @Setter(AccessLevel.NONE)
-    @Column(name = "version_token", nullable = false)
+    @Column(name = "token_version", nullable = false)
     @Builder.Default
     private int tokenVersion = 0;
 
@@ -56,16 +101,7 @@ public class User {
         return this.status == UserStatus.ACTIVE;
     }
 
-    /**
-     * Cambia el estado de la cuenta y cierra las sesiones ya emitidas: si el estado
-     * realmente cambia, incrementa la versión del token. Si el nuevo estado es igual
-     * al actual no hace nada. Usar este método en lugar de {@code setStatus}, que no
-     * incrementa la versión.
-     */
     public void changeStatus(UserStatus newStatus) {
-        if (newStatus == null) {
-            throw new IllegalArgumentException("El estado no puede ser nulo");
-        }
         if (this.status == newStatus) {
             return;
         }
