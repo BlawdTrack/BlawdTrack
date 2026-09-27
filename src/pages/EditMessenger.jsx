@@ -290,7 +290,7 @@ export function EditMessenger({ initialCedula = '' }) {
   return (
     <Box className="edit-messenger-container">
       {/* Flota de Mensajeros — cuadro blanco que encapsula todo */}
-      <TableContainer component="Paper" elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', mb: 4, bgcolor: '#ffffff', overflowX: 'auto' }}>
+      <Paper elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', mb: 4, bgcolor: '#ffffff', overflowX: 'auto' }}>
         <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="h5" className="edit-messenger-title" sx={{ fontSize: 22 }}>
             Flota de mensajeros
@@ -374,7 +374,7 @@ export function EditMessenger({ initialCedula = '' }) {
             </TableBody>
           </Table>
         </Box>
-        </TableContainer>
+        </Paper>
 
       {/* Formulario de Edición */}
       {currentCourier ? (
