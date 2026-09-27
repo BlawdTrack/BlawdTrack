@@ -290,7 +290,7 @@ export function EditMessenger({ initialCedula = '' }) {
   return (
     <Box className="edit-messenger-container">
       {/* Encabezado de la flota */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h5" className="edit-messenger-title" sx={{ fontSize: 22 }}>
           Flota de mensajeros
         </Typography>
@@ -300,27 +300,11 @@ export function EditMessenger({ initialCedula = '' }) {
       </Box>
 
       {/* Flota de Mensajeros */}
-      <TableContainer component="Paper" elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', p: 3, mb: 4, bgcolor: '#ffffff' }}>
-        <TableContainer sx={{ p: 0 }}>
-          <Table sx={{ minWidth: 600 }}>
-            <TableHead>
+      <TableContainer component="Paper" elevation={0} sx={{ borderRadius: 16, border: '1px solid #E4DED7', p: 0, mb: 4, bgcolor: '#ffffff' }}>
+        <Table sx={{ minWidth: 600 }}>
+          <TableHead>
               <TableRow>
-                <TableCell component="th" scope="col">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar
-                      sx={{
-                        bgcolor: '#EEEEEE',
-                        color: '#333333',
-                        fontWeight: 'bold',
-                        width: 32,
-                        height: 32
-                      }}
-                    >
-                      {getInitials((couriersList[0] || {}).fullName || (couriersList[0] || {}).nombre || '')}
-                    </Avatar>
-                    <span>Mensajero</span>
-                  </Box>
-                </TableCell>
+                <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Mensajero</TableCell>
                 <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Cédula</TableCell>
                 <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Horario</TableCell>
                 <TableCell component="th" scope="col" sx={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '0.5px' }}>Carga</TableCell>
@@ -392,7 +376,6 @@ export function EditMessenger({ initialCedula = '' }) {
             </TableBody>
           </Table>
         </TableContainer>
-      </TableContainer>
 
       {/* Formulario de Edición */}
       {currentCourier ? (
