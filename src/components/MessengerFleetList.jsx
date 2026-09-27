@@ -78,16 +78,16 @@ export const MessengerFleetList = () => {
 
   if (loadError) {
     return (
-      <Box sx={{ maxWidth: '900px', margin: '0 auto', p: 2 }}>
+      <Box sx={{ maxWidth: '900px', margin: '0 auto', p: { xs: 1.5, sm: 2 } }}>
         <Alert severity="error">{loadError}</Alert>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ maxWidth: '900px', margin: '0 auto', p: 2 }}>
+    <Box sx={{ maxWidth: '900px', margin: '0 auto', p: { xs: 1.5, sm: 2 } }}>
       <Paper elevation={0} sx={{ border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden' }}>
-        <Box sx={{ p: 3, bgcolor: '#FFFFFF' }}>
+        <Box sx={{ p: { xs: 1.5, sm: 3 }, bgcolor: '#FFFFFF' }}>
           <Typography variant="h6" sx={{ fontWeight: 700, color: '#064E3B', fontSize: '1.15rem' }}>
             Mensajeros · desactivación de acceso
           </Typography>
@@ -105,7 +105,7 @@ export const MessengerFleetList = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             {messengers.map((messenger, index) => (
               <React.Fragment key={messenger.id ?? messenger.documentNumber}>
-                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', p: 3, gap: 2, bgcolor: '#FFFFFF', '&:hover': { bgcolor: '#F9FAFB' } }}>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', p: { xs: 1.5, sm: 3 }, gap: { xs: 1, sm: 2 }, bgcolor: '#FFFFFF', '&:hover': { bgcolor: '#F9FAFB' } }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
                     <Avatar sx={{ bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600, width: 48, height: 48 }}>
                       {getInitials(messenger.fullName)}
@@ -118,7 +118,7 @@ export const MessengerFleetList = () => {
                     </Box>
                   </Box>
 
-                  <Box sx={{ minWidth: '180px', flex: 1 }}>
+                  <Box sx={{ minWidth: { sm: '180px' }, flex: 1 }}>
                     {messenger.inLabor !== undefined && (
                       <Typography variant="body2" sx={{ fontWeight: 600, color: messenger.inLabor ? '#92400E' : '#047857' }}>
                         {messenger.inLabor ? 'En labores' : 'Fuera de labores'}
@@ -139,7 +139,7 @@ export const MessengerFleetList = () => {
                       variant="outlined"
                       disabled={messenger.status === 'INACTIVE'}
                       onClick={() => handleOpenModal(messenger)}
-                      sx={{ minWidth: '110px', color: messenger.status === 'INACTIVE' ? '#9CA3AF' : '#B91C1C', borderColor: messenger.status === 'INACTIVE' ? '#E5E7EB' : '#B91C1C', textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
+                      sx={{ minWidth: { sm: '110px' }, color: messenger.status === 'INACTIVE' ? '#9CA3AF' : '#B91C1C', borderColor: messenger.status === 'INACTIVE' ? '#E5E7EB' : '#B91C1C', textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
                     >
                       {messenger.status === 'INACTIVE' ? 'Inactivo' : 'Desactivar'}
                     </Button>
@@ -152,7 +152,7 @@ export const MessengerFleetList = () => {
         )}
       </Paper>
 
-      <Alert severity="info" sx={{ mt: 3 }}>
+      <Alert severity="info" sx={{ mt: { xs: 1.5, sm: 3 } }}>
         La desactivación se gestiona según la validación de pendientes definida por
         el backend.
       </Alert>

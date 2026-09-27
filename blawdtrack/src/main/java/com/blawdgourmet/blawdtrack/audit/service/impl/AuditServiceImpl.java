@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class AuditServiceImpl implements AuditService {
 
     private static final String ACCION_CREAR_ADMINISTRADOR = "CREAR_ADMINISTRADOR";
+    private static final String ACCION_ELIMINAR_ADMINISTRADOR = "ELIMINAR_ADMINISTRADOR";
     private static final int MAX_DETAILS_LENGTH = 500;
 
     private final AuditLogRepository auditLogRepository;
@@ -29,18 +30,38 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public void registrarCreacionAdministrador(AuthenticatedUser actor, User administradorCreado) {
+        String detalle = "El Super Usuario '%s' (%s %s) creó al Administrador de Ventas '%s' (%s %s, correo %s)."
+                .formatted(
+                        actor.nombreCompleto(),
+                        actor.documentType(),
+                        actor.documentNumber(),
+                        administradorCreado.getFullName(),
+                        administradorCreado.getDocumentType(),
+                        administradorCreado.getDocumentNumber(),
+                        administradorCreado.getEmail()
+                );
 
+        logAction(AuditAction.ADMIN_CREATED, actor, administradorCreado, detalle);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void registrarEliminacionAdministrador(AuthenticatedUser actor, User administradorEliminado) {
         User actorReferencia = userRepository.getReferenceById(actor.id());
 
-        String detalle = "The Super User '%s' (ID %s) created the Sales Administrator '%s' (ID %s, email %s)."
-                .formatted(actor.nombreCompleto(), actor.documentNumber(),
-                        administradorCreado.getFullName(), administradorCreado.getDocumentNumber(),
-                        administradorCreado.getEmail());
+        String detalle = "El Super Usuario '%s' (documento %s) eliminó al Administrador de Ventas '%s' (documento %s, correo %s)."
+                .formatted(
+                        actor.nombreCompleto(),
+                        actor.documentType() + "-" + actor.documentNumber(),
+                        administradorEliminado.getFullName(),
+                        administradorEliminado.getDocumentType() + "-" + administradorEliminado.getDocumentNumber(),
+                        administradorEliminado.getEmail()
+                );
 
         AuditLog registro = AuditLog.builder()
                 .actor(actorReferencia)
-                .usuarioAfectado(administradorCreado)
-                .action(ACCION_CREAR_ADMINISTRADOR)
+                .usuarioAfectado(null)
+                .action(ACCION_ELIMINAR_ADMINISTRADOR)
                 .details(detalle)
                 .timestamp(LocalDateTime.now())
                 .build();

@@ -185,12 +185,11 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         <Typography component="h1" sx={TITLE_SX}>
           Enlace no válido
         </Typography>
-        <Box role="alert">
-          <StatusMessage
-            severity="error"
-            message={tokenRejected ? REJECTED_TOKEN_MESSAGE : MISSING_TOKEN_MESSAGE}
-          />
-        </Box>
+        {/* StatusMessage ya expone role="alert". */}
+        <StatusMessage
+          severity="error"
+          message={tokenRejected ? REJECTED_TOKEN_MESSAGE : MISSING_TOKEN_MESSAGE}
+        />
         <Button
           fullWidth
           variant="contained"
@@ -255,11 +254,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
 
         <PasswordRequirements password={newPassword} historyRejected={historyRejected} />
 
-        {error && (
-          <Box role="alert">
-            <StatusMessage severity="error" message={error.message} />
-          </Box>
-        )}
+        {error && <StatusMessage severity="error" message={error.message} />}
 
         <Button type="submit" fullWidth variant="contained" disabled={loading} sx={BUTTON_SX}>
           {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Guardar nueva contraseña'}

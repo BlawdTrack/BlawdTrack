@@ -2,18 +2,18 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
+import MainMenuPage from './pages/MainMenuPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
 import { MessengerFleetList } from './components/MessengerFleetList';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import MainMenuLayout from './components/layout/MainMenuLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
-import { ROLES, getHomeRoute } from './utils/roleRoutes';
-
-// Reemplaza el TODO anterior ("falta definir un router... temporalmente
-// se renderizan ambas pantallas apiladas") con rutas reales. Cada pantalla
-// vive en su propia ruta en vez de mostrarse todas a la vez.
+import { ROLES } from './config/roles';
+import { ROUTES } from './config/routes';
+import { getHomeRoute } from './utils/roleRoutes';
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
 // pasar siempre por /login.
@@ -22,7 +22,7 @@ function RootRedirect() {
   // Un rol sin inicio mapeado no debería existir (AuthContext no lo permite);
   // si pasara, se trata como sin sesión en vez de navegar a "null".
   const homeRoute = user ? getHomeRoute(user.role) : null;
-  return <Navigate to={homeRoute ?? '/login'} replace />;
+  return <Navigate to={homeRoute ?? ROUTES.LOGIN} replace />;
 }
 
 function LoginRoute() {
@@ -41,7 +41,7 @@ function LoginRoute() {
   return (
     <LoginPage
       onLoginSuccess={(response) => navigate(getHomeRoute(response.role), { replace: true })}
-      onForgotPassword={() => navigate('/recuperar-contrasena')}
+      onForgotPassword={() => navigate(ROUTES.PASSWORD_RECOVERY)}
     />
   );
 }
@@ -49,7 +49,7 @@ function LoginRoute() {
 function PasswordRecoveryRoute() {
   const navigate = useNavigate();
 
-  return <PasswordRecoveryRequestPage onBackToLogin={() => navigate('/login')} />;
+  return <PasswordRecoveryRequestPage onBackToLogin={() => navigate(ROUTES.LOGIN)} />;
 }
 
 // T05: destino del enlace del correo. "/recovery?token=..." es el valor por
@@ -59,8 +59,8 @@ function NewPasswordRoute() {
 
   return (
     <NewPasswordPage
-      onGoToLogin={() => navigate('/login', { replace: true })}
-      onRequestNewLink={() => navigate('/recuperar-contrasena')}
+      onGoToLogin={() => navigate(ROUTES.LOGIN, { replace: true })}
+      onRequestNewLink={() => navigate(ROUTES.PASSWORD_RECOVERY)}
     />
   );
 }
@@ -69,27 +69,29 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<RootRedirect />} />
-      <Route path="/login" element={<LoginRoute />} />
-      <Route path="/recuperar-contrasena" element={<PasswordRecoveryRoute />} />
-      <Route path="/recovery" element={<NewPasswordRoute />} />
-      {/* T17: /login, /recuperar-contrasena y /recovery son públicas. Todo lo demás exige
+      <Route path={ROUTES.LOGIN} element={<LoginRoute />} />
+      <Route path={ROUTES.PASSWORD_RECOVERY} element={<PasswordRecoveryRoute />} />
+      <Route path={ROUTES.PASSWORD_RESET} element={<NewPasswordRoute />} />
+      {/* T17: login, recuperación y /recovery son públicas. Todo lo demás exige
           sesión válida y va en el grupo del rol que puede verlo (allowedRoles):
           una pantalla nueva se agrega DENTRO del grupo que le corresponde, y si
           es para cualquier rol autenticado, en un grupo <ProtectedRoute />
           sin allowedRoles. Un rol fuera del grupo vuelve a su propio inicio.
           El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
           rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USUARIO]} />}>
-        {/* Vista de Administradores (HU008) */}
-        <Route path="/administradores" element={<AdminManagement />} />
-        <Route path="/registro-mensajero" element={<CourierRegistrationPage />} />
-        <Route path="/mensajeros" element={<MessengerFleetList />} />
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
+        <Route element={<MainMenuLayout />}>
+          <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
+          <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
+          <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
+          <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
+        </Route>
       </Route>
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN_VENTAS]} />}>
-        <Route path="/ventas" element={<SalesHomePage />} />
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
+        <Route path={ROUTES.SALES_HOME} element={<SalesHomePage />} />
       </Route>
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.MENSAJERO]} />}>
-        <Route path="/mensajero" element={<CourierHomePage />} />
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
+        <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
       </Route>
     </Routes>
   );
