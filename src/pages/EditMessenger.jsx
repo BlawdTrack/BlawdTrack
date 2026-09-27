@@ -52,21 +52,8 @@ export function EditMessenger({ initialCedula = '' }) {
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
   const [updateError, setUpdateError] = useState(null);
 
-  // Historial de modificaciones (Log)
-  const [changeLog, setChangeLog] = useState([
-    {
-      id: 1,
-      when: '26/09/2026 · 09:30',
-      text: 'Horario actualizado: 5:00 am – 1:00 pm → 6:00 am – 2:00 pm',
-      by: 'Súper Usuario'
-    },
-    {
-      id: 2,
-      when: '25/09/2026 · 14:15',
-      text: 'Capacidad máxima de carga: 20 kg → 25 kg',
-      by: 'Súper Usuario'
-    }
-  ]);
+  // Historial de modificaciones (Log) — debe cargarse desde el backend
+  const [changeLog, setChangeLog] = useState([]);
 
   // Normalizar cédula para búsqueda insensible a tipo de documento o formato
   const normalizeId = (id) => (id || '').toString().replace(/[-\s]/g, '').toLowerCase();
@@ -302,16 +289,6 @@ export function EditMessenger({ initialCedula = '' }) {
 
   return (
     <Box className="edit-messenger-container">
-      {/* Encabezado */}
-      <Box className="edit-messenger-header">
-        <Typography variant="h5" className="edit-messenger-title">
-          Editar Mensajero
-        </Typography>
-        <Typography variant="body2" className="edit-messenger-subtitle">
-          Actualizar datos de contacto, capacidad de carga y reglas de acceso operativo del personal.
-        </Typography>
-      </Box>
-
       {/* Encabezado de la flota */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="h5" className="edit-messenger-title" sx={{ fontSize: 22 }}>

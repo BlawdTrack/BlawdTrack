@@ -6,8 +6,11 @@
   padding: 24px;
 }
 
-.edit-messenger-header {
-  margin-bottom: 24px;
+@media (max-width: 768px) {
+  .edit-messenger-container {
+    padding: 12px;
+    max-width: 100%;
+  }
 }
 
 .edit-messenger-title {
