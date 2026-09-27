@@ -3,7 +3,7 @@ import { ROLE_HOME_ROUTES, getHomeRoute } from './roleRoutes';
 
 describe('getHomeRoute (T12)', () => {
   it('devuelve la ruta de inicio de cada rol del backend', () => {
-    expect(getHomeRoute('SUPER_USUARIO')).toBe('/administradores');
+    expect(getHomeRoute('SUPER_USUARIO')).toBe('/main-menu');
     expect(getHomeRoute('ADMIN_VENTAS')).toBe('/ventas');
     expect(getHomeRoute('MENSAJERO')).toBe('/mensajero');
   });

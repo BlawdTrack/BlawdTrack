@@ -1,3 +1,5 @@
+import { ROUTES } from '../config/routes';
+
 // Roles de negocio tal como los devuelve el backend (strings en español, no
 // los nombres de RoleName.java). Se usan para declarar qué roles pueden entrar
 // a cada grupo de rutas (prop allowedRoles de ProtectedRoute).
@@ -11,9 +13,9 @@ export const ROLES = {
 // estar dentro del grupo de rutas que ese rol puede ver (ver App.jsx); si no,
 // ProtectedRoute lo mandaría a un inicio al que no puede entrar.
 export const ROLE_HOME_ROUTES = {
-  [ROLES.SUPER_USUARIO]: '/administradores',
-  [ROLES.ADMIN_VENTAS]: '/ventas',
-  [ROLES.MENSAJERO]: '/mensajero',
+  [ROLES.SUPER_USUARIO]: ROUTES.MAIN_MENU,
+  [ROLES.ADMIN_VENTAS]: ROUTES.SALES_HOME,
+  [ROLES.MENSAJERO]: ROUTES.COURIER_HOME,
 };
 
 // Devuelve la ruta de inicio del rol, o null si el rol no esta en el mapa

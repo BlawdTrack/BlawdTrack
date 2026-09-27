@@ -4,14 +4,17 @@ import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 import { useAuth } from './hooks/useAuth';
 import { ROLES, ROLE_HOME_ROUTES, getHomeRoute } from './utils/roleRoutes';
+import { ROUTES } from './config/routes';
 
 // Las pantallas se mockean: aquí solo importa qué pantalla queda visible según
 // el rol (varias hacen peticiones al backend al montarse).
+vi.mock('./pages/MainMenuPage', () => ({ default: () => <div>Pantalla menú principal</div> }));
 vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla administradores</div> }));
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
 vi.mock('./pages/SalesHomePage', () => ({ default: () => <div>Pantalla ventas</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
-vi.mock('./pages/PasswordRecoveryTestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
+vi.mock('./pages/PasswordRecoveryRequestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
+vi.mock('./pages/NewPasswordPage', () => ({ default: () => <div>Pantalla nueva contraseña</div> }));
 vi.mock('./pages/LoginPage', () => ({ default: () => <div>Pantalla de login</div> }));
 vi.mock('./components/MessengerFleetList', () => ({
   MessengerFleetList: () => <div>Pantalla flota de mensajeros</div>,
@@ -21,18 +24,19 @@ vi.mock('./hooks/useAuth', () => ({ useAuth: vi.fn() }));
 // Rutas protegidas y la pantalla que muestra cada una. AL AGREGAR UNA RUTA
 // PROTEGIDA NUEVA EN App.jsx hay que sumarla aquí y en ALLOWED_ROUTES.
 const SCREENS = {
-  '/administradores': 'Pantalla administradores',
-  '/registro-mensajero': 'Pantalla registro de mensajero',
-  '/mensajeros': 'Pantalla flota de mensajeros',
-  '/ventas': 'Pantalla ventas',
-  '/mensajero': 'Pantalla mensajero',
+  [ROUTES.MAIN_MENU]: 'Pantalla menú principal',
+  [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
+  [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
+  [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
+  [ROUTES.SALES_HOME]: 'Pantalla ventas',
+  [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
 };
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
 const ALLOWED_ROUTES = {
-  [ROLES.SUPER_USUARIO]: ['/administradores', '/registro-mensajero', '/mensajeros'],
-  [ROLES.ADMIN_VENTAS]: ['/ventas'],
-  [ROLES.MENSAJERO]: ['/mensajero'],
+  [ROLES.SUPER_USUARIO]: [ROUTES.MAIN_MENU, ROUTES.ADMIN_DELETE, ROUTES.COURIER_CREATE, ROUTES.COURIER_DEACTIVATE],
+  [ROLES.ADMIN_VENTAS]: [ROUTES.SALES_HOME],
+  [ROLES.MENSAJERO]: [ROUTES.COURIER_HOME],
 };
 
 function loginAs(role) {
@@ -134,9 +138,15 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     }
   );
 
-  it('/recuperar-contrasena sigue siendo pública', () => {
+  it('la pantalla de recuperación sigue siendo pública', () => {
     useAuth.mockReturnValue({ user: null, expireSession: vi.fn() });
-    renderAt('/recuperar-contrasena');
+    renderAt(ROUTES.PASSWORD_RECOVERY);
     expect(screen.getByText('Pantalla recuperación')).toBeTruthy();
+  });
+
+  it('/recovery (destino del enlace del correo) es pública, con y sin sesión', () => {
+    useAuth.mockReturnValue({ user: null, expireSession: vi.fn() });
+    renderAt(`${ROUTES.PASSWORD_RESET}?token=abc`);
+    expect(screen.getByText('Pantalla nueva contraseña')).toBeTruthy();
   });
 });

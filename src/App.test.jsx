@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import App from './App';
 import { renderWithProviders, superUser } from './test-utils';
@@ -10,7 +10,8 @@ vi.mock('./pages/AdminManagement', () => ({ default: () => <div>admin management
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>courier registration screen</div> }));
 vi.mock('./components/MessengerFleetList', () => ({ MessengerFleetList: () => <div>fleet list screen</div> }));
 vi.mock('./pages/LoginPage', () => ({ default: () => <div>login screen</div> }));
-vi.mock('./pages/PasswordRecoveryTestPage', () => ({ default: () => <div>password recovery screen</div> }));
+vi.mock('./pages/PasswordRecoveryRequestPage', () => ({ default: () => <div>password recovery screen</div> }));
+vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>courier home screen</div> }));
 
 const protectedRoutes = [
   [ROUTES.MAIN_MENU, 'Bienvenid@ al sistema'],
@@ -20,6 +21,12 @@ const protectedRoutes = [
 ];
 
 describe('App routing', () => {
+  // ProtectedRoute también exige un token vigente (no es JWT: se asume válido).
+  beforeEach(() => {
+    localStorage.setItem('token', 'token-no-jwt');
+    localStorage.setItem('blawdtrack_user', JSON.stringify(superUser));
+  });
+
   it('starts on the login screen', () => {
     renderWithProviders(<App />, { route: '/' });
     expect(screen.getByText('login screen')).toBeInTheDocument();
@@ -35,9 +42,9 @@ describe('App routing', () => {
     expect(screen.getByText('login screen')).toBeInTheDocument();
   });
 
-  it.each(protectedRoutes)('sends %s to login for a non super user', (route) => {
+  it.each(protectedRoutes)('sends %s to the own home of a non super user', (route) => {
     renderWithProviders(<App />, { route, user: { ...superUser, role: ROLES.COURIER } });
-    expect(screen.getByText('login screen')).toBeInTheDocument();
+    expect(screen.getByText('courier home screen')).toBeInTheDocument();
   });
 
   it.each(protectedRoutes)('renders %s inside the main menu for the super user', (route, text) => {
