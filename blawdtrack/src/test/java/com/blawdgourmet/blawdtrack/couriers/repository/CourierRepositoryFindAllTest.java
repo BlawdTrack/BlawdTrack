@@ -1,7 +1,7 @@
 package com.blawdgourmet.blawdtrack.couriers.repository;
 
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;

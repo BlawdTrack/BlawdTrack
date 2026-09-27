@@ -1,6 +1,6 @@
 package com.blawdgourmet.blawdtrack.users.dto;
 
-import com.blawdgourmet.blawdtrack.users.constant.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.validation.DocumentHolder;
 import com.blawdgourmet.blawdtrack.users.validation.ValidDocument;
 
@@ -23,4 +23,14 @@ public record AdminDocumentRequest(
         @Size(max = 20, message = "Identity document cannot exceed 20 characters.")
         String documentNumber
 ) implements DocumentHolder {
+
+    @Override
+    public DocumentType getDocumentType() {
+        return documentType;
+    }
+
+    @Override
+    public String getDocumentNumber() {
+        return documentNumber;
+    }
 }
