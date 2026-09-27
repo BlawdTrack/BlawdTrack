@@ -32,6 +32,7 @@ public class JwtService {
                 .parseSignedClaims(token).getPayload();
         if (claims.getSubject() == null || claims.getSubject().isBlank()
                 || claims.getExpiration() == null
+                || !(claims.get("id") instanceof Number)
                 || claims.get("roles", String.class) == null
                 || claims.get("roles", String.class).isBlank()) {
             throw new JwtException("Invalid token claims");

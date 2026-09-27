@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Button, 
@@ -11,6 +12,7 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
+import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
 import {
@@ -19,6 +21,7 @@ import {
 } from '../services/AdminService';
 
 const AdminManagement = () => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [toastOpen, setToastOpen] = useState(false);
@@ -167,6 +170,17 @@ const AdminManagement = () => {
     <Box sx={{ p: { xs: 1.5, md: 4 }, bgcolor: '#f4f3ef', minHeight: { md: '100vh' } }}>
       <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
         
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<SecurityOutlined />}
+            onClick={() => navigate('/gestion-roles')}
+            sx={{ bgcolor: '#1b3e32', color: '#fff', textTransform: 'none', '&:hover': { bgcolor: '#122921' } }}
+          >
+            Gestionar roles y permisos
+          </Button>
+        </Box>
+
         {/* BUSCADOR */}
         <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: { xs: 1.5, md: 4 }, bgcolor: '#ffffff' }}>
           <Box sx={{ p: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid #e0e0e0' }}>

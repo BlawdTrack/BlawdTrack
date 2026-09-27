@@ -16,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,6 +41,7 @@ class RolePermissionIntegrationTest {
     @Autowired private PermissionRepository permissions;
     @Autowired private EntityManager entityManager;
     @Autowired private DataSeeder seeder;
+    @Autowired private PasswordEncoder passwordEncoder;
 
     private String token(String roleName) {
         var role = roles.findByName(roleName).orElseThrow();
@@ -168,6 +171,55 @@ class RolePermissionIntegrationTest {
 
         entityManager.clear();
         assertThat(roles.findByName(RoleName.COURIER).orElseThrow().getPermissions()).isEmpty();
+    }
+
+    @Test
+    void inicializadorMigraCorreoAnteriorDelSuperUsuario() throws Exception {
+        var superUser = users.findByEmail("superadmin@blawdgourmet.com").orElseThrow();
+        superUser.setEmail("alicia@blawdgourmet.com");
+        superUser.setFullName("Alicia (Default Super User)");
+        superUser.setPasswordHash(passwordEncoder.encode("ChangeMe123"));
+        users.saveAndFlush(superUser);
+
+        seeder.run();
+
+        assertThat(users.findByEmail("alicia@blawdgourmet.com")).isEmpty();
+        assertThat(users.findByEmail("superadmin@blawdgourmet.com"))
+                .contains(superUser)
+                .get()
+                .extracting(User::getFullName)
+                .isEqualTo("Super Usuario");
+        assertThat(passwordEncoder.matches("ultra_gorGon_1!", superUser.getPasswordHash())).isTrue();
+        assertThat(passwordEncoder.matches("ChangeMe123", superUser.getPasswordHash())).isFalse();
+    }
+
+    @Test
+    void inicializadorActualizaNombreDelSuperUsuarioExistente() throws Exception {
+        var superUser = users.findByEmail("superadmin@blawdgourmet.com").orElseThrow();
+        superUser.setFullName("Alicia (Default Super User)");
+        users.saveAndFlush(superUser);
+
+        seeder.run();
+
+        assertThat(users.findByEmail("superadmin@blawdgourmet.com").orElseThrow().getFullName())
+                .isEqualTo("Super Usuario");
+    }
+
+    @Test
+    void superUsuarioPredeterminadoIniciaSesionConCorreoNuevo() throws Exception {
+        mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "superadmin@blawdgourmet.com",
+                                  "password": "ultra_gorGon_1!"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fullName").value("Super Usuario"))
+                .andExpect(jsonPath("$.email").value("superadmin@blawdgourmet.com"))
+                .andExpect(jsonPath("$.role").value(RoleName.SUPER_USER))
+                .andExpect(jsonPath("$.token").isNotEmpty());
     }
 
     @Test
