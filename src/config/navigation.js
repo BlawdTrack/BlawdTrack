@@ -13,7 +13,7 @@ export const NAVIGATION_GROUPS = [
       {
         id: 'password-reset',
         label: 'Restablecer contraseña',
-        path: ROUTES.PASSWORD_RECOVERY,
+        path: ROUTES.PASSWORD_RESET_OWN,
         roles: [ROLES.SUPER_USER],
       },
     ],
