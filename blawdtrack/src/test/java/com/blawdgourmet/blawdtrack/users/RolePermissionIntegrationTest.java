@@ -157,7 +157,7 @@ class RolePermissionIntegrationTest {
                         roles.findByName(RoleName.COURIER).orElseThrow().getId())
                         .header("Authorization", bearer).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"permissionIds\":[]}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

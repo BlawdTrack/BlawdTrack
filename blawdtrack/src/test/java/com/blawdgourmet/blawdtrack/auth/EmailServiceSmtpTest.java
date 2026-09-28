@@ -40,7 +40,8 @@ class EmailServiceSmtpTest {
             sender.getJavaMailProperties().setProperty("mail.smtp.writetimeout", "5000");
             var service = new EmailService(sender, "no-reply@blawdtrack.test",
                     "https://blawdtrack.test/recovery",
-                    new ClassPathResource("templates/mail/email-with-token.html"));
+                    new ClassPathResource("templates/mail/email-with-token.html"),
+                    new ClassPathResource("templates/mail/courier-welcome.html"));
 
             if (welcome) {
                 service.sendCourierWelcome("destinatario@example.test", "Mensajero de prueba",
@@ -59,7 +60,11 @@ class EmailServiceSmtpTest {
             if (welcome) {
                 assertThat(message.getSubject()).isEqualTo("BlawdTrack: bienvenida y credenciales de acceso");
                 assertThat(body(message, "text/plain")).contains("destinatario@example.test", "Clave-FICTICIA-70!&");
-                assertThat(html).contains("Mensajero de prueba", "Clave-FICTICIA-70!&amp;");
+                assertThat(html)
+                        .contains("Mensajero de prueba", "destinatario@example.test",
+                                "Clave-FICTICIA-70!&amp;", "Notificaciones de tu cuenta",
+                                "Todo listo para comenzar")
+                        .doesNotContain("{{fullName}}", "{{recipient}}", "{{temporaryPassword}}");
             } else {
                 assertThat(message.getSubject()).isEqualTo("BlawdTrack: enlace de recuperación");
                 String link = "https://blawdtrack.test/recovery?token=token-prueba%2B%2F%3D%26%C3%B1";
