@@ -1,29 +1,49 @@
 import { NavLink } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, Tooltip, Typography } from '@mui/material';
+import { NAV_ITEM_ICONS } from './navIcons';
 
-function ItemContent({ label, active, disabled }) {
+function ItemContent({ label, active, disabled, Icon }) {
   return (
     <Box
       sx={{
-        px: 1.5,
-        py: 1.25,
-        borderRadius: '9px',
+        position: 'relative',
+        px: 1.75,
+        py: 1.15,
+        ml: '3px',
+        borderRadius: '8px',
         display: 'flex',
         alignItems: 'center',
         gap: 1.25,
-        cursor: disabled ? 'default' : 'pointer',
-        backgroundColor: active ? 'rgba(255,255,255,.12)' : 'transparent',
-        '&:hover': { backgroundColor: disabled ? 'transparent' : 'rgba(255,255,255,.08)' },
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        backgroundColor: active ? 'rgba(255,108,14,.14)' : 'transparent',
+        transition: 'background-color .15s ease',
+        '&:hover': { backgroundColor: disabled ? 'transparent' : active ? 'rgba(255,108,14,.14)' : 'rgba(255,255,255,.06)' },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          left: '-3px',
+          top: '20%',
+          bottom: '20%',
+          width: '3px',
+          borderRadius: '3px',
+          backgroundColor: active ? '#FF6C0E' : 'transparent',
+        },
       }}
     >
-      <Box
-        sx={{ width: 3, height: 16, borderRadius: '2px', flex: '0 0 3px', backgroundColor: active ? '#FF6C0E' : 'transparent' }}
-      />
+      {Icon && (
+        <Icon
+          sx={{
+            fontSize: 18,
+            flex: '0 0 18px',
+            color: active ? '#FF6C0E' : disabled ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.55)',
+          }}
+        />
+      )}
       <Typography
         sx={{
           fontSize: 13.5,
           fontWeight: active ? 600 : 500,
-          color: active ? '#fff' : disabled ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.78)',
+          color: active ? '#fff' : disabled ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.75)',
         }}
       >
         {label}
@@ -33,11 +53,21 @@ function ItemContent({ label, active, disabled }) {
 }
 
 export default function SidebarNavItem({ item }) {
-  if (!item.path) return <ItemContent label={item.label} active={false} disabled />;
+  const Icon = NAV_ITEM_ICONS[item.id];
+
+  if (!item.path) {
+    return (
+      <Tooltip title="Disponible próximamente" placement="right" arrow>
+        <span>
+          <ItemContent label={item.label} active={false} disabled Icon={Icon} />
+        </span>
+      </Tooltip>
+    );
+  }
 
   return (
     <NavLink to={item.path} end style={{ textDecoration: 'none' }}>
-      {({ isActive }) => <ItemContent label={item.label} active={isActive} disabled={false} />}
+      {({ isActive }) => <ItemContent label={item.label} active={isActive} disabled={false} Icon={Icon} />}
     </NavLink>
   );
 }
