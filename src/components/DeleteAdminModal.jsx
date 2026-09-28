@@ -2,17 +2,13 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   DialogActions,
   Button,
   Typography,
   Box,
   Avatar,
-  IconButton,
-  Alert
+  Alert,
 } from '@mui/material';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CloseIcon from '@mui/icons-material/Close';
 
 const DeleteAdminModal = ({
   open,
@@ -20,125 +16,116 @@ const DeleteAdminModal = ({
   onConfirm,
   adminData,
   errorMessage,
-  isSubmitting = false
+  isSubmitting = false,
 }) => {
   if (!adminData) return null;
 
-  // Extraemos las iniciales para el Avatar (ej. "Luis Diego Araya" -> "LD")
   const getInitials = (name) => {
+    if (!name) return '';
     const names = name.split(' ');
-    if (names.length >= 2) {
-      return `${names[0][0]}${names[1][0]}`.toUpperCase();
-    }
+    if (names.length >= 2) return `${names[0][0]}${names[1][0]}`.toUpperCase();
     return name.substring(0, 2).toUpperCase();
   };
+
   const documentNumber = adminData.documentNumber
     || adminData.identification
     || adminData.nationalId
     || adminData.id;
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={!isSubmitting ? onClose : undefined}
+      maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-          bgcolor: '#ffffff'
-        }
-      }}
+      PaperProps={{ sx: { borderRadius: '18px', padding: { xs: 1, sm: 1.5 } } }}
     >
-      <DialogTitle sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', gap: 1, color: '#212121', fontWeight: 'bold' }}>
-        <WarningAmberIcon sx={{ color: '#ff6b00' }} />
-        Eliminar administrador
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          disabled={isSubmitting}
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
+        <Box
           sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: '#666666',
+            width: 34,
+            height: 34,
+            borderRadius: '50%',
+            bgcolor: '#FCEDEA',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: '0 0 34px',
           }}
         >
-          <CloseIcon />
-        </IconButton>
+          <Box sx={{ width: '3px', height: '14px', bgcolor: '#C0392B', borderRadius: '2px' }} />
+        </Box>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '17px', color: 'primary.main' }}>
+          Eliminar administrador
+        </Typography>
       </DialogTitle>
-      
-      <DialogContent dividers sx={{ borderTop: 'none', borderBottom: 'none', pb: 1 }}>
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 2, 
-            mb: 3, 
-            p: 2, 
-            bgcolor: '#f4f3ef', // Blanco hueso neutro
-            borderRadius: 2 
+
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            p: '14px 16px',
+            bgcolor: '#F1ECE7',
+            borderRadius: '12px',
           }}
         >
-          <Avatar sx={{ bgcolor: '#e0e0e0', color: '#666666', fontWeight: 'bold' }}>
+          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: '#fff', fontWeight: 700, fontSize: '12.5px', flex: '0 0 38px' }}>
             {getInitials(adminData.name)}
           </Avatar>
-          <Box>
-            <Typography variant="subtitle1" fontWeight="bold" color="#212121" lineHeight={1.2}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography sx={{ fontSize: '13.5px', fontWeight: 600, color: '#1F2421' }}>
               {adminData.name}
             </Typography>
-            <Typography variant="body2" color="#666666">
-              {documentNumber} - {adminData.email}
+            <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
+              {documentNumber} · {adminData.email}
             </Typography>
           </Box>
         </Box>
-        
-        <DialogContentText sx={{ color: '#212121', fontSize: '0.95rem' }}>
-          Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda registrada en auditoría con fecha, hora y responsable.
-        </DialogContentText>
+
+        <Typography sx={{ fontSize: '13.5px', color: '#6B6560', lineHeight: 1.55 }}>
+          Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda
+          registrada en auditoría con fecha, hora y responsable.
+        </Typography>
 
         {errorMessage && (
-          <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
+          <Alert severity="error" sx={{ borderRadius: '10px', fontWeight: 500 }}>
             {errorMessage}
           </Alert>
         )}
       </DialogContent>
-      
-      <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <Button 
+
+      <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1.5 }}>
+        <Button
           onClick={onClose}
           disabled={isSubmitting}
-          variant="outlined"
-          sx={{ 
-            color: '#212121', 
-            borderColor: '#cccccc',
+          sx={{
+            color: 'primary.main',
+            border: '1.5px solid #DCD4CA',
+            borderRadius: '10px',
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: 2,
-            '&:hover': {
-              borderColor: '#666666',
-              bgcolor: '#f4f3ef'
-            }
+            fontSize: '14px',
+            px: 2.5,
           }}
         >
           Cancelar
         </Button>
         <Button
-          onClick={() =>
-            onConfirm(documentNumber)
-          }
+          onClick={() => onConfirm(documentNumber)}
           disabled={isSubmitting}
           variant="contained"
-          disableElevation
           sx={{
-            bgcolor: '#d32f2f', // Usamos un rojo estándar para acciones destructivas como en el video, o se puede cambiar por el accent #ff6b00
-            color: '#ffffff',
+            bgcolor: '#C0392B',
+            color: '#fff',
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: 2,
-            '&:hover': { 
-              bgcolor: '#c62828' 
-            }
+            borderRadius: '10px',
+            px: 2.5,
+            fontSize: '14px',
+            boxShadow: 'none',
+            '&:hover': { bgcolor: '#A5301F', boxShadow: 'none' },
           }}
         >
           {isSubmitting ? 'Eliminando...' : 'Sí, eliminar'}

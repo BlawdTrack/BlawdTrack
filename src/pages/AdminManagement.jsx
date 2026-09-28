@@ -1,24 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  Button, 
-  Typography, 
-  TextField, 
-  Avatar, 
-  Paper, 
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Avatar,
+  Paper,
   Divider,
   Snackbar,
   Alert,
-  CircularProgress
+  Chip,
+  CircularProgress,
 } from '@mui/material';
 import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
-import {
-  deleteAdministrator,
-  getAdministrators
-} from '../services/AdminService';
+import { deleteAdministrator, getAdministrators } from '../services/AdminService';
+import { ROUTES } from '../config/routes';
+
+const CARD_SX = {
+  borderRadius: '18px',
+  border: '1px solid #E4DED7',
+  bgcolor: '#fff',
+  boxShadow: '0 12px 30px rgba(26,60,52,.06)',
+};
+
+const CARD_HEADER_SX = {
+  p: { xs: 2.5, sm: '18px 24px' },
+  borderBottom: '1px solid #E4DED7',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  flexWrap: 'wrap',
+  gap: 1.5,
+};
 
 const AdminManagement = () => {
   const navigate = useNavigate();
@@ -28,11 +44,9 @@ const AdminManagement = () => {
   const [deleteError, setDeleteError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Estados limpios: arreglos vacíos sin datos falsos
   const [admins, setAdmins] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
-  
-  // Estados para manejar la carga de la API
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -90,7 +104,6 @@ const AdminManagement = () => {
   };
 
   const handleDeleteConfirm = async (cedula) => {
-    //Validación preventiva: Evitar peticiones si no hay cédula
     if (!cedula) {
       console.error('Intento de eliminación fallido: Cédula indefinida o vacía.');
       handleCloseModal();
@@ -101,11 +114,9 @@ const AdminManagement = () => {
     try {
       setDeleteError(null);
       setIsDeleting(true);
-      
-      // 1. Enviar la cédula requerida al backend
+
       await deleteAdministrator(cedula);
 
-      // 2. Buscar el administrador a eliminar para el log de auditoría
       const adminToDelete = admins.find(
         (admin) =>
           admin.documentNumber === cedula
@@ -114,7 +125,6 @@ const AdminManagement = () => {
           || admin.id === cedula
       );
 
-      // 3. Actualizar dinámicamente la lista de usuarios en pantalla filtrando por cédula
       setAdmins((currentAdmins) =>
         currentAdmins.filter(
           (admin) =>
@@ -127,23 +137,16 @@ const AdminManagement = () => {
 
       if (adminToDelete) {
         const now = new Date();
-        const dateStr = now.toLocaleDateString('es-CR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
-        const timeStr = now.toLocaleTimeString('es-CR', {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+        const dateStr = now.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
 
         const newLog = {
           id: Date.now(),
-          date: `${dateStr} - ${timeStr}`,
+          date: `${dateStr} · ${timeStr}`,
           action: 'Eliminación',
           details: `Administrador ${adminToDelete.name} - ${cedula}`,
           role: 'Súper Usuario',
-          isCreation: false
+          isCreation: false,
         };
 
         setAuditLogs((currentLogs) => [newLog, ...currentLogs]);
@@ -167,138 +170,179 @@ const AdminManagement = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 1.5, md: 4 }, bgcolor: '#f4f3ef', minHeight: { md: '100vh' } }}>
-      <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
-        
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+    <Box sx={{ maxWidth: '1100px', margin: '0 auto', p: { xs: 2.5, sm: '40px 32px' }, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          startIcon={<SecurityOutlined />}
+          onClick={() => navigate(ROUTES.ROLES_PERMISSIONS)}
+          sx={{
+            bgcolor: 'primary.main',
+            color: '#fff',
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: '10px',
+            px: 2.5,
+            py: '10px',
+            '&:hover': { bgcolor: '#12322B' },
+          }}
+        >
+          Gestionar roles y permisos
+        </Button>
+      </Box>
+
+      {/* BUSCADOR */}
+      <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
+        <Box sx={CARD_HEADER_SX}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+            Buscar administrador por cédula
+          </Typography>
+        </Box>
+        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' }, display: 'flex', gap: 1.5 }}>
+          <TextField
+            fullWidth
+            placeholder="1-2345-6789"
+            sx={{ bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
+          />
           <Button
             variant="contained"
-            startIcon={<SecurityOutlined />}
-            onClick={() => navigate('/gestion-roles')}
-            sx={{ bgcolor: '#1b3e32', color: '#fff', textTransform: 'none', '&:hover': { bgcolor: '#122921' } }}
+            disableElevation
+            sx={{
+              bgcolor: 'primary.main',
+              color: '#fff',
+              fontWeight: 600,
+              px: 3.5,
+              textTransform: 'none',
+              borderRadius: '10px',
+              '&:hover': { bgcolor: '#12322B' },
+            }}
           >
-            Gestionar roles y permisos
+            Buscar
           </Button>
         </Box>
+      </Paper>
 
-        {/* BUSCADOR */}
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: { xs: 1.5, md: 4 }, bgcolor: '#ffffff' }}>
-          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid #e0e0e0' }}>
-            <Typography 
-              variant="overline" 
-              sx={{ 
-                color: '#1b3e32', 
-                fontWeight: 'bold', 
-                display: 'block', 
-                textAlign: 'left',
-                fontSize: '0.8rem'
-              }}
-            >
-              BUSCAR ADMINISTRADOR POR CÉDULA
-            </Typography>
-          </Box>
-          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, display: 'flex', flexDirection: 'row', gap: { xs: 1, sm: 2 } }}>
-            <TextField 
-              fullWidth variant="outlined" placeholder="1-2345-6789" size="small" 
-              sx={{ bgcolor: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-            <Button 
-              variant="contained" disableElevation
-              sx={{ bgcolor: '#1b3e32', color: '#fff', fontWeight: 'bold', px: { xs: 2, sm: 4 }, textTransform: 'none', borderRadius: 2, '&:hover': { bgcolor: '#122921' } }}
-            >
-              Buscar
-            </Button>
-          </Box>
-        </Paper>
+      {/* LISTA DE ADMINISTRADORES */}
+      <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
+        <Box sx={CARD_HEADER_SX}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+            Administradores
+          </Typography>
+        </Box>
 
-        {/* LISTA DE ADMINISTRADORES */}
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', mb: { xs: 1.5, md: 4 }, bgcolor: '#ffffff' }}>
-          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
-              Administradores
-            </Typography>
-          </Box>
-
-          <Box>
-            {isLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                <CircularProgress sx={{ color: '#1b3e32' }} />
-              </Box>
-            ) : error ? (
-              <Typography variant="body1" sx={{ p: 3, color: '#d32f2f', textAlign: 'center', fontWeight: 'bold' }}>
-                {error}
-              </Typography>
-            ) : admins.length === 0 ? (
-              <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
-                No hay administradores registrados.
-              </Typography>
-            ) : (
-              admins.map((user, index) => (
-                <React.Fragment key={user.id}>
-                  <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: '#e0e0e0', color: '#666', fontWeight: 'bold' }}>
-                        {getInitials(user.name)}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="subtitle1" fontWeight="bold" color="#212121" lineHeight={1.2}>
-                          {user.name}
-                        </Typography>
-                        <Typography variant="body2" color="#666666">
-                          {user.identification || user.id} · {user.email}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-end', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}>
-                      <Button 
-                        variant="outlined" color="error" onClick={() => handleOpenModal(user)}
-                        sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 'bold', py: 0.5 }}
-                      >
-                        Eliminar
-                      </Button>
-                    </Box>
-                  </Box>
-                  {index < admins.length - 1 && <Divider />}
-                </React.Fragment>
-              ))
-            )}
-          </Box>
-        </Paper>
-
-        {/* AUDITORÍA */}
-        <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden', bgcolor: '#ffffff' }}>
-          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ color: '#1b3e32', fontWeight: 'bold', textAlign: 'left' }}>
-              Auditoría de eliminaciones y creaciones
-            </Typography>
-          </Box>
-
-          <Box>
-            {auditLogs.length === 0 ? (
-              <Typography variant="body1" sx={{ p: 3, color: '#666', textAlign: 'center' }}>
-                No hay registros de auditoría recientes.
-              </Typography>
-            ) : (
-              auditLogs.map((log, index) => (
-                <React.Fragment key={log.id}>
-                  <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: { sm: '220px' } }}>
-                      <Typography variant="body2" sx={{ color: '#666' }}>{log.date}</Typography>
-                      <Typography variant="caption" sx={{ px: 1.5, py: 0.5, borderRadius: 1.5, fontWeight: 'bold', bgcolor: log.isCreation ? '#e8f5e9' : '#ffebee', color: log.isCreation ? '#2e7d32' : '#c62828' }}>
-                        {log.action}
+        <Box>
+          {isLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress sx={{ color: 'primary.main' }} />
+            </Box>
+          ) : error ? (
+            <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
+          ) : admins.length === 0 ? (
+            <Alert severity="info" sx={{ m: 2 }}>No hay administradores registrados.</Alert>
+          ) : (
+            admins.map((user, index) => (
+              <React.Fragment key={user.id}>
+                {index > 0 && <Divider sx={{ borderColor: '#EFEAE4' }} />}
+                <Box
+                  sx={{
+                    p: { xs: 2.5, sm: '18px 24px' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75, minWidth: 0 }}>
+                    <Avatar sx={{ width: 40, height: 40, bgcolor: '#F1ECE7', color: '#6B6560', fontWeight: 700, fontSize: '13px', flex: '0 0 40px' }}>
+                      {getInitials(user.name)}
+                    </Avatar>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontSize: '14.5px', fontWeight: 600, color: '#1F2421' }}>
+                        {user.name}
+                      </Typography>
+                      <Typography sx={{ fontSize: '12.5px', color: '#6B6560' }}>
+                        {user.identification || user.id} · {user.email}
                       </Typography>
                     </Box>
-                    <Box sx={{ flexGrow: 1 }}><Typography variant="body2" color="#212121">{log.details}</Typography></Box>
-                    <Box><Typography variant="body2" color="#666">{log.role}</Typography></Box>
                   </Box>
-                  {index < auditLogs.length - 1 && <Divider />}
-                </React.Fragment>
-              ))
-            )}
-          </Box>
-        </Paper>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleOpenModal(user)}
+                    sx={{
+                      borderRadius: '10px',
+                      px: 2.25,
+                      py: '9px',
+                      fontWeight: 600,
+                      fontSize: '13.5px',
+                      textTransform: 'none',
+                      bgcolor: '#fff',
+                      color: '#C0392B',
+                      borderColor: '#C0392B',
+                      '&:hover': { bgcolor: '#FCEDEA', borderColor: '#C0392B' },
+                    }}
+                  >
+                    Eliminar
+                  </Button>
+                </Box>
+              </React.Fragment>
+            ))
+          )}
+        </Box>
+      </Paper>
 
-      </Box>
+      {/* AUDITORÍA */}
+      <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
+        <Box sx={CARD_HEADER_SX}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+            Auditoría de eliminaciones y creaciones
+          </Typography>
+        </Box>
+
+        <Box>
+          {auditLogs.length === 0 ? (
+            <Typography sx={{ p: '20px 24px', fontSize: '13px', color: '#9E968D', textAlign: 'center' }}>
+              No hay registros de auditoría recientes.
+            </Typography>
+          ) : (
+            auditLogs.map((log, index) => (
+              <React.Fragment key={log.id}>
+                {index > 0 && <Divider sx={{ borderColor: '#EFEAE4' }} />}
+                <Box
+                  sx={{
+                    p: { xs: 2.5, sm: '14px 24px' },
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    gap: '14px',
+                  }}
+                >
+                  <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#9E968D', flex: '0 0 150px' }}>
+                    {log.date}
+                  </Typography>
+                  <Chip
+                    label={log.action}
+                    size="small"
+                    sx={{
+                      fontSize: '11.5px',
+                      fontWeight: 700,
+                      borderRadius: '20px',
+                      bgcolor: log.isCreation ? '#E9F3EC' : '#FCEDEA',
+                      color: log.isCreation ? '#2F7D4F' : '#C0392B',
+                    }}
+                  />
+                  <Typography sx={{ fontSize: '13px', color: '#1F2421', flex: '1 1 200px', minWidth: 0 }}>
+                    {log.details}
+                  </Typography>
+                  <Typography sx={{ fontSize: '11.5px', color: '#6B6560' }}>
+                    {log.role}
+                  </Typography>
+                </Box>
+              </React.Fragment>
+            ))
+          )}
+        </Box>
+      </Paper>
 
       {/* MODAL */}
       <DeleteAdminModal
@@ -311,8 +355,8 @@ const AdminManagement = () => {
       />
 
       {/* TOAST */}
-      <Snackbar open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} sx={{ mb: { xs: 10, md: 0 } }}>
-        <Alert severity="success" sx={{ width: '100%', bgcolor: '#e8f5e9', color: '#2e7d32', border: '1px solid #c8e6c9', borderRadius: 2 }}>
+      <Snackbar open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Alert onClose={() => setToastOpen(false)} severity="success" variant="filled">
           Administrador eliminado correctamente.
         </Alert>
       </Snackbar>
@@ -321,18 +365,12 @@ const AdminManagement = () => {
         open={Boolean(deleteError) && !isModalOpen}
         autoHideDuration={6000}
         onClose={() => setDeleteError(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        sx={{ mb: { xs: 10, md: 0 } }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert
-          severity="error"
-          onClose={() => setDeleteError(null)}
-          sx={{ width: '100%', borderRadius: 2 }}
-        >
+        <Alert onClose={() => setDeleteError(null)} severity="error" variant="filled">
           {deleteError}
         </Alert>
       </Snackbar>
-
     </Box>
   );
 };
