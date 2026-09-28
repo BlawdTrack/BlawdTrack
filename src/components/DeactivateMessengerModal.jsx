@@ -45,79 +45,80 @@ export const DeactivateMessengerModal = ({
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: '12px', padding: { xs: 1, sm: 2 } },
+        sx: { borderRadius: '18px', padding: { xs: 1, sm: 1.5 } },
       }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
         <Box
           sx={{
-            width: 24,
-            height: 24,
-            border: '2px solid #111827',
-            borderRadius: '6px',
+            width: 34,
+            height: 34,
+            borderRadius: '50%',
+            bgcolor: '#FCEDEA',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: 800,
-            color: '#111827',
-            fontSize: '14px',
+            flex: '0 0 34px',
           }}
         >
-          !
+          <Box sx={{ width: '3px', height: '14px', bgcolor: '#C0392B', borderRadius: '2px' }} />
         </Box>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827' }}>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '17px', color: 'primary.main' }}>
           Desactivar mensajero
         </Typography>
       </DialogTitle>
 
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pb: 1 }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 1 }}>
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 2,
-            p: 2,
-            bgcolor: '#F9FAFB',
-            borderRadius: '8px',
-            border: '1px solid #E5E7EB',
-            mt: 1,
+            gap: '12px',
+            p: '14px 16px',
+            bgcolor: '#F1ECE7',
+            borderRadius: '12px',
           }}
         >
-          <Avatar sx={{ bgcolor: '#E5E7EB', color: '#374151', fontWeight: 600 }}>
+          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: '#fff', fontWeight: 700, fontSize: '12.5px', flex: '0 0 38px' }}>
             {getInitials(courier.fullName)}
           </Avatar>
-          <Box>
-            <Typography sx={{ fontWeight: 700, color: '#111827' }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography sx={{ fontSize: '13.5px', fontWeight: 600, color: '#1F2421' }}>
               {courier.fullName}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#6B7280' }}>
+            <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
               {courier.documentNumber} · {courier.schedule}
             </Typography>
           </Box>
         </Box>
 
-        <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.5 }}>
+        <Typography sx={{ fontSize: '13.5px', color: '#6B6560', lineHeight: 1.55 }}>
           El mensajero perderá el acceso de inmediato y no recibirá nuevas
           asignaciones. Su historial de entregas se conserva.
         </Typography>
 
         {error && (
-          <Alert severity={isBlockedByPendingPackages ? 'warning' : 'error'} sx={{ borderRadius: '8px', fontWeight: 500 }}>
+          <Alert
+            severity={isBlockedByPendingPackages ? 'warning' : 'error'}
+            sx={{ borderRadius: '10px', fontWeight: 500 }}
+          >
             {error}
           </Alert>
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2, pt: 1 }}>
+      <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1.5 }}>
         <Button
           onClick={onClose}
           disabled={isLoading}
           sx={{
-            color: '#374151',
+            color: 'primary.main',
+            border: '1.5px solid #DCD4CA',
+            borderRadius: '10px',
             textTransform: 'none',
             fontWeight: 600,
-            fontSize: '1rem',
-            '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
+            fontSize: '14px',
+            px: 2.5,
           }}
         >
           Cancelar
@@ -127,16 +128,15 @@ export const DeactivateMessengerModal = ({
           disabled={isLoading}
           variant="contained"
           sx={{
-            bgcolor: '#DC2626',
-            color: 'white',
+            bgcolor: '#C0392B',
+            color: '#fff',
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: '8px',
-            px: 3,
-            py: 1,
-            fontSize: '1rem',
-            '&:hover': { bgcolor: '#B91C1C' },
+            borderRadius: '10px',
+            px: 2.5,
+            fontSize: '14px',
             boxShadow: 'none',
+            '&:hover': { bgcolor: '#A5301F', boxShadow: 'none' },
           }}
         >
           {isLoading ? 'Desactivando...' : 'Sí, desactivar'}

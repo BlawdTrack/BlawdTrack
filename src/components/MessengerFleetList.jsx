@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -17,8 +16,13 @@ import { listCouriers } from '../services/CourierService';
 import { getInitials } from '../utils/getInitials';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
 
+// El backend aun no expone si un mensajero esta en labores ni sus paquetes
+// pendientes (ver ProvisionalCourierWorkloadPort): se muestra el mismo texto
+// fijo del mockup en vez de inventar datos reales que no existen todavia.
+const DUTY_PLACEHOLDER = 'Fuera de labores';
+const PENDING_PLACEHOLDER = 'Sin envíos en proceso';
+
 export const MessengerFleetList = () => {
-  const navigate = useNavigate();
   const { logout } = useAuth();
   const [messengers, setMessengers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,83 +92,123 @@ export const MessengerFleetList = () => {
 
   return (
     <Box sx={{ maxWidth: '900px', margin: '0 auto', p: { xs: 1.5, sm: 2 } }}>
-      <Paper elevation={0} sx={{ border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden' }}>
-        <Box sx={{ p: { xs: 1.5, sm: 3 }, bgcolor: '#FFFFFF' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#064E3B', fontSize: '1.15rem' }}>
+      <Paper
+        elevation={0}
+        sx={{ border: '1px solid #E4DED7', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 12px 30px rgba(26,60,52,.06)' }}
+      >
+        <Box
+          sx={{
+            p: { xs: 2, sm: '18px 24px' },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1.5,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
             Mensajeros · desactivación de acceso
           </Typography>
-          <Typography variant="body2" sx={{ color: '#9CA3AF', fontWeight: 500, mt: 1 }}>
+          <Typography sx={{ fontSize: '12px', color: '#9E968D' }}>
             El historial de entregas se conserva siempre
           </Typography>
         </Box>
-        <Divider />
 
         {messengers.length === 0 ? (
           <Alert severity="info" sx={{ m: 2 }}>
             No hay mensajeros disponibles para mostrar.
           </Alert>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            {messengers.map((messenger, index) => (
+          messengers.map((messenger, index) => {
+            const isActive = messenger.status === 'ACTIVE';
+            return (
               <React.Fragment key={messenger.id ?? messenger.documentNumber}>
-                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', p: { xs: 1.5, sm: 3 }, gap: { xs: 1, sm: 2 }, bgcolor: '#FFFFFF', '&:hover': { bgcolor: '#F9FAFB' } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                    <Avatar sx={{ bgcolor: '#F3F4F6', color: '#374151', fontWeight: 600, width: 48, height: 48 }}>
-                      {getInitials(messenger.fullName)}
-                    </Avatar>
-                    <Box>
-                      <Typography sx={{ fontWeight: 700, color: '#111827' }}>{messenger.fullName}</Typography>
-                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                        {messenger.documentNumber} · {messenger.schedule}
-                      </Typography>
-                    </Box>
+                {index > 0 && <Divider sx={{ borderColor: '#EFEAE4' }} />}
+                <Box
+                  sx={{
+                    p: { xs: 2, sm: '16px 24px' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <Avatar sx={{ width: 38, height: 38, bgcolor: '#F1ECE7', color: '#6B6560', fontWeight: 700, fontSize: '12.5px', flex: '0 0 38px' }}>
+                    {getInitials(messenger.fullName)}
+                  </Avatar>
+
+                  <Box sx={{ flex: '1 1 190px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 600, color: '#1F2421' }}>
+                      {messenger.fullName}
+                    </Typography>
+                    <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
+                      {messenger.documentNumber} · {messenger.schedule}
+                    </Typography>
                   </Box>
 
-                  <Box sx={{ minWidth: { sm: '180px' }, flex: 1 }}>
-                    {messenger.inLabor !== undefined && (
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: messenger.inLabor ? '#92400E' : '#047857' }}>
-                        {messenger.inLabor ? 'En labores' : 'Fuera de labores'}
-                      </Typography>
-                    )}
-                    {messenger.pendingPackages !== undefined && (
-                      <Typography variant="body2" sx={{ color: '#9CA3AF' }}>
-                        {messenger.pendingPackages > 0
-                          ? `${messenger.pendingPackages} paquete(s) pendiente(s)`
-                          : 'Sin envíos en proceso'}
-                      </Typography>
-                    )}
+                  <Box sx={{ flex: '0 1 200px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#2F7D4F' }}>
+                      {DUTY_PLACEHOLDER}
+                    </Typography>
+                    <Typography sx={{ fontSize: '11.5px', color: '#9E968D' }}>
+                      {PENDING_PLACEHOLDER}
+                    </Typography>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-end', flex: 1 }}>
-                    <Chip label={messenger.status === 'ACTIVE' ? 'Activo' : 'Inactivo'} size="small" sx={{ bgcolor: messenger.status === 'ACTIVE' ? '#DEF7EC' : '#F3F4F6', color: messenger.status === 'ACTIVE' ? '#047857' : '#6B7280', fontWeight: 700, borderRadius: '16px', px: 1 }} />
-                    <Button
-                      variant="contained"
-                      onClick={() => navigate(`/editar-mensajero/${encodeURIComponent(messenger.documentNumber || messenger.idCard || messenger.cedula || messenger.id)}`)}
-                      sx={{ minWidth: '90px', bgcolor: '#1A3C34', color: '#ffffff', textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: '#122921' } }}
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      disabled={messenger.status === 'INACTIVE'}
-                      onClick={() => handleOpenModal(messenger)}
-                      sx={{ minWidth: { sm: '110px' }, color: messenger.status === 'INACTIVE' ? '#9CA3AF' : '#B91C1C', borderColor: messenger.status === 'INACTIVE' ? '#E5E7EB' : '#B91C1C', textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
-                    >
-                      {messenger.status === 'INACTIVE' ? 'Inactivo' : 'Desactivar'}
-                    </Button>
-                  </Box>
+                  <Chip
+                    label={isActive ? 'Activo' : 'Inactivo'}
+                    sx={{
+                      fontSize: '11.5px',
+                      fontWeight: 700,
+                      borderRadius: '20px',
+                      bgcolor: isActive ? '#E9F3EC' : '#F1ECE7',
+                      color: isActive ? '#2F7D4F' : '#6B6560',
+                    }}
+                  />
+
+                  <Button
+                    variant="outlined"
+                    disabled={!isActive}
+                    onClick={() => handleOpenModal(messenger)}
+                    sx={{
+                      borderRadius: '9px',
+                      px: 2,
+                      py: '11px',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      bgcolor: '#fff',
+                      color: isActive ? '#C0392B' : '#7A736A',
+                      borderColor: isActive ? '#C0392B' : '#E4DED7',
+                      '&:hover': { bgcolor: isActive ? '#FCEDEA' : '#fff', borderColor: isActive ? '#C0392B' : '#E4DED7' },
+                    }}
+                  >
+                    {isActive ? 'Desactivar' : 'Inactivo'}
+                  </Button>
                 </Box>
-                {index < messengers.length - 1 && <Divider />}
               </React.Fragment>
-            ))}
-          </Box>
+            );
+          })
         )}
       </Paper>
 
-      <Alert severity="info" sx={{ mt: { xs: 1.5, sm: 3 } }}>
-        La desactivación se gestiona según la validación de pendientes definida por
-        el backend.
-      </Alert>
+      <Box
+        sx={{
+          mt: { xs: 1.5, sm: 2.5 },
+          bgcolor: '#FCF3E3',
+          border: '1px solid #EBC98A',
+          borderRadius: '14px',
+          p: '18px 20px',
+          display: 'flex',
+          gap: '12px',
+        }}
+      >
+        <Box sx={{ width: '8px', height: '8px', borderRadius: '50%', bgcolor: '#C9860F', mt: '6px', flex: '0 0 8px' }} />
+        <Typography sx={{ fontSize: '13.5px', color: '#7A5A12', lineHeight: 1.55 }}>
+          Un mensajero solo puede desactivarse si está fuera de labores y sin envíos en proceso.
+          Tras desactivarlo no recibe nuevas asignaciones y sus paquetes pendientes deben
+          reasignarse manualmente.
+        </Typography>
+      </Box>
 
       <DeactivateMessengerModal
         isOpen={isModalOpen}
