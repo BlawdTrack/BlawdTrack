@@ -105,7 +105,7 @@ class JwtIntegrationTest {
                 .code("TASK103_ACCESS").description("Acceso de prueba").build());
         Role role = roles.saveAndFlush(Role.builder().name("TASK103_ROLE")
                 .permissions(new HashSet<>(Set.of(permission))).build());
-        users.saveAndFlush(User.builder().nationalId("TASK103")
+        users.saveAndFlush(User.builder().documentId("TASK103")
                 .fullName("Usuario permisos").email("task103@example.com")
                 .passwordHash(passwordEncoder.encode("Task103-password!"))
                 .status(UserStatus.ACTIVE).role(role).build());
@@ -139,7 +139,7 @@ class JwtIntegrationTest {
     void tokenExistenteUsaRolYEstadoActualYDejaDeServirSiElUsuarioSeElimina() throws Exception {
         Role originalRole = roles.save(Role.builder().name("TASK103_ORIGINAL").build());
         Role newRole = roles.save(Role.builder().name("TASK103_NEW").build());
-        User user = users.saveAndFlush(User.builder().nationalId("TASK103-STATE")
+        User user = users.saveAndFlush(User.builder().documentId("TASK103-STATE")
                 .fullName("Usuario sesión vigente").email("task103-state@example.com")
                 .passwordHash("unused").status(UserStatus.ACTIVE).role(originalRole).build());
         String token = jwtService.generateToken(new UserPrincipal(user));
@@ -155,23 +155,28 @@ class JwtIntegrationTest {
 
         user = users.findById(user.getId()).orElseThrow();
         user.setRole(originalRole);
-        user.setStatus(UserStatus.INACTIVE);
+        user.changeStatus(UserStatus.INACTIVE);
         users.saveAndFlush(user);
         entityManager.clear();
         mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized());
 
         user = users.findById(user.getId()).orElseThrow();
-        user.setStatus(UserStatus.ACTIVE);
+        user.changeStatus(UserStatus.ACTIVE);
         users.saveAndFlush(user);
         entityManager.clear();
         mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+
+        user = users.findById(user.getId()).orElseThrow();
+        String reactivatedToken = jwtService.generateToken(new UserPrincipal(user));
+        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + reactivatedToken))
                 .andExpect(status().isOk());
 
         users.deleteById(user.getId());
         users.flush();
         entityManager.clear();
-        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + token))
+        mvc.perform(get("/test/jwt/current-role").header("Authorization", "Bearer " + reactivatedToken))
                 .andExpect(status().isUnauthorized());
     }
 

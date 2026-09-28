@@ -48,7 +48,7 @@ public class User {
     private String documentNumber;
 
     @Deprecated
-    @Column(name = "cedula", nullable = false, unique = true, length = 20)
+    @Column(name = "cedula", nullable = false, length = 20)
     private String documentId;
 
     @PrePersist
