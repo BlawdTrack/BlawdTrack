@@ -29,7 +29,7 @@ import './EditMessenger.css';
 
 export function EditMessenger({ initialCedula = '' }) {
   const { user, logout } = useAuth();
-  const { loading: submitting, updateCourier, getCourierByCedula } = useCourier();
+  const { loading: submitting, updateCourier } = useCourier();
 
   const [couriersList, setCouriersList] = useState([]);
   const [currentCourier, setCurrentCourier] = useState(null);

@@ -56,10 +56,10 @@ export const updateCourier = async (idCard, courierData) => {
   }
 };
 
-export const getCourierByCedula = async (idCard) => {
+export const getCourierByDocumentNumber = async (documentNumber) => {
   try {
     const response = await axiosClient.get(
-      `/v1/couriers/${encodeURIComponent(idCard)}`
+      `/v1/couriers/${encodeURIComponent(documentNumber)}`
     );
     return response.data;
   } catch (error) {
