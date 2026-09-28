@@ -4,6 +4,7 @@ import {
   Paper,
   Typography,
   TextField,
+  MenuItem,
   Button,
   CircularProgress,
   Chip,
@@ -24,11 +25,38 @@ import Toast from '../components/Toast';
 import StatusMessage from '../components/StatusMessage';
 import './EditMessenger.css';
 
+const DOCUMENT_TYPE_OPTIONS = [
+  { value: 'CEDULA', label: 'Cédula' },
+  { value: 'DIMEX', label: 'DIMEX' },
+  { value: 'PASAPORTE', label: 'Pasaporte' },
+];
+
+const DOCUMENT_PLACEHOLDERS = {
+  CEDULA: 'Ej. 1-2345-6789',
+  DIMEX: 'Ej. 155812345678',
+  PASAPORTE: 'Ej. A12345678',
+};
+
+const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+// Muestra solo el rango de horas en la tabla; el detalle de dias queda en el
+// formulario de edicion, no en esta columna.
+const getScheduleTimeRange = (schedule) => (schedule || '').split(',')[0].trim();
+
 const CARD_SX = {
   borderRadius: '18px',
   border: '1px solid #E4DED7',
   bgcolor: '#fff',
   boxShadow: '0 12px 30px rgba(26,60,52,.06)',
+};
+const CARD_HEADER_SX = {
+  p: { xs: 2.5, sm: '18px 24px' },
+  borderBottom: '1px solid #E4DED7',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  flexWrap: 'wrap',
+  gap: 1.5,
 };
 const LABEL_SX = {
   fontWeight: 700,
@@ -52,6 +80,10 @@ export function EditMessenger({ initialCedula = '' }) {
   const [currentCourier, setCurrentCourier] = useState(null);
   const [selectedCourierId, setSelectedCourierId] = useState(null);
   const [isLoadingCouriers, setIsLoadingCouriers] = useState(true);
+
+  const [searchDocumentType, setSearchDocumentType] = useState('CEDULA');
+  const [searchDocumentNumber, setSearchDocumentNumber] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -118,6 +150,28 @@ export function EditMessenger({ initialCedula = '' }) {
   const handleRowClick = (courier) => {
     loadMessengerData(courier);
   };
+
+  const handleSearch = () => {
+    const trimmed = searchDocumentNumber.trim();
+    if (!trimmed) {
+      setAppliedFilter(null);
+      return;
+    }
+    setAppliedFilter({ documentType: searchDocumentType, documentNumber: normalizeDocument(trimmed) });
+  };
+
+  const handleClearSearch = () => {
+    setSearchDocumentNumber('');
+    setAppliedFilter(null);
+  };
+
+  const visibleCouriers = appliedFilter
+    ? couriersList.filter(
+        (courier) =>
+          courier.documentType === appliedFilter.documentType
+          && normalizeDocument(getCourierId(courier)).includes(appliedFilter.documentNumber)
+      )
+    : couriersList;
 
   // Cargar por cédula inicial si se proporciona
   useEffect(() => {
@@ -323,6 +377,62 @@ export function EditMessenger({ initialCedula = '' }) {
 
   return (
     <Box className="edit-messenger-container" sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* BUSCADOR */}
+      <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
+        <Box sx={CARD_HEADER_SX}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+            Buscar mensajero por documento
+          </Typography>
+        </Box>
+        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' }, display: 'flex', gap: 1.5, flexWrap: { xs: 'wrap', sm: 'nowrap' }, alignItems: 'center' }}>
+          <TextField
+            select
+            value={searchDocumentType}
+            onChange={(e) => setSearchDocumentType(e.target.value)}
+            sx={{ flex: '0 0 150px', minWidth: 130, ...INPUT_SX }}
+          >
+            {DOCUMENT_TYPE_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            fullWidth
+            value={searchDocumentNumber}
+            onChange={(e) => setSearchDocumentNumber(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder={DOCUMENT_PLACEHOLDERS[searchDocumentType]}
+            sx={{ flex: '1 1 auto', minWidth: 0, ...INPUT_SX }}
+          />
+          <Button
+            variant="contained"
+            disableElevation
+            onClick={handleSearch}
+            sx={{
+              flex: '0 0 auto',
+              bgcolor: 'primary.main',
+              color: '#fff',
+              fontWeight: 600,
+              px: 3.5,
+              textTransform: 'none',
+              borderRadius: '10px',
+              '&:hover': { bgcolor: '#12322B' },
+            }}
+          >
+            Buscar
+          </Button>
+          {appliedFilter && (
+            <Button
+              onClick={handleClearSearch}
+              sx={{ flex: '0 0 auto', color: '#6B6560', textTransform: 'none', fontWeight: 600, px: 1.5 }}
+            >
+              Limpiar
+            </Button>
+          )}
+        </Box>
+      </Paper>
+
       {/* Flota de Mensajeros */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={{ p: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5 }}>
@@ -351,7 +461,7 @@ export function EditMessenger({ initialCedula = '' }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {couriersList.map((courier) => {
+              {visibleCouriers.map((courier) => {
                 const courierId = getCourierId(courier);
                 const isSelected = selectedCourierId === courierId;
                 return (
@@ -374,7 +484,7 @@ export function EditMessenger({ initialCedula = '' }) {
                       {courier.documentNumber || courier.idCard || courier.cedula || courier.id || ''}
                     </TableCell>
                     <TableCell sx={{ width: '30%', px: 3, py: '14px', fontSize: '13px', color: '#6B6560' }}>
-                      {courier.schedule || courier.horario || ''}
+                      {getScheduleTimeRange(courier.schedule || courier.horario)}
                     </TableCell>
                     <TableCell sx={{ width: '13%', px: 3, py: '14px', fontSize: '13px', color: '#6B6560', whiteSpace: 'nowrap' }}>
                       {courier.maxPackageWeightKg ?? courier.maxLoadCapacityKg ?? courier.cap ?? courier.capacidad ?? ''} kg
@@ -399,6 +509,13 @@ export function EditMessenger({ initialCedula = '' }) {
                 <TableRow>
                   <TableCell colSpan={5} sx={{ textAlign: 'center', py: 8, color: '#9E968D' }}>
                     No hay mensajeros disponibles
+                  </TableCell>
+                </TableRow>
+              )}
+              {couriersList.length > 0 && visibleCouriers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 8, color: '#9E968D' }}>
+                    No se encontró ningún mensajero con ese documento.
                   </TableCell>
                 </TableRow>
               )}
