@@ -24,7 +24,8 @@ class EmailServiceTest {
     void setUp() throws Exception {
         service = new EmailService(sender, "no-reply@blawdtrack.test",
                 "https://blawdtrack.test/recovery",
-                new ClassPathResource("templates/mail/email-with-token.html"));
+                new ClassPathResource("templates/mail/email-with-token.html"),
+                new ClassPathResource("templates/mail/courier-welcome.html"));
     }
 
     private MimeMessage prepare() {
@@ -71,7 +72,8 @@ class EmailServiceTest {
         for (String url : new String[]{"javascript:alert(1)", "/reset", "https://example.com/reset?token=old",
                 "https://example.com/reset#fragment", "https://user:password@example.com/reset"}) {
             assertThatThrownBy(() -> new EmailService(sender, "a@example.com", url,
-                    new ClassPathResource("templates/mail/email-with-token.html")))
+                    new ClassPathResource("templates/mail/email-with-token.html"),
+                    new ClassPathResource("templates/mail/courier-welcome.html")))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
@@ -85,8 +87,11 @@ class EmailServiceTest {
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo("courier@example.com");
         assertThat(message.getSubject()).isEqualTo("BlawdTrack: bienvenida y credenciales de acceso");
         assertThat(body(message, "text/plain")).contains("courier@example.com", "Ab12<&strong>!");
-        assertThat(body(message, "text/html")).contains("Ana &lt;script&gt;", "Ab12&lt;&amp;strong&gt;!")
-                .doesNotContain("<script>", "Ab12<&strong>!");
+        assertThat(body(message, "text/html"))
+                .contains("Ana &lt;script&gt;", "courier@example.com", "Ab12&lt;&amp;strong&gt;!",
+                        "Notificaciones de tu cuenta", "Todo listo para comenzar", "Contraseña temporal")
+                .doesNotContain("<script>", "Ab12<&strong>!", "{{fullName}}", "{{recipient}}",
+                        "{{temporaryPassword}}");
     }
 
     private String body(Part part, String type) throws Exception {
