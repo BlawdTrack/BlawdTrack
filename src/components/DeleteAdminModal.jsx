@@ -113,7 +113,7 @@ const DeleteAdminModal = ({
           Cancelar
         </Button>
         <Button
-          onClick={() => onConfirm(documentNumber)}
+          onClick={() => onConfirm(adminData.documentType, documentNumber)}
           disabled={isSubmitting}
           variant="contained"
           sx={{

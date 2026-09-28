@@ -28,8 +28,10 @@ const normalizeAdministrator = (administrator) => {
     id: administrator.id,
     name,
     email,
+    documentType: administrator.documentType,
     documentNumber,
-    identification: documentNumber
+    identification: documentNumber,
+    hasActiveSession: Boolean(administrator.hasActiveSession)
   };
 };
 
@@ -47,8 +49,8 @@ export const getAdministrators = async () => {
   return administrators.map(normalizeAdministrator);
 };
 
-export const deleteAdministrator = async (cedula) => {
+export const deleteAdministrator = async (documentType, documentNumber) => {
   await axiosClient.delete(
-    `${ADMINISTRATORS_PATH}/${encodeURIComponent(cedula)}`
+    `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}`
   );
 };

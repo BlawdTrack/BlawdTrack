@@ -103,9 +103,9 @@ const AdminManagement = () => {
     return backendMessage || 'No se pudo eliminar el administrador. Intenta nuevamente.';
   };
 
-  const handleDeleteConfirm = async (cedula) => {
-    if (!cedula) {
-      console.error('Intento de eliminación fallido: Cédula indefinida o vacía.');
+  const handleDeleteConfirm = async (documentType, cedula) => {
+    if (!documentType || !cedula) {
+      console.error('Intento de eliminación fallido: documento indefinido o vacío.');
       handleCloseModal();
       setDeleteError('No se puede procesar la solicitud porque faltan datos del administrador.');
       return;
@@ -115,7 +115,7 @@ const AdminManagement = () => {
       setDeleteError(null);
       setIsDeleting(true);
 
-      await deleteAdministrator(cedula);
+      await deleteAdministrator(documentType, cedula);
 
       const adminToDelete = admins.find(
         (admin) =>
@@ -240,53 +240,77 @@ const AdminManagement = () => {
           ) : admins.length === 0 ? (
             <Alert severity="info" sx={{ m: 2 }}>No hay administradores registrados.</Alert>
           ) : (
-            admins.map((user, index) => (
-              <React.Fragment key={user.id}>
-                {index > 0 && <Divider sx={{ borderColor: '#EFEAE4' }} />}
-                <Box
-                  sx={{
-                    p: { xs: 2.5, sm: '18px 24px' },
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 2,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75, minWidth: 0 }}>
-                    <Avatar sx={{ width: 40, height: 40, bgcolor: '#F1ECE7', color: '#6B6560', fontWeight: 700, fontSize: '13px', flex: '0 0 40px' }}>
-                      {getInitials(user.name)}
-                    </Avatar>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography sx={{ fontSize: '14.5px', fontWeight: 600, color: '#1F2421' }}>
-                        {user.name}
-                      </Typography>
-                      <Typography sx={{ fontSize: '12.5px', color: '#6B6560' }}>
-                        {user.identification || user.id} · {user.email}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleOpenModal(user)}
+            admins.map((user, index) => {
+              const blocked = user.hasActiveSession;
+              return (
+                <React.Fragment key={user.id}>
+                  {index > 0 && <Divider sx={{ borderColor: '#EFEAE4' }} />}
+                  <Box
                     sx={{
-                      borderRadius: '10px',
-                      px: 2.25,
-                      py: '9px',
-                      fontWeight: 600,
-                      fontSize: '13.5px',
-                      textTransform: 'none',
-                      bgcolor: '#fff',
-                      color: '#C0392B',
-                      borderColor: '#C0392B',
-                      '&:hover': { bgcolor: '#FCEDEA', borderColor: '#C0392B' },
+                      p: { xs: 2.5, sm: '18px 24px' },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 2,
+                      flexWrap: 'wrap',
                     }}
                   >
-                    Eliminar
-                  </Button>
-                </Box>
-              </React.Fragment>
-            ))
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75, minWidth: 0 }}>
+                      <Avatar sx={{ width: 40, height: 40, bgcolor: '#F1ECE7', color: '#6B6560', fontWeight: 700, fontSize: '13px', flex: '0 0 40px' }}>
+                        {getInitials(user.name)}
+                      </Avatar>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography sx={{ fontSize: '14.5px', fontWeight: 600, color: '#1F2421' }}>
+                          {user.name}
+                        </Typography>
+                        <Typography sx={{ fontSize: '12.5px', color: '#6B6560' }}>
+                          {user.identification || user.id} · {user.email}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Chip
+                        label={blocked ? 'Sesión activa' : 'Sin sesión'}
+                        size="small"
+                        sx={{
+                          fontSize: '11.5px',
+                          fontWeight: 700,
+                          borderRadius: '20px',
+                          bgcolor: blocked ? '#FCF3E3' : '#F1ECE7',
+                          color: blocked ? '#B27A0C' : '#6B6560',
+                        }}
+                      />
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                        <Button
+                          variant="outlined"
+                          disabled={blocked}
+                          onClick={() => handleOpenModal(user)}
+                          sx={{
+                            borderRadius: '10px',
+                            px: 2.25,
+                            py: '9px',
+                            fontWeight: 600,
+                            fontSize: '13.5px',
+                            textTransform: 'none',
+                            bgcolor: '#fff',
+                            color: blocked ? '#9E968D' : '#C0392B',
+                            borderColor: blocked ? '#DCD4CA' : '#C0392B',
+                            '&:hover': { bgcolor: blocked ? '#fff' : '#FCEDEA', borderColor: blocked ? '#DCD4CA' : '#C0392B' },
+                          }}
+                        >
+                          Eliminar
+                        </Button>
+                        {blocked && (
+                          <Typography sx={{ fontSize: '10.5px', color: '#9E968D' }}>
+                            Requiere cierre de sesión
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  </Box>
+                </React.Fragment>
+              );
+            })
           )}
         </Box>
       </Paper>
