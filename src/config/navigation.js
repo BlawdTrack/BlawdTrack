@@ -13,7 +13,7 @@ export const NAVIGATION_GROUPS = [
       {
         id: 'password-reset',
         label: 'Restablecer contraseña',
-        path: ROUTES.PASSWORD_RECOVERY,
+        path: ROUTES.PASSWORD_RESET_OWN,
         roles: [ROLES.SUPER_USER],
       },
     ],
@@ -24,7 +24,7 @@ export const NAVIGATION_GROUPS = [
     shortTitle: 'Mensajeros',
     items: [
       { id: 'courier-create', label: 'Crear mensajero', path: ROUTES.COURIER_CREATE, roles: [ROLES.SUPER_USER] },
-      { id: 'courier-update', label: 'Actualizar mensajero', path: null, roles: [ROLES.SUPER_USER] },
+      { id: 'courier-update', label: 'Actualizar mensajero', path: ROUTES.COURIER_UPDATE, roles: [ROLES.SUPER_USER] },
       { id: 'courier-deactivate', label: 'Desactivar mensajero', path: ROUTES.COURIER_DEACTIVATE, roles: [ROLES.SUPER_USER] },
     ],
   },
@@ -41,7 +41,7 @@ export const NAVIGATION_GROUPS = [
     id: 'permissions',
     title: 'Roles y permisos',
     shortTitle: 'Permisos',
-    items: [{ id: 'roles-permissions', label: 'Roles y permisos', path: null, roles: [ROLES.SUPER_USER] }],
+    items: [{ id: 'roles-permissions', label: 'Roles y permisos', path: ROUTES.ROLES_PERMISSIONS, roles: [ROLES.SUPER_USER] }],
   },
 ];
 

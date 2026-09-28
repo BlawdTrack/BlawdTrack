@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
+import { NAV_GROUP_ICONS } from './navIcons';
 
 const firstEnabledPath = (group) => group.items.find((item) => item.path)?.path ?? null;
 const isGroupActive = (group, pathname) => group.items.some((item) => item.path === pathname);
@@ -26,29 +27,23 @@ export default function MobileBottomNav({ groups }) {
       {groups.map((group) => {
         const target = firstEnabledPath(group);
         const active = isGroupActive(group, pathname);
+        const Icon = NAV_GROUP_ICONS[group.id];
         return (
           <Box
             key={group.id}
             onClick={() => target && navigate(target)}
             sx={{
               flex: 1,
-              pt: 1.5,
-              pb: 1.75,
+              pt: 1.25,
+              pb: 1.5,
               textAlign: 'center',
               cursor: target ? 'pointer' : 'default',
               opacity: target ? 1 : 0.5,
             }}
           >
-            <Box
-              sx={{
-                width: 20,
-                height: 20,
-                borderRadius: '6px',
-                mx: 'auto',
-                mb: 0.625,
-                backgroundColor: active ? '#FF6C0E' : '#E4DED7',
-              }}
-            />
+            {Icon && (
+              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? '#FF6C0E' : '#9E968D' }} />
+            )}
             <Typography sx={{ fontSize: 10.5, fontWeight: 700, color: active ? '#FF6C0E' : '#9E968D' }}>
               {group.shortTitle}
             </Typography>

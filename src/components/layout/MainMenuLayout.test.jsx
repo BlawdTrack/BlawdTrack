@@ -12,7 +12,9 @@ const tree = (
     <Route element={<MainMenuLayout />}>
       <Route path={ROUTES.MAIN_MENU} element={<div>menu content</div>} />
       <Route path={ROUTES.COURIER_CREATE} element={<div>create courier content</div>} />
+      <Route path={ROUTES.COURIER_UPDATE} element={<div>update courier content</div>} />
       <Route path={ROUTES.COURIER_DEACTIVATE} element={<div>deactivate content</div>} />
+      <Route path={ROUTES.ROLES_PERMISSIONS} element={<div>roles content</div>} />
     </Route>
   </Routes>
 );
@@ -74,11 +76,21 @@ describe('MainMenuLayout sidebar', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
 
-    ['Actualizar mensajero', 'Crear administrador', 'Roles y permisos'].forEach((label) => {
-      expect(bar.queryByRole('link', { name: label })).not.toBeInTheDocument();
-    });
-    await user.click(bar.getByText('Actualizar mensajero'));
+    expect(bar.queryByRole('link', { name: 'Crear administrador' })).not.toBeInTheDocument();
+    await user.click(bar.getByText('Crear administrador'));
     expect(screen.getByText('menu content')).toBeInTheDocument();
+  });
+
+  it('navigates to "Actualizar mensajero" and "Roles y permisos" now that they are implemented', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    const bar = within(sidebar());
+
+    await user.click(bar.getByRole('link', { name: 'Actualizar mensajero' }));
+    expect(screen.getByText('update courier content')).toBeInTheDocument();
+
+    await user.click(bar.getByRole('link', { name: 'Roles y permisos' }));
+    expect(screen.getByText('roles content')).toBeInTheDocument();
   });
 
   it('logs out and returns to the login screen', async () => {

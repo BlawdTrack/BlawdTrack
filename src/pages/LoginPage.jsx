@@ -175,7 +175,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               type="button"
               onClick={() => onForgotPassword?.()}
               underline="hover"
-              sx={{ alignSelf: 'flex-end', color: 'primary.main', fontWeight: 600, fontSize: 13 }}
+              sx={{ alignSelf: 'center', color: 'primary.main', fontWeight: 600, fontSize: 13 }}
             >
               ¿Olvidaste tu contraseña?
             </Link>

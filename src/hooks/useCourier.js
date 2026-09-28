@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-// Nota: Renombrar 'getCourierByCedula' a 'getCourierByDocumentNumber' en CourierService.js
 import { registerCourier, updateCourier, getCourierByDocumentNumber } from '../services/CourierService';
 import { normalizeCourierError } from '../utils/courierErrors';
 import { useAuth } from './useAuth';

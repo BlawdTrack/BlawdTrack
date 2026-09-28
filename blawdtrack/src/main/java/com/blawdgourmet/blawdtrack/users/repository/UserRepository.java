@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.users.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -64,6 +65,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             DocumentType documentType,
             String documentNumber
     );
+
+    @EntityGraph(attributePaths = {"role"})
+    List<User> findByRole_NameOrderByFullNameAsc(String roleName);
 
     boolean existsByEmail(String email);
 

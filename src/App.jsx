@@ -55,6 +55,15 @@ function PasswordRecoveryRoute() {
   return <PasswordRecoveryRequestPage onBackToLogin={() => navigate(ROUTES.LOGIN)} />;
 }
 
+// Mismo flujo de PasswordRecoveryRoute, pero para un usuario ya logueado
+// (sidebar "Restablecer contraseña"): vuelve al menú principal en vez de
+// al login.
+function OwnPasswordResetRoute() {
+  const navigate = useNavigate();
+
+  return <PasswordRecoveryRequestPage onBackToLogin={() => navigate(ROUTES.MAIN_MENU)} />;
+}
+
 // T05: destino del enlace del correo. "/recovery?token=..." es el valor por
 // defecto de MAIL_LINK_URL en el backend (pendiente de confirmar con ellos).
 function NewPasswordRoute() {
@@ -87,14 +96,15 @@ function App() {
         {/* Mantenemos el MainMenuLayout de develop para que tu pantalla tenga menú */}
         <Route element={<MainMenuLayout />}>
           <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
+          <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetRoute />} />
           <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
           <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
           <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
-          <Route path="/gestion-roles" element={<RoleAccessManagement />} />
-          
+          <Route path={ROUTES.ROLES_PERMISSIONS} element={<RoleAccessManagement />} />
+
           {/* Rutas de tu feature agregadas y adaptadas */}
-          <Route path="/editar-mensajero" element={<EditMessenger />} />
-          <Route path="/editar-mensajero/:documentNumber" element={<EditMessenger />} />
+          <Route path={ROUTES.COURIER_UPDATE} element={<EditMessenger />} />
+          <Route path={`${ROUTES.COURIER_UPDATE}/:documentNumber`} element={<EditMessenger />} />
         </Route>
       </Route>
 

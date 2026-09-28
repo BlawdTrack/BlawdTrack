@@ -1,13 +1,22 @@
 package com.blawdgourmet.blawdtrack.users.service;
 
+import java.util.List;
+
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminSummaryResponse;
 
 public interface AdminService {
+
+    /**
+     * Lists every "Sales Administrator" user, including their approximate
+     * session state, for the deletion screen (HU-008).
+     */
+    List<AdminSummaryResponse> list();
 
     /**
      * Registers a new user with the "Sales Administrator" role (HU-006 / CU-006).

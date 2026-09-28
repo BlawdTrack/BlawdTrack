@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,7 @@ import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminSummaryResponse;
 import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -76,6 +78,23 @@ public class AdminServiceImpl implements AdminService {
 
     @Value("${security.jwt.expiration-ms}")
     private long jwtExpirationMs;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminSummaryResponse> list() {
+        return userRepository.findByRole_NameOrderByFullNameAsc(RoleName.SALES_ADMIN).stream()
+                .map(admin -> new AdminSummaryResponse(
+                        admin.getId(),
+                        admin.getDocumentType(),
+                        admin.getDocumentNumber(),
+                        admin.getFullName(),
+                        admin.getEmail(),
+                        admin.getPhone(),
+                        admin.getStatus(),
+                        hasActiveSession(admin)
+                ))
+                .toList();
+    }
 
     @Override
     @Transactional
@@ -179,12 +198,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AccessDeniedException("No se puede eliminar un usuario que no es Administrador de Ventas.");
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        boolean hasActiveSession = user.getStatus() == UserStatus.ACTIVE
-                || (user.getLastLoginAt() != null
-                        && now.isBefore(user.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS)));
-
-        if (hasActiveSession) {
+        if (hasActiveSession(user)) {
             throw new AdminSessionActiveException(
                     "El administrador tiene una sesión activa. Cierre primero la sesión antes de eliminarlo.");
         }
@@ -194,5 +208,12 @@ public class AdminServiceImpl implements AdminService {
         userRepository.flush();
 
         return new AdminDeletionResponse("Administrador eliminado correctamente.");
+    }
+
+    private boolean hasActiveSession(User user) {
+        LocalDateTime now = LocalDateTime.now();
+        return user.getStatus() == UserStatus.ACTIVE
+                || (user.getLastLoginAt() != null
+                        && now.isBefore(user.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS)));
     }
 }

@@ -1,29 +1,38 @@
 import { createTheme } from '@mui/material/styles';
-// aqui se hara la parte de los colores correspondientes al sistema y sus secciones
+// Paleta y tipografía alineadas al mockup de diseño (Inter + Poppins, verde/naranja BlawdTrack).
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#193D31',      // Verde Oscuro (Encabezados, botones primarios)
-      dark: '#112b22',
+      main: '#1A3C34',      // Verde Oscuro (Encabezados, botones primarios)
+      dark: '#12322B',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#FF6300',    // Anaranjado (Acciones de acento, alertas, foco)
+      main: '#FF6C0E',    // Anaranjado (Acciones de acento, alertas, foco)
       contrastText: '#ffffff',
     },
     background: {
-      default: '#F3ECE7',  // Tono crema/gris claro de fondo de pantalla
+      default: '#FAF8F5',  // Tono crema/gris claro de fondo de pantalla
       paper: '#ffffff',    // Tarjetas y formularios en blanco limpio
     },
     text: {
-      primary: '#193D31',
-      secondary: '#64748b',
+      primary: '#1F2421',
+      secondary: '#6B6560',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    h4: {
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontWeight: 600,
+    },
     h5: {
-      fontWeight: 700,
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontWeight: 600,
+    },
+    h6: {
+      fontFamily: '"Poppins", "Inter", sans-serif',
+      fontWeight: 600,
     },
     button: {
       textTransform: 'none',
@@ -31,18 +40,30 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '10px',
+          paddingTop: '12px',
+          paddingBottom: '12px',
+        },
+      },
+    },
     MuiTextField: {
       defaultProps: {
         variant: 'outlined',
         size: 'medium',
       },
-    },
-    MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '8px',
-          paddingTop: '12px',
-          paddingBottom: '12px',
+          '& .MuiOutlinedInput-root': { borderRadius: '10px' },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: '16px',
         },
       },
     },

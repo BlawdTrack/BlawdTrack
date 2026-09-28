@@ -7,12 +7,10 @@ import SidebarUserFooter from './SidebarUserFooter';
 export default function SidebarContent({ groups, user, roleLabel, onLogout }) {
   return (
     <Box
-      
       sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#1A3C34' }}
     >
-      <Box sx={{ height: 4, backgroundColor: '#FF6C0E', flex: '0 0 4px' }} />
       <SidebarBrand />
-      <Box sx={{ px: 1.5, pb: 2.5, display: 'flex', flexDirection: 'column', gap: 1.75 }}>
+      <Box sx={{ px: 1.75, py: 2, display: 'flex', flexDirection: 'column', gap: 2.25, overflowY: 'auto' }}>
         {groups.map((group) => (
           <SidebarNavGroup key={group.id} group={group} />
         ))}
