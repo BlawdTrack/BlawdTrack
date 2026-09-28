@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
   Typography,
   TextField,
+  MenuItem,
   Avatar,
   Paper,
   Divider,
@@ -13,11 +13,23 @@ import {
   Chip,
   CircularProgress,
 } from '@mui/material';
-import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
 import { deleteAdministrator, getAdministrators } from '../services/AdminService';
-import { ROUTES } from '../config/routes';
+
+const DOCUMENT_TYPE_OPTIONS = [
+  { value: 'CEDULA', label: 'Cédula' },
+  { value: 'DIMEX', label: 'DIMEX' },
+  { value: 'PASAPORTE', label: 'Pasaporte' },
+];
+
+const DOCUMENT_PLACEHOLDERS = {
+  CEDULA: 'Ej. 1-2345-6789',
+  DIMEX: 'Ej. 155812345678',
+  PASAPORTE: 'Ej. A12345678',
+};
+
+const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 
 const CARD_SX = {
   borderRadius: '18px',
@@ -37,7 +49,6 @@ const CARD_HEADER_SX = {
 };
 
 const AdminManagement = () => {
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [toastOpen, setToastOpen] = useState(false);
@@ -49,6 +60,10 @@ const AdminManagement = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [searchDocumentType, setSearchDocumentType] = useState('CEDULA');
+  const [searchDocumentNumber, setSearchDocumentNumber] = useState('');
+  const [appliedFilter, setAppliedFilter] = useState(null);
 
   useEffect(() => {
     const fetchAdmins = async () => {
@@ -162,6 +177,28 @@ const AdminManagement = () => {
     }
   };
 
+  const handleSearch = () => {
+    const trimmed = searchDocumentNumber.trim();
+    if (!trimmed) {
+      setAppliedFilter(null);
+      return;
+    }
+    setAppliedFilter({ documentType: searchDocumentType, documentNumber: normalizeDocument(trimmed) });
+  };
+
+  const handleClearSearch = () => {
+    setSearchDocumentNumber('');
+    setAppliedFilter(null);
+  };
+
+  const visibleAdmins = appliedFilter
+    ? admins.filter(
+        (admin) =>
+          admin.documentType === appliedFilter.documentType
+          && normalizeDocument(admin.documentNumber).includes(appliedFilter.documentNumber)
+      )
+    : admins;
+
   const getInitials = (name) => {
     if (!name) return '';
     const names = name.split(' ');
@@ -170,44 +207,41 @@ const AdminManagement = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: '1100px', margin: '0 auto', p: { xs: 2.5, sm: '40px 32px' }, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          variant="contained"
-          startIcon={<SecurityOutlined />}
-          onClick={() => navigate(ROUTES.ROLES_PERMISSIONS)}
-          sx={{
-            bgcolor: 'primary.main',
-            color: '#fff',
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: '10px',
-            px: 2.5,
-            py: '10px',
-            '&:hover': { bgcolor: '#12322B' },
-          }}
-        >
-          Gestionar roles y permisos
-        </Button>
-      </Box>
-
+    <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2.5, sm: '40px 32px' }, display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* BUSCADOR */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
           <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
-            Buscar administrador por cédula
+            Buscar administrador por documento
           </Typography>
         </Box>
-        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' }, display: 'flex', gap: 1.5 }}>
+        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' }, display: 'flex', gap: 1.5, flexWrap: { xs: 'wrap', sm: 'nowrap' }, alignItems: 'center' }}>
+          <TextField
+            select
+            value={searchDocumentType}
+            onChange={(e) => setSearchDocumentType(e.target.value)}
+            sx={{ flex: '0 0 150px', minWidth: 130, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
+          >
+            {DOCUMENT_TYPE_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
           <TextField
             fullWidth
-            placeholder="1-2345-6789"
-            sx={{ bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
+            value={searchDocumentNumber}
+            onChange={(e) => setSearchDocumentNumber(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder={DOCUMENT_PLACEHOLDERS[searchDocumentType]}
+            sx={{ flex: '1 1 auto', minWidth: 0, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
           />
           <Button
             variant="contained"
             disableElevation
+            onClick={handleSearch}
             sx={{
+              flex: '0 0 auto',
               bgcolor: 'primary.main',
               color: '#fff',
               fontWeight: 600,
@@ -219,6 +253,14 @@ const AdminManagement = () => {
           >
             Buscar
           </Button>
+          {appliedFilter && (
+            <Button
+              onClick={handleClearSearch}
+              sx={{ flex: '0 0 auto', color: '#6B6560', textTransform: 'none', fontWeight: 600, px: 1.5 }}
+            >
+              Limpiar
+            </Button>
+          )}
         </Box>
       </Paper>
 
@@ -239,8 +281,12 @@ const AdminManagement = () => {
             <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
           ) : admins.length === 0 ? (
             <Alert severity="info" sx={{ m: 2 }}>No hay administradores registrados.</Alert>
+          ) : visibleAdmins.length === 0 ? (
+            <Alert severity="info" sx={{ m: 2 }}>
+              No se encontró ningún administrador con ese documento.
+            </Alert>
           ) : (
-            admins.map((user, index) => {
+            visibleAdmins.map((user, index) => {
               const blocked = user.hasActiveSession;
               return (
                 <React.Fragment key={user.id}>
