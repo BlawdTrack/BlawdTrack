@@ -100,11 +100,11 @@ function App() {
           <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
           <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
           <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
-          <Route path="/gestion-roles" element={<RoleAccessManagement />} />
-          
+          <Route path={ROUTES.ROLES_PERMISSIONS} element={<RoleAccessManagement />} />
+
           {/* Rutas de tu feature agregadas y adaptadas */}
-          <Route path="/editar-mensajero" element={<EditMessenger />} />
-          <Route path="/editar-mensajero/:documentNumber" element={<EditMessenger />} />
+          <Route path={ROUTES.COURIER_UPDATE} element={<EditMessenger />} />
+          <Route path={`${ROUTES.COURIER_UPDATE}/:documentNumber`} element={<EditMessenger />} />
         </Route>
       </Route>
 
