@@ -1,18 +1,23 @@
 import { useRef, useState } from 'react';
-import { registerCourier } from '../services/CourierService';
+// Nota: Renombrar 'getCourierByCedula' a 'getCourierByDocumentNumber' en CourierService.js
+import { registerCourier, updateCourier, getCourierByDocumentNumber } from '../services/CourierService';
 import { normalizeCourierError } from '../utils/courierErrors';
+import { useAuth } from './useAuth';
 
 /**
- * Manages the courier registration request and exposes its outcome already
- * normalized (see courierErrors.js), never the raw axios error.
+ * Manages the courier registration/update requests and exposes outcomes.
  */
 export const useCourier = () => {
+  const { logout } = useAuth();
+  
+  // Estados unificados basados en develop
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
   const [globalMessage, setGlobalMessage] = useState(null);
   const [severity, setSeverity] = useState('error');
+  
   // A ref blocks a second submit fired before the state update is rendered.
   const inFlightRef = useRef(false);
 
@@ -23,8 +28,9 @@ export const useCourier = () => {
     setGlobalMessage(null);
   };
 
-  // Returns { ok: true } or { ok: false, fieldErrors } so the caller can focus
-  // the first invalid field. Returns null when a submit is already running.
+  // ------------------------------------
+  // REGISTRO (Logica de Develop)
+  // ------------------------------------
   const register = async (payload) => {
     if (inFlightRef.current) return null;
     inFlightRef.current = true;
@@ -48,7 +54,56 @@ export const useCourier = () => {
     }
   };
 
-  // Shows client-side validation errors using the same channel as the API ones.
+  // ------------------------------------
+  // ACTUALIZACIÓN (Lógica de tu Feature)
+  // ------------------------------------
+  const handleUpdate = async (documentNumber, courierData) => {
+    setIsSubmitting(true);
+    clearFeedback();
+
+    try {
+      const response = await updateCourier(documentNumber, courierData);
+      setIsSuccess(true);
+      return response;
+    } catch (err) {
+      if (err.response?.status === 401 && logout) {
+        logout();
+      }
+      const msg = err.response?.data?.message || err.message || 'Error al actualizar datos del mensajero.';
+      setGlobalMessage(msg);
+      setSeverity('error');
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ------------------------------------
+  // OBTENER MENSAJERO (Lógica de tu Feature adaptada)
+  // ------------------------------------
+  const handleGetByDocumentNumber = async (documentNumber) => {
+    setIsSubmitting(true);
+    clearFeedback();
+
+    try {
+      const data = await getCourierByDocumentNumber(documentNumber);
+      return data;
+    } catch (err) {
+      if (err.response?.status === 401 && logout) {
+        logout();
+      }
+      const msg = err.response?.data?.message || err.message || 'Mensajero no encontrado.';
+      setGlobalMessage(msg);
+      setSeverity('error');
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ------------------------------------
+  // MANEJO DE ERRORES FRONTEND (Develop)
+  // ------------------------------------
   const setValidationErrors = (errors) => {
     setIsSuccess(false);
     setGlobalMessage(null);
@@ -69,13 +124,25 @@ export const useCourier = () => {
   };
 
   return {
+    // Estados nativos de develop
     isSubmitting,
     isSuccess,
     registeredEmail,
     fieldErrors,
     globalMessage,
     severity,
+    
+    // Alias para compatibilidad con tu código actual de EditMessenger
+    loading: isSubmitting,
+    error: severity === 'error' ? globalMessage : null,
+    success: isSuccess,
+    
+    // Funciones
     register,
+    registerCourier: register, // Alias por si lo estabas usando así
+    updateCourier: handleUpdate,
+    getCourierByDocumentNumber: handleGetByDocumentNumber,
+    resetState: clearFeedback,
     setValidationErrors,
     setFieldError,
     clearFieldError,

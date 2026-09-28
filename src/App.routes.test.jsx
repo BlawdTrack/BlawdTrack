@@ -11,6 +11,7 @@ import { ROUTES } from './config/routes';
 vi.mock('./pages/MainMenuPage', () => ({ default: () => <div>Pantalla menú principal</div> }));
 vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla administradores</div> }));
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
+vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
 vi.mock('./pages/SalesHomePage', () => ({ default: () => <div>Pantalla ventas</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/PasswordRecoveryRequestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
@@ -30,13 +31,22 @@ const SCREENS = {
   [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
   [ROUTES.SALES_HOME]: 'Pantalla ventas',
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
+  // Rutas de tu feature agregadas al formato de develop
+  '/editar-mensajero': 'Pantalla edición de mensajero',
 };
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
 const ALLOWED_ROUTES = {
-  [ROLES.SUPER_USUARIO]: [ROUTES.MAIN_MENU, ROUTES.ADMIN_DELETE, ROUTES.COURIER_CREATE, ROUTES.COURIER_DEACTIVATE],
-  [ROLES.ADMIN_VENTAS]: [ROUTES.SALES_HOME],
-  [ROLES.MENSAJERO]: [ROUTES.COURIER_HOME],
+  // Ajustado a las constantes en inglés (SUPER_USER, SALES_ADMIN, COURIER) para que hagan match con App.jsx
+  [ROLES.SUPER_USER]: [
+    ROUTES.MAIN_MENU, 
+    ROUTES.ADMIN_DELETE, 
+    ROUTES.COURIER_CREATE, 
+    ROUTES.COURIER_DEACTIVATE, 
+    '/editar-mensajero'
+  ],
+  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME],
+  [ROLES.COURIER]: [ROUTES.COURIER_HOME],
 };
 
 function loginAs(role) {

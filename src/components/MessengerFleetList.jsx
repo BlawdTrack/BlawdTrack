@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -17,6 +18,7 @@ import { getInitials } from '../utils/getInitials';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
 
 export const MessengerFleetList = () => {
+  const navigate = useNavigate();
   const { logout } = useAuth();
   const [messengers, setMessengers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,8 +135,15 @@ export const MessengerFleetList = () => {
                     )}
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end', flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-end', flex: 1 }}>
                     <Chip label={messenger.status === 'ACTIVE' ? 'Activo' : 'Inactivo'} size="small" sx={{ bgcolor: messenger.status === 'ACTIVE' ? '#DEF7EC' : '#F3F4F6', color: messenger.status === 'ACTIVE' ? '#047857' : '#6B7280', fontWeight: 700, borderRadius: '16px', px: 1 }} />
+                    <Button
+                      variant="contained"
+                      onClick={() => navigate(`/editar-mensajero/${encodeURIComponent(messenger.documentNumber || messenger.idCard || messenger.cedula || messenger.id)}`)}
+                      sx={{ minWidth: '90px', bgcolor: '#1A3C34', color: '#ffffff', textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: '#122921' } }}
+                    >
+                      Editar
+                    </Button>
                     <Button
                       variant="outlined"
                       disabled={messenger.status === 'INACTIVE'}

@@ -39,3 +39,31 @@ export const deactivateCourier = async (id) => {
   );
   return response.data;
 };
+
+export const updateCourier = async (idCard, courierData) => {
+  try {
+    const response = await axiosClient.put(
+      `/v1/couriers/${encodeURIComponent(idCard)}`,
+      courierData
+    );
+    return {
+      success: true,
+      ...response.data
+    };
+  } catch (error) {
+    console.error('Error al actualizar mensajero:', error);
+    throw error;
+  }
+};
+
+export const getCourierByCedula = async (idCard) => {
+  try {
+    const response = await axiosClient.get(
+      `/v1/couriers/${encodeURIComponent(idCard)}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener mensajero:', error);
+    throw error;
+  }
+};

@@ -1,3 +1,4 @@
+// src/App.jsx
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
@@ -7,6 +8,8 @@ import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
+import EditMessenger from './pages/EditMessenger';
+import RoleAccessManagement from './pages/RoleAccessManagement'; // Faltaba en tu bloque pero develop lo exige
 import { MessengerFleetList } from './components/MessengerFleetList';
 import MainMenuLayout from './components/layout/MainMenuLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -79,6 +82,7 @@ function App() {
           sin allowedRoles. Un rol fuera del grupo vuelve a su propio inicio.
           El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
           rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
+      
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
         {/* Mantenemos el MainMenuLayout de develop para que tu pantalla tenga menú */}
         <Route element={<MainMenuLayout />}>
@@ -87,11 +91,17 @@ function App() {
           <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
           <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
           <Route path="/gestion-roles" element={<RoleAccessManagement />} />
+          
+          {/* Rutas de tu feature agregadas y adaptadas */}
+          <Route path="/editar-mensajero" element={<EditMessenger />} />
+          <Route path="/editar-mensajero/:documentNumber" element={<EditMessenger />} />
         </Route>
       </Route>
+
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
         <Route path={ROUTES.SALES_HOME} element={<SalesHomePage />} />
       </Route>
+      
       <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
         <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
       </Route>
