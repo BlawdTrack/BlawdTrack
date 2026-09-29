@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
+/** Logotipo de BlawdTrack (SVG "BT" sobre fondo verde de marca) que se muestra en el login. */
 export default function BlawdTrackLogo() {
   return (
     <Box display="flex" justifyContent="center" mb={3}>

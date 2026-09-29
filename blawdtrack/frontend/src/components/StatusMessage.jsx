@@ -10,6 +10,11 @@ const VARIANTS = {
   success: { bg: '#E5F1E8', border: '#BFE0CC', dot: '#2F7D4F', text: '#1E5236' },
 };
 
+/**
+ * @param {{ severity?: 'error'|'warning'|'success', message: string }} props Aviso fijo dentro de un
+ *   formulario. Los errores y avisos se anuncian de forma asertiva (`role="alert"`); el éxito, de
+ *   forma cortés (`role="status"`).
+ */
 export function StatusMessage({ severity = 'error', message }) {
   const variant = VARIANTS[severity] || VARIANTS.error;
 

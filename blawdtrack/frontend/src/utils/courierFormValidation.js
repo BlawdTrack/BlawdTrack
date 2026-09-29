@@ -16,6 +16,12 @@ const MESSAGES = {
   weight: 'Ingresa un número positivo (hasta 8 enteros y 2 decimales).',
 };
 
+/**
+ * Valida en el cliente el formulario de registro de mensajero.
+ * @param {{ documentType: string, documentNumber: string, fullName: string, email: string,
+ *   schedule: string, scheduleStart?: string, scheduleEnd?: string, maxPackageWeightKg: string }} formData
+ * @returns {Object<string, string>} Mensaje por campo inválido; vacío si todo es válido.
+ */
 export function validateCourierForm(formData) {
   const errors = {};
 

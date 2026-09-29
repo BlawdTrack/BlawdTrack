@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import SidebarNavItem from './SidebarNavItem';
 
+/** @param {{ group: { title: string, items: Array } }} props Un grupo del menú con su título y sus ítems. */
 export default function SidebarNavGroup({ group }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>

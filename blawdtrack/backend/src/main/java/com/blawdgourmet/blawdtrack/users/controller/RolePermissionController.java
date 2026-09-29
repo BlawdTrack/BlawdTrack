@@ -17,12 +17,14 @@ import com.blawdgourmet.blawdtrack.users.service.RolePermissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/** API de la matriz de permisos por rol (HU-009). Exclusiva del Super Usuario ({@code SecurityConfig}). */
 @RestController
 @RequestMapping("/api/v1/roles")
 @RequiredArgsConstructor
 public class RolePermissionController {
     private final RolePermissionService service;
 
+    /** Reemplaza los permisos del rol con el conjunto {@code permissionIds} del cuerpo. */
     @PutMapping("/{roleId}/permissions")
     public RolePermissionsResponse replace(@PathVariable Long roleId,
                                            @Valid @RequestBody UpdateRolePermissionsRequest request) {

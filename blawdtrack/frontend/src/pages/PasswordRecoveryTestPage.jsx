@@ -23,6 +23,11 @@ import { Toast } from '../components/Toast';
 // qué correos están registrados) — por eso aquí solo hay un toast de
 // éxito posible; el toast de error queda para fallas reales de red o
 // validación (correo con formato inválido, servidor caído, etc.).
+/**
+ * Pantalla de prueba de la solicitud de recuperación de contraseña (HU-002, T06). No forma parte del
+ * flujo final: la definitiva es `PasswordRecoveryRequestPage`.
+ * @param {{ onBackToLogin: Function }} props
+ */
 export function PasswordRecoveryTestPage({ onBackToLogin }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

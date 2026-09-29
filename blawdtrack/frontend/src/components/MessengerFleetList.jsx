@@ -56,6 +56,11 @@ const CARD_HEADER_SX = {
   gap: 1.5,
 };
 
+/**
+ * Pantalla "Desactivar mensajero" (HU-005), exclusiva del Super Usuario. Lista los mensajeros, permite
+ * buscarlos por tipo y número de documento y abre `DeactivateMessengerModal` para confirmar la
+ * desactivación. Muestra además una auditoría de las desactivaciones hechas en la sesión.
+ */
 export const MessengerFleetList = () => {
   const { logout } = useAuth();
   const [messengers, setMessengers] = useState([]);

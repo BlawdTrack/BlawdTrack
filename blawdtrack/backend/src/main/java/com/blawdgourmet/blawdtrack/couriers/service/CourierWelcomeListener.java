@@ -8,6 +8,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+/**
+ * Envía el correo de bienvenida con la contraseña temporal cuando un mensajero se registra (HU-003).
+ * Escucha {@link CourierRegisteredEvent} <b>después del commit</b>: si el registro se revierte no sale
+ * ningún correo, y si el correo falla la cuenta ya creada se conserva (solo se registra el error, sin
+ * credenciales).
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j

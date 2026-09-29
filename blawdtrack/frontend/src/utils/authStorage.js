@@ -24,11 +24,21 @@ const USER_KEY = 'blawdtrack_user';
 // objeto plano: { token, type, id, fullName, email, role, permissions } —
 // no anida los datos del usuario bajo una clave 'user'. Se arma aquí el
 // objeto de usuario a partir de esos campos planos antes de guardarlo.
+/**
+ * Arma el objeto de usuario de la sesión a partir de la respuesta del login.
+ * @param {{ id: number, fullName: string, email: string, role: string, permissions: string[] }} authResponse
+ * @returns {{ id: number, fullName: string, email: string, role: string, permissions: string[] }}
+ */
 export function buildUserFromLoginResponse(authResponse) {
   const { id, fullName, email, role, permissions } = authResponse;
   return { id, fullName, email, role, permissions };
 }
 
+/**
+ * Guarda el token y el perfil del usuario en `localStorage`.
+ * @param {{ token: string }} authResponse Respuesta del login.
+ * @throws {Error} Si la respuesta no trae un token.
+ */
 export function saveAuthSession(authResponse) {
   const { token } = authResponse;
   // Sin token no hay sesión: evita guardar la cadena "undefined" en localStorage
@@ -40,10 +50,12 @@ export function saveAuthSession(authResponse) {
   localStorage.setItem(USER_KEY, JSON.stringify(buildUserFromLoginResponse(authResponse)));
 }
 
+/** @returns {string|null} El token guardado, o `null` si no hay sesión. */
 export function getStoredToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+/** @returns {object|null} El perfil guardado, o `null` si falta o está corrupto (se descarta). */
 export function getStoredUser() {
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) return null;
@@ -58,6 +70,7 @@ export function getStoredUser() {
   }
 }
 
+/** Borra el token y el perfil guardados (cierre de sesión). */
 export function clearAuthSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
@@ -83,6 +96,11 @@ function decodeJwtPayload(token) {
   }
 }
 
+/**
+ * Indica si hay una sesión vigente: token y perfil guardados y, si el token es un JWT, sin vencer. Si
+ * ya venció, limpia la sesión guardada.
+ * @returns {boolean}
+ */
 export function hasActiveSession() {
   const token = getStoredToken();
   const user = getStoredUser();

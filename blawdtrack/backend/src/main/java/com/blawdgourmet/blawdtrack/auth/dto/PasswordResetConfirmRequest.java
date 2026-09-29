@@ -8,6 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Cuerpo de {@code POST /api/v1/auth/password-reset/confirm} (HU-002): el token recibido por correo y la
+ * nueva contraseña, que debe tener al menos 8 caracteres y combinar letras y números.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

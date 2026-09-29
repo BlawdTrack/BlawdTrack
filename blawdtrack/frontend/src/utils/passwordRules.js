@@ -6,8 +6,14 @@
 // propósito: el frontend no tiene ni debe tener el historial de contraseñas;
 // solo el backend puede confirmarla o rechazarla al guardar.
 
+/** Largo mínimo de una contraseña. */
 export const MIN_PASSWORD_LENGTH = 8;
 
+/**
+ * Evalúa cada regla por separado para que la lista de requisitos marque cuáles se cumplen.
+ * @param {string} password
+ * @returns {{ length: boolean, uppercase: boolean, number: boolean }}
+ */
 export function evaluatePasswordRules(password) {
   return {
     length: password.length >= MIN_PASSWORD_LENGTH,
@@ -16,6 +22,7 @@ export function evaluatePasswordRules(password) {
   };
 }
 
+/** @returns {boolean} `true` si la contraseña cumple todas las reglas que el cliente puede validar. */
 export function meetsClientPasswordRules(password) {
   return Object.values(evaluatePasswordRules(password)).every(Boolean);
 }

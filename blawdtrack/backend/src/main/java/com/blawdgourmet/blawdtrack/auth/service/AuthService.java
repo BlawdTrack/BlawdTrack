@@ -21,6 +21,7 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+/** Caso de uso de inicio de sesión (HU-001). */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -29,6 +30,13 @@ public class AuthService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
+    /**
+     * Autentica con correo y contraseña, registra la fecha del último inicio de sesión (que usan
+     * otras reglas para saber si hay una sesión activa) y emite el JWT.
+     *
+     * @throws DisabledException       si la cuenta está inactiva
+     * @throws BadCredentialsException si el correo o la contraseña no coinciden
+     */
     @Transactional
     public LoginResponse authenticate(LoginRequest request) {
         Authentication authentication;

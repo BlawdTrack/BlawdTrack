@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.users.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+/** Permiso que se puede asignar a un rol; se identifica por su código único (ver {@code PermissionCode}). */
 @Entity
 @Table(name = "permisos")
 @Getter

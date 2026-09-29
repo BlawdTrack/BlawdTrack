@@ -88,6 +88,11 @@ function buildCourierPayload(formData) {
   return payload;
 }
 
+/**
+ * Pantalla "Crear mensajero" (HU-003), exclusiva del Super Usuario. Valida el formulario en el cliente
+ * (`validateCourierForm`), arma el cuerpo de `POST /api/v1/couriers` y muestra los errores del backend
+ * junto a cada campo (`normalizeCourierError`). La contraseña temporal la genera y envía el backend.
+ */
 export function CourierRegistrationPage() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const {

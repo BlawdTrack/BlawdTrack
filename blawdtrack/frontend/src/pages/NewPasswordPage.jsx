@@ -62,6 +62,12 @@ const BUTTON_SX = { borderRadius: '10px', py: '15px', fontWeight: 600, fontSize:
 //    (valor por defecto de MAIL_LINK_URL en el backend; ver EmailService).
 //  - El contrato de POST /v1/auth/password-reset/confirm está en
 //    PasswordRecoveryService.confirmPasswordReset.
+/**
+ * Pantalla "Crear nueva contraseña" (HU-002). Se abre desde el enlace del correo (`/recovery?token=...`),
+ * valida la contraseña con `PasswordRequirements` y confirma con `confirmPasswordReset`. Tiene tres
+ * vistas: formulario, éxito y "enlace no válido" (token ausente, usado o vencido).
+ * @param {{ onGoToLogin: Function, onRequestNewLink: Function }} props
+ */
 export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
   const [searchParams] = useSearchParams();
   const token = (searchParams.get('token') ?? '').trim();

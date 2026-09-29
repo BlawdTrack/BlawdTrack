@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { handleUnauthorizedResponse } from './sessionExpiry';
 
+/**
+ * Cliente HTTP compartido por todos los servicios. La URL base sale de `VITE_API_URL`; el interceptor
+ * de solicitud agrega `Authorization: Bearer <token>` con el token guardado en `localStorage`, y el de
+ * respuesta avisa al `AuthProvider` cuando llega un 401 de sesión vencida.
+ */
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {

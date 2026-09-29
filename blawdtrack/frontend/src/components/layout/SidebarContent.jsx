@@ -3,7 +3,12 @@ import SidebarBrand from './SidebarBrand';
 import SidebarNavGroup from './SidebarNavGroup';
 import SidebarUserFooter from './SidebarUserFooter';
 
-// Sidebar body shared by the desktop panel and the mobile drawer.
+/**
+ * Contenido de la barra lateral: marca, grupos de navegación y pie con el usuario y el botón de cerrar
+ * sesión.
+ * @param {{ groups: Array, user: { fullName: string, email: string }, roleLabel: string,
+ *   onLogout: Function }} props
+ */
 export default function SidebarContent({ groups, user, roleLabel, onLogout }) {
   return (
     <Box

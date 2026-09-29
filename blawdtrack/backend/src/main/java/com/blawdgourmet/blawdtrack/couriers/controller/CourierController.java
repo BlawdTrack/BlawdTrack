@@ -32,22 +32,40 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * API de mensajeros (HU-003, HU-004 y HU-005). Todos los endpoints son exclusivos del Super Usuario:
+ * lo exige {@code SecurityConfig} para {@code /api/v1/couriers/**} y lo refuerza {@code @PreAuthorize}
+ * en {@link CourierService}.
+ */
 @RestController
 @RequestMapping("/api/v1/couriers")
 @RequiredArgsConstructor
 public class CourierController {
     private final CourierService service;
 
+    /** Lista todos los mensajeros, activos e inactivos, ordenados por nombre. */
     @GetMapping
     public List<CourierResponse> list() {
         return service.list();
     }
 
+    /**
+     * Registra un mensajero con estado activo y rol MENSAJERO. La contraseña temporal se envía por
+     * correo y nunca aparece en la respuesta.
+     *
+     * @return 201 con el mensajero creado; 400 si hay datos inválidos; 409 si el documento, correo o
+     *         teléfono ya existen
+     */
     @PostMapping
     public ResponseEntity<CourierResponse> register(@Valid @RequestBody CreateCourierRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
     }
 
+    /**
+     * Actualiza nombre, correo, teléfono, horario y capacidad de carga.
+     *
+     * @param id id numérico del mensajero o su número de documento
+     */
     @PutMapping("/{id}")
     public CourierResponse update(@PathVariable String id,
                                   @Valid @RequestBody UpdateCourierRequest request) {
@@ -99,7 +117,7 @@ public class CourierController {
                 .code("COURIER_NOT_FOUND").message(ex.getMessage()).status(404).build());
     }
 
-    // Las restricciones únicas también protegen frente a registros simultáneos.
+    /** Las restricciones únicas de la base protegen frente a registros simultáneos: 409 genérico. */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> integrityConflict(DataIntegrityViolationException ex) {
         return conflict("Los datos del mensajero entran en conflicto con un registro existente");

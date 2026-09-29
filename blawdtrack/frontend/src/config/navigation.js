@@ -45,6 +45,11 @@ export const NAVIGATION_GROUPS = [
   },
 ];
 
+/**
+ * Menú lateral que le corresponde a un rol: los grupos con solo los ítems permitidos, sin grupos vacíos.
+ * @param {string} role Rol de negocio.
+ * @returns {Array<{ id: string, title: string, shortTitle: string, items: Array }>}
+ */
 export function getNavigationForRole(role) {
   return NAVIGATION_GROUPS.map((group) => ({
     ...group,

@@ -4,7 +4,12 @@ import { normalizeCourierError } from '../utils/courierErrors';
 import { useAuth } from './useAuth';
 
 /**
- * Manages the courier registration/update requests and exposes outcomes.
+ * Hook de las llamadas de mensajeros (HU-003 registrar, HU-004 editar): controla el envío, evita
+ * envíos dobles y expone el resultado.
+ * @returns {{ isSubmitting: boolean, isSuccess: boolean, registeredEmail: string|null,
+ *   fieldErrors: Object<string, string>, globalMessage: string|null, severity: string,
+ *   register: Function, updateCourier: Function, getCourierByDocumentNumber: Function,
+ *   resetState: Function }} Un 401 cierra la sesión; los errores del backend se normalizan por campo.
  */
 export const useCourier = () => {
   const { logout } = useAuth();

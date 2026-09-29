@@ -30,6 +30,11 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Casos de uso de mensajeros (HU-003 registrar, HU-004 editar). Un mensajero son dos registros: la
+ * cuenta {@link User} (documento, contacto, contraseña, estado y rol) y el perfil {@link Courier}
+ * (horario y capacidad de carga), que se guardan en la misma transacción.
+ */
 @Service
 @RequiredArgsConstructor
 public class CourierService {
@@ -51,6 +56,13 @@ public class CourierService {
             AuditAction.COURIER_ACTIVATED.getCode(),
             AuditAction.COURIER_PASSWORD_CHANGED.getCode());
 
+    /**
+     * Registra un mensajero: valida la unicidad, crea la cuenta activa con rol MENSAJERO y una
+     * contraseña temporal (cifrada), crea el perfil y publica {@link CourierRegisteredEvent}. El correo
+     * de bienvenida se envía solo si la transacción se confirma.
+     *
+     * @throws DuplicateCourierException si el documento, correo o teléfono ya existen
+     */
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public CourierResponse register(CreateCourierRequest request) {
@@ -102,6 +114,15 @@ public class CourierService {
         return CourierResponse.from(courier);
     }
 
+    /**
+     * Actualiza los datos editables del mensajero. Si algún campo cambió, deja una auditoría
+     * {@code ACTUALIZAR_MENSAJERO} con los nombres de los campos modificados. El documento, el rol y
+     * el estado no se cambian aquí.
+     *
+     * @param id id numérico del mensajero o su número de documento
+     * @throws CourierNotFoundException  si no existe
+     * @throws DuplicateCourierException si el correo o teléfono pertenecen a otro usuario
+     */
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public CourierResponse update(
@@ -289,6 +310,10 @@ public class CourierService {
         return left.equals(right);
     }
 
+    /**
+     * Ubica al mensajero por id numérico o, si el texto no es un número, por número de documento.
+     * Ojo: un documento formado solo por dígitos se interpreta primero como id.
+     */
     private Courier resolveCourier(String id) {
         if (id == null || id.isBlank()) {
             throw new CourierNotFoundException(

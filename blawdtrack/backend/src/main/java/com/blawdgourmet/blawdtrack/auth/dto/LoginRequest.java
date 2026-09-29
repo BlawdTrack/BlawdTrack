@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** Cuerpo de {@code POST /api/v1/auth/login}: correo y contraseña obligatorios. */
 @Getter
 @Setter
 @NoArgsConstructor

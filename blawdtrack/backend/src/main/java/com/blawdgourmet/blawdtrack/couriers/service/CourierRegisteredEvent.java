@@ -1,6 +1,11 @@
 package com.blawdgourmet.blawdtrack.couriers.service;
 
-// Solo vive en memoria durante la transacción; no generar un toString con credenciales.
+/**
+ * Evento que {@link CourierService#register} publica al crear un mensajero. {@link CourierWelcomeListener}
+ * lo recibe después de confirmar la transacción y envía el correo con la contraseña temporal.
+ * <p>
+ * Solo vive en memoria durante la transacción; no generar un toString con credenciales.
+ */
 final class CourierRegisteredEvent {
     final Long userId;
     final String email;

@@ -52,6 +52,13 @@ const getRequestError = (error, fallback) => {
   return error.message || fallback;
 };
 
+/**
+ * Pantalla "Roles y permisos" (HU-009), exclusiva del Super Usuario: busca un mensajero por número de
+ * documento y muestra la matriz de control de acceso por perfil (Super Usuario, Administrador de
+ * Ventas y Mensajero). "Aplicar cambios" envía los permisos editados de cada rol a
+ * `PUT /api/v1/roles/{roleId}/permissions`; "Restablecer predeterminados" vuelve a los valores del
+ * catálogo del frontend.
+ */
 function RoleAccessManagement() {
   const navigate = useNavigate();
   const [documentType, setDocumentType] = useState('CEDULA');

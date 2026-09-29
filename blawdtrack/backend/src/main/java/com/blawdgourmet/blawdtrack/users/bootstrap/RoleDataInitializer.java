@@ -19,6 +19,13 @@ import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Siembra los permisos y los tres roles del sistema al arrancar la aplicación (HU-009). Corre antes
+ * ({@code @Order(1)}) que {@code DataSeeder}, que necesita el rol Super Usuario ya creado.
+ * <p>
+ * Es idempotente para los permisos: si un código ya existe no lo duplica. Para los roles, asigna sus
+ * permisos predeterminados cada vez que arranca.
+ */
 @Component
 @RequiredArgsConstructor
 @Order(1)

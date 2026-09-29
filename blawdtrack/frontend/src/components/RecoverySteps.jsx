@@ -9,6 +9,10 @@ const STEPS = [
   { number: 3, label: 'Nueva contraseña' },
 ];
 
+/**
+ * @param {{ current: 1|2|3 }} props Paso actual: 1 solicitar enlace, 2 correo enviado, 3 nueva
+ *   contraseña. Los anteriores se marcan como completados.
+ */
 export function RecoverySteps({ current }) {
   return (
     <Box

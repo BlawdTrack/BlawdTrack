@@ -63,6 +63,12 @@ const INPUT_SX = {
   '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '14.5px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } },
 };
 
+/**
+ * Pantalla "Actualizar mensajero" (HU-004), exclusiva del Super Usuario. Busca al mensajero por tipo y
+ * número de documento, permite editar nombre, correo, teléfono, horario y capacidad de carga
+ * (`PUT /api/v1/couriers/{id}`) y muestra el estado de acceso y el historial de cambios.
+ * @param {{ initialCedula?: string }} props Documento con el que se abre la pantalla ya cargada.
+ */
 export function EditMessenger({ initialCedula = '' }) {
   const { logout } = useAuth();
   const { loading: submitting, updateCourier } = useCourier();

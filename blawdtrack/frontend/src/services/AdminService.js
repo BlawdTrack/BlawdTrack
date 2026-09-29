@@ -35,14 +35,22 @@ const normalizeAdministrator = (administrator) => {
   };
 };
 
-// Payload shape expected by POST /api/v1/admins (AdminRegistrationRequest):
-// { nombreCompleto, numeroTelefono, correoElectronico, contrasenaInicial,
-//   documentType, documentNumber }.
+/**
+ * Registra un administrador de ventas: `POST /api/v1/admins`.
+ * @param {{ nombreCompleto: string, numeroTelefono: string, correoElectronico: string,
+ *   contrasenaInicial: string, documentType: string, documentNumber: string }} adminData
+ *   Cuerpo esperado por `AdminRegistrationRequest`.
+ */
 export const registerAdministrator = async (adminData) => {
   const response = await axiosClient.post(ADMINISTRATORS_PATH, adminData);
   return response.data;
 };
 
+/**
+ * Lista los administradores de ventas: `GET /api/v1/admins`.
+ * @returns {Promise<Array<{ id: number, name: string, email: string, documentType: string,
+ *   documentNumber: string, hasActiveSession: boolean }>>}
+ */
 export const getAdministrators = async () => {
   const response = await axiosClient.get(ADMINISTRATORS_PATH);
   const payload = response.data;
@@ -57,6 +65,11 @@ export const getAdministrators = async () => {
   return administrators.map(normalizeAdministrator);
 };
 
+/**
+ * Elimina un administrador: `DELETE /api/v1/admins/{documentType}/{documentNumber}`.
+ * @param {string} documentType `CEDULA`, `DIMEX` o `PASAPORTE`.
+ * @param {string} documentNumber
+ */
 export const deleteAdministrator = async (documentType, documentNumber) => {
   await axiosClient.delete(
     `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}`

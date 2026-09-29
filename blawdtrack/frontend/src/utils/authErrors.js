@@ -15,7 +15,11 @@ const GENERIC_MESSAGE = 'No se pudo iniciar sesión. Intenta de nuevo en unos mi
 // INVALID_CREDENTIALS (401) para cualquier otro fallo de login. Ya no hace
 // falta interpretar el mensaje en inglés del backend para distinguirlos.
 
-// Recibe el error de axios y devuelve { message, severity } para StatusMessage.
+/**
+ * Traduce el error de un login fallido al aviso que muestra la pantalla.
+ * @param {import('axios').AxiosError} err Error de axios (sin `response` si no hubo conexión).
+ * @returns {{ message: string, severity: 'error'|'warning' }} Para `StatusMessage`.
+ */
 export function getLoginError(err) {
   const response = err?.response;
 

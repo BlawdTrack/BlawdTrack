@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { useAuth } from './useAuth';
 import { deactivateCourier } from '../services/CourierService';
 
+/**
+ * Hook de la desactivación de un mensajero (HU-005).
+ * @returns {{ deactivate: (id: number|string) => Promise<{ success: boolean, status: number|null,
+ *   error?: string }>, isLoading: boolean, error: string|null, status: number|null,
+ *   clearError: Function }} Un 401 cierra la sesión; un 409 indica paquetes pendientes.
+ */
 export const useDeactivateMessenger = () => {
   const { logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);

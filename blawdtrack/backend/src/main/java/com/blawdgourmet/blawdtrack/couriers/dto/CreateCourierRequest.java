@@ -16,6 +16,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Cuerpo de {@code POST /api/v1/couriers}. El constructor compacto limpia los datos: recorta
+ * espacios, pasa el correo a minúsculas, deja el teléfono vacío como nulo y usa CEDULA si no llega el
+ * tipo de documento. {@code maxPackageWeightKg} debe ser positivo (hasta 8 enteros y 2 decimales).
+ */
 @ValidDocument
 public record CreateCourierRequest(
         @NotNull DocumentType documentType,

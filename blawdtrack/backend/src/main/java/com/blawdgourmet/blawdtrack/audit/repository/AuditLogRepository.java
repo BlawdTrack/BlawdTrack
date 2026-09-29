@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 
+/** Acceso al historial de auditoría (tabla {@code auditorias}). */
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 
     /**
