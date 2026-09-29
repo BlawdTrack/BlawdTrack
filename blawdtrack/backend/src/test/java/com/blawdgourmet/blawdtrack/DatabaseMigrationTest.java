@@ -27,4 +27,12 @@ class DatabaseMigrationTest {
                 Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM usuarios_permisos", Integer.class)).isZero();
     }
+
+    @Test
+    void migracionDeFechasAUtcALocalSeAplicaSinErrores() {
+        // V12 corrige las fechas existentes (UTC -> hora local); en una base recién creada no hay filas.
+        assertThat(jdbc.queryForObject(
+                "SELECT COUNT(*) FROM \"flyway_schema_history\" WHERE \"version\" = '12' AND \"success\" = TRUE",
+                Integer.class)).isEqualTo(1);
+    }
 }
