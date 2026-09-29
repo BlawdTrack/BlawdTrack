@@ -19,7 +19,9 @@ import {
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { useCourier } from '../hooks/useCourier';
-import { listCouriers } from '../services/CourierService';
+import { listCouriers, updateCourierStatus, updateCourierPassword, getCourierHistory } from '../services/CourierService';
+import { formatHistoryEntry } from '../utils/courierHistory';
+import { MIN_PASSWORD_LENGTH, meetsClientPasswordRules } from '../utils/passwordRules';
 import { getInitials } from '../utils/getInitials';
 import Toast from '../components/Toast';
 import StatusMessage from '../components/StatusMessage';
@@ -62,7 +64,7 @@ const INPUT_SX = {
 };
 
 export function EditMessenger({ initialCedula = '' }) {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { loading: submitting, updateCourier } = useCourier();
 
   const [couriersList, setCouriersList] = useState([]);
@@ -92,8 +94,18 @@ export function EditMessenger({ initialCedula = '' }) {
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
   const [updateError, setUpdateError] = useState(null);
 
-  // Historial de modificaciones (Log) — debe cargarse desde el backend
+  // Historial de modificaciones (Log) — viene de GET /v1/couriers/{id}/history
   const [changeLog, setChangeLog] = useState([]);
+
+  const loadHistory = useCallback(async (courierId) => {
+    try {
+      const entries = await getCourierHistory(courierId);
+      setChangeLog(Array.isArray(entries) ? entries.map(formatHistoryEntry) : []);
+    } catch (err) {
+      console.error('Error al cargar el historial del mensajero:', err);
+      setChangeLog([]);
+    }
+  }, []);
 
   // Normalizar cédula para búsqueda insensible a tipo de documento o formato
   const normalizeId = (id) => (id || '').toString().replace(/[-\s]/g, '').toLowerCase();
@@ -134,6 +146,7 @@ export function EditMessenger({ initialCedula = '' }) {
     setInitialFormValues(initialVals);
     setFormErrors({});
     setUpdateError(null);
+    loadHistory(courier.id);
   };
 
   const handleRowClick = (courier) => {
@@ -205,8 +218,8 @@ export function EditMessenger({ initialCedula = '' }) {
       errors.maxLoadCapacityKg = 'La capacidad máxima de carga debe ser un valor numérico positivo.';
     }
 
-    if (formData.password && formData.password.length < 6) {
-      errors.password = 'La contraseña debe tener al menos 6 caracteres.';
+    if (formData.password && !meetsClientPasswordRules(formData.password)) {
+      errors.password = `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres, una mayúscula y un número.`;
     }
 
     setFormErrors(errors);
@@ -298,29 +311,41 @@ export function EditMessenger({ initialCedula = '' }) {
       return;
     }
 
+    const dataChanged = ['fullName', 'email', 'phone', 'schedule'].some(
+      (field) => formData[field] !== initialFormValues[field]
+    ) || String(formData.maxLoadCapacityKg) !== String(initialFormValues.maxLoadCapacityKg);
+    const statusChanged = formData.status !== initialFormValues.status;
+    const passwordChanged = Boolean(formData.password);
+
     try {
-      const payload = {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        schedule: formData.schedule,
-        maxPackageWeightKg: Number(formData.maxLoadCapacityKg)
-      };
+      if (dataChanged) {
+        await updateCourier(idCard, {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          schedule: formData.schedule,
+          maxPackageWeightKg: Number(formData.maxLoadCapacityKg)
+        });
+      }
 
-      await updateCourier(idCard, payload);
+      // El backend guarda la contraseña cifrada, cierra la sesión del mensajero y la registra en el historial.
+      if (passwordChanged) {
+        await updateCourierPassword(currentCourier.id, formData.password);
+      }
 
-      // Criterio de aceptación 3: Registrar historial de modificaciones (log)
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const timeStr = now.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
-      const newLog = {
-        id: Date.now(),
-        when: `${dateStr} · ${timeStr}`,
-        text: modifiedFields.join(' | '),
-        by: user?.fullName || 'Súper Usuario'
-      };
+      // Criterio de aceptación 1: el backend cierra la sesión activa al cambiar el estado de acceso.
+      if (statusChanged) {
+        try {
+          await updateCourierStatus(currentCourier.id, formData.status);
+        } catch (statusError) {
+          // El backend rechazó el cambio (p. ej. envíos en proceso): el interruptor vuelve al estado real.
+          setFormData((prev) => ({ ...prev, status: initialFormValues.status }));
+          throw statusError;
+        }
+      }
 
-      setChangeLog((prev) => [newLog, ...prev]);
+      // Criterio de aceptación 3: el historial (fecha, hora y campos) lo registra y sirve el backend.
+      loadHistory(currentCourier.id);
 
       // Actualizar estado local
       const updatedCourier = {
@@ -329,7 +354,8 @@ export function EditMessenger({ initialCedula = '' }) {
         email: formData.email,
         phone: formData.phone,
         schedule: formData.schedule,
-        maxPackageWeightKg: Number(formData.maxLoadCapacityKg)
+        maxPackageWeightKg: Number(formData.maxLoadCapacityKg),
+        status: formData.status
       };
       setCurrentCourier(updatedCourier);
       setInitialFormValues({ ...formData, password: '' });
