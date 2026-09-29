@@ -22,6 +22,11 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Matriz de permisos por rol (HU-009). Solo los roles operativos (administrador de ventas y mensajero)
+ * se pueden editar, y cada uno solo puede recibir permisos de su propio alcance; el Super Usuario no es
+ * editable. Los cambios aplican en la siguiente solicitud de los usuarios de ese rol.
+ */
 @Service
 @RequiredArgsConstructor
 public class RolePermissionService {
@@ -42,6 +47,16 @@ public class RolePermissionService {
     private final PermissionRepository permissions;
     private final UserRepository users;
 
+    /**
+     * Reemplaza el conjunto completo de permisos de un rol. Además de exigir el rol Super Usuario,
+     * confirma en la base que el actor siga activo y con ese rol, porque su JWT puede ser anterior a un
+     * cambio.
+     *
+     * @param roleId        id del rol a modificar
+     * @param permissionIds ids de los permisos que el rol tendrá; una lista vacía los revoca todos
+     * @throws RolePermissionException 404 si el rol no existe, 403 si el rol no es editable o si pide
+     *                                 permisos fuera de su alcance, 400 si algún permiso no existe
+     */
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public RolePermissionsResponse replace(Long roleId, Set<Long> permissionIds) {

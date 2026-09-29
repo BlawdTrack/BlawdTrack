@@ -1,5 +1,10 @@
 package com.blawdgourmet.blawdtrack.users.constant;
 
+/**
+ * Códigos de los permisos del sistema, tal como se guardan en la columna {@code permisos.codigo}.
+ * Agrupados por área: gestión de usuarios, paquetes (administración de ventas), paquetes del mensajero
+ * y reportes. Se siembran en {@code RoleDataInitializer}.
+ */
 public final class PermissionCode {
     private PermissionCode() {}
 

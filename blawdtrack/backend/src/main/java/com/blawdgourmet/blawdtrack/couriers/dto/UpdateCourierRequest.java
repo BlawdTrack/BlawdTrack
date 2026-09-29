@@ -4,6 +4,10 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.Locale;
 
+/**
+ * Cuerpo de {@code PUT /api/v1/couriers/{id}}: los datos editables de un mensajero. No incluye
+ * documento, rol ni estado. Se limpia igual que {@link CreateCourierRequest}.
+ */
 public record UpdateCourierRequest(
         @NotBlank @Size(max = 120) String fullName,
         @NotBlank @Email @Size(max = 120) String email,

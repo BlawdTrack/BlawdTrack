@@ -19,6 +19,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Contraseña anterior de un usuario (HU-002). Se guarda el hash de la contraseña que se reemplaza
+ * al restablecerla, para impedir reutilizar las últimas contraseñas.
+ */
 @Entity
 @Table(name = "historial_contrasenas")
 @Getter

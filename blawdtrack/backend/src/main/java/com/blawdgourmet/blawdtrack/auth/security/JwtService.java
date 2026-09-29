@@ -14,6 +14,14 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+/**
+ * Emite y valida los tokens JWT de sesión (HU-001).
+ * <p>
+ * El token se firma con HMAC usando {@code security.jwt.secret} (variable de entorno
+ * {@code JWT_SECRET}, sin valor por defecto) y vence a los {@code security.jwt.expiration-ms}
+ * milisegundos. Además del correo (subject) lleva el id, el documento, el nombre, las autoridades
+ * y {@code tokenVersion}, que permite invalidar sesiones sin esperar a que el token venza.
+ */
 @Component
 public class JwtService {
 
@@ -27,6 +35,12 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Verifica la firma y la vigencia del token y comprueba que traiga los datos mínimos
+     * (subject, expiración, id y autoridades).
+     *
+     * @throws JwtException si el token está mal formado, vencido, con firma inválida o incompleto
+     */
     public Claims validateToken(String token) {
         Claims claims = Jwts.parser().verifyWith(key()).build()
                 .parseSignedClaims(token).getPayload();
@@ -40,6 +54,7 @@ public class JwtService {
         return claims;
     }
 
+    /** Genera el JWT firmado del usuario autenticado. */
     public String generateToken(UserPrincipal principal) {
         String roles = principal.getAuthorities().stream()
                 .map(Object::toString)
@@ -59,6 +74,7 @@ public class JwtService {
                 .compact();
     }
 
+    /** Versión de sesión guardada en el token; {@code 0} si falta o no es numérica (tokens antiguos). */
     public int extractTokenVersion(Claims claims) {
         Object value = claims.get("tokenVersion");
         if (value == null) {

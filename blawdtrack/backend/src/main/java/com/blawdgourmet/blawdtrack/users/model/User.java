@@ -23,6 +23,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Cuenta de cualquier persona que entra al sistema: Super Usuario, administrador de ventas o mensajero.
+ * <ul>
+ *   <li>El documento se identifica por {@code documentType} + {@code documentNumber} (único en conjunto).
+ *       {@code documentId} es la columna heredada {@code cedula}, que se mantiene sincronizada.</li>
+ *   <li>{@code status} solo se cambia con {@link #changeStatus(UserStatus)}, que además sube
+ *       {@code tokenVersion} para invalidar las sesiones ya emitidas.</li>
+ *   <li>{@code lastLoginAt} es la fecha del último inicio de sesión exitoso.</li>
+ * </ul>
+ */
 @Entity
 @Table(name = "usuarios",
         uniqueConstraints = @UniqueConstraint(
@@ -97,10 +107,15 @@ public class User {
     @JoinColumn(name = "rol_id", nullable = false)
     private Role role;
 
+    /** {@code true} si la cuenta está activa (puede iniciar sesión). */
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
     }
 
+    /**
+     * Cambia el estado de acceso. Si el estado realmente cambia sube {@code tokenVersion}, por lo que los
+     * JWT emitidos antes dejan de ser válidos en su siguiente solicitud. Repetir el estado no hace nada.
+     */
     public void changeStatus(UserStatus newStatus) {
         if (this.status == newStatus) {
             return;

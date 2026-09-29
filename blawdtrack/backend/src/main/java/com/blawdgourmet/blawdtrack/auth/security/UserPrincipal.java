@@ -9,6 +9,12 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Adaptador de {@link User} al modelo de Spring Security. Las autoridades son {@code ROLE_} + nombre
+ * del rol más los códigos de los permisos del rol; {@link #isEnabled()} refleja si la cuenta está
+ * activa. Se reconstruye desde la base en cada solicitud, así los cambios de rol o permisos aplican de
+ * inmediato.
+ */
 public class UserPrincipal implements UserDetails {
 
     private final User user;

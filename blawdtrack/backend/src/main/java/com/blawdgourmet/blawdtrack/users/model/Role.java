@@ -6,6 +6,11 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Rol de un usuario (ver {@code RoleName}) con el conjunto de permisos que le corresponden. Los
+ * permisos se cargan siempre junto con el rol ({@code EAGER}) porque se necesitan para construir las
+ * autoridades en cada solicitud autenticada.
+ */
 @Entity
 @Table(name = "roles")
 @Getter
