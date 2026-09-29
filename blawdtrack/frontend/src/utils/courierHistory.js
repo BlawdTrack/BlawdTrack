@@ -13,6 +13,7 @@ const FIELD_LABELS = {
 const ACTION_TEXTS = {
   DESACTIVAR_MENSAJERO: 'Estado de acceso: Inactivo (sesión cerrada inmediatamente)',
   ACTIVAR_MENSAJERO: 'Estado de acceso: Activo (sesión cerrada inmediatamente)',
+  CAMBIAR_CONTRASENA_MENSAJERO: 'Contraseña actualizada (sesión cerrada inmediatamente)',
 };
 
 function describeFields(details) {

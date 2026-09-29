@@ -64,6 +64,13 @@ export const updateCourierStatus = async (id, status) => {
   return response.data;
 };
 
+export const updateCourierPassword = async (id, password) => {
+  await axiosClient.patch(
+    `/v1/couriers/${encodeURIComponent(id)}/password`,
+    { password }
+  );
+};
+
 export const getCourierHistory = async (id) => {
   const response = await axiosClient.get(
     `/v1/couriers/${encodeURIComponent(id)}/history`

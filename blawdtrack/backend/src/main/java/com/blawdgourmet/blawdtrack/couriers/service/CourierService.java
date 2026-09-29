@@ -48,7 +48,8 @@ public class CourierService {
     private static final List<String> COURIER_AUDIT_ACTIONS = List.of(
             AuditAction.COURIER_UPDATED.getCode(),
             AuditAction.COURIER_DEACTIVATED.getCode(),
-            AuditAction.COURIER_ACTIVATED.getCode());
+            AuditAction.COURIER_ACTIVATED.getCode(),
+            AuditAction.COURIER_PASSWORD_CHANGED.getCode());
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
@@ -175,6 +176,26 @@ public class CourierService {
         );
 
         return CourierResponse.from(courier);
+    }
+
+    /**
+     * Define una nueva contraseña para el mensajero. Sube el {@code tokenVersion} (cierra su sesión activa)
+     * y audita el cambio sin registrar nunca la contraseña.
+     */
+    @Transactional
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public void changePassword(String id, String newPassword) {
+        var user = resolveCourier(id).getUser();
+
+        user.changePassword(passwordEncoder.encode(newPassword));
+        users.saveAndFlush(user);
+
+        auditService.logAction(
+                AuditAction.COURIER_PASSWORD_CHANGED,
+                currentPrincipal(),
+                user,
+                "password"
+        );
     }
 
     @Transactional(readOnly = true)
