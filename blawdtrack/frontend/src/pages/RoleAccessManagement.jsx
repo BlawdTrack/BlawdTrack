@@ -8,34 +8,29 @@ import SaveOutlined from '@mui/icons-material/SaveOutlined';
 import SearchRounded from '@mui/icons-material/SearchRounded';
 import { CircularProgress } from '@mui/material';
 import Toast from '../components/Toast';
+import { ROLE_ACCESS_CATALOG } from '../config/roleAccessCatalog';
 import {
-  ROLE_ACCESS_CATALOG,
-} from '../config/roleAccessCatalog';
-import { findCourierByDocumentNumber } from '../services/CourierService';
+  getUserPermissions,
+  replaceUserPermissions,
+  resetUserPermissions,
+} from '../services/RoleAccessService';
 import './RoleAccessManagement.css';
-import { replaceRolePermissions } from '../services/RoleAccessService';
 
-const getPermissionCodes = (role) => new Set(
-  role.permissions
-    .filter((permission) => permission.editable && permission.defaultGranted)
-    .map((permission) => permission.code)
-);
+const DOCUMENT_TYPE_OPTIONS = [
+  { value: 'CEDULA', label: 'Cédula' },
+  { value: 'DIMEX', label: 'DIMEX' },
+  { value: 'PASAPORTE', label: 'Pasaporte' },
+];
+
+const DOCUMENT_PLACEHOLDERS = {
+  CEDULA: 'Ej. 1-2345-6789',
+  DIMEX: 'Ej. 155812345678',
+  PASAPORTE: 'Ej. A12345678',
+};
 
 const sameSet = (left, right) => (
   left.size === right.size && [...left].every((value) => right.has(value))
 );
-
-const getSearchError = (error) => {
-  if (error.response?.status === 401) {
-    return 'Tu sesión expiró. Inicia sesión nuevamente para continuar.';
-  }
-  if (error.response?.status === 403) {
-    return 'No tienes permiso para consultar los mensajeros.';
-  }
-  return error.response?.data?.message
-    || error.message
-    || 'No se pudo completar la búsqueda. Inténtalo de nuevo.';
-};
 
 const getInitials = (name) => name
   .trim()
@@ -45,16 +40,17 @@ const getInitials = (name) => name
   .join('')
   .toUpperCase();
 
-const getDefaultPermissionCodesByRole = () => Object.fromEntries(
-  ROLE_ACCESS_CATALOG.map((role) => [role.code, getPermissionCodes(role)])
-);
-
-const copyPermissionCodesByRole = (permissionsByRole) => Object.fromEntries(
-  Object.entries(permissionsByRole).map(([roleCode, codes]) => [
-    roleCode,
-    new Set(codes),
-  ])
-);
+// El backend responde en inglés para los errores de alcance; 404 trae "Usuario no existente".
+const getRequestError = (error, fallback) => {
+  const status = error.response?.status;
+  if (status === 401) return 'Tu sesión expiró. Inicia sesión nuevamente para continuar.';
+  if (status === 403) {
+    return 'No tienes permiso para modificar los permisos de este usuario, o su rol no admite cambios.';
+  }
+  if (status === 404) return error.response?.data?.message || 'Usuario no existente';
+  if (status === 400) return 'Revisa el tipo y el número de documento ingresados.';
+  return error.message || fallback;
+};
 
 /**
  * Pantalla "Roles y permisos" (HU-009), exclusiva del Super Usuario: busca un mensajero por número de
@@ -65,117 +61,100 @@ const copyPermissionCodesByRole = (permissionsByRole) => Object.fromEntries(
  */
 function RoleAccessManagement() {
   const navigate = useNavigate();
-  const [defaultPermissionCodesByRole] = useState(getDefaultPermissionCodesByRole);
-  const [permissionCodesByRole, setPermissionCodesByRole] = useState(
-    () => copyPermissionCodesByRole(defaultPermissionCodesByRole)
-  );
-  const [appliedPermissionCodesByRole, setAppliedPermissionCodesByRole] = useState(
-    () => copyPermissionCodesByRole(defaultPermissionCodesByRole)
-  );
-  const [searchDocument, setSearchDocument] = useState('');
+  const [documentType, setDocumentType] = useState('CEDULA');
+  const [documentNumber, setDocumentNumber] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchedCourier, setSearchedCourier] = useState(null);
   const [searchError, setSearchError] = useState('');
-  const [searchMessage, setSearchMessage] = useState('');
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  const [user, setUser] = useState(null);
+  const [selectedCodes, setSelectedCodes] = useState(() => new Set());
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const hasChanges = ROLE_ACCESS_CATALOG.some((role) => (
-    role.editable
-    && !sameSet(
-      permissionCodesByRole[role.code],
-      appliedPermissionCodesByRole[role.code]
-    )
-  ));
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+
+  const appliedCodes = new Set(user?.effectivePermissions ?? []);
+  const hasChanges = user !== null && !sameSet(selectedCodes, appliedCodes);
+  const roleGroup = user
+    ? ROLE_ACCESS_CATALOG.find((role) => role.code === user.role)
+    : null;
+
+  const showUser = (permissions) => {
+    setUser(permissions);
+    setSelectedCodes(new Set(permissions.effectivePermissions));
+    setSaveError('');
+  };
 
   const handleSearch = async (event) => {
     event.preventDefault();
-    const documentNumber = searchDocument.trim();
-    if (!/\d/.test(documentNumber)) {
-      setSearchedCourier(null);
-      setSearchMessage('');
-      setSearchError('Ingresa una cédula válida para realizar la búsqueda.');
+    const number = documentNumber.trim();
+    if (!number) {
+      setUser(null);
+      setSearchError('Ingresa el número de documento del usuario.');
       return;
     }
 
     setIsSearching(true);
-    setSearchedCourier(null);
     setSearchError('');
-    setSearchMessage('');
+    setUser(null);
     try {
-      const courier = await findCourierByDocumentNumber(documentNumber);
-      if (!courier) {
-        setSearchMessage('No se encontró un mensajero con esa cédula.');
-        return;
-      }
-      setSearchedCourier(courier);
+      showUser(await getUserPermissions(documentType, number));
     } catch (error) {
-      console.error('Error al buscar mensajero para la gestión de roles:', error);
-      setSearchError(getSearchError(error));
+      setSearchError(getRequestError(error, 'No se pudo completar la búsqueda. Inténtalo de nuevo.'));
     } finally {
       setIsSearching(false);
     }
   };
 
-  const handlePermissionToggle = (roleCode, permissionCode) => {
-    setPermissionCodesByRole((current) => {
-      const next = new Set(current[roleCode]);
-      if (next.has(permissionCode)) {
-        next.delete(permissionCode);
+  const handlePermissionToggle = (code) => {
+    setSelectedCodes((current) => {
+      const next = new Set(current);
+      if (next.has(code)) {
+        next.delete(code);
       } else {
-        next.add(permissionCode);
+        next.add(code);
       }
-      return { ...current, [roleCode]: next };
+      return next;
     });
   };
 
-  const handleReset = () => {
-    setPermissionCodesByRole((current) => Object.fromEntries(
-      ROLE_ACCESS_CATALOG.map((role) => [
-        role.code,
-        role.editable
-          ? new Set(defaultPermissionCodesByRole[role.code])
-          : current[role.code],
-      ])
-    ));
-  };
-
-  const handleSave = async () => {
-    if (!hasChanges || isSaving) return;
+  const applyResult = async (request, successMessage, failureMessage) => {
     setIsSaving(true);
     setSaveError('');
-
-    const rolesToUpdate = ROLE_ACCESS_CATALOG.filter(
-      (role) => role.editable && !sameSet(
-        permissionCodesByRole[role.code],
-        appliedPermissionCodesByRole[role.code]
-      )
-    );
-
     try {
-      for (const role of rolesToUpdate) {
-        const permissionIds = Array.from(permissionCodesByRole[role.code]);
-        await replaceRolePermissions(role.code, permissionIds);
-      }
-
-      setAppliedPermissionCodesByRole(copyPermissionCodesByRole(permissionCodesByRole));
-      setToast({ open: true, severity: 'success', message: 'Cambios aplicados correctamente.' });
+      showUser(await request());
+      setToast({ open: true, severity: 'success', message: successMessage });
     } catch (error) {
-      console.error('Error al guardar los cambios de permisos:', error);
-      let errorMessage = 'No se pudo guardar los cambios.';
-      if (error.response?.status === 403) {
-        errorMessage = 'No tienes permiso para modificar los permisos de este rol. Verifica tu rol actual.';
-      } else if (error.response?.status === 401) {
-        errorMessage = 'Tu sesión expiró. Inicia sesión nuevamente para continuar.';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      setSaveError(errorMessage);
-      setToast({ open: true, severity: 'error', message: errorMessage });
+      const message = getRequestError(error, failureMessage);
+      setSaveError(message);
+      setToast({ open: true, severity: 'error', message });
     } finally {
       setIsSaving(false);
     }
   };
+
+  const handleSave = () => {
+    if (!hasChanges || isSaving) return;
+    applyResult(
+      () => replaceUserPermissions(user.documentType, user.documentNumber, [...selectedCodes]),
+      'Los permisos se aplicarán en la siguiente solicitud del usuario.',
+      'No se pudo guardar los cambios.'
+    );
+  };
+
+  // Vuelve a los permisos predeterminados del rol principal del usuario.
+  const handleReset = () => {
+    if (isSaving) return;
+    if (!user.customized) {
+      setSelectedCodes(new Set(user.effectivePermissions));
+      return;
+    }
+    applyResult(
+      () => resetUserPermissions(user.documentType, user.documentNumber),
+      'Se restablecieron los permisos predeterminados del rol.',
+      'No se pudo restablecer los permisos.'
+    );
+  };
+
+  const canReset = user !== null && user.editable && (user.customized || hasChanges);
 
   return (
     <main className="role-access-page">
@@ -194,12 +173,22 @@ function RoleAccessManagement() {
             USUARIO A CONFIGURAR
           </label>
           <form className="user-search-form" onSubmit={handleSearch}>
+            <select
+              aria-label="Tipo de documento"
+              value={documentType}
+              onChange={(event) => setDocumentType(event.target.value)}
+              disabled={isSearching}
+            >
+              {DOCUMENT_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
             <input
               id="role-user-search"
               type="search"
-              value={searchDocument}
-              onChange={(event) => setSearchDocument(event.target.value)}
-              placeholder="Cédula del usuario · ej. 1-0345-0678"
+              value={documentNumber}
+              onChange={(event) => setDocumentNumber(event.target.value)}
+              placeholder={DOCUMENT_PLACEHOLDERS[documentType]}
               aria-describedby="user-search-scope"
               disabled={isSearching}
             />
@@ -211,75 +200,76 @@ function RoleAccessManagement() {
             </button>
           </form>
           <p className="access-search-scope" id="user-search-scope">
-            Busca al usuario mediante su cédula.
+            Busca al usuario por su documento (cédula, DIMEX o pasaporte), sea cual sea su rol.
           </p>
           {searchError && <p className="access-inline-error" role="alert">{searchError}</p>}
-          {searchMessage && <p className="access-search-message" role="status">{searchMessage}</p>}
-          {searchedCourier && (
+          {user && (
             <div className="access-user-preview" role="status">
               <span className="access-user-avatar" aria-hidden="true">
-                {getInitials(searchedCourier.fullName)}
+                {getInitials(user.fullName)}
               </span>
               <div className="access-user-details">
-                <strong>{searchedCourier.fullName}</strong>
+                <strong>{user.fullName}</strong>
                 <span>
-                  {searchedCourier.documentNumber}
-                  {' · rol actual: '}
-                  {searchedCourier.role || 'Mensajero'}
+                  {user.documentNumber}
+                  {' · rol principal: '}
+                  {roleGroup?.name ?? user.role}
+                  {user.customized ? ' · permisos personalizados' : ''}
                 </span>
               </div>
             </div>
           )}
         </section>
 
-        <section className="access-matrix-card" aria-labelledby="access-matrix-title">
-          <div className="access-matrix-heading">
-            <div>
-              <div className="access-matrix-title-row">
-                <h2 id="access-matrix-title">Matriz de control de acceso</h2>
+        {user && (
+          <section className="access-matrix-card" aria-labelledby="access-matrix-title">
+            <div className="access-matrix-heading">
+              <div>
+                <div className="access-matrix-title-row">
+                  <h2 id="access-matrix-title">Matriz de control de acceso</h2>
+                </div>
+                <p>
+                  Permisos de {user.fullName}. Solo se pueden modificar los permisos que
+                  corresponden a su rol.
+                </p>
               </div>
-              <p>Permisos organizados por perfil: Super Usuario, Administrador de Ventas y Mensajero.</p>
+              <div className="access-matrix-actions">
+                <button
+                  className="access-secondary-button"
+                  type="button"
+                  onClick={handleReset}
+                  disabled={!canReset || isSaving}
+                >
+                  <RestartAltRounded aria-hidden="true" />
+                  Restablecer predeterminados
+                </button>
+                <button
+                  className="access-primary-button"
+                  type="button"
+                  onClick={handleSave}
+                  disabled={!hasChanges || isSaving}
+                >
+                  {isSaving
+                    ? <CircularProgress size={19} color="inherit" />
+                    : <SaveOutlined aria-hidden="true" />}
+                  {isSaving ? 'Guardando...' : 'Aplicar cambios'}
+                </button>
+              </div>
             </div>
-            <div className="access-matrix-actions">
-              <button
-                className="access-secondary-button"
-                type="button"
-                onClick={handleReset}
-                disabled={!hasChanges}
-              >
-                <RestartAltRounded aria-hidden="true" />
-                Restablecer predeterminados
-              </button>
-              <button
-                className="access-primary-button"
-                type="button"
-                onClick={handleSave}
-                disabled={!hasChanges || isSaving}
-              >
-                {isSaving
-                  ? <CircularProgress size={19} color="inherit" />
-                  : <SaveOutlined aria-hidden="true" />}
-                {isSaving ? 'Guardando...' : 'Aplicar cambios'}
-              </button>
-            </div>
-          </div>
 
-          {saveError && (
-            <p className="access-inline-error" role="alert" style={{ marginTop: '1rem' }}>
-              {saveError}
-            </p>
-          )}
+            {saveError && (
+              <p className="access-inline-error" role="alert" style={{ marginTop: '1rem' }}>
+                {saveError}
+              </p>
+            )}
 
-          {ROLE_ACCESS_CATALOG.map((role) => {
-            const selectedPermissionCodes = permissionCodesByRole[role.code];
-
-            return (
-              <section className="access-role-section" key={role.code}>
+            {roleGroup && (
+              <section className="access-role-section">
                 <div className="access-group-heading">
                   <span aria-hidden="true" />
-                  <h3>{role.name}</h3>
-                  <span className="access-group-count">{role.permissions.length} permisos</span>
-                  {!role.editable && (
+                  <h3>{roleGroup.name}</h3>
+                  <span className="access-group-count">{roleGroup.permissions.length} permisos</span>
+                  {!user.editable && (
                     <span className="access-fixed-label">
                       <LockOutlined aria-hidden="true" />
                       Fijos
@@ -287,36 +277,36 @@ function RoleAccessManagement() {
                   )}
                 </div>
 
-                {role.permissions.map((permission) => {
-                  const isSelected = permission.editable
-                    ? selectedPermissionCodes.has(permission.code)
+                {roleGroup.permissions.map((permission) => {
+                  const isEditable = user.editable && user.allowedPermissions.includes(permission.code);
+                  const isSelected = isEditable
+                    ? selectedCodes.has(permission.code)
                     : permission.defaultGranted;
 
                   return (
                     <div
-                      className={`access-permission-row${permission.editable ? '' : ' is-fixed'}`}
+                      className={`access-permission-row${isEditable ? '' : ' is-fixed'}`}
                       key={permission.code}
                     >
                       <span className="access-permission-name">{permission.description}</span>
                       <button
-                        className={`access-toggle${isSelected ? ' is-on' : ''}${permission.editable ? '' : ' is-disabled'}`}
+                        className={`access-toggle${isSelected ? ' is-on' : ''}${isEditable ? '' : ' is-disabled'}`}
                         type="button"
                         role="switch"
                         aria-checked={isSelected}
-                        aria-label={`${permission.description}: ${isSelected ? 'permitido' : 'denegado'}${permission.editable ? '' : ', no editable'}`}
-                        onClick={() => handlePermissionToggle(role.code, permission.code)}
-                        disabled={!permission.editable}
+                        aria-label={`${permission.description}: ${isSelected ? 'permitido' : 'denegado'}${isEditable ? '' : ', no editable'}`}
+                        onClick={() => handlePermissionToggle(permission.code)}
+                        disabled={!isEditable}
                       >
                         <span>{isSelected && <CheckRounded aria-hidden="true" />}</span>
                       </button>
                     </div>
                   );
                 })}
-
               </section>
-            );
-          })}
-        </section>
+            )}
+          </section>
+        )}
       </div>
       <Toast
         open={toast.open}

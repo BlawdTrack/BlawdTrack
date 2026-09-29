@@ -1,11 +1,16 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
+import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.User;
+import com.blawdgourmet.blawdtrack.users.model.UserPermission;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,9 +23,16 @@ import java.util.stream.Stream;
 public class UserPrincipal implements UserDetails {
 
     private final User user;
+    private final Collection<UserPermission> permissionOverrides;
 
     public UserPrincipal(User user) {
+        this(user, List.of());
+    }
+
+    /** {@code permissionOverrides}: excepciones individuales sobre los permisos del rol (HU-009). */
+    public UserPrincipal(User user, Collection<UserPermission> permissionOverrides) {
         this.user = user;
+        this.permissionOverrides = permissionOverrides;
     }
 
     public Long getId() {
@@ -40,8 +52,17 @@ public class UserPrincipal implements UserDetails {
         Stream<GrantedAuthority> role = Stream.of(
                 new SimpleGrantedAuthority("ROLE_" + user.getRole().getName())
         );
-        Stream<GrantedAuthority> permissions = user.getRole().getPermissions().stream()
-                .map(p -> new SimpleGrantedAuthority(p.getCode()));
+        Set<String> permissionCodes = user.getRole().getPermissions().stream()
+                .map(Permission::getCode)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        permissionOverrides.forEach(override -> {
+            if (override.isAllowed()) {
+                permissionCodes.add(override.getPermission().getCode());
+            } else {
+                permissionCodes.remove(override.getPermission().getCode());
+            }
+        });
+        Stream<GrantedAuthority> permissions = permissionCodes.stream().map(SimpleGrantedAuthority::new);
 
         return Stream.concat(role, permissions).collect(Collectors.toList());
     }

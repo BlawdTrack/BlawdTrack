@@ -63,6 +63,7 @@
   flex-wrap: wrap;
 }
 
+.user-search-form select,
 .user-search-form input {
   width: 100%;
   min-width: 0;
@@ -78,10 +79,15 @@
   font-size: 14px;
 }
 
+.user-search-form select {
+  flex: 0 1 170px;
+}
+
 .user-search-form input::placeholder {
   color: #9e968d;
 }
 
+.user-search-form select:focus-visible,
 .user-search-form input:focus-visible {
   border-color: #1a3c34;
   box-shadow: 0 0 0 3px rgba(26, 60, 52, 0.12);
@@ -399,6 +405,7 @@
     flex-direction: column;
   }
 
+  .user-search-form select,
   .user-search-form input {
     flex-basis: auto;
   }

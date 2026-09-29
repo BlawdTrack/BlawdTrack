@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.constant.RolePermissionDefaults;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.repository.PermissionRepository;
@@ -78,31 +79,26 @@ public class RoleDataInitializer implements CommandLineRunner {
                 PermissionCode.PROOF_OF_DELIVERY_VIEW,
                 PermissionCode.COST_VIEW);
 
-        ensureRole(RoleName.SALES_ADMIN, "Administrador de Ventas",
-                PermissionCode.USER_CREATE,
-                PermissionCode.USER_UPDATE,
-                PermissionCode.PACKAGE_IMPORT,
-                PermissionCode.PACKAGE_DELETE,
-                PermissionCode.PACKAGE_VIEW,
-                PermissionCode.PACKAGE_SEARCH,
-                PermissionCode.PACKAGE_EXPORT,
-                PermissionCode.PACKAGE_GENERATE_QR,
-                PermissionCode.PACKAGE_ASSIGN,
-                PermissionCode.PACKAGE_VIEW_ASSIGNED,
-                PermissionCode.PACKAGE_UPDATE_STATUS,
-                PermissionCode.TRIP_COST_REGISTER,
-                PermissionCode.REPORT_VIEW,
-                PermissionCode.REPORT_PRINT,
-                PermissionCode.PROOF_OF_DELIVERY_VIEW,
-                PermissionCode.COST_VIEW);
+        ensureOperationalRole(RoleName.SALES_ADMIN, "Administrador de Ventas");
+        ensureOperationalRole(RoleName.COURIER, "Mensajero");
+    }
 
-        ensureRole(RoleName.COURIER, "Mensajero",
-                PermissionCode.PACKAGE_VIEW,
-                PermissionCode.PACKAGE_SEARCH,
-                PermissionCode.PACKAGE_VIEW_ASSIGNED,
-                PermissionCode.PACKAGE_UPDATE_STATUS,
-                PermissionCode.PROOF_OF_DELIVERY_VIEW,
-                PermissionCode.COST_VIEW);
+    /**
+     * Un rol operativo recibe sus permisos predeterminados solo al crearse: las ediciones del Super
+     * Usuario sobreviven a los reinicios. Si ya existe, únicamente se retira lo que quede fuera de su
+     * alcance (permisos heredados de siembras anteriores), para que nunca conserve permisos restringidos.
+     */
+    private void ensureOperationalRole(String roleName, String description) {
+        Set<String> defaults = RolePermissionDefaults.forRole(roleName).orElseThrow();
+        Role role = roleRepository.findByName(roleName).orElse(null);
+
+        if (role == null) {
+            ensureRole(roleName, description, defaults.toArray(String[]::new));
+            return;
+        }
+        if (role.getPermissions().removeIf(permission -> !defaults.contains(permission.getCode()))) {
+            roleRepository.save(role);
+        }
     }
 
     private void ensurePermission(String code, String description) {

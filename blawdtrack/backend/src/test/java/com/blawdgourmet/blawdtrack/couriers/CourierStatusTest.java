@@ -181,6 +181,51 @@ class CourierStatusTest {
         changeStatus(superToken, "{\"status\":\"BORRADO\"}").andExpect(status().isBadRequest());
     }
 
+    private ResultActions deactivate(String token) throws Exception {
+        return mvc.perform(patch("/api/v1/couriers/" + courier.getId() + "/deactivate")
+                .header("Authorization", "Bearer " + token));
+    }
+
+    @Test
+    void deactivateDesactivaCierraLaSesionYConservaAlMensajeroYSuPerfil() throws Exception {
+        String courierToken = tokenOf(courierUser);
+
+        deactivate(superUserToken())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("INACTIVE"));
+
+        mvc.perform(get("/api/v1/couriers").header("Authorization", "Bearer " + courierToken))
+                .andExpect(status().isUnauthorized());
+        // La desactivación es lógica: el usuario y su perfil de mensajero se conservan.
+        assertThat(users.findById(courierUser.getId())).isPresent();
+        assertThat(couriers.findById(courier.getId())).isPresent();
+        assertThat(records("DESACTIVAR_MENSAJERO")).hasSize(1);
+    }
+
+    @Test
+    void deactivateConAsignacionesActivasResponde409YNoDesactiva() throws Exception {
+        when(workload.hasActiveAssignments(courier.getId())).thenReturn(true);
+
+        deactivate(superUserToken())
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("COURIER_HAS_ACTIVE_ASSIGNMENTS"));
+
+        assertThat(users.findById(courierUser.getId()).orElseThrow().getStatus()).isEqualTo(UserStatus.ACTIVE);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN_VENTAS", "MENSAJERO"})
+    void deactivateSoloLoPuedeEjecutarElSuperUsuario(String role) throws Exception {
+        var actor = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA)
+                .documentNumber("704440448").fullName("Sin permiso").email("sinpermiso-hu005@example.com")
+                .passwordHash("unused").status(UserStatus.ACTIVE)
+                .role(roles.findByName(role).orElseThrow()).build());
+
+        deactivate(tokenOf(actor)).andExpect(status().isForbidden());
+
+        assertThat(users.findById(courierUser.getId()).orElseThrow().getStatus()).isEqualTo(UserStatus.ACTIVE);
+    }
+
     @Test
     void elHistorialListaLosCambiosMasRecientesPrimeroConFechaHoraYAutor() throws Exception {
         String superToken = superUserToken();

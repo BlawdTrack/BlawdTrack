@@ -12,4 +12,6 @@ public interface PasswordHistoryRepository extends JpaRepository<PasswordHistory
 
     /** Las dos contraseñas anteriores más recientes del usuario, de la más nueva a la más antigua. */
     List<PasswordHistory> findTop2ByUserOrderByCreatedAtDesc(User user);
+
+    void deleteByUserId(Long userId);
 }
