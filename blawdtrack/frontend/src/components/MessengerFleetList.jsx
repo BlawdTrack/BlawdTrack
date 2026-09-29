@@ -14,7 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
-import { listCouriers } from '../services/CourierService';
+import { listCouriers, getCourierHistory } from '../services/CourierService';
+import { formatHistoryEntry } from '../utils/courierHistory';
 import { getInitials } from '../utils/getInitials';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
 
@@ -56,7 +57,7 @@ const CARD_HEADER_SX = {
 };
 
 export const MessengerFleetList = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [messengers, setMessengers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -100,6 +101,28 @@ export const MessengerFleetList = () => {
     setIsModalOpen(true);
   };
 
+  // La fecha, la hora y el autor de la auditoría vienen del registro del backend.
+  const appendDeactivationAudit = async (messenger) => {
+    try {
+      const history = await getCourierHistory(messenger.id);
+      const entry = history.find((item) => item.action === 'DESACTIVAR_MENSAJERO');
+      if (!entry) return;
+      const { id, when, by } = formatHistoryEntry(entry, 0);
+      setAuditLogs((previous) => [
+        {
+          id: `${messenger.id}-${id}`,
+          date: when,
+          action: 'Desactivación',
+          details: `Mensajero ${messenger.fullName} · ${messenger.documentNumber}`,
+          role: by,
+        },
+        ...previous,
+      ]);
+    } catch (historyError) {
+      console.error('Error al cargar la auditoría de la desactivación:', historyError);
+    }
+  };
+
   const handleSuccessfulDeactivation = () => {
     setMessengers((previous) =>
       previous.map((messenger) =>
@@ -108,20 +131,7 @@ export const MessengerFleetList = () => {
           : messenger
       )
     );
-
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const timeStr = now.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
-    setAuditLogs((previous) => [
-      {
-        id: Date.now(),
-        date: `${dateStr} · ${timeStr}`,
-        action: 'Desactivación',
-        details: `Mensajero ${selectedMessenger.fullName} · ${selectedMessenger.documentNumber}`,
-        role: user?.fullName || 'Súper Usuario',
-      },
-      ...previous,
-    ]);
+    appendDeactivationAudit(selectedMessenger);
 
     setIsModalOpen(false);
     setSnackbarOpen(true);
