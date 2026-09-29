@@ -57,8 +57,7 @@ class AdminServiceImplTest {
     @BeforeEach
     void setUp() {
         service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService,
-                new AdminUniquenessValidator(userRepository), relatedRecordsCleaner);
-        service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService, auditLogRepository);
+                new AdminUniquenessValidator(userRepository), auditLogRepository, relatedRecordsCleaner);
         ReflectionTestUtils.setField(service, "jwtExpirationMs", 3_600_000L);
     }
 

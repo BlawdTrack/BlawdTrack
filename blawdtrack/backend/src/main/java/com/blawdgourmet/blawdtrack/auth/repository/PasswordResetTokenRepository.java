@@ -21,7 +21,7 @@ public interface PasswordResetTokenRepository extends JpaRepository<PasswordRese
 
 	 @Lock(LockModeType.PESSIMISTIC_WRITE)
 	 @Query("SELECT t FROM PasswordResetToken t WHERE t.used = false AND t.expirationDate > :ahora")
-	 List<PasswordResetToken> findActivosParaActualizar(@Param("ahora") LocalDateTime ahora);
+	 List<PasswordResetToken> findActiveForUpdate(@Param("ahora") LocalDateTime ahora);
 
 	 void deleteByUserId(Long userId);
 }
