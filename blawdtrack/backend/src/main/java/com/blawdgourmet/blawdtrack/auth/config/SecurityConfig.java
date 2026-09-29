@@ -81,6 +81,8 @@ public class SecurityConfig {
                         // coincide, y estas reglas de prefijo bloquearian a ese rol con un 403.
                         .requestMatchers("/api/v1/couriers/**").hasRole(RoleName.SUPER_USER)
                         .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
+                        // Permisos individuales de usuarios (HU-009): exclusivos del Super Usuario.
+                        .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

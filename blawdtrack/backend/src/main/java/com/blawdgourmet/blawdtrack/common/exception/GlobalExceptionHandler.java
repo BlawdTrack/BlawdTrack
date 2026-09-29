@@ -15,6 +15,8 @@ import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
 import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
+import com.blawdgourmet.blawdtrack.users.service.RolePermissionException;
+import com.blawdgourmet.blawdtrack.users.service.UserNotFoundException;
 
 /**
  * Traduce las excepciones de la aplicación al formato unificado de errores (estándar P05).
@@ -90,6 +92,28 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiError> manejarUsuarioNoExistente(UserNotFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("USUARIO_NO_EXISTENTE")
+                .message(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(RolePermissionException.class)
+    public ResponseEntity<ApiError> manejarPermisosFueraDeAlcance(RolePermissionException ex) {
+        ApiError error = ApiError.builder()
+                .code("ROLE_PERMISSIONS_ERROR")
+                .message(ex.getMessage())
+                .status(ex.getStatus().value())
+                .build();
+
+        return ResponseEntity.status(ex.getStatus()).body(error);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
