@@ -115,6 +115,12 @@ function mapConflict(data) {
   return result('conflict', { globalMessage: MESSAGES.conflictGeneric });
 }
 
+/**
+ * Convierte el error de una llamada a `/v1/couriers` en un modelo uniforme para el formulario.
+ * @param {import('axios').AxiosError} error
+ * @returns {{ kind: 'validation'|'conflict'|'network'|'unauthenticated'|'forbidden'|'server'|'unknown',
+ *   fieldErrors: Object<string, string>, globalMessage: string|null, severity: string }}
+ */
 export function normalizeCourierError(error) {
   const response = error?.response;
 

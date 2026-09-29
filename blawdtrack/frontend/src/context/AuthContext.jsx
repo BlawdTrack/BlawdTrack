@@ -42,6 +42,13 @@ function getValidStoredUser() {
   return storedUser;
 }
 
+/**
+ * Proveedor de autenticación de toda la aplicación (HU-001). Expone por contexto:
+ * `user` (o `null`), `login(email, password)`, `logout()`, `loading`, `error`, `resetError()` y
+ * `expireSession()`. Restaura la sesión guardada al cargar y se registra en `sessionExpiry` para cerrar
+ * la sesión cuando el backend responde 401.
+ * @param {{ children: import('react').ReactNode }} props
+ */
 export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

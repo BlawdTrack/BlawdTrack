@@ -18,7 +18,11 @@ const GENERIC_MESSAGE = 'No se pudo iniciar sesión. Intenta de nuevo en unos mi
 // se siguen soportando. Cuando eso pase, este respaldo se puede quitar.
 const INACTIVE_TEXT_PATTERN = /inactive|disabled/i;
 
-// Recibe el error de axios y devuelve { message, severity } para StatusMessage.
+/**
+ * Traduce el error de un login fallido al aviso que muestra la pantalla.
+ * @param {import('axios').AxiosError} err Error de axios (sin `response` si no hubo conexión).
+ * @returns {{ message: string, severity: 'error'|'warning' }} Para `StatusMessage`.
+ */
 export function getLoginError(err) {
   const response = err?.response;
 

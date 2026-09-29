@@ -208,8 +208,12 @@ export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
   );
 }
 
-// iOS-alarm style time picker: three scrolling wheels (hour, minute, am/pm).
-// Value is a 24h "HH:MM" string; empty string means unset.
+/**
+ * Selector de hora estilo alarma de iOS con tres ruedas (hora, minuto y am/pm). El valor es un texto
+ * "HH:MM" en formato de 24 horas; `''` significa sin selección.
+ * @param {{ label: string, value: string, onChange: (value: string) => void, error?: string,
+ *   id?: string }} props
+ */
 export function TimeWheelField({ label, value, onChange, error, id }) {
   const [anchor, setAnchor] = useState(null);
   const [draft, setDraft] = useState(parse(value));

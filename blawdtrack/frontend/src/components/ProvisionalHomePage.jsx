@@ -5,6 +5,10 @@ import { useAuth } from '../hooks/useAuth';
 // Pantalla de inicio mínima para roles que todavía no tienen su panel real
 // (T12). SalesHomePage y CourierHomePage la usan; cuando HU-010+/HU-022
 // construyan la pantalla definitiva, cada una se reemplaza por la real.
+/**
+ * @param {{ title: string, description: string }} props Título y texto de la pantalla provisional;
+ *   muestra el usuario y el rol autenticados y un botón para cerrar sesión.
+ */
 export function ProvisionalHomePage({ title, description }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();

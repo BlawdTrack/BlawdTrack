@@ -18,9 +18,12 @@ export const ROLE_HOME_ROUTES = {
   [ROLES.MENSAJERO]: ROUTES.COURIER_HOME,
 };
 
-// Devuelve la ruta de inicio del rol, o null si el rol no esta en el mapa
-// (rol desconocido o ausente). Object.hasOwn evita que claves heredadas del
-// prototipo ("constructor", "toString"...) pasen como roles validos.
+/**
+ * Ruta de inicio de un rol. `Object.hasOwn` evita que claves heredadas del prototipo ("constructor",
+ * "toString"...) pasen como roles válidos.
+ * @param {string} role Rol de negocio (por ejemplo `SUPER_USUARIO`).
+ * @returns {string|null} La ruta, o `null` si el rol es desconocido o ausente.
+ */
 export function getHomeRoute(role) {
   return Object.hasOwn(ROLE_HOME_ROUTES, role) ? ROLE_HOME_ROUTES[role] : null;
 }

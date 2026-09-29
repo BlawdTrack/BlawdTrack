@@ -1,5 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 // Paleta y tipografía alineadas al mockup de diseño (Inter + Poppins, verde/naranja BlawdTrack).
+/** Tema de MUI de la aplicación (paleta verde/naranja de BlawdTrack; fuentes Inter y Poppins). */
 export const theme = createTheme({
   palette: {
     primary: {

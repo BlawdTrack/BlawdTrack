@@ -48,6 +48,12 @@ const CARD_HEADER_SX = {
   gap: 1.5,
 };
 
+/**
+ * Pantalla "Eliminar administrador" (HU-008), exclusiva del Super Usuario. Lista los administradores de
+ * ventas (`GET /api/v1/admins`), permite buscarlos por tipo y número de documento y abre
+ * `DeleteAdminModal` para confirmar. Un administrador con sesión activa no se puede eliminar; los
+ * errores del backend (404 y 409) se muestran en el modal y en una notificación.
+ */
 const AdminManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);

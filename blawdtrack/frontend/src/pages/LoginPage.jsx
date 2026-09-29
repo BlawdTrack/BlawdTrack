@@ -31,6 +31,12 @@ function validateForm(data) {
   return errors;
 }
 
+/**
+ * Pantalla de inicio de sesión (HU-001). Valida correo y contraseña en el cliente y, si son válidos,
+ * llama a `login` del contexto de autenticación.
+ * @param {{ onLoginSuccess?: Function, onSubmitAttempt?: Function, onForgotPassword?: Function }} props
+ *   `onLoginSuccess` se ejecuta con la respuesta del login; `onForgotPassword` abre la recuperación.
+ */
 export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });

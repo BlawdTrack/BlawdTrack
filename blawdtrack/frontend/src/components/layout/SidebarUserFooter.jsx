@@ -1,4 +1,8 @@
 import { Box, Button, Typography } from '@mui/material';
+/**
+ * Pie de la barra lateral: iniciales, nombre, correo y rol del usuario, y el botón de cerrar sesión.
+ * @param {{ fullName: string, email?: string, roleLabel: string, onLogout: Function }} props
+ */
 export default function SidebarUserFooter({ fullName, email = '', roleLabel, onLogout }) {
   return (
     <Box sx={{ mt: 'auto', p: '16px 18px 18px', borderTop: '1px solid rgba(255,255,255,.08)' }}>

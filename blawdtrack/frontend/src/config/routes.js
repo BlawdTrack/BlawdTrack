@@ -1,3 +1,4 @@
+/** Rutas de la aplicación en un solo lugar; `App.jsx` las registra y el menú lateral las enlaza. */
 export const ROUTES = {
   LOGIN: '/login',
   PASSWORD_RECOVERY: '/password-recovery',

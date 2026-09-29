@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import logo from '../../assets/Logo.png';
 
+/** Encabezado de la barra lateral con el logo y el nombre de la aplicación. */
 export default function SidebarBrand() {
   return (
     <Box

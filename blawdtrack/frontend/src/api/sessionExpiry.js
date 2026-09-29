@@ -16,8 +16,11 @@ const EXCLUDED_URL_PARTS = ['/v1/auth/login', '/v1/auth/password-reset'];
 
 let sessionExpiredHandler = null;
 
-// Registra quién limpia la sesión. Devuelve la función para desregistrarlo
-// (cleanup del useEffect del AuthProvider).
+/**
+ * Registra quién limpia la sesión cuando expira.
+ * @param {() => void} handler Función que cierra la sesión (la registra el `AuthProvider`).
+ * @returns {() => void} Función para desregistrarlo (cleanup del `useEffect`).
+ */
 export function setSessionExpiredHandler(handler) {
   sessionExpiredHandler = handler;
   return () => {
@@ -31,9 +34,14 @@ function getSentAuthorization(config) {
   return typeof headers.get === 'function' ? headers.get('Authorization') : headers.Authorization;
 }
 
-// Solo cuenta como sesión expirada un 401 con code NO_AUTENTICADO (token
-// ausente, inválido o vencido en un endpoint protegido). Un 403
-// (ACCESO_DENEGADO, CUENTA_INACTIVA) no cierra la sesión.
+/**
+ * Indica si un error de axios significa "sesión expirada".
+ *
+ * Solo cuenta como sesión expirada un 401 con code NO_AUTENTICADO (token ausente, inválido o vencido
+ * en un endpoint protegido). Un 403 (ACCESO_DENEGADO, CUENTA_INACTIVA) no cierra la sesión.
+ * @param {import('axios').AxiosError} error Error de la petición fallida.
+ * @returns {boolean}
+ */
 export function isSessionExpiredResponse(error) {
   const response = error?.response;
   if (!response || response.status !== 401) return false;
@@ -51,6 +59,11 @@ export function isSessionExpiredResponse(error) {
   return getSentAuthorization(error.config) === `Bearer ${currentToken}`;
 }
 
+/**
+ * Llamada por el interceptor de respuesta: si el error es de sesión expirada, avisa al handler
+ * registrado. No modifica ni traga el error.
+ * @param {import('axios').AxiosError} error
+ */
 export function handleUnauthorizedResponse(error) {
   if (sessionExpiredHandler && isSessionExpiredResponse(error)) {
     sessionExpiredHandler();

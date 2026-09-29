@@ -52,6 +52,11 @@ function ItemContent({ label, active, disabled, Icon }) {
   );
 }
 
+/**
+ * Un ítem del menú lateral. Si no tiene ruta (`path: null`) se muestra deshabilitado con el aviso
+ * "Disponible próximamente"; si la tiene, resalta cuando es la ruta activa.
+ * @param {{ item: { id: string, label: string, path: string|null } }} props
+ */
 export default function SidebarNavItem({ item }) {
   const Icon = NAV_ITEM_ICONS[item.id];
 

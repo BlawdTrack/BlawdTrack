@@ -1,15 +1,26 @@
 import axiosClient from '../api/axiosClient';
 
+/**
+ * Registra un mensajero: `POST /api/v1/couriers`.
+ * @param {object} courierData Cuerpo de `CreateCourierRequest`.
+ */
 export const registerCourier = async (courierData) => {
   const response = await axiosClient.post('/v1/couriers', courierData);
   return response.data;
 };
 
+/** Lista todos los mensajeros: `GET /api/v1/couriers`. */
 export const listCouriers = async () => {
   const response = await axiosClient.get('/v1/couriers');
   return response.data;
 };
 
+/**
+ * Busca un mensajero por número de documento entre la lista completa (compara solo los dígitos).
+ * @param {string} documentNumber
+ * @returns {Promise<object|null>} El mensajero, o `null` si no existe.
+ * @throws {Error} Si el número no tiene dígitos o la respuesta del backend es incompleta.
+ */
 export const findCourierByDocumentNumber = async (documentNumber) => {
   const normalizedDocument = documentNumber.replace(/\D/g, '');
   if (!normalizedDocument) {
@@ -33,6 +44,10 @@ export const findCourierByDocumentNumber = async (documentNumber) => {
   return courier;
 };
 
+/**
+ * Desactiva un mensajero: `PATCH /api/v1/couriers/{id}/deactivate`.
+ * @param {number|string} id Id del mensajero.
+ */
 export const deactivateCourier = async (id) => {
   const response = await axiosClient.patch(
     `/v1/couriers/${encodeURIComponent(id)}/deactivate`
@@ -40,6 +55,11 @@ export const deactivateCourier = async (id) => {
   return response.data;
 };
 
+/**
+ * Actualiza un mensajero: `PUT /api/v1/couriers/{id}`.
+ * @param {string|number} idCard Id numérico del mensajero o su número de documento.
+ * @param {object} courierData Cuerpo de `UpdateCourierRequest`.
+ */
 export const updateCourier = async (idCard, courierData) => {
   try {
     const response = await axiosClient.put(
@@ -56,6 +76,7 @@ export const updateCourier = async (idCard, courierData) => {
   }
 };
 
+/** Consulta un mensajero: `GET /api/v1/couriers/{documentNumber}`. */
 export const getCourierByDocumentNumber = async (documentNumber) => {
   try {
     const response = await axiosClient.get(

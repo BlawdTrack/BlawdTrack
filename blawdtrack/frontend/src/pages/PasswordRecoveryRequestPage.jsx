@@ -55,6 +55,10 @@ const LINK_SX = { fontSize: 12.5, fontWeight: 600, color: 'primary.main' };
 // anti-enumeración del backend). Por eso hay un único resultado posible tras
 // enviar: no se distingue "cuenta inactiva" ni "correo no registrado" (eso
 // del mockup, `resetScenarios`, es solo de la demo interactiva).
+/**
+ * Pantalla "Recuperar contraseña" (HU-002): pide el correo y muestra la confirmación "Revisa tu correo".
+ * @param {{ onBackToLogin: Function }} props
+ */
 export function PasswordRecoveryRequestPage({ onBackToLogin }) {
   const [email, setEmail] = useState('');
   const [fieldErrors, setFieldErrors] = useState({ email: '' });

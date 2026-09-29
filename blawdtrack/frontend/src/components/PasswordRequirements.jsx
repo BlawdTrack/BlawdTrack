@@ -57,6 +57,10 @@ function Rule({ label, state, note }) {
   );
 }
 
+/**
+ * @param {{ password: string, historyRejected?: boolean }} props `historyRejected` marca la regla de
+ *   "distinta de las últimas 3 contraseñas" como no cumplida cuando el backend la rechazó.
+ */
 export function PasswordRequirements({ password, historyRejected = false }) {
   const results = evaluatePasswordRules(password);
 

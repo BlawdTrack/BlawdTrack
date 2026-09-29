@@ -4,8 +4,12 @@ import { Wheel, WHEEL_ITEM_HEIGHT, WHEEL_VISIBLE_ITEMS } from './TimeWheelField'
 
 const WEIGHTS = Array.from({ length: 800 }, (_, i) => String(i + 1));
 
-// Wheel picker for the courier's maximum load, 1 to 800 kg (whole numbers).
-// Value is a string ("" when unset) so it plugs into the same form state as a text input.
+/**
+ * Selector de rueda para la capacidad máxima de carga del mensajero: de 1 a 800 kg, en números enteros.
+ * El valor es un texto (`''` si no hay selección) para encajar en el mismo estado que un campo de texto.
+ * @param {{ label: string, value: string, onChange: (value: string) => void, error?: string,
+ *   id?: string }} props
+ */
 export function WeightWheelField({ label, value, onChange, error, id }) {
   const [anchor, setAnchor] = useState(null);
   const [draft, setDraft] = useState('1');

@@ -13,6 +13,11 @@ import {
 import { useDeactivateMessenger } from '../hooks/useDeactivateMessenger';
 import { getInitials } from '../utils/getInitials';
 
+/**
+ * Diálogo de confirmación para desactivar a un mensajero (HU-005). Llama a `useDeactivateMessenger`; un
+ * 409 (paquetes pendientes) se muestra como advertencia y el resto de errores como error.
+ * @param {{ isOpen: boolean, onClose: Function, courier: object|null, onDeactivateSuccess: Function }} props
+ */
 export const DeactivateMessengerModal = ({
   isOpen,
   onClose,

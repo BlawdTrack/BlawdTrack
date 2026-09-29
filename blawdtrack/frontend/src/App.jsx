@@ -77,6 +77,11 @@ function NewPasswordRoute() {
   );
 }
 
+/**
+ * Tabla de rutas de la aplicación. Públicas: login, recuperación de contraseña y `/recovery` (enlace
+ * del correo). El resto va dentro de un `ProtectedRoute` por rol: el Super Usuario dentro de
+ * `MainMenuLayout`, el administrador de ventas en `/ventas` y el mensajero en `/mensajero`.
+ */
 function App() {
   return (
     <Routes>

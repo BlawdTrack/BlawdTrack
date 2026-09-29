@@ -4,6 +4,7 @@ import { ROUTES } from '../config/routes';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
 
+/** Inicio del Super Usuario dentro del menú principal: saludo con su nombre, su rol y cerrar sesión. */
 export default function MainMenuPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();

@@ -13,6 +13,13 @@ import { getHomeRoute } from '../utils/roleRoutes';
 // tener sesión y un rol conocido. Es coherencia de la interfaz; la seguridad real la aplica el
 // backend (@PreAuthorize). La matriz fina de permisos por pantalla es HU-009 y
 // podrá sumarse como otra prop sin cambiar la estructura de rutas.
+/**
+ * Ruta protegida que envuelve un grupo de rutas (layout route de React Router).
+ * @param {{ allowedRoles?: string[] }} props Roles que pueden ver el grupo; sin la prop basta con
+ *   tener sesión válida y un rol conocido.
+ * @returns Las rutas hijas (`<Outlet />`), o una redirección a `/login` (sin sesión) o al inicio del
+ *   rol (rol no permitido).
+ */
 export function ProtectedRoute({ allowedRoles }) {
   const { user, expireSession, logout } = useAuth();
   const location = useLocation();

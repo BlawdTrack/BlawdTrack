@@ -5,7 +5,11 @@ import { NAV_GROUP_ICONS } from './navIcons';
 const firstEnabledPath = (group) => group.items.find((item) => item.path)?.path ?? null;
 const isGroupActive = (group, pathname) => group.items.some((item) => item.path === pathname);
 
-// Bottom tab bar for phones: one tab per navigation group.
+/**
+ * Barra de pestañas inferior para teléfonos: una pestaña por grupo de navegación, que lleva a la
+ * primera pantalla disponible del grupo.
+ * @param {{ groups: Array }} props Grupos de `getNavigationForRole`.
+ */
 export default function MobileBottomNav({ groups }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();

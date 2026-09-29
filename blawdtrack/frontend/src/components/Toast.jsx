@@ -12,6 +12,11 @@ const SEVERITY_STYLES = {
   warning: '#C9860F',
 };
 
+/**
+ * @param {{ open: boolean, message: string, severity?: 'success'|'error'|'warning',
+ *   onClose: Function, autoHideDuration?: number }} props Notificación flotante que se cierra sola
+ *   a los 4 segundos por defecto.
+ */
 export function Toast({ open, message, severity = 'success', onClose, autoHideDuration = 4000 }) {
   const accentColor = SEVERITY_STYLES[severity] || SEVERITY_STYLES.success;
 

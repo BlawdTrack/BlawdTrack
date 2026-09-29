@@ -10,6 +10,12 @@ import {
   Alert,
 } from '@mui/material';
 
+/**
+ * Diálogo de confirmación para eliminar un administrador (HU-008).
+ * @param {{ open: boolean, onClose: Function, onConfirm: (documentType: string, documentNumber: string) => void,
+ *   adminData: object|null, errorMessage?: string, isSubmitting?: boolean }} props `adminData` es el
+ *   administrador seleccionado; sin él no se renderiza nada.
+ */
 const DeleteAdminModal = ({
   open,
   onClose,

@@ -61,6 +61,11 @@ const adminSalesEditableCodes = adminSalesCodes.filter((code) => (
   operationalPermissions.some((permission) => permission.code === code)
 ));
 
+/**
+ * Catálogo de la matriz de control de acceso (HU-009): los tres perfiles con sus permisos. Cada permiso
+ * indica si es editable y si se concede por defecto. Los permisos `visualOnly` del administrador de
+ * ventas solo se muestran: todavía no existen como permisos en el backend.
+ */
 export const ROLE_ACCESS_CATALOG = [
   {
     code: 'SUPER_USUARIO',
