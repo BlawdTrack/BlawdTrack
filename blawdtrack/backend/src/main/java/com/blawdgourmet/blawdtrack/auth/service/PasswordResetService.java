@@ -20,5 +20,16 @@ public interface PasswordResetService {
      */
     PasswordResetResult requestPasswordReset(String email);
 
+    /**
+     * Envía el enlace de restablecimiento al correo de la propia cuenta autenticada. El correo nunca
+     * lo indica el cliente: se toma del usuario de la sesión, así que nadie puede pedirlo para otra
+     * cuenta. Los enlaces anteriores de esa cuenta dejan de valer.
+     *
+     * @param userId id del usuario autenticado
+     * @throws com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException si el correo no
+     *         pudo enviarse (en ese caso no queda ningún token guardado)
+     */
+    void requestOwnPasswordReset(Long userId);
+
     void confirmPasswordReset(String rawToken, String newPassword);
 }

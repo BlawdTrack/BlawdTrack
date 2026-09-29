@@ -4,6 +4,7 @@ import com.blawdgourmet.blawdtrack.auth.entity.PasswordResetToken;
 import com.blawdgourmet.blawdtrack.auth.entity.PasswordHistory;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
 import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
+import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.repository.PasswordHistoryRepository;
 import com.blawdgourmet.blawdtrack.auth.repository.PasswordResetTokenRepository;
 import com.blawdgourmet.blawdtrack.auth.service.EmailService;
@@ -14,6 +15,7 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,21 +54,46 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             return PasswordResetResult.notGenerated();
         }
 
+        String rawToken = issueToken(user.get());
+        sendResetEmail(user.get().getEmail(), rawToken);
+
+        return PasswordResetResult.generated(rawToken, user.get().getId());
+    }
+
+    @Override
+    @Transactional
+    public void requestOwnPasswordReset(Long userId) {
+        User user = userRepository.findById(userId)
+                .filter(User::isActive)
+                .orElseThrow(() -> new AccessDeniedException("La cuenta no existe o está inactiva."));
+
+        // Los enlaces anteriores dejan de valer: solo el más reciente restablece la contraseña.
+        passwordResetTokenRepository.deleteByUserId(user.getId());
+        String rawToken = issueToken(user);
+
+        try {
+            emailService.sendEmailWithToken(user.getEmail(), rawToken);
+        } catch (MailException ex) {
+            log.error("No se pudo enviar el correo de restablecimiento al usuario {}", user.getId(), ex);
+            // Revierte la transacción: sin correo no queda un token que nadie pueda usar.
+            throw new PasswordResetEmailException(ex);
+        }
+    }
+
+    /** Genera y guarda un token nuevo (solo su hash) y devuelve su valor en texto plano. */
+    private String issueToken(User user) {
         String rawToken = UUID.randomUUID().toString();
         LocalDateTime now = LocalDateTime.now();
 
-        PasswordResetToken token = PasswordResetToken.builder()
-                .user(user.get())
+        passwordResetTokenRepository.save(PasswordResetToken.builder()
+                .user(user)
                 .tokenHash(passwordEncoder.encode(rawToken))
                 .expirationDate(now.plusMinutes(TOKEN_EXPIRATION_MINUTES))
                 .createdAt(now)
                 .used(false)
-                .build();
+                .build());
 
-        passwordResetTokenRepository.save(token);
-        sendResetEmail(user.get().getEmail(), rawToken);
-
-        return PasswordResetResult.generated(rawToken, user.get().getId());
+        return rawToken;
     }
 
     /**

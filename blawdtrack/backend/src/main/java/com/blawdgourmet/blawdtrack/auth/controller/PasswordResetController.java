@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetConfirmRequest;
 import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetRequestDTO;
 import com.blawdgourmet.blawdtrack.auth.dto.PasswordResetResponseDTO;
 import com.blawdgourmet.blawdtrack.auth.service.PasswordResetService;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,20 @@ public class PasswordResetController {
             @Valid @RequestBody PasswordResetRequestDTO request) {
         passwordResetService.requestPasswordReset(request.getEmail());
         return ResponseEntity.ok(PasswordResetResponseDTO.builder().message(GENERIC_MESSAGE).build());
+    }
+
+    /**
+     * Envía el enlace de restablecimiento al correo de la cuenta con la sesión iniciada (cualquier rol).
+     * No recibe correo: siempre es el del usuario autenticado, así que solo se puede pedir para uno mismo.
+     * Si el correo no puede enviarse responde 503 {@code CORREO_NO_ENVIADO}.
+     */
+    @PostMapping("/password-reset/request-own")
+    public ResponseEntity<PasswordResetResponseDTO> requestOwnPasswordReset(
+            @AuthenticationPrincipal AuthenticatedUser user) {
+        passwordResetService.requestOwnPasswordReset(user.id());
+        return ResponseEntity.ok(PasswordResetResponseDTO.builder()
+                .message("Te enviamos el enlace para restablecer tu contraseña a tu correo.")
+                .build());
     }
 
     @PostMapping("/password-reset/confirm")

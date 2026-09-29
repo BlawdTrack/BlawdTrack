@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
 import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
@@ -70,6 +71,17 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(PasswordResetEmailException.class)
+    public ResponseEntity<ApiError> handlePasswordResetEmail(PasswordResetEmailException ex) {
+        ApiError error = ApiError.builder()
+                .code("CORREO_NO_ENVIADO")
+                .message(ex.getMessage())
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 
     @ExceptionHandler(PasswordReusedException.class)
