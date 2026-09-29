@@ -125,6 +125,17 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
   });
 
   it('T04 & T05: Registra en el historial de modificaciones (log) la fecha, hora y campos modificados', async () => {
+    // El historial lo sirve el backend: tras guardar, GET /history ya incluye la modificación.
+    CourierService.getCourierHistory.mockImplementation(async () =>
+      CourierService.updateCourier.mock.calls.length > 0
+        ? [{
+            action: 'ACTUALIZAR_MENSAJERO',
+            details: 'maxPackageWeightKg',
+            timestamp: '2026-09-29T12:00:00',
+            actorName: 'Super Usuario'
+          }]
+        : []
+    );
     render(<EditMessenger initialCedula="1-0345-0678" />);
 
     await waitFor(() => {
@@ -138,9 +149,10 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     fireEvent.click(saveButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Capacidad: 25 kg → 35 kg/i)).toBeTruthy();
+      expect(screen.getByText(/Campos modificados: Capacidad de carga/i)).toBeTruthy();
       expect(screen.getByText('Historial de modificaciones')).toBeTruthy();
     });
+    CourierService.getCourierHistory.mockResolvedValue([]);
   });
 
   it('T06: Muestra notificación de éxito (Toast) tras guardar los cambios correctamente', async () => {

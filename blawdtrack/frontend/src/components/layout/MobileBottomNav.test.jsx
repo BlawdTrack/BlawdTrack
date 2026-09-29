@@ -51,7 +51,7 @@ describe('MobileBottomNav', () => {
     expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.COURIER_CREATE);
 
     await user.click(tab('Admins'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.ADMIN_DELETE);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.ADMIN_CREATE);
 
     await user.click(tab('Acceso'));
     expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PASSWORD_RESET_OWN);
