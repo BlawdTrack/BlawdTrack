@@ -19,8 +19,9 @@ import {
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { useCourier } from '../hooks/useCourier';
-import { listCouriers, updateCourierStatus, getCourierHistory } from '../services/CourierService';
+import { listCouriers, updateCourierStatus, updateCourierPassword, getCourierHistory } from '../services/CourierService';
 import { formatHistoryEntry } from '../utils/courierHistory';
+import { MIN_PASSWORD_LENGTH, meetsClientPasswordRules } from '../utils/passwordRules';
 import { getInitials } from '../utils/getInitials';
 import Toast from '../components/Toast';
 import StatusMessage from '../components/StatusMessage';
@@ -228,8 +229,8 @@ export function EditMessenger({ initialCedula = '' }) {
       errors.maxLoadCapacityKg = 'La capacidad máxima de carga debe ser un valor numérico positivo.';
     }
 
-    if (formData.password && formData.password.length < 6) {
-      errors.password = 'La contraseña debe tener al menos 6 caracteres.';
+    if (formData.password && !meetsClientPasswordRules(formData.password)) {
+      errors.password = `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres, una mayúscula y un número.`;
     }
 
     setFormErrors(errors);
@@ -325,6 +326,7 @@ export function EditMessenger({ initialCedula = '' }) {
       (field) => formData[field] !== initialFormValues[field]
     ) || String(formData.maxLoadCapacityKg) !== String(initialFormValues.maxLoadCapacityKg);
     const statusChanged = formData.status !== initialFormValues.status;
+    const passwordChanged = Boolean(formData.password);
 
     try {
       if (dataChanged) {
@@ -335,6 +337,11 @@ export function EditMessenger({ initialCedula = '' }) {
           schedule: formData.schedule,
           maxPackageWeightKg: Number(formData.maxLoadCapacityKg)
         });
+      }
+
+      // El backend guarda la contraseña cifrada, cierra la sesión del mensajero y la registra en el historial.
+      if (passwordChanged) {
+        await updateCourierPassword(currentCourier.id, formData.password);
       }
 
       // Criterio de aceptación 1: el backend cierra la sesión activa al cambiar el estado de acceso.
