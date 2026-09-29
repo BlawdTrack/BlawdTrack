@@ -20,6 +20,7 @@ import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierPasswordRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierStatusRequest;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierHasActiveAssignmentsException;
@@ -56,6 +57,13 @@ public class CourierController {
     public CourierResponse changeStatus(@PathVariable String id,
                                         @Valid @RequestBody UpdateCourierStatusRequest request) {
         return service.changeStatus(id, request.status());
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<Void> changePassword(@PathVariable String id,
+                                               @Valid @RequestBody UpdateCourierPasswordRequest request) {
+        service.changePassword(id, request.password());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/history")
