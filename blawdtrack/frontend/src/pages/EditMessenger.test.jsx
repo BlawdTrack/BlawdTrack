@@ -26,7 +26,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
   };
 
   const mockCourier = {
-    id: '1-0345-0678',
+    id: 7,
     documentNumber: '1-0345-0678',
     fullName: 'María José Solano',
     email: 'maria.solano@example.com',
@@ -114,7 +114,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
     await waitFor(() => {
       expect(CourierService.updateCourier).toHaveBeenCalledWith(
-        '1-0345-0678',
+        7,
         expect.objectContaining({
           fullName: 'María José Solano Editada',
           schedule: '6:00 am – 2:00 pm',
@@ -181,7 +181,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() => {
-      expect(CourierService.updateCourierPassword).toHaveBeenCalledWith('1-0345-0678', 'Nueva2026x');
+      expect(CourierService.updateCourierPassword).toHaveBeenCalledWith(7, 'Nueva2026x');
     });
     expect(CourierService.updateCourierStatus).not.toHaveBeenCalled();
     await waitFor(() => {

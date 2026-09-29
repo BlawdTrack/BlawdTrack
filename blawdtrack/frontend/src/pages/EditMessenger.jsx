@@ -280,7 +280,8 @@ export function EditMessenger({ initialCedula = '' }) {
 
     setUpdateError(null);
 
-    const idCard = currentCourier.documentNumber || currentCourier.idCard || currentCourier.cedula || currentCourier.id;
+    // El backend resuelve el mensajero por su id de perfil; un documento de solo dígitos se confundiría con un id.
+    const idCard = currentCourier.id;
 
     // Detectar campos modificados para el log
     const modifiedFields = [];
