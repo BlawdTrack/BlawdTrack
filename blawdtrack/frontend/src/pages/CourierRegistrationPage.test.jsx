@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourierRegistrationPage } from './CourierRegistrationPage';
 import { registerCourier } from '../services/CourierService';
+import { renderWithProviders } from '../test-utils';
 
 vi.mock('../services/CourierService', () => ({ registerCourier: vi.fn() }));
 
@@ -39,7 +40,7 @@ describe('CourierRegistrationPage', () => {
   it('shows the success message with the response email and clears the form', async () => {
     registerCourier.mockResolvedValue({ email: 'ana@blawdgourmet.com' });
     const user = userEvent.setup();
-    render(<CourierRegistrationPage />);
+    renderWithProviders(<CourierRegistrationPage />);
 
     await fillForm(user);
     await submit(user);
@@ -58,7 +59,7 @@ describe('CourierRegistrationPage', () => {
       httpError(409, { code: 'COURIER_CONFLICT', message: 'El correo ya está registrado' })
     );
     const user = userEvent.setup();
-    render(<CourierRegistrationPage />);
+    renderWithProviders(<CourierRegistrationPage />);
 
     await fillForm(user);
     await submit(user);
@@ -73,7 +74,7 @@ describe('CourierRegistrationPage', () => {
   it('shows a global alert when there is no connection', async () => {
     registerCourier.mockRejectedValue(new Error('Network Error'));
     const user = userEvent.setup();
-    render(<CourierRegistrationPage />);
+    renderWithProviders(<CourierRegistrationPage />);
 
     await fillForm(user);
     await submit(user);

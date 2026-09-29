@@ -21,7 +21,6 @@ const renderNav = (route) =>
   );
 
 const tab = (label) => screen.getByText(label);
-const square = (label) => tab(label).previousSibling;
 const ORANGE = 'rgb(255, 108, 14)';
 
 describe('MobileBottomNav', () => {
@@ -32,16 +31,15 @@ describe('MobileBottomNav', () => {
 
   it('highlights only the tab of the current module', () => {
     renderNav(ROUTES.COURIER_DEACTIVATE);
-    expect(square('Mensajeros')).toHaveStyle({ backgroundColor: ORANGE });
-    expect(square('Admins')).not.toHaveStyle({ backgroundColor: ORANGE });
-    expect(square('Acceso')).not.toHaveStyle({ backgroundColor: ORANGE });
     expect(tab('Mensajeros')).toHaveStyle({ color: ORANGE });
+    expect(tab('Admins')).not.toHaveStyle({ color: ORANGE });
+    expect(tab('Acceso')).not.toHaveStyle({ color: ORANGE });
   });
 
   it('highlights nothing on the main menu', () => {
     renderNav(ROUTES.MAIN_MENU);
     ['Acceso', 'Mensajeros', 'Admins', 'Permisos'].forEach((label) =>
-      expect(square(label)).not.toHaveStyle({ backgroundColor: ORANGE })
+      expect(tab(label)).not.toHaveStyle({ color: ORANGE })
     );
   });
 
@@ -56,13 +54,13 @@ describe('MobileBottomNav', () => {
     expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.ADMIN_DELETE);
 
     await user.click(tab('Acceso'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PASSWORD_RECOVERY);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PASSWORD_RESET_OWN);
   });
 
-  it('does nothing when the module has no built screens (Permisos)', async () => {
+  it('navigates to the roles & permissions screen', async () => {
     const user = userEvent.setup();
     renderNav(ROUTES.MAIN_MENU);
     await user.click(tab('Permisos'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MAIN_MENU);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.ROLES_PERMISSIONS);
   });
 });

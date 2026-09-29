@@ -3,13 +3,15 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 import { useAuth } from './hooks/useAuth';
-import { ROLES, ROLE_HOME_ROUTES, getHomeRoute } from './utils/roleRoutes';
+import { ROLES } from './config/roles';
+import { ROLE_HOME_ROUTES, getHomeRoute } from './utils/roleRoutes';
 import { ROUTES } from './config/routes';
 
 // Las pantallas se mockean: aquí solo importa qué pantalla queda visible según
 // el rol (varias hacen peticiones al backend al montarse).
 vi.mock('./pages/MainMenuPage', () => ({ default: () => <div>Pantalla menú principal</div> }));
 vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla administradores</div> }));
+vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
 vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
 vi.mock('./pages/SalesHomePage', () => ({ default: () => <div>Pantalla ventas</div> }));
@@ -29,6 +31,7 @@ const SCREENS = {
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
   [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
+  [ROUTES.ROLES_PERMISSIONS]: 'Pantalla roles y permisos',
   [ROUTES.SALES_HOME]: 'Pantalla ventas',
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
   // Rutas de tu feature agregadas al formato de develop
@@ -42,7 +45,8 @@ const ALLOWED_ROUTES = {
     ROUTES.MAIN_MENU, 
     ROUTES.ADMIN_DELETE, 
     ROUTES.COURIER_CREATE, 
-    ROUTES.COURIER_DEACTIVATE, 
+    ROUTES.COURIER_DEACTIVATE,
+    ROUTES.ROLES_PERMISSIONS,
     '/editar-mensajero'
   ],
   [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME],
