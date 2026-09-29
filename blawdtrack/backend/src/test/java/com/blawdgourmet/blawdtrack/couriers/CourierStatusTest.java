@@ -262,4 +262,44 @@ class CourierStatusTest {
                         .header("Authorization", "Bearer " + tokenOf(actor)))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void laAuditoriaDeDesactivacionesSeConservaAunqueElMensajeroSeReactive() throws Exception {
+        String superToken = superUserToken();
+        changeStatus(superToken, DEACTIVATE).andExpect(status().isOk());
+        changeStatus(superToken, ACTIVATE).andExpect(status().isOk());
+        assertThat(users.findById(courierUser.getId()).orElseThrow().getStatus()).isEqualTo(UserStatus.ACTIVE);
+
+        mvc.perform(get("/api/v1/couriers/deactivations").header("Authorization", "Bearer " + superToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].courierName").value(courierUser.getFullName()))
+                .andExpect(jsonPath("$[0].documentNumber").value(courierUser.getDocumentNumber()))
+                .andExpect(jsonPath("$[0].actorName").value("Super HU004"))
+                .andExpect(jsonPath("$[0].timestamp").isNotEmpty());
+        assertThat(records("DESACTIVAR_MENSAJERO")).hasSize(1);
+    }
+
+    @Test
+    void laAuditoriaDeDesactivacionesListaCadaDesactivacionDeLaMasRecienteALaMasAntigua() throws Exception {
+        String superToken = superUserToken();
+        changeStatus(superToken, DEACTIVATE).andExpect(status().isOk());
+        changeStatus(superToken, ACTIVATE).andExpect(status().isOk());
+        changeStatus(superToken, DEACTIVATE).andExpect(status().isOk());
+
+        mvc.perform(get("/api/v1/couriers/deactivations").header("Authorization", "Bearer " + superToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void laAuditoriaDeDesactivacionesSoloLaPuedeVerElSuperUsuario() throws Exception {
+        var actor = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA)
+                .documentNumber("704440448").fullName("Admin ventas 2").email("ventas2-hu004@example.com")
+                .passwordHash("unused").status(UserStatus.ACTIVE)
+                .role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
+
+        mvc.perform(get("/api/v1/couriers/deactivations").header("Authorization", "Bearer " + tokenOf(actor)))
+                .andExpect(status().isForbidden());
+    }
 }
