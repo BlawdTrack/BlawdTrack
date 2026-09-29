@@ -35,7 +35,12 @@ const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0
 
 // Muestra solo el rango de horas en la tabla; el detalle de dias queda en el
 // formulario de edicion, no en esta columna.
-const getScheduleTimeRange = (schedule) => (schedule || '').split(',')[0].trim();
+// La API devuelve `status` ("ACTIVE"/"INACTIVE"); `estado` es el nombre heredado en español.
+const isCourierActive = (courier) => (
+  courier.status ? courier.status === 'ACTIVE' : courier.estado !== 'Inactivo'
+);
+
+const getScheduleTimeRange =(schedule) => (schedule || '').split(',')[0].trim();
 
 const CARD_SX = {
   borderRadius: '18px',
@@ -387,6 +392,10 @@ export function EditMessenger({ initialCedula = '' }) {
         status: formData.status
       };
       setCurrentCourier(updatedCourier);
+      // La tabla de la flota refleja de inmediato los datos y el estado guardados.
+      setCouriersList((prev) => prev.map((courier) => (
+        courier.id === updatedCourier.id ? { ...courier, ...updatedCourier } : courier
+      )));
       setInitialFormValues({ ...formData, password: '' });
       setFormData((prev) => ({ ...prev, password: '' }));
 
@@ -535,14 +544,14 @@ export function EditMessenger({ initialCedula = '' }) {
                     </TableCell>
                     <TableCell sx={{ width: '13%', px: 3, py: '14px' }}>
                       <Chip
-                        label={courier.status === 'ACTIVE' || !courier.estado ? 'Activo' : 'Inactivo'}
+                        label={isCourierActive(courier) ? 'Activo' : 'Inactivo'}
                         size="small"
                         sx={{
                           fontSize: '11.5px',
                           fontWeight: 700,
                           borderRadius: '20px',
-                          bgcolor: courier.status === 'ACTIVE' || !courier.estado ? '#E9F3EC' : '#F1ECE7',
-                          color: courier.status === 'ACTIVE' || !courier.estado ? '#2F7D4F' : '#6B6560',
+                          bgcolor: isCourierActive(courier) ? '#E9F3EC' : '#F1ECE7',
+                          color: isCourierActive(courier) ? '#2F7D4F' : '#6B6560',
                         }}
                       />
                     </TableCell>

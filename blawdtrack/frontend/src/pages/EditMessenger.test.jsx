@@ -185,6 +185,35 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     CourierService.getCourierHistory.mockResolvedValue([]);
   });
 
+  const fleetRow = (name) => screen.getAllByRole('row').find((row) => within(row).queryByText(name));
+
+  it('T04: La tabla de la flota marca como Inactivo al mensajero que la API devuelve inactivo', async () => {
+    CourierService.listCouriers.mockResolvedValue([
+      mockCourier,
+      { ...mockCourier, id: 8, documentNumber: '2-0456-0789', fullName: 'Pedro Inactivo', status: 'INACTIVE' }
+    ]);
+    render(<EditMessenger />);
+
+    await waitFor(() => expect(fleetRow('Pedro Inactivo')).toBeTruthy());
+    expect(within(fleetRow('Pedro Inactivo')).getByText('Inactivo')).toBeTruthy();
+    expect(within(fleetRow('María José Solano')).getByText('Activo')).toBeTruthy();
+  });
+
+  it('T04: Al quitar el acceso y guardar, la tabla de la flota pasa a Inactivo', async () => {
+    const user = userEvent.setup();
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
+    expect(within(fleetRow('María José Solano')).getByText('Activo')).toBeTruthy();
+
+    await user.click(screen.getByRole('switch'));
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => {
+      expect(CourierService.updateCourierStatus).toHaveBeenCalledWith(7, 'INACTIVE');
+      expect(within(fleetRow('María José Solano')).getByText('Inactivo')).toBeTruthy();
+    });
+  });
+
   it('T06: Muestra notificación de éxito (Toast) tras guardar los cambios correctamente', async () => {
     render(<EditMessenger initialCedula="1-0345-0678" />);
 
