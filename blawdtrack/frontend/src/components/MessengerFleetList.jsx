@@ -14,10 +14,30 @@ import {
   Typography,
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
-import { listCouriers, getCourierHistory } from '../services/CourierService';
+import { listCouriers, getCourierDeactivations } from '../services/CourierService';
 import { formatHistoryEntry } from '../utils/courierHistory';
 import { getInitials } from '../utils/getInitials';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
+
+// Filas del panel de auditoría a partir de las desactivaciones guardadas en el backend.
+const fetchDeactivationAudit = async () => {
+  const entries = await getCourierDeactivations();
+  return (Array.isArray(entries) ? entries : []).map((entry, index) => {
+    const { id, when, by } = formatHistoryEntry(
+      { timestamp: entry.timestamp, action: 'DESACTIVAR_MENSAJERO', actorName: entry.actorName },
+      index
+    );
+    return {
+      id: `${entry.documentNumber}-${id}`,
+      date: when,
+      action: 'Desactivación',
+      details: `Mensajero ${entry.courierName} · ${entry.documentNumber}`,
+      role: by,
+    };
+  });
+};
+
+const logAuditError = (auditError) => console.error('Error al cargar la auditoría de desactivaciones:', auditError);
 
 // El backend aun no expone si un mensajero esta en labores ni sus paquetes
 // pendientes (ver ProvisionalCourierWorkloadPort): se muestra el mismo texto
@@ -59,7 +79,8 @@ const CARD_HEADER_SX = {
 /**
  * Pantalla "Desactivar mensajero" (HU-005), exclusiva del Super Usuario. Lista los mensajeros, permite
  * buscarlos por tipo y número de documento y abre `DeactivateMessengerModal` para confirmar la
- * desactivación. Muestra además una auditoría de las desactivaciones hechas en la sesión.
+ * desactivación. Muestra además la auditoría de todas las desactivaciones registradas, aunque el
+ * mensajero se haya reactivado después.
  */
 export const MessengerFleetList = () => {
   const { logout } = useAuth();
@@ -106,27 +127,11 @@ export const MessengerFleetList = () => {
     setIsModalOpen(true);
   };
 
-  // La fecha, la hora y el autor de la auditoría vienen del registro del backend.
-  const appendDeactivationAudit = async (messenger) => {
-    try {
-      const history = await getCourierHistory(messenger.id);
-      const entry = history.find((item) => item.action === 'DESACTIVAR_MENSAJERO');
-      if (!entry) return;
-      const { id, when, by } = formatHistoryEntry(entry, 0);
-      setAuditLogs((previous) => [
-        {
-          id: `${messenger.id}-${id}`,
-          date: when,
-          action: 'Desactivación',
-          details: `Mensajero ${messenger.fullName} · ${messenger.documentNumber}`,
-          role: by,
-        },
-        ...previous,
-      ]);
-    } catch (historyError) {
-      console.error('Error al cargar la auditoría de la desactivación:', historyError);
-    }
-  };
+  // Todas las desactivaciones registradas: la auditoría vive en la base de datos y se conserva aunque el
+  // mensajero se reactive, así que se carga completa desde el backend y no solo la de esta sesión.
+  useEffect(() => {
+    fetchDeactivationAudit().then(setAuditLogs).catch(logAuditError);
+  }, []);
 
   const handleSuccessfulDeactivation = () => {
     setMessengers((previous) =>
@@ -136,7 +141,7 @@ export const MessengerFleetList = () => {
           : messenger
       )
     );
-    appendDeactivationAudit(selectedMessenger);
+    fetchDeactivationAudit().then(setAuditLogs).catch(logAuditError);
 
     setIsModalOpen(false);
     setSnackbarOpen(true);
@@ -368,7 +373,7 @@ export const MessengerFleetList = () => {
         <Box>
           {auditLogs.length === 0 ? (
             <Typography sx={{ p: '20px 24px', fontSize: '13px', color: '#9E968D', textAlign: 'center' }}>
-              No hay registros de auditoría recientes.
+              No hay desactivaciones registradas.
             </Typography>
           ) : (
             auditLogs.map((log, index) => (

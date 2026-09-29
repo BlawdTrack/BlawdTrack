@@ -10,8 +10,16 @@ vi.mock('../hooks/useAuth', () => ({
 vi.mock('../services/CourierService', () => ({
   listCouriers: vi.fn(),
   deactivateCourier: vi.fn(),
-  getCourierHistory: vi.fn(),
+  getCourierDeactivations: vi.fn(),
 }));
+
+const DEACTIVATION = {
+  timestamp: '2026-09-29T14:05:00',
+  courierName: 'María Solano',
+  documentType: 'CEDULA',
+  documentNumber: '123456789',
+  actorName: 'Súper Usuario',
+};
 
 const COURIER = {
   id: 7,
@@ -26,9 +34,7 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     CourierService.listCouriers.mockResolvedValue([COURIER]);
-    CourierService.getCourierHistory.mockResolvedValue([
-      { timestamp: '2026-09-29T14:05:00', action: 'DESACTIVAR_MENSAJERO', details: 'status', actorName: 'Súper Usuario' },
-    ]);
+    CourierService.getCourierDeactivations.mockResolvedValue([]);
   });
 
   afterEach(() => cleanup());
@@ -46,6 +52,8 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
 
   it('al confirmar desactiva por id, marca Inactivo y muestra la auditoría del backend', async () => {
     CourierService.deactivateCourier.mockResolvedValue({ ...COURIER, status: 'INACTIVE' });
+    // Al montar aún no hay desactivaciones; tras desactivar, el backend ya la registró.
+    CourierService.getCourierDeactivations.mockResolvedValueOnce([]).mockResolvedValue([DEACTIVATION]);
     render(<MessengerFleetList />);
 
     fireEvent.click(await screen.findByRole('button', { name: 'Desactivar' }));
@@ -54,7 +62,27 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     await waitFor(() => expect(CourierService.deactivateCourier).toHaveBeenCalledWith(7));
     expect(await screen.findByText('Inactivo', { selector: 'button' })).toBeTruthy();
     expect(await screen.findByText(/Mensajero María Solano · 123456789/)).toBeTruthy();
-    expect(CourierService.getCourierHistory).toHaveBeenCalledWith(7);
+    expect(CourierService.getCourierDeactivations).toHaveBeenCalledTimes(2);
+  });
+
+  it('muestra al abrir la pantalla las desactivaciones guardadas aunque el mensajero ya esté activo', async () => {
+    // El mensajero fue desactivado y luego reactivado: la auditoría sigue en la base de datos.
+    CourierService.getCourierDeactivations.mockResolvedValue([DEACTIVATION]);
+    render(<MessengerFleetList />);
+
+    expect(await screen.findByText(/Mensajero María Solano · 123456789/)).toBeTruthy();
+    expect(screen.getByText('Desactivación')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Desactivar' })).toBeTruthy();
+  });
+
+  it('lista todas las desactivaciones guardadas, no solo la última', async () => {
+    CourierService.getCourierDeactivations.mockResolvedValue([
+      DEACTIVATION,
+      { ...DEACTIVATION, timestamp: '2026-09-28T09:00:00' },
+    ]);
+    render(<MessengerFleetList />);
+
+    await waitFor(() => expect(screen.getAllByText('Desactivación')).toHaveLength(2));
   });
 
   it('si el backend responde 409 muestra el motivo y no marca al mensajero como inactivo', async () => {
@@ -67,7 +95,8 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Sí, desactivar' }));
 
     expect(await screen.findByText(/tiene paquetes o entregas pendientes/)).toBeTruthy();
-    expect(CourierService.getCourierHistory).not.toHaveBeenCalled();
+    // Solo la carga inicial: una desactivación rechazada no vuelve a consultar la auditoría.
+    expect(CourierService.getCourierDeactivations).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Inactivo', { selector: 'button' })).toBeNull();
   });
 });
