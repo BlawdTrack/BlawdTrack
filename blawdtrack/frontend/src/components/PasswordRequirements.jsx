@@ -5,7 +5,7 @@ import { evaluatePasswordRules } from '../utils/passwordRules';
 // vivo con lo que el usuario escribe. La regla 4 (distinta de las últimas 3
 // contraseñas) se queda SIEMPRE en estado neutro: el cliente no puede saberlo.
 // Solo pasa a "no cumplida" cuando el propio backend la rechazó
-// (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
+// (`historyRejected`, tras un PASSWORD_REUSED).
 const OK_COLOR = '#2F7D4F';
 const ERROR_COLOR = '#C0392B';
 const NEUTRAL_TEXT = '#9E968D';
@@ -83,7 +83,7 @@ export function PasswordRequirements({ password, historyRejected = false }) {
         sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}
       >
         <Rule label="Mínimo 8 caracteres" state={results.length ? 'ok' : 'pending'} />
-        <Rule label="Al menos una mayúscula" state={results.uppercase ? 'ok' : 'pending'} />
+        <Rule label="Al menos una letra" state={results.letter ? 'ok' : 'pending'} />
         <Rule label="Al menos un número" state={results.number ? 'ok' : 'pending'} />
         <Rule
           label="Distinta de las últimas 3 contraseñas"

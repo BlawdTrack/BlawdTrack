@@ -11,7 +11,7 @@ export const MIN_PASSWORD_LENGTH = 8;
 export function evaluatePasswordRules(password) {
   return {
     length: password.length >= MIN_PASSWORD_LENGTH,
-    uppercase: /[A-ZÁÉÍÓÚÑ]/.test(password),
+    letter: /[A-Za-z]/.test(password),
     number: /\d/.test(password),
   };
 }
