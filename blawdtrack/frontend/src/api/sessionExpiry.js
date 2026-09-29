@@ -10,7 +10,7 @@ export const SESSION_EXPIRED_ERROR = {
   severity: 'warning',
 };
 
-// El 401 del login (CREDENCIALES_INVALIDAS) y los de password-reset NO son
+// El 401 del login (INVALID_CREDENTIALS) y los de password-reset NO son
 // sesión expirada: siguen mostrando su propio mensaje (T13).
 const EXCLUDED_URL_PARTS = ['/v1/auth/login', '/v1/auth/password-reset'];
 
@@ -38,7 +38,7 @@ function getSentAuthorization(config) {
  * Indica si un error de axios significa "sesión expirada".
  *
  * Solo cuenta como sesión expirada un 401 con code NO_AUTENTICADO (token ausente, inválido o vencido
- * en un endpoint protegido). Un 403 (ACCESO_DENEGADO, CUENTA_INACTIVA) no cierra la sesión.
+ * en un endpoint protegido). Un 403 (ACCESO_DENEGADO, ACCOUNT_INACTIVE) no cierra la sesión.
  * @param {import('axios').AxiosError} error Error de la petición fallida.
  * @returns {boolean}
  */

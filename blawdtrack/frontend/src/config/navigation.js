@@ -33,7 +33,7 @@ export const NAVIGATION_GROUPS = [
     title: 'Administradores',
     shortTitle: 'Admins',
     items: [
-      { id: 'admin-create', label: 'Crear administrador', path: null, roles: [ROLES.SUPER_USER] },
+      { id: 'admin-create', label: 'Crear administrador', path: ROUTES.ADMIN_CREATE, roles: [ROLES.SUPER_USER] },
       { id: 'admin-delete', label: 'Eliminar administrador', path: ROUTES.ADMIN_DELETE, roles: [ROLES.SUPER_USER] },
     ],
   },

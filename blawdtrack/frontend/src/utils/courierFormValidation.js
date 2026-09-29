@@ -1,6 +1,7 @@
 // UX-only validation for the courier registration form: required fields,
 // email format and a positive numeric weight. Business rules (document
-// format, uniqueness) live in the backend and are not duplicated here.
+// format per type, uniqueness) live in the backend (@ValidDocument on
+// CreateCourierRequest) and are not duplicated here.
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
 

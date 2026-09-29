@@ -57,7 +57,7 @@ class CourierCredentialsIntegrationTest {
             for (int i = 0; i < 2; i++) {
                 String email = "courier70e2e" + i + "@example.test";
                 String body = """
-                        {"documentId":"E2E70%d","fullName":"Mensajero prueba",
+                        {"documentId":"70000000%d","fullName":"Mensajero prueba",
                          "email":"%s","password":"ClaveElegidaPorCliente!",
                          "phone":"8888888%d","schedule":"Lunes a viernes","maxPackageWeightKg":20}
                         """.formatted(i, email, i);

@@ -98,7 +98,7 @@ flowchart LR
 | `auth.entity.PasswordResetToken`, `PasswordHistory` | Tablas `tokens_recuperacion_contrasena` e `historial_contrasenas`. |
 | `auth.repository.PasswordResetTokenRepository`, `PasswordHistoryRepository` | Acceso a datos. |
 | `auth.dto.PasswordResetRequestDTO`, `PasswordResetConfirmRequest`, `PasswordResetResponseDTO` | Contratos. |
-| `auth.exception.TokenRestablecimientoInvalidoException`, `ContrasenaReutilizadaException` | Errores de negocio (400). |
+| `auth.exception.InvalidResetTokenException`, `PasswordReusedException` | Errores de negocio (400). |
 
 ### Frontend
 

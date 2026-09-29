@@ -36,6 +36,17 @@ const normalizeAdministrator = (administrator) => {
 };
 
 /**
+ * Registra un administrador de ventas: `POST /api/v1/admins`.
+ * @param {{ nombreCompleto: string, numeroTelefono: string, correoElectronico: string,
+ *   contrasenaInicial: string, documentType: string, documentNumber: string }} adminData
+ *   Cuerpo esperado por `AdminRegistrationRequest`.
+ */
+export const registerAdministrator = async (adminData) => {
+  const response = await axiosClient.post(ADMINISTRATORS_PATH, adminData);
+  return response.data;
+};
+
+/**
  * Lista los administradores de ventas: `GET /api/v1/admins`.
  * @returns {Promise<Array<{ id: number, name: string, email: string, documentType: string,
  *   documentNumber: string, hasActiveSession: boolean }>>}
@@ -63,4 +74,14 @@ export const deleteAdministrator = async (documentType, documentNumber) => {
   await axiosClient.delete(
     `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}`
   );
+};
+
+// GET /api/v1/admins/audit-log: historial de creación/eliminación de
+// administradores (HU-006 / T06), persistido en el backend.
+export const getAdminAuditLog = async () => {
+  const response = await axiosClient.get(`${ADMINISTRATORS_PATH}/audit-log`);
+  if (!Array.isArray(response.data)) {
+    throw new Error('La respuesta del backend no contiene un historial de auditoría.');
+  }
+  return response.data;
 };

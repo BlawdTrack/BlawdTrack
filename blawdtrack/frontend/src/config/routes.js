@@ -11,6 +11,7 @@ export const ROUTES = {
   COURIER_CREATE: '/main-menu/couriers/new',
   COURIER_UPDATE: '/editar-mensajero',
   COURIER_DEACTIVATE: '/main-menu/couriers/deactivate',
+  ADMIN_CREATE: '/main-menu/admins/new',
   ADMIN_DELETE: '/main-menu/admins/delete',
   ROLES_PERMISSIONS: '/gestion-roles',
   // Inicios de los roles que no usan el menú principal (HU-001 T12).
