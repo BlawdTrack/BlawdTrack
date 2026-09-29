@@ -125,4 +125,10 @@ public class User {
         this.status = newStatus;
         this.tokenVersion++;
     }
+
+    /** Reemplaza el hash y sube {@code tokenVersion}, cerrando las sesiones abiertas con la contraseña anterior. */
+    public void changePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+        this.tokenVersion++;
+    }
 }

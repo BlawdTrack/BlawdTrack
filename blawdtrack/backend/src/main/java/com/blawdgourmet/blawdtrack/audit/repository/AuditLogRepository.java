@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.audit.repository;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
@@ -10,5 +11,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 /** Acceso al historial de auditoría (tabla {@code auditorias}). */
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 
-    List<AuditLog> findByActionInOrderByTimestampDesc(Collection<String> actions);
+    @EntityGraph(attributePaths = "actor")
+    List<AuditLog> findByUsuarioAfectadoIdAndActionInOrderByTimestampDescIdDesc(
+            Long affectedUserId, Collection<String> actions);
 }

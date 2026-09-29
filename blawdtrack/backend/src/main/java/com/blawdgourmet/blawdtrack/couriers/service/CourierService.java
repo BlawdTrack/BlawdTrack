@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
@@ -45,6 +47,14 @@ public class CourierService {
     private final ApplicationEventPublisher events;
     private final CourierUniquenessValidator uniquenessValidator;
     private final AuditService auditService;
+    private final AuditLogRepository auditLogs;
+    private final CourierDeactivationValidator deactivationValidator;
+
+    private static final List<String> COURIER_AUDIT_ACTIONS = List.of(
+            AuditAction.COURIER_UPDATED.getCode(),
+            AuditAction.COURIER_DEACTIVATED.getCode(),
+            AuditAction.COURIER_ACTIVATED.getCode(),
+            AuditAction.COURIER_PASSWORD_CHANGED.getCode());
 
     /**
      * Registra un mensajero: valida la unicidad, crea la cuenta activa con rol MENSAJERO y una
@@ -144,14 +154,9 @@ public class CourierService {
         couriers.saveAndFlush(courier);
 
         if (!details.isBlank()) {
-            var principal = (AuthenticatedUser) SecurityContextHolder
-                    .getContext()
-                    .getAuthentication()
-                    .getPrincipal();
-
             auditService.logAction(
                     AuditAction.COURIER_UPDATED,
-                    principal,
+                    currentPrincipal(),
                     user,
                     details
             );
@@ -160,7 +165,79 @@ public class CourierService {
         return CourierResponse.from(courier);
     }
 
-    /** Todos los mensajeros ordenados por nombre. */
+    /**
+     * Activa o desactiva el acceso del mensajero. {@link User#changeStatus} sube el
+     * {@code tokenVersion}, por lo que la sesión activa deja de ser válida en su
+     * siguiente solicitud. Desactivar exige que el mensajero no tenga asignaciones activas.
+     */
+    @Transactional
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public CourierResponse changeStatus(String id, UserStatus newStatus) {
+        var courier = resolveCourier(id);
+        var user = courier.getUser();
+
+        if (user.getStatus() == newStatus) {
+            return CourierResponse.from(courier);
+        }
+
+        if (newStatus == UserStatus.INACTIVE) {
+            deactivationValidator.validateCanDeactivate(courier.getId());
+        }
+
+        user.changeStatus(newStatus);
+        users.saveAndFlush(user);
+
+        auditService.logAction(
+                newStatus == UserStatus.INACTIVE
+                        ? AuditAction.COURIER_DEACTIVATED
+                        : AuditAction.COURIER_ACTIVATED,
+                currentPrincipal(),
+                user,
+                "status"
+        );
+
+        return CourierResponse.from(courier);
+    }
+
+    /**
+     * Define una nueva contraseña para el mensajero. Sube el {@code tokenVersion} (cierra su sesión activa)
+     * y audita el cambio sin registrar nunca la contraseña.
+     */
+    @Transactional
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public void changePassword(String id, String newPassword) {
+        var user = resolveCourier(id).getUser();
+
+        user.changePassword(passwordEncoder.encode(newPassword));
+        users.saveAndFlush(user);
+
+        auditService.logAction(
+                AuditAction.COURIER_PASSWORD_CHANGED,
+                currentPrincipal(),
+                user,
+                "password"
+        );
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public List<CourierHistoryEntry> history(String id) {
+        var user = resolveCourier(id).getUser();
+
+        return auditLogs.findByUsuarioAfectadoIdAndActionInOrderByTimestampDescIdDesc(
+                        user.getId(), COURIER_AUDIT_ACTIONS)
+                .stream()
+                .map(CourierHistoryEntry::from)
+                .toList();
+    }
+
+    private AuthenticatedUser currentPrincipal() {
+        return (AuthenticatedUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public List<CourierResponse> list() {
