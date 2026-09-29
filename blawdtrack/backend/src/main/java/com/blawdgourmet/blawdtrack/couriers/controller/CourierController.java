@@ -26,6 +26,7 @@ import com.blawdgourmet.blawdtrack.couriers.service.CourierHasActiveAssignmentsE
 import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
 import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,11 @@ public class CourierController {
     public CourierResponse changeStatus(@PathVariable String id,
                                         @Valid @RequestBody UpdateCourierStatusRequest request) {
         return service.changeStatus(id, request.status());
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    public CourierResponse deactivate(@PathVariable String id) {
+        return service.changeStatus(id, UserStatus.INACTIVE);
     }
 
     @GetMapping("/{id}/history")
