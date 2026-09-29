@@ -32,6 +32,7 @@ const SCREENS = {
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
   [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
+  [ROUTES.ROLES_PERMISSIONS]: 'Pantalla roles y permisos',
   [ROUTES.SALES_HOME]: 'Pantalla ventas',
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
   // Rutas de tu feature agregadas al formato de develop
