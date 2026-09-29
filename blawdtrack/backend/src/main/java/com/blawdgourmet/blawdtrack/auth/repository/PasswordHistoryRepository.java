@@ -10,4 +10,6 @@ import com.blawdgourmet.blawdtrack.users.model.User;
 public interface PasswordHistoryRepository extends JpaRepository<PasswordHistory, Long> {
 
     List<PasswordHistory> findTop2ByUserOrderByCreatedAtDesc(User user);
+
+    void deleteByUserId(Long userId);
 }

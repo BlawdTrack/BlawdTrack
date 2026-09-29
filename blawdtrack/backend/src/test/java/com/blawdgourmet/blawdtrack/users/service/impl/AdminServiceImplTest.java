@@ -39,6 +39,8 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
+import com.blawdgourmet.blawdtrack.users.service.AdminUniquenessValidator;
+import com.blawdgourmet.blawdtrack.users.service.UserRelatedRecordsCleaner;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceImplTest {
@@ -47,12 +49,15 @@ class AdminServiceImplTest {
     @Mock private RoleRepository roleRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private AuditService auditService;
+    @Mock private UserRelatedRecordsCleaner relatedRecordsCleaner;
     @Mock private AuditLogRepository auditLogRepository;
 
     private AdminServiceImpl service;
 
     @BeforeEach
     void setUp() {
+        service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService,
+                new AdminUniquenessValidator(userRepository), relatedRecordsCleaner);
         service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService, auditLogRepository);
         ReflectionTestUtils.setField(service, "jwtExpirationMs", 3_600_000L);
     }
