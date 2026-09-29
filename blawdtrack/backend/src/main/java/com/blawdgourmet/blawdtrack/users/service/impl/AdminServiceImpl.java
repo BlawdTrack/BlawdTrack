@@ -1,6 +1,5 @@
 package com.blawdgourmet.blawdtrack.users.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +32,7 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
 import com.blawdgourmet.blawdtrack.users.service.AdminUniquenessValidator;
+import com.blawdgourmet.blawdtrack.users.service.UserRelatedRecordsCleaner;
 import com.blawdgourmet.blawdtrack.users.validation.DocumentNormalizer;
 
 /**
@@ -52,28 +52,21 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
     private final AdminUniquenessValidator adminUniquenessValidator;
+    private final UserRelatedRecordsCleaner relatedRecordsCleaner;
 
-    public AdminServiceImpl(
-            UserRepository userRepository,
-            RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder,
-            AuditService auditService) {
-        this(userRepository, roleRepository, passwordEncoder, auditService,
-                new AdminUniquenessValidator(userRepository));
-    }
-
-    @Autowired
     public AdminServiceImpl(
             UserRepository userRepository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
             AuditService auditService,
-            AdminUniquenessValidator adminUniquenessValidator) {
+            AdminUniquenessValidator adminUniquenessValidator,
+            UserRelatedRecordsCleaner relatedRecordsCleaner) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditService = auditService;
         this.adminUniquenessValidator = adminUniquenessValidator;
+        this.relatedRecordsCleaner = relatedRecordsCleaner;
     }
 
     @Value("${security.jwt.expiration-ms}")
@@ -166,9 +159,7 @@ public class AdminServiceImpl implements AdminService {
                         && RoleName.SALES_ADMIN.equals(user.getRole().getName()))
                 .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
 
-        LocalDateTime now = LocalDateTime.now();
-        boolean hasActiveSession = admin.getLastLoginAt() != null
-                && now.isBefore(admin.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS));
+        boolean hasActiveSession = hasActiveSession(admin);
         boolean eligible = !hasActiveSession;
         String reason = eligible
                 ? null
@@ -204,6 +195,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         auditService.registrarEliminacionAdministrador(actor, user);
+        relatedRecordsCleaner.removeFor(user.getId());
         userRepository.delete(user);
         userRepository.flush();
 
@@ -211,9 +203,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private boolean hasActiveSession(User user) {
-        LocalDateTime now = LocalDateTime.now();
-        return user.getStatus() == UserStatus.ACTIVE
-                || (user.getLastLoginAt() != null
-                        && now.isBefore(user.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS)));
+        return user.getLastLoginAt() != null
+                && LocalDateTime.now().isBefore(user.getLastLoginAt().plus(jwtExpirationMs, ChronoUnit.MILLIS));
     }
 }

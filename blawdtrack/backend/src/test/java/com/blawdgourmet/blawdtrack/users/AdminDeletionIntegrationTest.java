@@ -1,25 +1,37 @@
 package com.blawdgourmet.blawdtrack.users;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
+import com.blawdgourmet.blawdtrack.auth.entity.PasswordHistory;
+import com.blawdgourmet.blawdtrack.auth.entity.PasswordResetToken;
+import com.blawdgourmet.blawdtrack.auth.repository.PasswordHistoryRepository;
+import com.blawdgourmet.blawdtrack.auth.repository.PasswordResetTokenRepository;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
+import com.blawdgourmet.blawdtrack.users.model.UserPermission;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
+import com.blawdgourmet.blawdtrack.users.repository.PermissionRepository;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
+import com.blawdgourmet.blawdtrack.users.repository.UserPermissionRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import jakarta.persistence.EntityManager;
@@ -41,6 +53,10 @@ class AdminDeletionIntegrationTest {
     @Autowired private RoleRepository roles;
     @Autowired private JwtService jwt;
     @Autowired private AuditLogRepository audits;
+    @Autowired private PermissionRepository permissions;
+    @Autowired private UserPermissionRepository userPermissions;
+    @Autowired private PasswordResetTokenRepository resetTokens;
+    @Autowired private PasswordHistoryRepository passwordHistory;
     @Autowired private EntityManager entityManager;
 
     private String bearerFor(String roleName) {
@@ -157,8 +173,57 @@ class AdminDeletionIntegrationTest {
     }
 
     @Test
+    void administradorActivoSinSesionSePuedeEliminar() throws Exception {
+        // Estar ACTIVE no implica tener una sesión: un administrador que nunca inició sesión no la tiene.
+        User admin = createAdmin("9-0000-0008", UserStatus.ACTIVE);
+
+        mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
+                        .header("Authorization", bearerFor(RoleName.SUPER_USER)))
+                .andExpect(status().isOk());
+
+        entityManager.clear();
+        assertThat(users.findById(admin.getId())).isEmpty();
+    }
+
+    @Test
+    void administradorCreadoPorLaApiConRegistrosRelacionadosSeEliminaYLaAuditoriaPermanece() throws Exception {
+        String token = bearerFor(RoleName.SUPER_USER);
+        mvc.perform(post("/api/v1/admins").header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana-delete@example.test","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"123456789"}
+                                """))
+                .andExpect(status().isCreated());
+        User admin = users.findByEmail("ana-delete@example.test").orElseThrow();
+        Permission permission = permissions.save(Permission.builder().code("PERMISO_ELIMINACION_PRUEBA").build());
+        userPermissions.save(UserPermission.builder().user(admin).permission(permission).allowed(true).build());
+        resetTokens.save(PasswordResetToken.builder().user(admin).tokenHash("hash")
+                .expirationDate(LocalDateTime.now().plusMinutes(15)).createdAt(LocalDateTime.now()).build());
+        passwordHistory.save(PasswordHistory.builder().user(admin).passwordHash("hash-anterior")
+                .createdAt(LocalDateTime.now()).build());
+        // La eliminación real ocurre en otra transacción: se parte de un contexto de persistencia limpio.
+        entityManager.flush();
+        entityManager.clear();
+
+        mvc.perform(delete(RUTA, DocumentType.CEDULA, "123456789").header("Authorization", token))
+                .andExpect(status().isOk());
+
+        entityManager.clear();
+        assertThat(users.findById(admin.getId())).isEmpty();
+        assertThat(userPermissions.findByUserId(admin.getId())).isEmpty();
+        assertThat(audits.findAll())
+                .filteredOn(audit -> "CREAR_ADMINISTRADOR".equals(audit.getAction()))
+                .singleElement()
+                .satisfies(audit -> assertThat(audit.getUsuarioAfectado()).isNull());
+        assertThat(audits.findAll())
+                .anySatisfy(audit -> assertThat(audit.getAction()).isEqualTo("ELIMINAR_ADMINISTRADOR"));
+    }
+
+    @Test
     void administradorConSesionActivaSeBloquea() throws Exception {
-        User admin = createAdmin("9-0000-0006", UserStatus.ACTIVE);
+        User admin = createAdmin("9-0000-0006", UserStatus.INACTIVE);
+        admin.setLastLoginAt(LocalDateTime.now());
+        users.saveAndFlush(admin);
 
         mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
