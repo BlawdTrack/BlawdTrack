@@ -62,3 +62,13 @@ export const deleteAdministrator = async (documentType, documentNumber) => {
     `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}`
   );
 };
+
+// GET /api/v1/admins/audit-log: historial de creación/eliminación de
+// administradores (HU-006 / T06), persistido en el backend.
+export const getAdminAuditLog = async () => {
+  const response = await axiosClient.get(`${ADMINISTRATORS_PATH}/audit-log`);
+  if (!Array.isArray(response.data)) {
+    throw new Error('La respuesta del backend no contiene un historial de auditoría.');
+  }
+  return response.data;
+};

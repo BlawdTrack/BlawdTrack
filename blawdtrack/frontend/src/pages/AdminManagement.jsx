@@ -15,10 +15,30 @@ import {
 } from '@mui/material';
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
-import { deleteAdministrator, getAdministrators } from '../services/AdminService';
+import { deleteAdministrator, getAdministrators, getAdminAuditLog } from '../services/AdminService';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+// Backend action codes (AuditServiceImpl / AdminServiceImpl) -> presentation.
+const AUDIT_ACTION_LABELS = {
+  CREAR_ADMINISTRADOR: { label: 'Creación', isCreation: true },
+  ELIMINAR_ADMINISTRADOR: { label: 'Eliminación', isCreation: false },
+};
+
+// Maps GET /v1/admins/audit-log rows to what the list below renders.
+const mapAuditLogEntry = (entry) => {
+  const meta = AUDIT_ACTION_LABELS[entry.action] || { label: entry.action, isCreation: false };
+  const when = new Date(entry.timestamp);
+  return {
+    id: entry.id,
+    date: `${when.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' })} · ${when.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}`,
+    action: meta.label,
+    isCreation: meta.isCreation,
+    details: entry.details,
+    role: 'Súper Usuario',
+  };
+};
 
 const CARD_SX = {
   borderRadius: '18px',
@@ -54,6 +74,17 @@ const AdminManagement = () => {
   const [searchDocumentNumber, setSearchDocumentNumber] = useState('');
   const [appliedFilter, setAppliedFilter] = useState(null);
 
+  const fetchAuditLog = async () => {
+    try {
+      const data = await getAdminAuditLog();
+      setAuditLogs(data.map(mapAuditLogEntry));
+    } catch (err) {
+      // The audit list is secondary to the admin list; a failure here does not
+      // block the page, it just leaves the "no hay registros" placeholder.
+      console.error('Error al cargar el historial de auditoría:', err);
+    }
+  };
+
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
@@ -69,6 +100,7 @@ const AdminManagement = () => {
     };
 
     fetchAdmins();
+    fetchAuditLog();
   }, []);
 
   const handleOpenModal = (admin) => {
@@ -121,14 +153,6 @@ const AdminManagement = () => {
 
       await deleteAdministrator(documentType, cedula);
 
-      const adminToDelete = admins.find(
-        (admin) =>
-          admin.documentNumber === cedula
-          || admin.identification === cedula
-          || admin.nationalId === cedula
-          || admin.id === cedula
-      );
-
       setAdmins((currentAdmins) =>
         currentAdmins.filter(
           (admin) =>
@@ -139,22 +163,9 @@ const AdminManagement = () => {
         )
       );
 
-      if (adminToDelete) {
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const timeStr = now.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
-
-        const newLog = {
-          id: Date.now(),
-          date: `${dateStr} · ${timeStr}`,
-          action: 'Eliminación',
-          details: `Administrador ${adminToDelete.name} - ${cedula}`,
-          role: 'Súper Usuario',
-          isCreation: false,
-        };
-
-        setAuditLogs((currentLogs) => [newLog, ...currentLogs]);
-      }
+      // The backend already wrote the audit entry (registrarEliminacionAdministrador);
+      // refetch instead of guessing its shape locally.
+      fetchAuditLog();
 
       closeDeleteModal();
       setToastOpen(true);
