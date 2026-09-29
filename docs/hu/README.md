@@ -17,7 +17,7 @@ Un documento por historia. Todos siguen la misma estructura:
 | [HU004](HU004-edicion-de-mensajeros.md) | Edición de mensajeros | ⚠️ Estado de acceso e historial solo en pantalla | `fix/hu004/criterios-aceptacion/silesky` (#6) |
 | [HU005](HU005-desactivacion-de-mensajeros.md) | Desactivación de mensajeros | ❌ El endpoint no existe | `fix/hu005/criterios-aceptacion/silesky` (#7) |
 | [HU006](HU006-creacion-de-administradores.md) | Creación de administradores | ✅ Backend; ⏳ formulario en ramas `t04`/`t05` | — |
-| [HU007](HU007-edicion-de-administradores.md) | Edición de administradores | Sin implementación | — |
+| [HU007](HU007-edicion-de-administradores.md) | Edición de administradores | Siguiente sprint (fuera del alcance actual) | — |
 | [HU008](HU008-eliminacion-de-administradores.md) | Eliminación de administradores | ⚠️ No se puede eliminar en la práctica | `fix/hu008/criterios-aceptacion/silesky` (#22) |
 | [HU009](HU009-roles-y-permisos.md) | Roles y permisos | ⚠️ Solo por rol; la pantalla no guarda | `fix/hu009/criterios-aceptacion/silesky` (#13) |
 
