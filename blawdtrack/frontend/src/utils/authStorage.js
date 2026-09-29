@@ -4,6 +4,18 @@
 // equipo ya tiene funcionando. El resto del perfil (nombre, rol, permisos)
 // se guarda junto en una sola clave, en vez de dejar varias claves sueltas
 // en localStorage.
+//
+// Riesgo aceptado (HU-001): el JWT vive en localStorage, legible por
+// cualquier script que corra en la página (XSS), a diferencia de una cookie
+// httpOnly. Se eligió así porque este SPA no tiene backend-for-frontend que
+// pueda setear/leer una cookie httpOnly junto con la API real (que vive en
+// otro origen); migrar exigiría rediseñar todo el flujo de auth (CSRF,
+// logout con endpoint que borre la cookie, detección de expiración sin
+// poder leer el payload del token en el cliente). Mitigación real hoy:
+// ningún componente usa dangerouslySetInnerHTML, .innerHTML, eval() ni
+// libs de render de HTML/markdown (auditado en esta misma tarea) — sin una
+// vía de inyección, el token no es exfiltrable. Si se agrega alguna de esas
+// vías más adelante, hay que sanitizar esa entrada o reabrir esta decisión.
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'blawdtrack_user';

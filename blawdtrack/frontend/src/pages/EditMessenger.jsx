@@ -26,18 +26,7 @@ import { getInitials } from '../utils/getInitials';
 import Toast from '../components/Toast';
 import StatusMessage from '../components/StatusMessage';
 import './EditMessenger.css';
-
-const DOCUMENT_TYPE_OPTIONS = [
-  { value: 'CEDULA', label: 'Cédula' },
-  { value: 'DIMEX', label: 'DIMEX' },
-  { value: 'PASAPORTE', label: 'Pasaporte' },
-];
-
-const DOCUMENT_PLACEHOLDERS = {
-  CEDULA: 'Ej. 1-2345-6789',
-  DIMEX: 'Ej. 155812345678',
-  PASAPORTE: 'Ej. A12345678',
-};
+import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 

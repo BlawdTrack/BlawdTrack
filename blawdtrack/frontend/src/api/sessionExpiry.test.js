@@ -33,7 +33,7 @@ describe('sessionExpiry - qué cuenta como sesión expirada (T17)', () => {
   });
 
   it('el 401 del login (credenciales incorrectas) NO cuenta', () => {
-    const error = buildError({ code: 'CREDENCIALES_INVALIDAS', url: '/v1/auth/login' });
+    const error = buildError({ code: 'INVALID_CREDENTIALS', url: '/v1/auth/login' });
     expect(isSessionExpiredResponse(error)).toBe(false);
   });
 
@@ -44,9 +44,9 @@ describe('sessionExpiry - qué cuenta como sesión expirada (T17)', () => {
     ).toBe(false);
   });
 
-  it('un 403 (ACCESO_DENEGADO o CUENTA_INACTIVA) NO cuenta', () => {
+  it('un 403 (ACCESO_DENEGADO o ACCOUNT_INACTIVE) NO cuenta', () => {
     expect(isSessionExpiredResponse(buildError({ status: 403, code: 'ACCESO_DENEGADO' }))).toBe(false);
-    expect(isSessionExpiredResponse(buildError({ status: 403, code: 'CUENTA_INACTIVA' }))).toBe(false);
+    expect(isSessionExpiredResponse(buildError({ status: 403, code: 'ACCOUNT_INACTIVE' }))).toBe(false);
   });
 
   it('un 401 con otro code, o sin code, NO cuenta', () => {
@@ -151,7 +151,7 @@ describe('axiosClient - interceptor de respuesta (T17)', () => {
   it('el 401 del login (credenciales incorrectas) no avisa y el error llega al llamador', async () => {
     const handler = vi.fn();
     unregister = setSessionExpiredHandler(handler);
-    respondWith(401, 'CREDENCIALES_INVALIDAS');
+    respondWith(401, 'INVALID_CREDENTIALS');
 
     await expect(axiosClient.post('/v1/auth/login', {})).rejects.toMatchObject({
       response: { status: 401 },
