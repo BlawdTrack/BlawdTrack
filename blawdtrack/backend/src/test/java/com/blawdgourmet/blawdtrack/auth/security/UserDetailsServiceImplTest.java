@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.auth.security;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
+import com.blawdgourmet.blawdtrack.users.repository.UserPermissionRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,9 @@ class UserDetailsServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserPermissionRepository userPermissionRepository;
 
     @InjectMocks
     private UserDetailsServiceImpl userDetailsService;

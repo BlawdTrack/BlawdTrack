@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
 import com.blawdgourmet.blawdtrack.users.model.User;
+import com.blawdgourmet.blawdtrack.users.repository.UserPermissionRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final UserPermissionRepository userPermissionRepository;
 
     /**
      * Satisface la Task #52 / CU-001: consulta del usuario mediante el correo
@@ -37,6 +39,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
-        return new UserPrincipal(user);
+        return new UserPrincipal(user, userPermissionRepository.findWithPermissionByUserId(user.getId()));
     }
 }
