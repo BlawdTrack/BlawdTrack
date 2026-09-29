@@ -56,6 +56,21 @@ export const updateCourier = async (idCard, courierData) => {
   }
 };
 
+export const updateCourierStatus = async (id, status) => {
+  const response = await axiosClient.patch(
+    `/v1/couriers/${encodeURIComponent(id)}/status`,
+    { status }
+  );
+  return response.data;
+};
+
+export const getCourierHistory = async (id) => {
+  const response = await axiosClient.get(
+    `/v1/couriers/${encodeURIComponent(id)}/history`
+  );
+  return response.data;
+};
+
 export const getCourierByDocumentNumber = async (documentNumber) => {
   try {
     const response = await axiosClient.get(

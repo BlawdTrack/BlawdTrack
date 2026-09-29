@@ -12,7 +12,9 @@ vi.mock('../hooks/useAuth', () => ({
 vi.mock('../services/CourierService', () => ({
   listCouriers: vi.fn(),
   getCourierByCedula: vi.fn(),
-  updateCourier: vi.fn()
+  updateCourier: vi.fn(),
+  updateCourierStatus: vi.fn(),
+  getCourierHistory: vi.fn().mockResolvedValue([])
 }));
 
 describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
