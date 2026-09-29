@@ -1,8 +1,8 @@
 package com.blawdgourmet.blawdtrack.auth.exception;
 
-public class ContrasenaReutilizadaException extends RuntimeException {
+public class PasswordReusedException extends RuntimeException {
 
-    public ContrasenaReutilizadaException() {
+    public PasswordReusedException() {
         super("La nueva contraseña no puede coincidir con las últimas contraseñas utilizadas.");
     }
 }

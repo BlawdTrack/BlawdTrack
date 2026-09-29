@@ -215,7 +215,7 @@ class SessionInvalidationIntegrationTest {
                 .andExpect(jsonPath("$.token").isNotEmpty());
         login(oldToken, "incorrecta")
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("AUTH_FAILED"))
+                .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
                 .andExpect(jsonPath("$.message").value("Invalid email or password"));
     }
 

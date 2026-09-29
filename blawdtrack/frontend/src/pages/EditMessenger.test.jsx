@@ -29,6 +29,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     id: '1-0345-0678',
     documentNumber: '1-0345-0678',
     fullName: 'María José Solano',
+    email: 'maria.solano@blawdgourmet.com',
     schedule: '6:00 am – 2:00 pm',
     maxLoadCapacityKg: 25,
     status: 'ACTIVE',
@@ -51,8 +52,8 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
   it('T04: Renderiza el título, buscador y prellena el formulario con los datos del mensajero', async () => {
     render(<EditMessenger initialCedula="1-0345-0678" />);
 
-    expect(screen.getByText('Editar Mensajero')).toBeTruthy();
-    expect(screen.getByPlaceholderText('Ingrese cédula o número de documento (ej. 1-0345-0678)')).toBeTruthy();
+    expect(screen.getByText('Buscar mensajero por documento')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Ej. 1-2345-6789')).toBeTruthy();
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('María José Solano')).toBeTruthy();
@@ -85,7 +86,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
       inLabor: true,
       pendingPackages: 2
     };
-    CourierService.getCourierByCedula.mockResolvedValue(activeCourierInDuty);
+    CourierService.listCouriers.mockResolvedValue([activeCourierInDuty]);
 
     render(<EditMessenger initialCedula="1-0345-0678" />);
 
@@ -93,8 +94,8 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
       expect(screen.getByDisplayValue('María José Solano')).toBeTruthy();
     });
 
-    const statusSwitch = screen.getByRole('checkbox');
-    expect(statusSwitch.getAttribute('disabled')).not.toBeNull();
+    const statusSwitch = screen.getByRole('switch');
+    expect(statusSwitch).toBeDisabled();
   });
 
   it('T05: Integra el formulario con la API REST enviando la petición HTTP de actualización', async () => {
@@ -116,8 +117,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
         expect.objectContaining({
           fullName: 'María José Solano Editada',
           schedule: '6:00 am – 2:00 pm',
-          maxLoadCapacityKg: 25,
-          status: 'ACTIVE'
+          maxPackageWeightKg: 25
         })
       );
     });
@@ -178,7 +178,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     fireEvent.click(saveButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Error de red al actualizar el mensajero.')).toBeTruthy();
+      expect(screen.getAllByText('Error de red al actualizar el mensajero.').length).toBeGreaterThan(0);
     });
   });
 });

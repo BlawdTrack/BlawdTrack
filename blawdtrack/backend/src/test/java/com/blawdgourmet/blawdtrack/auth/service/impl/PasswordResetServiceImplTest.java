@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.auth.service.impl;
 
 import com.blawdgourmet.blawdtrack.auth.entity.PasswordResetToken;
 import com.blawdgourmet.blawdtrack.auth.repository.PasswordResetTokenRepository;
+import com.blawdgourmet.blawdtrack.auth.service.EmailService;
 import com.blawdgourmet.blawdtrack.auth.service.PasswordResetResult;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -13,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -40,6 +42,9 @@ class PasswordResetServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private PasswordResetServiceImpl passwordResetService;
@@ -79,10 +84,23 @@ class PasswordResetServiceImplTest {
         PasswordResetToken saved = captor.getValue();
         assertThat(saved.getUser()).isEqualTo(user);
         assertThat(saved.getTokenHash()).isEqualTo("hash-simulado");
-        assertThat(saved.isUsado()).isFalse();
-        assertThat(saved.getFechaExpiracion()).isAfter(LocalDateTime.now());
+        assertThat(saved.isUsed()).isFalse();
+        assertThat(saved.getExpirationDate()).isAfter(LocalDateTime.now());
         // El valor plano nunca se guarda: solo se persiste su hash.
         assertThat(saved.getTokenHash()).isNotEqualTo(result.rawToken());
+        verify(emailService).sendEmailWithToken("genesis@blawdtrack.com", result.rawToken());
+    }
+
+    @Test
+    void requestPasswordReset_siFallaElEnvioDelCorreo_noPropagaElError() {
+        User user = buildUser(UserStatus.ACTIVE);
+        when(userRepository.findByEmail("genesis@blawdtrack.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(any())).thenReturn("hash-simulado");
+        doThrow(new MailSendException("smtp caido")).when(emailService).sendEmailWithToken(any(), any());
+
+        PasswordResetResult result = passwordResetService.requestPasswordReset("genesis@blawdtrack.com");
+
+        assertThat(result.tokenGenerated()).isTrue();
     }
 
     @Test
@@ -94,6 +112,7 @@ class PasswordResetServiceImplTest {
         assertThat(result.tokenGenerated()).isFalse();
         assertThat(result.rawToken()).isNull();
         verify(passwordResetTokenRepository, never()).save(any());
+        verifyNoInteractions(emailService);
     }
 
     @Test
@@ -105,5 +124,6 @@ class PasswordResetServiceImplTest {
 
         assertThat(result.tokenGenerated()).isFalse();
         verify(passwordResetTokenRepository, never()).save(any());
+        verifyNoInteractions(emailService);
     }
 }
