@@ -13,19 +13,7 @@ import { validateCourierForm } from '../utils/courierFormValidation';
 import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
 import { StatusMessage } from '../components/StatusMessage';
-
-const DOCUMENT_TYPE_OPTIONS = [
-  { value: 'CEDULA', label: 'Cédula' },
-  { value: 'DIMEX', label: 'DIMEX' },
-  { value: 'PASAPORTE', label: 'Pasaporte' }
-];
-
-// Example shown in the number field, so the expected format is clear per type.
-const DOCUMENT_PLACEHOLDERS = {
-  CEDULA: 'Ej. 1-2345-6789',
-  DIMEX: 'Ej. 155812345678',
-  PASAPORTE: 'Ej. A12345678'
-};
+import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 // On phones the form uses 2 columns; wide fields span both.
 const SPAN_2_SX = { gridColumn: { xs: 'span 2', md: 'auto' } };
