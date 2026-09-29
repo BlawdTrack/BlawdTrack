@@ -120,3 +120,7 @@ sequenceDiagram
   audita `ACTIVAR_MENSAJERO` / `DESACTIVAR_MENSAJERO`.
 - `GET /api/v1/couriers/{id}/history`: historial con fecha, hora, campos y autor; la pantalla lo lee del
   backend en lugar de armarlo en memoria.
+- El historial también incluye el alta (`CREAR_MENSAJERO`, detalle `created`), registrada por
+  `CourierService.register` en la misma transacción. Como el resto de entradas, no guarda valores personales.
+- La pantalla recarga el historial aunque falle un paso posterior al guardado de datos o contraseña (por
+  ejemplo el cambio de estado con envíos activos) y no reenvía lo que ya se guardó.

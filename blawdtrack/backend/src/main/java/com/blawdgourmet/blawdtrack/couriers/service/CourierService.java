@@ -51,6 +51,7 @@ public class CourierService {
     private final CourierDeactivationValidator deactivationValidator;
 
     private static final List<String> COURIER_AUDIT_ACTIONS = List.of(
+            AuditAction.COURIER_CREATED.getCode(),
             AuditAction.COURIER_UPDATED.getCode(),
             AuditAction.COURIER_DEACTIVATED.getCode(),
             AuditAction.COURIER_ACTIVATED.getCode(),
@@ -103,6 +104,14 @@ public class CourierService {
                 .schedule(request.schedule())
                 .maxPackageWeightKg(request.maxPackageWeightKg())
                 .build());
+
+        // Como el resto del historial, el detalle no lleva datos personales: solo indica el alta.
+        auditService.logAction(
+                AuditAction.COURIER_CREATED,
+                currentPrincipal(),
+                user,
+                "created"
+        );
 
         events.publishEvent(new CourierRegisteredEvent(
                 user.getId(),

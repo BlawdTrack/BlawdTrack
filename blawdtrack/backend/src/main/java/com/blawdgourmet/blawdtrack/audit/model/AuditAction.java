@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum AuditAction {
 
+    COURIER_CREATED("CREAR_MENSAJERO"),
     COURIER_UPDATED("ACTUALIZAR_MENSAJERO"),
     COURIER_DEACTIVATED("DESACTIVAR_MENSAJERO"),
     COURIER_ACTIVATED("ACTIVAR_MENSAJERO"),

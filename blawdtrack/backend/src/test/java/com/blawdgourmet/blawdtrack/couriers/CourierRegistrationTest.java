@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.couriers;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.auth.service.EmailService;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -57,6 +59,9 @@ class CourierRegistrationTest {
 
     @Autowired
     private RoleRepository roles;
+
+    @Autowired
+    private AuditLogRepository auditLogs;
 
     @MockitoSpyBean
     private CourierRepository couriers;
@@ -99,6 +104,36 @@ class CourierRegistrationTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
+    }
+
+    @Test
+    void registrarUnMensajeroDejaUnRegistroDeCreacionSinDatosPersonalesYApareceEnElHistorial()
+            throws Exception {
+        var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
+
+        register(token, BODY).andExpect(status().isCreated());
+
+        var created = users.findByEmail("courier69@example.com").orElseThrow();
+        var actor = users.findByEmail("actor69@example.com").orElseThrow();
+        var records = auditLogs.findAll().stream()
+                .filter(log -> log.getUsuarioAfectado() != null
+                        && created.getId().equals(log.getUsuarioAfectado().getId())
+                        && "CREAR_MENSAJERO".equals(log.getAction()))
+                .toList();
+        assertThat(records).hasSize(1);
+        assertThat(records.get(0).getActor().getId()).isEqualTo(actor.getId());
+        assertThat(records.get(0).getTimestamp()).isNotNull();
+        // El detalle no lleva datos personales ni la contraseña temporal.
+        assertThat(records.get(0).getDetails()).isEqualTo("created");
+
+        var courierId = couriers.findByUserId(created.getId()).orElseThrow().getId();
+        mvc.perform(get("/api/v1/couriers/" + courierId + "/history")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].action").value("CREAR_MENSAJERO"))
+                .andExpect(jsonPath("$[0].details").value("created"))
+                .andExpect(jsonPath("$[0].actorName").value("Actor"));
     }
 
     @Test
@@ -545,6 +580,8 @@ class CourierRegistrationTest {
 
             verifyNoMoreInteractions(emailService);
         } finally {
+            // El alta deja un registro de auditoría que referencia a la cuenta: se borra antes que ella.
+            auditLogs.deleteAll();
             users.findByEmail("courier69@example.com")
                     .ifPresent(user -> {
                         couriers.findByUserId(user.getId())
