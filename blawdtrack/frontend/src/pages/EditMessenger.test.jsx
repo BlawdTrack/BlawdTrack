@@ -214,6 +214,27 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     });
   });
 
+  it('T04: Si falla el cambio de estado tras guardar los datos, el historial se recarga igualmente', async () => {
+    CourierService.updateCourierStatus.mockRejectedValue({
+      response: { data: { message: 'El mensajero tiene envíos activos' } }
+    });
+    const user = userEvent.setup();
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
+    await waitFor(() => expect(CourierService.getCourierHistory).toHaveBeenCalled());
+    const historyCallsBefore = CourierService.getCourierHistory.mock.calls.length;
+
+    fireEvent.change(screen.getByDisplayValue('María José Solano'), { target: { value: 'María José Editada' } });
+    await user.click(screen.getByRole('switch'));
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => {
+      expect(CourierService.updateCourier).toHaveBeenCalled();
+      expect(CourierService.updateCourierStatus).toHaveBeenCalled();
+      expect(CourierService.getCourierHistory.mock.calls.length).toBeGreaterThan(historyCallsBefore);
+    });
+  });
+
   it('T06: Muestra notificación de éxito (Toast) tras guardar los cambios correctamente', async () => {
     render(<EditMessenger initialCedula="1-0345-0678" />);
 

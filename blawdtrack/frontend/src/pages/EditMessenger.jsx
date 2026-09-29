@@ -351,6 +351,10 @@ export function EditMessenger({ initialCedula = '' }) {
     const statusChanged = formData.status !== initialFormValues.status;
     const passwordChanged = Boolean(formData.password);
 
+    // Pasos que el backend ya guardó (y registró en el historial) aunque un paso posterior falle.
+    let dataSaved = false;
+    let passwordSaved = false;
+
     try {
       if (dataChanged) {
         await updateCourier(idCard, {
@@ -360,11 +364,13 @@ export function EditMessenger({ initialCedula = '' }) {
           schedule: formData.schedule,
           maxPackageWeightKg: Number(formData.maxLoadCapacityKg)
         });
+        dataSaved = true;
       }
 
       // El backend guarda la contraseña cifrada, cierra la sesión del mensajero y la registra en el historial.
       if (passwordChanged) {
         await updateCourierPassword(currentCourier.id, formData.password);
+        passwordSaved = true;
       }
 
       // Criterio de aceptación 1: el backend cierra la sesión activa al cambiar el estado de acceso.
@@ -405,6 +411,35 @@ export function EditMessenger({ initialCedula = '' }) {
         severity: 'success'
       });
     } catch (err) {
+      // Si un paso anterior ya quedó guardado, la pantalla y el historial deben reflejarlo igualmente:
+      // el historial se recarga y no se vuelve a enviar lo ya guardado (p. ej. la contraseña).
+      if (dataSaved || passwordSaved) {
+        loadHistory(currentCourier.id);
+        loadCouriersList();
+        if (passwordSaved) {
+          setFormData((prev) => ({ ...prev, password: '' }));
+        }
+        if (dataSaved) {
+          const savedData = {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            schedule: formData.schedule,
+            scheduleStart: formData.scheduleStart,
+            scheduleEnd: formData.scheduleEnd,
+            maxLoadCapacityKg: formData.maxLoadCapacityKg
+          };
+          setInitialFormValues((prev) => ({ ...prev, ...savedData }));
+          setCurrentCourier((prev) => ({
+            ...prev,
+            fullName: savedData.fullName,
+            email: savedData.email,
+            phone: savedData.phone,
+            schedule: savedData.schedule,
+            maxPackageWeightKg: Number(savedData.maxLoadCapacityKg)
+          }));
+        }
+      }
       const errorMessage = err.response?.data?.message || err.message || 'Error al actualizar la información del mensajero.';
       setUpdateError(errorMessage);
       setToast({
