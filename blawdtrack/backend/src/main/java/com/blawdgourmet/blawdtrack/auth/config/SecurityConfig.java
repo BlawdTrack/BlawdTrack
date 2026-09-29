@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.auth.config;
 
+import com.blawdgourmet.blawdtrack.auth.security.HttpsEnforcementFilter;
 import com.blawdgourmet.blawdtrack.auth.security.JwtAuthenticationFilter;
 import com.blawdgourmet.blawdtrack.auth.security.RestAccessDeniedHandler;
 import com.blawdgourmet.blawdtrack.auth.security.RestAuthenticationEntryPoint;
@@ -31,6 +32,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final HttpsEnforcementFilter httpsEnforcementFilter;
     private final UserDetailsService userDetailsService;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
@@ -84,6 +86,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Antes que todo lo demás: si la petición debe rechazarse por venir en
+                // HTTP plano, ni siquiera llega a evaluarse como pública o protegida.
+                .addFilterBefore(httpsEnforcementFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 

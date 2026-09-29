@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
@@ -47,4 +48,10 @@ public interface AdminService {
      */
     AdminDeletionResponse deleteAdministrator(
             DocumentType documentType, String documentNumber, AuthenticatedUser actor);
+
+    /**
+     * Lists the audit trail of administrator creations and deletions (HU-006 / T06),
+     * newest first.
+     */
+    List<AdminAuditLogResponse> getAuditLog();
 }

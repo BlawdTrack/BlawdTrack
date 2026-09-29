@@ -15,32 +15,18 @@ const INACTIVE = {
   severity: 'warning',
 };
 
-describe('getLoginError con el backend vivo (blawdtrack/, code AUTH_FAILED)', () => {
-  it('401 AUTH_FAILED con "Invalid email or password" → credenciales incorrectas', () => {
-    expect(getLoginError(httpError(401, 'AUTH_FAILED', 'Invalid email or password'))).toEqual(CREDENTIALS);
+describe('getLoginError con el contrato de AuthController (codes en inglés)', () => {
+  it('401 INVALID_CREDENTIALS → credenciales incorrectas', () => {
+    expect(getLoginError(httpError(401, 'INVALID_CREDENTIALS', 'Invalid email or password'))).toEqual(CREDENTIALS);
   });
 
-  it('401 AUTH_FAILED con "The account is inactive" → cuenta inactiva (ámbar)', () => {
-    expect(getLoginError(httpError(401, 'AUTH_FAILED', 'The account is inactive'))).toEqual(INACTIVE);
-  });
-
-  it('401 AUTH_FAILED sin mensaje → credenciales incorrectas (no revela nada más)', () => {
-    expect(getLoginError(httpError(401, 'AUTH_FAILED'))).toEqual(CREDENTIALS);
+  it('403 ACCOUNT_INACTIVE → cuenta inactiva (ámbar)', () => {
+    expect(getLoginError(httpError(403, 'ACCOUNT_INACTIVE', 'The account is inactive'))).toEqual(INACTIVE);
   });
 
   it('el mensaje de credenciales no indica cuál dato falló', () => {
-    const { message } = getLoginError(httpError(401, 'AUTH_FAILED', 'Invalid email or password'));
+    const { message } = getLoginError(httpError(401, 'INVALID_CREDENTIALS', 'Invalid email or password'));
     expect(message.toLowerCase()).not.toMatch(/solo el correo|solo la contraseña|el correo no existe/);
-  });
-});
-
-describe('getLoginError con los códigos del contrato original', () => {
-  it('401 CREDENCIALES_INVALIDAS → credenciales incorrectas', () => {
-    expect(getLoginError(httpError(401, 'CREDENCIALES_INVALIDAS'))).toEqual(CREDENTIALS);
-  });
-
-  it('403 CUENTA_INACTIVA → cuenta inactiva (ámbar)', () => {
-    expect(getLoginError(httpError(403, 'CUENTA_INACTIVA'))).toEqual(INACTIVE);
   });
 
   it('respaldo por estado HTTP cuando no llega code', () => {
