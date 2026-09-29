@@ -35,6 +35,14 @@ const normalizeAdministrator = (administrator) => {
   };
 };
 
+// Payload shape expected by POST /api/v1/admins (AdminRegistrationRequest):
+// { nombreCompleto, numeroTelefono, correoElectronico, contrasenaInicial,
+//   documentType, documentNumber }.
+export const registerAdministrator = async (adminData) => {
+  const response = await axiosClient.post(ADMINISTRATORS_PATH, adminData);
+  return response.data;
+};
+
 export const getAdministrators = async () => {
   const response = await axiosClient.get(ADMINISTRATORS_PATH);
   const payload = response.data;
