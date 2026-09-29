@@ -65,7 +65,7 @@ describe('AuthContext - sesión expirada por 401 (T17)', () => {
 
     act(() => {
       handleUnauthorizedResponse({
-        response: { status: 401, data: { code: 'CREDENCIALES_INVALIDAS' } },
+        response: { status: 401, data: { code: 'INVALID_CREDENTIALS' } },
         config: { url: '/v1/auth/login', headers: { Authorization: 'Bearer token-vigente' } },
       });
     });
