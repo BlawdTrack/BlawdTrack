@@ -140,3 +140,23 @@ flowchart LR
 - El frontend se alinea con el backend: letras y números, sin exigir mayúscula.
 - Nombres de clases y métodos en inglés (`InvalidResetTokenException`, `PasswordReusedException`,
   `findActiveForUpdate`); los `code` de error se mantienen en español porque el frontend los consume.
+
+## Restablecer la propia contraseña con la sesión iniciada
+
+Además de la recuperación pública del login, cualquier rol autenticado (Super Usuario, Administrador de
+Ventas y Mensajero) puede restablecer **su propia** contraseña:
+
+- **Backend:** `POST /api/v1/auth/password-reset/request-own` (exige sesión, cualquier rol). No recibe
+  correo: usa el de la cuenta autenticada, así que nadie puede pedir el enlace de otra cuenta. Borra los
+  enlaces anteriores de esa cuenta y genera uno nuevo. Si el correo no puede enviarse responde
+  `503 CORREO_NO_ENVIADO` y no deja ningún token guardado; a diferencia de la recuperación pública, aquí no
+  hay riesgo de enumerar correos y el fallo se le informa al usuario.
+- **Frontend:** la pantalla `OwnPasswordResetPage` muestra el correo de la cuenta y un botón "Enviarme el
+  enlace", sin campo de correo. El Super Usuario entra desde el menú lateral ("Restablecer contraseña"); el
+  Administrador de Ventas y el Mensajero, desde el botón de su pantalla de inicio
+  (`/ventas/restablecer-contrasena` y `/mensajero/restablecer-contrasena`).
+- El enlace del correo lleva a `/recovery?token=...`, la misma pantalla de nueva contraseña de la
+  recuperación pública, y vence a los 15 minutos.
+- **Requisito de entorno:** el correo solo sale si el backend tiene un servidor SMTP configurado
+  (`MAIL_HOST`, `MAIL_PORT`, ... o el perfil `brevo`). Con el valor por defecto (`localhost:1025`) y sin un
+  servidor escuchando, la pantalla muestra el error de envío.

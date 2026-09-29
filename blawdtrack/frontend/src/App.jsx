@@ -9,6 +9,7 @@ import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
+import OwnPasswordResetPage from './pages/OwnPasswordResetPage';
 import EditMessenger from './pages/EditMessenger';
 import RoleAccessManagement from './pages/RoleAccessManagement'; // Faltaba en tu bloque pero develop lo exige
 import { MessengerFleetList } from './components/MessengerFleetList';
@@ -56,15 +57,6 @@ function PasswordRecoveryRoute() {
   return <PasswordRecoveryRequestPage onBackToLogin={() => navigate(ROUTES.LOGIN)} />;
 }
 
-// Mismo flujo de PasswordRecoveryRoute, pero para un usuario ya logueado
-// (sidebar "Restablecer contraseña"): vuelve al menú principal en vez de
-// al login.
-function OwnPasswordResetRoute() {
-  const navigate = useNavigate();
-
-  return <PasswordRecoveryRequestPage onBackToLogin={() => navigate(ROUTES.MAIN_MENU)} />;
-}
-
 // T05: destino del enlace del correo. "/recovery?token=..." es el valor por
 // defecto de MAIL_LINK_URL en el backend (pendiente de confirmar con ellos).
 function NewPasswordRoute() {
@@ -102,7 +94,7 @@ function App() {
         {/* Mantenemos el MainMenuLayout de develop para que tu pantalla tenga menú */}
         <Route element={<MainMenuLayout />}>
           <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
-          <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetRoute />} />
+          <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
           <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
           <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
           <Route path={ROUTES.ADMIN_CREATE} element={<AdminRegistrationPage />} />
@@ -117,10 +109,12 @@ function App() {
 
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
         <Route path={ROUTES.SALES_HOME} element={<SalesHomePage />} />
+        <Route path={ROUTES.SALES_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
       </Route>
       
       <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
         <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
+        <Route path={ROUTES.COURIER_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
       </Route>
     </Routes>
   );

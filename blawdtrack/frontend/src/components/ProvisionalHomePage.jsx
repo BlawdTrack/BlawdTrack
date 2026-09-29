@@ -1,6 +1,7 @@
 import { Box, Container, Paper, Typography, Button, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getPasswordResetRoute } from '../utils/roleRoutes';
 
 // Pantalla de inicio mínima para roles que todavía no tienen su panel real
 // (T12). SalesHomePage y CourierHomePage la usan; cuando HU-010+/HU-022
@@ -12,6 +13,8 @@ import { useAuth } from '../hooks/useAuth';
 export function ProvisionalHomePage({ title, description }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  // Cada rol restablece su propia contraseña desde su inicio.
+  const passwordResetRoute = getPasswordResetRoute(user?.role);
 
   const handleLogout = () => {
     logout();
@@ -33,9 +36,16 @@ export function ProvisionalHomePage({ title, description }) {
           <Typography sx={{ mb: 3 }}>
             <strong>Rol:</strong> {user?.role}
           </Typography>
-          <Button variant="outlined" onClick={handleLogout}>
-            Cerrar sesión
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+            {passwordResetRoute && (
+              <Button variant="contained" onClick={() => navigate(passwordResetRoute)}>
+                Restablecer contraseña
+              </Button>
+            )}
+            <Button variant="outlined" onClick={handleLogout}>
+              Cerrar sesión
+            </Button>
+          </Box>
         </Paper>
       </Container>
     </Box>

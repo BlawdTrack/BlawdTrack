@@ -18,6 +18,22 @@ export const ROLE_HOME_ROUTES = {
   [ROLES.MENSAJERO]: ROUTES.COURIER_HOME,
 };
 
+// Mapa de rol -> pantalla donde restablece su propia contraseña con la sesión iniciada.
+export const ROLE_PASSWORD_RESET_ROUTES = {
+  [ROLES.SUPER_USUARIO]: ROUTES.PASSWORD_RESET_OWN,
+  [ROLES.ADMIN_VENTAS]: ROUTES.SALES_PASSWORD_RESET,
+  [ROLES.MENSAJERO]: ROUTES.COURIER_PASSWORD_RESET,
+};
+
+/**
+ * Pantalla para restablecer la propia contraseña de un rol.
+ * @param {string} role Rol de negocio.
+ * @returns {string|null} La ruta, o `null` si el rol es desconocido o ausente.
+ */
+export function getPasswordResetRoute(role) {
+  return Object.hasOwn(ROLE_PASSWORD_RESET_ROUTES, role) ? ROLE_PASSWORD_RESET_ROUTES[role] : null;
+}
+
 /**
  * Ruta de inicio de un rol. `Object.hasOwn` evita que claves heredadas del prototipo ("constructor",
  * "toString"...) pasen como roles válidos.

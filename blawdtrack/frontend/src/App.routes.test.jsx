@@ -17,7 +17,8 @@ vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición 
 vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
 vi.mock('./pages/SalesHomePage',() => ({ default: () => <div>Pantalla ventas</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
-vi.mock('./pages/PasswordRecoveryRequestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
+vi.mock('./pages/OwnPasswordResetPage', () => ({ default: () => <div>Pantalla restablecer mi contraseña</div> }));
+vi.mock('./pages/PasswordRecoveryRequestPage',() => ({ default: () => <div>Pantalla recuperación</div> }));
 vi.mock('./pages/NewPasswordPage', () => ({ default: () => <div>Pantalla nueva contraseña</div> }));
 vi.mock('./pages/LoginPage', () => ({ default: () => <div>Pantalla de login</div> }));
 vi.mock('./components/MessengerFleetList', () => ({
@@ -36,6 +37,10 @@ const SCREENS = {
   [ROUTES.ROLES_PERMISSIONS]: 'Pantalla roles y permisos',
   [ROUTES.SALES_HOME]: 'Pantalla ventas',
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
+  // Cada rol restablece su propia contraseña con la sesión iniciada.
+  [ROUTES.PASSWORD_RESET_OWN]: 'Pantalla restablecer mi contraseña',
+  [ROUTES.SALES_PASSWORD_RESET]: 'Pantalla restablecer mi contraseña',
+  [ROUTES.COURIER_PASSWORD_RESET]: 'Pantalla restablecer mi contraseña',
   // Rutas de tu feature agregadas al formato de develop
   '/editar-mensajero': 'Pantalla edición de mensajero',
 };
@@ -50,10 +55,11 @@ const ALLOWED_ROUTES = {
     ROUTES.COURIER_CREATE,
     ROUTES.COURIER_DEACTIVATE,
     ROUTES.ROLES_PERMISSIONS,
+    ROUTES.PASSWORD_RESET_OWN,
     '/editar-mensajero'
   ],
-  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME],
-  [ROLES.COURIER]: [ROUTES.COURIER_HOME],
+  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME, ROUTES.SALES_PASSWORD_RESET],
+  [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],
 };
 
 function loginAs(role) {

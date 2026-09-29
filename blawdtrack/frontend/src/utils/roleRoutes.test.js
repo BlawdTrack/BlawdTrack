@@ -1,5 +1,20 @@
 import { describe, it, expect } from 'vitest';
-import { ROLE_HOME_ROUTES, getHomeRoute } from './roleRoutes';
+import { ROLE_HOME_ROUTES, getHomeRoute, getPasswordResetRoute } from './roleRoutes';
+
+describe('getPasswordResetRoute (restablecer la propia contraseña)', () => {
+  it('devuelve la pantalla de cada rol del backend', () => {
+    expect(getPasswordResetRoute('SUPER_USUARIO')).toBe('/main-menu/restablecer-contrasena');
+    expect(getPasswordResetRoute('ADMIN_VENTAS')).toBe('/ventas/restablecer-contrasena');
+    expect(getPasswordResetRoute('MENSAJERO')).toBe('/mensajero/restablecer-contrasena');
+  });
+
+  it.each(['ROL_QUE_NO_EXISTE', undefined, null, '', 'constructor', 'toString'])(
+    'devuelve null para el rol desconocido o heredado del prototipo (%s)',
+    (role) => {
+      expect(getPasswordResetRoute(role)).toBeNull();
+    }
+  );
+});
 
 describe('getHomeRoute (T12)', () => {
   it('devuelve la ruta de inicio de cada rol del backend', () => {
