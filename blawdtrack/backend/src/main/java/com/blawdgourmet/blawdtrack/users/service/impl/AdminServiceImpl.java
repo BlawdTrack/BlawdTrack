@@ -12,12 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.security.access.AccessDeniedException;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationException;
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
@@ -53,20 +56,47 @@ public class AdminServiceImpl implements AdminService {
     private final AuditService auditService;
     private final AdminUniquenessValidator adminUniquenessValidator;
     private final UserRelatedRecordsCleaner relatedRecordsCleaner;
+    private final AuditLogRepository auditLogRepository;
 
+    public AdminServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+ @Autowired
+    public AdminServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            AuditService auditService,
+            AuditLogRepository auditLogRepository) {
+        this(userRepository, roleRepository, passwordEncoder, auditService,
+                new AdminUniquenessValidator(userRepository), auditLogRepository, null);
+    }
+
+    @Autowired
     public AdminServiceImpl(
             UserRepository userRepository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
             AuditService auditService,
             AdminUniquenessValidator adminUniquenessValidator,
+            AuditLogRepository auditLogRepository,
             UserRelatedRecordsCleaner relatedRecordsCleaner) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditService = auditService;
         this.adminUniquenessValidator = adminUniquenessValidator;
+        this.auditLogRepository = auditLogRepository;
         this.relatedRecordsCleaner = relatedRecordsCleaner;
+    }
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.auditService = auditService;
+        this.adminUniquenessValidator = adminUniquenessValidator;
+        this.relatedRecordsCleaner = relatedRecordsCleaner;
+        this.auditLogRepository = auditLogRepository;
     }
 
     @Value("${security.jwt.expiration-ms}")
@@ -135,6 +165,26 @@ public class AdminServiceImpl implements AdminService {
                 administradorGuardado.getRole().getName(),
                 administradorGuardado.getStatus()
         );
+    }
+
+    // "ELIMINAR_ADMINISTRADOR" mirrors AuditServiceImpl.ACCION_ELIMINAR_ADMINISTRADOR
+    // (not in the AuditAction enum yet; that entry is written directly by
+    // registrarEliminacionAdministrador instead of going through logAction).
+    private static final List<String> ADMIN_AUDIT_ACTIONS = List.of(
+            AuditAction.ADMIN_CREATED.getCode(), "ELIMINAR_ADMINISTRADOR");
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminAuditLogResponse> getAuditLog() {
+        return auditLogRepository.findByActionInOrderByTimestampDesc(ADMIN_AUDIT_ACTIONS).stream()
+                .map(log -> new AdminAuditLogResponse(
+                        log.getId(),
+                        log.getAction(),
+                        log.getActor().getFullName(),
+                        log.getDetails(),
+                        log.getTimestamp()
+                ))
+                .toList();
     }
 
     /**

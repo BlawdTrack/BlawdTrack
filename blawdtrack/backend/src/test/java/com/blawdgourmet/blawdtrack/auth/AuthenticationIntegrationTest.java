@@ -104,10 +104,10 @@ class AuthenticationIntegrationTest {
         createUser(UserStatus.INACTIVE);
 
         login(EMAIL, PASSWORD)
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("AUTH_FAILED"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCOUNT_INACTIVE"))
                 .andExpect(jsonPath("$.message").value("The account is inactive"))
-                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.status").value(403))
                 .andExpect(jsonPath("$.token").doesNotExist());
         verifyNoInteractions(jwtService);
     }
@@ -172,7 +172,7 @@ class AuthenticationIntegrationTest {
 
     private String expectInvalidCredentials(ResultActions result) throws Exception {
         return result.andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("AUTH_FAILED"))
+                .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
                 .andExpect(jsonPath("$.message").value("Invalid email or password"))
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.token").doesNotExist())

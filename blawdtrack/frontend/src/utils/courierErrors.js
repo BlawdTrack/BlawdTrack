@@ -1,9 +1,10 @@
 // Normalizes a failed POST /api/v1/couriers call (axios error) into a uniform
-// model the registration form can render:
-//   { kind, fieldErrors, globalMessage, severity }
-// - fieldErrors: { [fieldName]: message } shown inline under each input.
-// - globalMessage: text for an alert (null when everything maps to a field).
+// model the registration form can render. The status-code -> "kind" mapping
+// (network/validation/conflict/auth/server) is shared via ./apiErrors; only
+// the courier-specific texts and field matching live here.
 // UI texts are in Spanish; identifiers and comments in English.
+
+import { normalizeApiError, extractFieldsFromApiError } from './apiErrors';
 
 const MESSAGES = {
   validationGeneric: 'Revisa los datos ingresados e intenta de nuevo.',
@@ -32,12 +33,6 @@ const FIELD_MESSAGES = {
   maxPackageWeightKg: 'Ingresa un número positivo (hasta 8 enteros y 2 decimales).',
 };
 
-const VALIDATION_CODES = ['VALIDATION_FAILED', 'VALIDATION_ERROR'];
-
-function result(kind, { fieldErrors = {}, globalMessage = null, severity = 'error' } = {}) {
-  return { kind, fieldErrors, globalMessage, severity };
-}
-
 // Lowercase and strip diacritics so "Teléfono" and "telefono" compare equal.
 function normalizeText(text) {
   return String(text ?? '')
@@ -46,30 +41,8 @@ function normalizeText(text) {
     .toLowerCase();
 }
 
-// Returns { names, backendMessages } from either the global ApiError shape
-// (errores[] with campo/mensaje) or the courier controller shape, where the
-// field names only appear inside the message: "Revise los campos: a, b".
-function extractFields(data) {
-  if (Array.isArray(data?.errores) && data.errores.length > 0) {
-    const names = [];
-    const backendMessages = {};
-    data.errores.forEach((item) => {
-      if (!item?.campo) return;
-      names.push(item.campo);
-      if (item.mensaje) backendMessages[item.campo] = item.mensaje;
-    });
-    return { names, backendMessages };
-  }
-
-  const match = /campos:\s*(.*)$/i.exec(String(data?.message ?? ''));
-  const names = match
-    ? match[1].split(',').map((name) => name.trim()).filter(Boolean)
-    : [];
-  return { names, backendMessages: {} };
-}
-
 function mapValidation(data) {
-  const { names, backendMessages } = extractFields(data);
+  const { names, backendMessages } = extractFieldsFromApiError(data);
   const fieldErrors = {};
   let globalMessage = null;
 
@@ -95,7 +68,7 @@ function mapValidation(data) {
     }
   }
 
-  return result('validation', { fieldErrors, globalMessage });
+  return { fieldErrors, globalMessage };
 }
 
 // TEMPORARY: the 409 body has no structured field, only a Spanish message such
@@ -104,43 +77,19 @@ function mapValidation(data) {
 function mapConflict(data) {
   const text = normalizeText(data?.message);
   if (text.includes('documento')) {
-    return result('conflict', { fieldErrors: { documentNumber: MESSAGES.documentDuplicate } });
+    return { fieldErrors: { documentNumber: MESSAGES.documentDuplicate } };
   }
   if (text.includes('correo')) {
-    return result('conflict', { fieldErrors: { email: MESSAGES.emailDuplicate } });
+    return { fieldErrors: { email: MESSAGES.emailDuplicate } };
   }
   if (text.includes('telefono')) {
-    return result('conflict', { fieldErrors: { phone: MESSAGES.phoneDuplicate } });
+    return { fieldErrors: { phone: MESSAGES.phoneDuplicate } };
   }
-  return result('conflict', { globalMessage: MESSAGES.conflictGeneric });
+  return { globalMessage: MESSAGES.conflictGeneric };
 }
 
 export function normalizeCourierError(error) {
-  const response = error?.response;
-
-  // No response: network down, backend off or request timeout.
-  if (!response) {
-    return result('network', { globalMessage: MESSAGES.network });
-  }
-
-  const { status, data } = response;
-
-  if (status === 400 && (VALIDATION_CODES.includes(data?.code) || data?.errores)) {
-    return mapValidation(data);
-  }
-  if (status === 409) {
-    return mapConflict(data);
-  }
-  if (status === 401) {
-    return result('unauthenticated', { globalMessage: MESSAGES.unauthenticated, severity: 'warning' });
-  }
-  if (status === 403) {
-    return result('forbidden', { globalMessage: MESSAGES.forbidden });
-  }
-  if (status >= 500) {
-    return result('server', { globalMessage: MESSAGES.server });
-  }
-  return result('unknown', { globalMessage: MESSAGES.fallback });
+  return normalizeApiError(error, { messages: MESSAGES, mapValidation, mapConflict });
 }
 
 export default normalizeCourierError;

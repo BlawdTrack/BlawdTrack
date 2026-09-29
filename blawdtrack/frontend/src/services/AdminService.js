@@ -35,6 +35,14 @@ const normalizeAdministrator = (administrator) => {
   };
 };
 
+// Payload shape expected by POST /api/v1/admins (AdminRegistrationRequest):
+// { nombreCompleto, numeroTelefono, correoElectronico, contrasenaInicial,
+//   documentType, documentNumber }.
+export const registerAdministrator = async (adminData) => {
+  const response = await axiosClient.post(ADMINISTRATORS_PATH, adminData);
+  return response.data;
+};
+
 export const getAdministrators = async () => {
   const response = await axiosClient.get(ADMINISTRATORS_PATH);
   const payload = response.data;
@@ -53,4 +61,14 @@ export const deleteAdministrator = async (documentType, documentNumber) => {
   await axiosClient.delete(
     `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}`
   );
+};
+
+// GET /api/v1/admins/audit-log: historial de creación/eliminación de
+// administradores (HU-006 / T06), persistido en el backend.
+export const getAdminAuditLog = async () => {
+  const response = await axiosClient.get(`${ADMINISTRATORS_PATH}/audit-log`);
+  if (!Array.isArray(response.data)) {
+    throw new Error('La respuesta del backend no contiene un historial de auditoría.');
+  }
+  return response.data;
 };

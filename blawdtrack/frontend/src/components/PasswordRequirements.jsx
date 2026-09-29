@@ -83,7 +83,7 @@ export function PasswordRequirements({ password, historyRejected = false }) {
         sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}
       >
         <Rule label="Mínimo 8 caracteres" state={results.length ? 'ok' : 'pending'} />
-        <Rule label="Al menos una mayúscula" state={results.uppercase ? 'ok' : 'pending'} />
+        <Rule label="Al menos una letra" state={results.letter ? 'ok' : 'pending'} />
         <Rule label="Al menos un número" state={results.number ? 'ok' : 'pending'} />
         <Rule
           label="Distinta de las últimas 3 contraseñas"

@@ -47,8 +47,10 @@ public class User {
     @Column(name = "numero_documento", length = 50)
     private String documentNumber;
 
+    // La unicidad real la garantiza uq_usuarios_tipo_documento_numero_documento
+    // (tipo_documento, numero_documento); ver V11__eliminar_restriccion_unica_cedula.sql.
     @Deprecated
-    @Column(name = "cedula", nullable = false, unique = true, length = 20)
+    @Column(name = "cedula", nullable = false, length = 20)
     private String documentId;
 
     @PrePersist
@@ -106,6 +108,12 @@ public class User {
             return;
         }
         this.status = newStatus;
+        this.tokenVersion++;
+    }
+
+    /** Reemplaza el hash y sube {@code tokenVersion}, cerrando las sesiones abiertas con la contraseña anterior. */
+    public void changePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
         this.tokenVersion++;
     }
 }

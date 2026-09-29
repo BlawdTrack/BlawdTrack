@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.users.service.impl;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,9 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -46,6 +50,7 @@ class AdminServiceImplTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private AuditService auditService;
     @Mock private UserRelatedRecordsCleaner relatedRecordsCleaner;
+    @Mock private AuditLogRepository auditLogRepository;
 
     private AdminServiceImpl service;
 
@@ -53,6 +58,7 @@ class AdminServiceImplTest {
     void setUp() {
         service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService,
                 new AdminUniquenessValidator(userRepository), relatedRecordsCleaner);
+        service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService, auditLogRepository);
         ReflectionTestUtils.setField(service, "jwtExpirationMs", 3_600_000L);
     }
 
@@ -128,6 +134,36 @@ class AdminServiceImplTest {
         assertThat(response.documentNumber()).isEqualTo("12345678901");
         verify(userRepository, never()).findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "12345678901");
         verify(userRepository, never()).findByDocumentTypeAndDocumentNumber(DocumentType.PASAPORTE, "12345678901");
+    }
+
+    @Test
+    void getAuditLogReturnsOnlyCreationAndDeletionEntriesNewestFirst() {
+        User actor = usuarioConRol(RoleName.SUPER_USER);
+        AuditLog creacion = AuditLog.builder()
+                .id(1L)
+                .actor(actor)
+                .action("CREAR_ADMINISTRADOR")
+                .details("El Super Usuario creó al Administrador X.")
+                .timestamp(LocalDateTime.now())
+                .build();
+        AuditLog eliminacion = AuditLog.builder()
+                .id(2L)
+                .actor(actor)
+                .action("ELIMINAR_ADMINISTRADOR")
+                .details("El Super Usuario eliminó al Administrador Y.")
+                .timestamp(LocalDateTime.now().minusDays(1))
+                .build();
+        when(auditLogRepository.findByActionInOrderByTimestampDesc(
+                List.of("CREAR_ADMINISTRADOR", "ELIMINAR_ADMINISTRADOR")))
+                .thenReturn(List.of(creacion, eliminacion));
+
+        List<AdminAuditLogResponse> respuesta = service.getAuditLog();
+
+        assertThat(respuesta).hasSize(2);
+        assertThat(respuesta.get(0).action()).isEqualTo("CREAR_ADMINISTRADOR");
+        assertThat(respuesta.get(0).actorName()).isEqualTo(actor.getFullName());
+        assertThat(respuesta.get(0).details()).isEqualTo(creacion.getDetails());
+        assertThat(respuesta.get(1).action()).isEqualTo("ELIMINAR_ADMINISTRADOR");
     }
 
     private User usuarioConRol(String nombreRol) {

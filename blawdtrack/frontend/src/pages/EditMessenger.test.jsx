@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import React from 'react';
 import EditMessenger from './EditMessenger';
 import { useAuth } from '../hooks/useAuth';
 import * as CourierService from '../services/CourierService';
@@ -12,7 +11,10 @@ vi.mock('../hooks/useAuth', () => ({
 vi.mock('../services/CourierService', () => ({
   listCouriers: vi.fn(),
   getCourierByCedula: vi.fn(),
-  updateCourier: vi.fn()
+  updateCourier: vi.fn(),
+  updateCourierStatus: vi.fn(),
+  updateCourierPassword: vi.fn(),
+  getCourierHistory: vi.fn().mockResolvedValue([])
 }));
 
 describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
@@ -27,7 +29,8 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     id: '1-0345-0678',
     documentNumber: '1-0345-0678',
     fullName: 'María José Solano',
-    email: 'maria.solano@blawdgourmet.com',
+    email: 'maria.solano@example.com',
+    phone: '88888888',
     schedule: '6:00 am – 2:00 pm',
     maxLoadCapacityKg: 25,
     status: 'ACTIVE',
@@ -156,6 +159,49 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     await waitFor(() => {
       expect(screen.getByText('Notificación de actualización exitosa. Los datos del mensajero han sido modificados.')).toBeTruthy();
     });
+  });
+
+  it('HU-004: Envía la nueva contraseña al endpoint real y no la deja en el formulario', async () => {
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+
+    const passwordInput = await screen.findByPlaceholderText('••••••••');
+    fireEvent.change(passwordInput, { target: { value: 'Nueva2026x' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => {
+      expect(CourierService.updateCourierPassword).toHaveBeenCalledWith('1-0345-0678', 'Nueva2026x');
+    });
+    expect(CourierService.updateCourierStatus).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('••••••••').value).toBe('');
+    });
+  });
+
+  it('HU-004: Rechaza en cliente una contraseña que no cumple las reglas y no llama al backend', async () => {
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+
+    const passwordInput = await screen.findByPlaceholderText('••••••••');
+    fireEvent.change(passwordInput, { target: { value: 'corta' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/al menos 8 caracteres/i)).toBeTruthy();
+    });
+    expect(CourierService.updateCourierPassword).not.toHaveBeenCalled();
+  });
+
+  it('HU-004: Si el backend rechaza la contraseña no muestra el toast de éxito', async () => {
+    CourierService.updateCourierPassword.mockRejectedValue({ response: { data: { message: 'Revise los campos: password' } } });
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+
+    const passwordInput = await screen.findByPlaceholderText('••••••••');
+    fireEvent.change(passwordInput, { target: { value: 'Nueva2026x' } });
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Revise los campos: password').length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText(/Notificación de actualización exitosa/)).toBeNull();
   });
 
   it('T06: Muestra mensaje de error cuando falla la API REST de actualización', async () => {
