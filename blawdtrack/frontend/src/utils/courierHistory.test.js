@@ -17,6 +17,11 @@ describe('formatHistoryEntry (HU-004 historial)', () => {
       .toContain('Activo');
   });
 
+  it('describe el cambio de contraseña sin exponer ningún valor', () => {
+    expect(formatHistoryEntry({ ...BASE, action: 'CAMBIAR_CONTRASENA_MENSAJERO', details: 'password' }, 0).text)
+      .toBe('Contraseña actualizada (sesión cerrada inmediatamente)');
+  });
+
   it('incluye fecha y hora', () => {
     const row = formatHistoryEntry({ ...BASE, action: 'ACTUALIZAR_MENSAJERO', details: 'email' }, 0);
     expect(row.when).toMatch(/29\/09\/2026 · /);
