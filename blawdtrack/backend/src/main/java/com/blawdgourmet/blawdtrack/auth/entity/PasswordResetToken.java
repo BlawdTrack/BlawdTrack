@@ -57,12 +57,4 @@ public class PasswordResetToken {
 
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime createdAt;
-
-    public boolean isUsado() {
-        return used;
-    }
-
-    public LocalDateTime getFechaExpiracion() {
-        return expirationDate;
-    }
 }

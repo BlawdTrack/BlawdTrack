@@ -118,8 +118,8 @@ describe('NewPasswordPage (HU-002 T05)', () => {
       expect(onGoToLogin).toHaveBeenCalledTimes(1);
     });
 
-    it('TOKEN_INVALIDO pasa a "Enlace no válido" con el aviso de expirado', async () => {
-      confirmPasswordReset.mockRejectedValue(apiError(400, 'TOKEN_INVALIDO'));
+    it('INVALID_RESET_TOKEN pasa a "Enlace no válido" con el aviso de expirado', async () => {
+      confirmPasswordReset.mockRejectedValue(apiError(400, 'INVALID_RESET_TOKEN'));
       const user = userEvent.setup();
       renderPage();
 
@@ -130,8 +130,8 @@ describe('NewPasswordPage (HU-002 T05)', () => {
       expect(screen.getByRole('alert')).toHaveTextContent('no es válido o ya expiró');
     });
 
-    it('CONTRASENA_REUTILIZADA marca la regla del historial como no cumplida y conserva el formulario', async () => {
-      confirmPasswordReset.mockRejectedValue(apiError(400, 'CONTRASENA_REUTILIZADA'));
+    it('PASSWORD_REUSED marca la regla del historial como no cumplida y conserva el formulario', async () => {
+      confirmPasswordReset.mockRejectedValue(apiError(400, 'PASSWORD_REUSED'));
       const user = userEvent.setup();
       renderPage();
 
@@ -144,7 +144,7 @@ describe('NewPasswordPage (HU-002 T05)', () => {
     });
 
     it('la regla del historial vuelve a pendiente al escribir otra contraseña', async () => {
-      confirmPasswordReset.mockRejectedValue(apiError(400, 'CONTRASENA_REUTILIZADA'));
+      confirmPasswordReset.mockRejectedValue(apiError(400, 'PASSWORD_REUSED'));
       const user = userEvent.setup();
       renderPage();
       await fill(user, VALID);

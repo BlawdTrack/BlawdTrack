@@ -10,8 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.blawdgourmet.blawdtrack.auth.exception.ContrasenaReutilizadaException;
-import com.blawdgourmet.blawdtrack.auth.exception.TokenRestablecimientoInvalidoException;
+import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
+import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
 import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
@@ -59,10 +59,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
-    @ExceptionHandler(TokenRestablecimientoInvalidoException.class)
-    public ResponseEntity<ApiError> manejarTokenInvalido(TokenRestablecimientoInvalidoException ex) {
+    @ExceptionHandler(InvalidResetTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidResetToken(InvalidResetTokenException ex) {
         ApiError error = ApiError.builder()
-                .code("TOKEN_INVALIDO")
+                .code("INVALID_RESET_TOKEN")
                 .message(ex.getMessage())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .build();
@@ -70,10 +70,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
-    @ExceptionHandler(ContrasenaReutilizadaException.class)
-    public ResponseEntity<ApiError> manejarContrasenaReutilizada(ContrasenaReutilizadaException ex) {
+    @ExceptionHandler(PasswordReusedException.class)
+    public ResponseEntity<ApiError> handlePasswordReused(PasswordReusedException ex) {
         ApiError error = ApiError.builder()
-                .code("CONTRASENA_REUTILIZADA")
+                .code("PASSWORD_REUSED")
                 .message(ex.getMessage())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .build();
