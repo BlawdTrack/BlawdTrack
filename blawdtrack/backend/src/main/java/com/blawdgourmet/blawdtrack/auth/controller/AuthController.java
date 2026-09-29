@@ -25,13 +25,30 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @ExceptionHandler({BadCredentialsException.class, DisabledException.class})
-    public ResponseEntity<ErrorResponse> handleAuthenticationError(RuntimeException ex) {
+    // Wrong credentials: 401, without saying whether the email or the
+    // password failed (AuthService already generalizes the message).
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
         ErrorResponse error = ErrorResponse.builder()
-                .code("AUTH_FAILED")
+                .code("INVALID_CREDENTIALS")
                 .message(ex.getMessage())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    // Inactive account with correct credentials: 403, its own code so the
+    // frontend can tell the two cases apart without parsing the message
+    // (AuthenticationManager only reaches this handler after the password
+    // already matched, so this never reveals the account's status to
+    // someone who does not know it; see SecurityConfig.authenticationManager()).
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ErrorResponse> handleDisabledAccount(DisabledException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .code("ACCOUNT_INACTIVE")
+                .message(ex.getMessage())
+                .status(HttpStatus.FORBIDDEN.value())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 }
