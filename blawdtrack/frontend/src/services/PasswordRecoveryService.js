@@ -14,8 +14,8 @@ export const requestPasswordReset = async (email) => {
 //
 //   POST /v1/auth/password-reset/confirm   { token, newPassword }
 //   200  { message }
-//   400  { code: 'INVALID_RESET_TOKEN' }          token inexistente, usado o vencido
-//   400  { code: 'PASSWORD_REUSED' }  igual a la actual o a las últimas 2
+//   400  { code: 'TOKEN_INVALIDO' }          token inexistente, usado o vencido
+//   400  { code: 'CONTRASENA_REUTILIZADA' }  igual a la actual o a las últimas 2
 //   400  { code: 'VALIDATION_ERROR' }        newPassword sin 8+ caracteres con
 //                                            letras y números, o token vacío
 export const confirmPasswordReset = async (token, newPassword) => {

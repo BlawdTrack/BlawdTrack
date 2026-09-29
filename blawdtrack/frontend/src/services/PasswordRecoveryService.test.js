@@ -27,7 +27,7 @@ describe('PasswordRecoveryService (HU-002)', () => {
   });
 
   it('propaga el error para que la pantalla lo interprete', async () => {
-    const error = { response: { status: 400, data: { code: 'INVALID_RESET_TOKEN' } } };
+    const error = { response: { status: 400, data: { code: 'TOKEN_INVALIDO' } } };
     axiosClient.post.mockRejectedValue(error);
 
     await expect(confirmPasswordReset('tok', 'Nueva123')).rejects.toBe(error);

@@ -116,9 +116,9 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
       const code = err.response?.data?.code;
       if (!err.response) {
         setError({ message: CONNECTION_ERROR_MESSAGE });
-      } else if (code === 'INVALID_RESET_TOKEN') {
+      } else if (code === 'TOKEN_INVALIDO') {
         setTokenRejected(true);
-      } else if (code === 'PASSWORD_REUSED') {
+      } else if (code === 'CONTRASENA_REUTILIZADA') {
         // Esto sí lo confirmó el backend: la regla 4 pasa a "no cumplida".
         setHistoryRejected(true);
         setError({ message: REUSED_ERROR_MESSAGE, field: 'newPassword' });

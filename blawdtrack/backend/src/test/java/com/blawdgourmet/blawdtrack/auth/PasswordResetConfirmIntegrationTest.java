@@ -76,7 +76,7 @@ class PasswordResetConfirmIntegrationTest {
     void tokenInexistenteDevuelveErrorGenerico() throws Exception {
         confirm("token-inexistente", "NewPass123")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_RESET_TOKEN"))
+                .andExpect(jsonPath("$.code").value("TOKEN_INVALIDO"))
                 .andExpect(jsonPath("$.message").value("El enlace de restablecimiento no es válido o ha expirado."));
     }
 
@@ -88,7 +88,7 @@ class PasswordResetConfirmIntegrationTest {
         confirm(result.rawToken(), "NewPass123").andExpect(status().isOk());
         confirm(result.rawToken(), "Another123")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_RESET_TOKEN"))
+                .andExpect(jsonPath("$.code").value("TOKEN_INVALIDO"))
                 .andExpect(jsonPath("$.message").value("El enlace de restablecimiento no es válido o ha expirado."));
     }
 
@@ -105,7 +105,7 @@ class PasswordResetConfirmIntegrationTest {
 
         confirm("expired-token", "NewPass123")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_RESET_TOKEN"));
+                .andExpect(jsonPath("$.code").value("TOKEN_INVALIDO"));
     }
 
     @Test
@@ -122,7 +122,7 @@ class PasswordResetConfirmIntegrationTest {
 
         confirm(result.rawToken(), OLD_PASSWORD)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("PASSWORD_REUSED"))
+                .andExpect(jsonPath("$.code").value("CONTRASENA_REUTILIZADA"))
                 .andExpect(jsonPath("$.message")
                         .value("La nueva contraseña no puede coincidir con las últimas contraseñas utilizadas."));
     }
@@ -139,7 +139,7 @@ class PasswordResetConfirmIntegrationTest {
 
         confirm(result.rawToken(), "Previous123")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("PASSWORD_REUSED"));
+                .andExpect(jsonPath("$.code").value("CONTRASENA_REUTILIZADA"));
     }
 
     private User createUser() {

@@ -5,7 +5,7 @@ import { evaluatePasswordRules } from '../utils/passwordRules';
 // vivo con lo que el usuario escribe. La regla 4 (distinta de las últimas 3
 // contraseñas) se queda SIEMPRE en estado neutro: el cliente no puede saberlo.
 // Solo pasa a "no cumplida" cuando el propio backend la rechazó
-// (`historyRejected`, tras un PASSWORD_REUSED).
+// (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
 const OK_COLOR = '#2F7D4F';
 const ERROR_COLOR = '#C0392B';
 const NEUTRAL_TEXT = '#9E968D';

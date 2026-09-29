@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidResetTokenException.class)
     public ResponseEntity<ApiError> handleInvalidResetToken(InvalidResetTokenException ex) {
         ApiError error = ApiError.builder()
-                .code("INVALID_RESET_TOKEN")
+                .code("TOKEN_INVALIDO")
                 .message(ex.getMessage())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .build();
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PasswordReusedException.class)
     public ResponseEntity<ApiError> handlePasswordReused(PasswordReusedException ex) {
         ApiError error = ApiError.builder()
-                .code("PASSWORD_REUSED")
+                .code("CONTRASENA_REUTILIZADA")
                 .message(ex.getMessage())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .build();
