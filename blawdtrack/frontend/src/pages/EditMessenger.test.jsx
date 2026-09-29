@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import EditMessenger from './EditMessenger';
 import { useAuth } from '../hooks/useAuth';
 import * as CourierService from '../services/CourierService';
@@ -16,6 +17,23 @@ vi.mock('../services/CourierService', () => ({
   updateCourierPassword: vi.fn(),
   getCourierHistory: vi.fn().mockResolvedValue([])
 }));
+
+// Las ruedas de horario y capacidad son las mismas de "Crear mensajero".
+async function pickTime(user, label, hour, period) {
+  await user.click(screen.getByRole('textbox', { name: label }));
+  const pick = (name, text) =>
+    user.click(within(screen.getByRole('listbox', { name })).getAllByRole('option', { name: text })[0]);
+  await pick(/: hora$/i, hour);
+  await pick(/: am o pm$/i, period);
+  await user.click(screen.getByRole('button', { name: 'Listo' }));
+}
+
+async function pickWeight(user, arrowDownPresses) {
+  await user.click(screen.getByRole('textbox', { name: /capacidad máxima/i }));
+  screen.getByRole('listbox', { name: /capacidad máxima/i }).focus();
+  await user.keyboard(`{ArrowDown>${arrowDownPresses}/}`);
+  await user.click(screen.getByRole('button', { name: 'Listo' }));
+}
 
 describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
   const mockUser = {
@@ -58,27 +76,39 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('María José Solano')).toBeTruthy();
-      expect(screen.getByDisplayValue('6:00 am – 2:00 pm')).toBeTruthy();
-      expect(screen.getByDisplayValue('25')).toBeTruthy();
+      // Horario y capacidad se muestran en las ruedas de la pantalla de creación.
+      expect(screen.getByRole('textbox', { name: /hora de entrada/i })).toHaveValue('6:00 am');
+      expect(screen.getByRole('textbox', { name: /hora de salida/i })).toHaveValue('2:00 pm');
+      expect(screen.getByRole('textbox', { name: /capacidad máxima/i })).toHaveValue('25 kg');
     });
   });
 
-  it('T04: Valida en cliente que la capacidad máxima de carga sea un valor numérico positivo (> 0)', async () => {
+  it('T04: Cambiar las ruedas de horario envía el horario compuesto al backend', async () => {
+    const user = userEvent.setup();
     render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
+
+    await pickTime(user, /hora de entrada/i, '08', 'am');
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('25')).toBeTruthy();
+      expect(CourierService.updateCourier).toHaveBeenCalledWith(
+        7,
+        expect.objectContaining({ schedule: '8:00 am – 2:00 pm' })
+      );
     });
+  });
 
-    const capInput = screen.getByDisplayValue('25');
-    fireEvent.change(capInput, { target: { value: '-5' } });
+  it('T04: Valida en cliente que la hora de salida sea posterior a la de entrada', async () => {
+    const user = userEvent.setup();
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
 
-    const saveButton = screen.getByRole('button', { name: /guardar cambios/i });
-    fireEvent.click(saveButton);
+    await pickTime(user, /hora de salida/i, '05', 'am');
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('La capacidad máxima de carga debe ser un valor numérico positivo.')).toBeTruthy();
-    });
+    expect(await screen.findByText('La hora de salida debe ser posterior a la de entrada.')).toBeTruthy();
+    expect(CourierService.updateCourier).not.toHaveBeenCalled();
   });
 
   it('T04: Bloquea el cambio de estado si el mensajero tiene envíos en proceso o está en labores', async () => {
@@ -136,17 +166,17 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
           }]
         : []
     );
+    const user = userEvent.setup();
     render(<EditMessenger initialCedula="1-0345-0678" />);
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('25')).toBeTruthy();
+      expect(screen.getByRole('textbox', { name: /capacidad máxima/i })).toHaveValue('25 kg');
     });
 
-    const capInput = screen.getByDisplayValue('25');
-    fireEvent.change(capInput, { target: { value: '35' } });
+    await pickWeight(user, 10);
+    expect(screen.getByRole('textbox', { name: /capacidad máxima/i })).not.toHaveValue('25 kg');
 
-    const saveButton = screen.getByRole('button', { name: /guardar cambios/i });
-    fireEvent.click(saveButton);
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/Campos modificados: Capacidad de carga/i)).toBeTruthy();

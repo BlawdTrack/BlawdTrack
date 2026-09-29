@@ -23,6 +23,9 @@ import { listCouriers, updateCourierStatus, updateCourierPassword, getCourierHis
 import { formatHistoryEntry } from '../utils/courierHistory';
 import { MIN_PASSWORD_LENGTH, meetsClientPasswordRules } from '../utils/passwordRules';
 import { getInitials } from '../utils/getInitials';
+import { composeSchedule, parseSchedule } from '../utils/courierSchedule';
+import { TimeWheelField } from '../components/TimeWheelField';
+import { WeightWheelField } from '../components/WeightWheelField';
 import Toast from '../components/Toast';
 import StatusMessage from '../components/StatusMessage';
 import './EditMessenger.css';
@@ -88,6 +91,8 @@ export function EditMessenger({ initialCedula = '' }) {
     email: '',
     phone: '',
     schedule: '',
+    scheduleStart: '',
+    scheduleEnd: '',
     maxLoadCapacityKg: '',
     password: '',
     status: 'ACTIVE'
@@ -139,12 +144,16 @@ export function EditMessenger({ initialCedula = '' }) {
   const loadMessengerData = (courier) => {
     setCurrentCourier(courier);
     setSelectedCourierId(getCourierId(courier));
+    const schedule = courier.schedule || courier.horario || '';
+    const { start: scheduleStart, end: scheduleEnd } = parseSchedule(schedule);
     const initialVals = {
       fullName: courier.fullName || courier.nombre || '',
       email: courier.email || '',
       phone: courier.phone || courier.telefono || '',
-      schedule: courier.schedule || courier.horario || '',
-      maxLoadCapacityKg: courier.maxPackageWeightKg ?? courier.maxLoadCapacityKg ?? courier.cap ?? courier.capacidad ?? '',
+      schedule,
+      scheduleStart,
+      scheduleEnd,
+      maxLoadCapacityKg: String(courier.maxPackageWeightKg ?? courier.maxLoadCapacityKg ?? courier.cap ?? courier.capacidad ?? ''),
       password: '',
       status: courier.status || (courier.estado === 'Inactivo' ? 'INACTIVE' : 'ACTIVE')
     };
@@ -202,6 +211,17 @@ export function EditMessenger({ initialCedula = '' }) {
     }
   };
 
+  // Las ruedas de entrada y salida componen el texto de horario que se envía al backend.
+  const handleScheduleChange = (field, value) => {
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      return { ...next, schedule: composeSchedule(next.scheduleStart, next.scheduleEnd) };
+    });
+    if (formErrors.schedule) {
+      setFormErrors((prev) => ({ ...prev, schedule: null }));
+    }
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -217,6 +237,8 @@ export function EditMessenger({ initialCedula = '' }) {
 
     if (!formData.schedule.trim()) {
       errors.schedule = 'El horario es requerido.';
+    } else if (formData.scheduleStart && formData.scheduleEnd && formData.scheduleEnd <= formData.scheduleStart) {
+      errors.schedule = 'La hora de salida debe ser posterior a la de entrada.';
     }
 
     const capNum = Number(formData.maxLoadCapacityKg);
@@ -605,32 +627,49 @@ export function EditMessenger({ initialCedula = '' }) {
 
               <Box>
                 <Typography sx={LABEL_SX}>Horario</Typography>
-                <TextField
-                  fullWidth
-                  name="schedule"
-                  value={formData.schedule}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.schedule)}
-                  helperText={formErrors.schedule}
-                  placeholder="Ej. 6:00 am – 2:00 pm"
-                  sx={INPUT_SX}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <TimeWheelField
+                    id="scheduleStart"
+                    label="Hora de entrada"
+                    value={formData.scheduleStart}
+                    error={Boolean(formErrors.schedule)}
+                    onChange={(v) => handleScheduleChange('scheduleStart', v)}
+                  />
+                  <Typography component="span" sx={{ color: '#6B6560' }}>a</Typography>
+                  <TimeWheelField
+                    id="scheduleEnd"
+                    label="Hora de salida"
+                    value={formData.scheduleEnd}
+                    error={Boolean(formErrors.schedule)}
+                    onChange={(v) => handleScheduleChange('scheduleEnd', v)}
+                  />
+                </Box>
+                {formData.schedule && !formData.scheduleStart && (
+                  <Typography variant="caption" sx={{ display: 'block', mt: 0.5, mx: 1.75, color: '#6B6560' }}>
+                    Horario actual: {formData.schedule}. Elige las horas para cambiarlo.
+                  </Typography>
+                )}
+                {formErrors.schedule && (
+                  <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
+                    {formErrors.schedule}
+                  </Typography>
+                )}
               </Box>
 
               <Box>
                 <Typography sx={LABEL_SX}>Capacidad máxima de carga (kg)</Typography>
-                <TextField
-                  fullWidth
-                  name="maxLoadCapacityKg"
-                  type="number"
+                <WeightWheelField
+                  id="maxLoadCapacityKg"
+                  label="Capacidad máxima de carga"
                   value={formData.maxLoadCapacityKg}
-                  onChange={handleChange}
                   error={Boolean(formErrors.maxLoadCapacityKg)}
-                  helperText={formErrors.maxLoadCapacityKg}
-                  placeholder="Valor positivo (ej. 25)"
-                  inputProps={{ min: '1', step: 'any' }}
-                  sx={INPUT_SX}
+                  onChange={(v) => handleChange({ target: { name: 'maxLoadCapacityKg', value: v } })}
                 />
+                {formErrors.maxLoadCapacityKg && (
+                  <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
+                    {formErrors.maxLoadCapacityKg}
+                  </Typography>
+                )}
               </Box>
 
               <Box>
