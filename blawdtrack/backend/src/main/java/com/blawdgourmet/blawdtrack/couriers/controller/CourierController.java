@@ -27,6 +27,7 @@ import com.blawdgourmet.blawdtrack.couriers.service.CourierHasActiveAssignmentsE
 import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
 import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
+import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
