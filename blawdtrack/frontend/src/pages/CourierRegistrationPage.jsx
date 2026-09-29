@@ -12,6 +12,7 @@ import { useCourier } from '../hooks/useCourier';
 import { validateCourierForm } from '../utils/courierFormValidation';
 import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
+import { composeSchedule } from '../utils/courierSchedule';
 import { StatusMessage } from '../components/StatusMessage';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
@@ -47,17 +48,6 @@ const INPUT_SX = {
   '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '0.9rem', '& fieldset': { borderColor: '#DCD4CA' } },
   '& .MuiOutlinedInput-input': { py: 1.4 }
 };
-
-// 24h "HH:MM" -> "6:00 am" (the format the backend already stores).
-function formatTime(value) {
-  const [h, m] = value.split(':').map(Number);
-  const suffix = h >= 12 ? 'pm' : 'am';
-  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${suffix}`;
-}
-
-function composeSchedule(start, end) {
-  return start && end ? `${formatTime(start)} – ${formatTime(end)}` : '';
-}
 
 // Returns the weight as a number, or null when blank or not numeric.
 // Number('') is 0, so a blank value must never be coerced silently;
