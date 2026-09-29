@@ -15,6 +15,7 @@ const tree = (
       <Route path={ROUTES.COURIER_UPDATE} element={<div>update courier content</div>} />
       <Route path={ROUTES.COURIER_DEACTIVATE} element={<div>deactivate content</div>} />
       <Route path={ROUTES.ROLES_PERMISSIONS} element={<div>roles content</div>} />
+      <Route path={ROUTES.ADMIN_CREATE} element={<div>create admin content</div>} />
     </Route>
   </Routes>
 );
@@ -71,17 +72,7 @@ describe('MainMenuLayout sidebar', () => {
     expect(screen.queryByText('create courier content')).not.toBeInTheDocument();
   });
 
-  it('renders unimplemented screens as non-clickable items', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
-    const bar = within(sidebar());
-
-    expect(bar.queryByRole('link', { name: 'Crear administrador' })).not.toBeInTheDocument();
-    await user.click(bar.getByText('Crear administrador'));
-    expect(screen.getByText('menu content')).toBeInTheDocument();
-  });
-
-  it('navigates to "Actualizar mensajero" and "Roles y permisos" now that they are implemented', async () => {
+  it('navigates to "Actualizar mensajero", "Roles y permisos" and "Crear administrador" now that they are implemented', async () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
@@ -91,6 +82,9 @@ describe('MainMenuLayout sidebar', () => {
 
     await user.click(bar.getByRole('link', { name: 'Roles y permisos' }));
     expect(screen.getByText('roles content')).toBeInTheDocument();
+
+    await user.click(bar.getByRole('link', { name: 'Crear administrador' }));
+    expect(screen.getByText('create admin content')).toBeInTheDocument();
   });
 
   it('logs out and returns to the login screen', async () => {

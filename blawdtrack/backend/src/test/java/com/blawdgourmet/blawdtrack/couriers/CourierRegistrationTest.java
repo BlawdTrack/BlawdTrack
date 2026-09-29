@@ -14,6 +14,7 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -81,8 +82,8 @@ class CourierRegistrationTest {
     private String token(String role, UserStatus status) {
         var user = users.saveAndFlush(User.builder()
                 .documentType(DocumentType.CEDULA)
-                .documentNumber("ACTOR69")
-                .documentId("ACTOR69")
+                .documentNumber("555555555")
+                .documentId("555555555")
                 .fullName("Actor")
                 .email("actor69@example.com")
                 .passwordHash("unused")
@@ -265,7 +266,8 @@ class CourierRegistrationTest {
         long courierCount = couriers.count();
 
         String body = field.equals("documentNumber")
-                ? BODY.replace("123456789", " ACTOR69 ")
+                // Mismo número con guiones: se normaliza antes de validar la unicidad.
+                ? BODY.replace("123456789", " 5-5555-5555 ")
                 : BODY.replace(
                         "courier69@example.com",
                         " ACTOR69@EXAMPLE.COM "
@@ -360,6 +362,50 @@ class CourierRegistrationTest {
                         .orElseThrow()
                         .getPhone()
         ).isNull();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "CEDULA,12345678",
+            "CEDULA,ABC123456",
+            "DIMEX,12345678",
+            "DIMEX,1558-1234567",
+            "PASAPORTE,12345678",
+            "PASAPORTE,AB1"
+    })
+    void documentoConFormatoInvalidoParaSuTipoSeRechaza(String type, String number)
+            throws Exception {
+        var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
+        long count = users.count();
+
+        register(token, BODY
+                .replace("\"CEDULA\"", "\"" + type + "\"")
+                .replace("123456789", number))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("documentNumber")));
+
+        assertThat(users.count()).isEqualTo(count);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "CEDULA,1-2345-6789,123456789",
+            "DIMEX,155812345678,155812345678",
+            "PASAPORTE,ab12345,AB12345"
+    })
+    void documentoValidoSeAceptaYSeGuardaNormalizado(String type, String number, String stored)
+            throws Exception {
+        var token = token("SUPER_USUARIO", UserStatus.ACTIVE);
+
+        register(token, BODY
+                .replace("\"CEDULA\"", "\"" + type + "\"")
+                .replace("123456789", number))
+                .andExpect(status().isCreated());
+
+        var user = users.findByEmail("courier69@example.com").orElseThrow();
+        assertThat(user.getDocumentType()).isEqualTo(DocumentType.valueOf(type));
+        assertThat(user.getDocumentNumber()).isEqualTo(stored);
     }
 
     @ParameterizedTest
