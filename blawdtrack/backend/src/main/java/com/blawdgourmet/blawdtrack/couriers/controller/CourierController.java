@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,9 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
+import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierStatusRequest;
+import com.blawdgourmet.blawdtrack.couriers.service.CourierHasActiveAssignmentsException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierNotFoundException;
 import com.blawdgourmet.blawdtrack.couriers.service.CourierService;
 import com.blawdgourmet.blawdtrack.couriers.service.DuplicateCourierException;
@@ -46,6 +50,23 @@ public class CourierController {
     public CourierResponse update(@PathVariable String id,
                                   @Valid @RequestBody UpdateCourierRequest request) {
         return service.update(id, request);
+    }
+
+    @PatchMapping("/{id}/status")
+    public CourierResponse changeStatus(@PathVariable String id,
+                                        @Valid @RequestBody UpdateCourierStatusRequest request) {
+        return service.changeStatus(id, request.status());
+    }
+
+    @GetMapping("/{id}/history")
+    public List<CourierHistoryEntry> history(@PathVariable String id) {
+        return service.history(id);
+    }
+
+    @ExceptionHandler(CourierHasActiveAssignmentsException.class)
+    public ResponseEntity<ErrorResponse> hasActiveAssignments(CourierHasActiveAssignmentsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder()
+                .code("COURIER_HAS_ACTIVE_ASSIGNMENTS").message(ex.getMessage()).status(409).build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

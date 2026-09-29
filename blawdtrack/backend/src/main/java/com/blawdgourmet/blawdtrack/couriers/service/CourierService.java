@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
 import com.blawdgourmet.blawdtrack.couriers.dto.UpdateCourierRequest;
@@ -40,6 +42,13 @@ public class CourierService {
     private final ApplicationEventPublisher events;
     private final CourierUniquenessValidator uniquenessValidator;
     private final AuditService auditService;
+    private final AuditLogRepository auditLogs;
+    private final CourierDeactivationValidator deactivationValidator;
+
+    private static final List<String> COURIER_AUDIT_ACTIONS = List.of(
+            AuditAction.COURIER_UPDATED.getCode(),
+            AuditAction.COURIER_DEACTIVATED.getCode(),
+            AuditAction.COURIER_ACTIVATED.getCode());
 
     @Transactional
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
@@ -123,20 +132,68 @@ public class CourierService {
         couriers.saveAndFlush(courier);
 
         if (!details.isBlank()) {
-            var principal = (AuthenticatedUser) SecurityContextHolder
-                    .getContext()
-                    .getAuthentication()
-                    .getPrincipal();
-
             auditService.logAction(
                     AuditAction.COURIER_UPDATED,
-                    principal,
+                    currentPrincipal(),
                     user,
                     details
             );
         }
 
         return CourierResponse.from(courier);
+    }
+
+    /**
+     * Activa o desactiva el acceso del mensajero. {@link User#changeStatus} sube el
+     * {@code tokenVersion}, por lo que la sesión activa deja de ser válida en su
+     * siguiente solicitud. Desactivar exige que el mensajero no tenga asignaciones activas.
+     */
+    @Transactional
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public CourierResponse changeStatus(String id, UserStatus newStatus) {
+        var courier = resolveCourier(id);
+        var user = courier.getUser();
+
+        if (user.getStatus() == newStatus) {
+            return CourierResponse.from(courier);
+        }
+
+        if (newStatus == UserStatus.INACTIVE) {
+            deactivationValidator.validateCanDeactivate(courier.getId());
+        }
+
+        user.changeStatus(newStatus);
+        users.saveAndFlush(user);
+
+        auditService.logAction(
+                newStatus == UserStatus.INACTIVE
+                        ? AuditAction.COURIER_DEACTIVATED
+                        : AuditAction.COURIER_ACTIVATED,
+                currentPrincipal(),
+                user,
+                "status"
+        );
+
+        return CourierResponse.from(courier);
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public List<CourierHistoryEntry> history(String id) {
+        var user = resolveCourier(id).getUser();
+
+        return auditLogs.findByUsuarioAfectadoIdAndActionInOrderByTimestampDescIdDesc(
+                        user.getId(), COURIER_AUDIT_ACTIONS)
+                .stream()
+                .map(CourierHistoryEntry::from)
+                .toList();
+    }
+
+    private AuthenticatedUser currentPrincipal() {
+        return (AuthenticatedUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
     }
 
     @Transactional(readOnly = true)
