@@ -26,6 +26,33 @@ La configuración está en `src/main/resources/application.properties` y se ajus
 | `MAIL_FROM` | No | Remitente de los correos. |
 | `MAIL_LINK_URL` | No (`http://localhost:5173/recovery`) | Enlace base del correo de recuperación de contraseña. |
 
+### Correo real con Brevo (local)
+
+Para que los correos lleguen a un buzón real, activa el perfil `brevo`
+(`application-brevo.properties`). Las credenciales **no van en el repositorio ni en una carpeta
+sincronizada con la nube**: se guardan en un archivo local fuera del proyecto, por ejemplo
+`C:/Users/<usuario>/.blawdtrack/application-brevo.properties`, con estas propiedades:
+
+```properties
+spring.mail.username=   # "login SMTP" de Brevo (SMTP & API > SMTP)
+spring.mail.password=   # clave SMTP (no la contraseña de la cuenta)
+app.mail.from=          # remitente verificado en Brevo > Senders
+app.mail.link-url=http://localhost:5173/recovery
+```
+
+Se arranca con `SPRING_PROFILES_ACTIVE=brevo` y
+`--spring.config.additional-location=file:C:/Users/<usuario>/.blawdtrack/`. Si `app.mail.from` queda vacío la
+aplicación no arranca ("Mail sender is required").
+
+Puntos que suelen fallar la primera vez:
+
+- **Servidor:** el perfil usa `smtp-relay.sendinblue.com` (puerto 587), no `smtp-relay.brevo.com`: el
+  certificado de Brevo solo cubre los nombres de `sendinblue.com` y Java rechaza el otro con "No subject
+  alternative DNS name matching". No se desactiva la verificación del certificado.
+- **`525 5.7.1 Unauthorized IP address`:** la cuenta de Brevo tiene activo el bloqueo por IP. Se desactiva, o
+  se agrega la IP, en Brevo > Seguridad > Direcciones IP autorizadas.
+- **Clave:** en el campo de contraseña va la clave SMTP (`xsmtpsib-…`), no una clave de API (`xkeysib-…`).
+
 La conexión a MySQL (URL, usuario y contraseña) está en `spring.datasource.*` del mismo archivo. El
 esquema lo crea Flyway al arrancar (`src/main/resources/db/migration`); Hibernate solo lo valida.
 

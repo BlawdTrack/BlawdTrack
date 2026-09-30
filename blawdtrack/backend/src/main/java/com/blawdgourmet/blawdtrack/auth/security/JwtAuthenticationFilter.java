@@ -140,8 +140,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .setAuthentication(authentication);
     }
 
+    /** Vive bajo /api/v1/auth/ pero exige sesión: el filtro debe validar su token. */
+    private static final String OWN_PASSWORD_RESET_ROUTE = "/api/v1/auth/password-reset/request-own";
+
     private boolean isPublicRoute(HttpServletRequest request) {
         String uri = request.getRequestURI();
+
+        if (OWN_PASSWORD_RESET_ROUTE.equals(uri)) {
+            return false;
+        }
 
         return uri.startsWith("/api/v1/auth/")
                 || uri.startsWith("/swagger-ui/")
