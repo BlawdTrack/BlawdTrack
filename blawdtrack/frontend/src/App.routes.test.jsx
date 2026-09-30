@@ -14,7 +14,8 @@ vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla adminis
 vi.mock('./pages/AdminRegistrationPage', () => ({ default: () => <div>Pantalla registro de administrador</div> }));
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
 vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
-vi.mock('./pages/SalesHomePage', () => ({ default: () => <div>Pantalla ventas</div> }));
+vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
+vi.mock('./pages/SalesHomePage',() => ({ default: () => <div>Pantalla ventas</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/PasswordRecoveryRequestPage', () => ({ default: () => <div>Pantalla recuperación</div> }));
 vi.mock('./pages/NewPasswordPage', () => ({ default: () => <div>Pantalla nueva contraseña</div> }));
@@ -47,7 +48,8 @@ const ALLOWED_ROUTES = {
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_DELETE,
     ROUTES.COURIER_CREATE,
-    ROUTES.COURIER_DEACTIVATE, 
+    ROUTES.COURIER_DEACTIVATE,
+    ROUTES.ROLES_PERMISSIONS,
     '/editar-mensajero'
   ],
   [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME],

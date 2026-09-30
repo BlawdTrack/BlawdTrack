@@ -24,4 +24,7 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     @EntityGraph(attributePaths = "actor")
     List<AuditLog> findByUsuarioAfectadoIdAndActionInOrderByTimestampDescIdDesc(
             Long affectedUserId, Collection<String> actions);
+
+    @EntityGraph(attributePaths = "actor")
+    List<AuditLog> findByActionInOrderByTimestampDesc(Collection<String> actions);
 }

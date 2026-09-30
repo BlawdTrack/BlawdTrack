@@ -78,6 +78,11 @@ public class CourierController {
         return service.changeStatus(id, request.status());
     }
 
+    @PatchMapping("/{id}/deactivate")
+    public CourierResponse deactivate(@PathVariable String id) {
+        return service.changeStatus(id, UserStatus.INACTIVE);
+    }
+
     @PatchMapping("/{id}/password")
     public ResponseEntity<Void> changePassword(@PathVariable String id,
                                                @Valid @RequestBody UpdateCourierPasswordRequest request) {

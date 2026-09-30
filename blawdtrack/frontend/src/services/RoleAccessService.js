@@ -6,6 +6,13 @@ import axiosClient from '../api/axiosClient';
  * @param {number[]} permissionIds Ids numéricos de los permisos que el rol tendrá.
  */
 export const replaceRolePermissions = async (roleId, permissionIds) => {
+  const response = await axiosClient.put(
+    `/v1/roles/${encodeURIComponent(roleId)}/permissions`,
+    { permissionIds }
+  );
+  return response.data;
+};
+
 const userPermissionsPath = (documentType, documentNumber) => (
   `/v1/users/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}/permissions`
 );
