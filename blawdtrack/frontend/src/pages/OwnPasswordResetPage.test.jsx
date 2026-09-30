@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useLocation } from 'react-router-dom';
 import { OwnPasswordResetPage } from './OwnPasswordResetPage';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { renderWithProviders } from '../test-utils';
-import { ROUTES } from '../config/routes';
 
 vi.mock('../services/PasswordRecoveryService', () => ({ requestOwnPasswordReset: vi.fn() }));
 
@@ -15,18 +13,7 @@ const USERS = {
   MENSAJERO: { id: 3, fullName: 'Marco Mensajero', email: 'marco@blawdgourmet.com', role: 'MENSAJERO' },
 };
 
-function LocationProbe() {
-  return <div data-testid="path">{useLocation().pathname}</div>;
-}
-
-const renderPage = (user) =>
-  renderWithProviders(
-    <>
-      <OwnPasswordResetPage />
-      <LocationProbe />
-    </>,
-    { user, route: '/restablecer' }
-  );
+const renderPage = (user) => renderWithProviders(<OwnPasswordResetPage />, { user, route: '/restablecer' });
 
 describe('OwnPasswordResetPage (restablecer la propia contraseña)', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -76,16 +63,10 @@ describe('OwnPasswordResetPage (restablecer la propia contraseña)', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('No se pudo conectar');
   });
 
-  it.each([
-    ['SUPER_USUARIO', ROUTES.MAIN_MENU],
-    ['ADMIN_VENTAS', ROUTES.SALES_HOME],
-    ['MENSAJERO', ROUTES.COURIER_HOME],
-  ])('Volver lleva al inicio del rol %s', async (role, home) => {
-    const user = userEvent.setup();
-    renderPage(USERS[role]);
+  it('muestra un único botón: el de enviar el enlace', () => {
+    renderPage(USERS.MENSAJERO);
 
-    await user.click(screen.getByRole('button', { name: 'Volver' }));
-
-    expect(screen.getByTestId('path')).toHaveTextContent(home);
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: 'Volver' })).toBeNull();
   });
 });

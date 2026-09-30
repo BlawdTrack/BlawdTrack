@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Container, Paper, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
-import { getHomeRoute } from '../utils/roleRoutes';
 import { StatusMessage } from '../components/StatusMessage';
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
@@ -17,7 +15,6 @@ const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. 
  */
 export function OwnPasswordResetPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
@@ -39,8 +36,6 @@ export function OwnPasswordResetPage() {
       setLoading(false);
     }
   };
-
-  const homeRoute = getHomeRoute(user?.role);
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
@@ -73,16 +68,14 @@ export function OwnPasswordResetPage() {
             </Box>
           )}
 
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-            <Button variant="contained" onClick={handleSend} disabled={loading}>
-              {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
-            </Button>
-            {homeRoute && (
-              <Button variant="text" onClick={() => navigate(homeRoute)} disabled={loading}>
-                Volver
-              </Button>
-            )}
-          </Box>
+          <Button
+            variant="contained"
+            onClick={handleSend}
+            disabled={loading}
+            sx={{ width: { xs: '100%', sm: 'auto' }, px: 3, py: 1.2, fontWeight: 700 }}
+          >
+            {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
+          </Button>
         </Paper>
       </Container>
     </Box>
