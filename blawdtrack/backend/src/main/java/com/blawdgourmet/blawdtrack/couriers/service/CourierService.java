@@ -15,6 +15,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierDeactivationEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
@@ -51,6 +52,7 @@ public class CourierService {
     private final CourierDeactivationValidator deactivationValidator;
 
     private static final List<String> COURIER_AUDIT_ACTIONS = List.of(
+            AuditAction.COURIER_CREATED.getCode(),
             AuditAction.COURIER_UPDATED.getCode(),
             AuditAction.COURIER_DEACTIVATED.getCode(),
             AuditAction.COURIER_ACTIVATED.getCode(),
@@ -103,6 +105,14 @@ public class CourierService {
                 .schedule(request.schedule())
                 .maxPackageWeightKg(request.maxPackageWeightKg())
                 .build());
+
+        // Como el resto del historial, el detalle no lleva datos personales: solo indica el alta.
+        auditService.logAction(
+                AuditAction.COURIER_CREATED,
+                currentPrincipal(),
+                user,
+                "created"
+        );
 
         events.publishEvent(new CourierRegisteredEvent(
                 user.getId(),
@@ -228,6 +238,20 @@ public class CourierService {
                         user.getId(), COURIER_AUDIT_ACTIONS)
                 .stream()
                 .map(CourierHistoryEntry::from)
+                .toList();
+    }
+
+    /**
+     * Todas las desactivaciones registradas, de la más reciente a la más antigua. La auditoría se conserva
+     * aunque el mensajero se reactive después; solo se omiten las de cuentas ya eliminadas.
+     */
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public List<CourierDeactivationEntry> deactivations() {
+        return auditLogs.findByActionOrderByTimestampDescIdDesc(AuditAction.COURIER_DEACTIVATED.getCode())
+                .stream()
+                .filter(log -> log.getUsuarioAfectado() != null)
+                .map(CourierDeactivationEntry::from)
                 .toList();
     }
 

@@ -92,6 +92,15 @@ export const updateCourierPassword = async (id, password) => {
   );
 };
 
+/**
+ * Auditoría de todas las desactivaciones (`GET /api/v1/couriers/deactivations`), de la más reciente a la
+ * más antigua. Se conserva aunque el mensajero se haya reactivado.
+ */
+export const getCourierDeactivations = async () => {
+  const response = await axiosClient.get('/v1/couriers/deactivations');
+  return response.data;
+};
+
 export const getCourierHistory = async (id) => {
   const response = await axiosClient.get(
     `/v1/couriers/${encodeURIComponent(id)}/history`

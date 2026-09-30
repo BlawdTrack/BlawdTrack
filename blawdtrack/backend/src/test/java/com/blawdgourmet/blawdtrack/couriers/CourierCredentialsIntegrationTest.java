@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.couriers;
 
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
@@ -39,6 +40,7 @@ class CourierCredentialsIntegrationTest {
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
     @Autowired private CourierRepository couriers;
+    @Autowired private AuditLogRepository auditLogs;
     @Autowired private JwtService jwt;
     @Autowired private PasswordEncoder encoder;
     @MockitoBean private JavaMailSender sender;
@@ -95,6 +97,8 @@ class CourierCredentialsIntegrationTest {
             assertThat(passwords.get(0)).isNotEqualTo(passwords.get(1));
             verify(sender, times(2)).send(any(MimeMessage.class));
         } finally {
+            // Cada alta deja un registro de auditoría que referencia a la cuenta: se borra antes que ella.
+            auditLogs.deleteAll();
             for (String email : List.of("courier70e2e0@example.test", "courier70e2e1@example.test", "actor70e2e@example.test")) {
                 users.findByEmail(email).ifPresent(user -> {
                     couriers.findByUserId(user.getId()).ifPresent(couriers::delete);

@@ -23,6 +23,9 @@ import { listCouriers, updateCourierStatus, updateCourierPassword, getCourierHis
 import { formatHistoryEntry } from '../utils/courierHistory';
 import { MIN_PASSWORD_LENGTH, meetsClientPasswordRules } from '../utils/passwordRules';
 import { getInitials } from '../utils/getInitials';
+import { composeSchedule, parseSchedule } from '../utils/courierSchedule';
+import { TimeWheelField } from '../components/TimeWheelField';
+import { WeightWheelField } from '../components/WeightWheelField';
 import Toast from '../components/Toast';
 import StatusMessage from '../components/StatusMessage';
 import './EditMessenger.css';
@@ -32,7 +35,12 @@ const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0
 
 // Muestra solo el rango de horas en la tabla; el detalle de dias queda en el
 // formulario de edicion, no en esta columna.
-const getScheduleTimeRange = (schedule) => (schedule || '').split(',')[0].trim();
+// La API devuelve `status` ("ACTIVE"/"INACTIVE"); `estado` es el nombre heredado en español.
+const isCourierActive = (courier) => (
+  courier.status ? courier.status === 'ACTIVE' : courier.estado !== 'Inactivo'
+);
+
+const getScheduleTimeRange =(schedule) => (schedule || '').split(',')[0].trim();
 
 const CARD_SX = {
   borderRadius: '18px',
@@ -88,6 +96,8 @@ export function EditMessenger({ initialCedula = '' }) {
     email: '',
     phone: '',
     schedule: '',
+    scheduleStart: '',
+    scheduleEnd: '',
     maxLoadCapacityKg: '',
     password: '',
     status: 'ACTIVE'
@@ -139,12 +149,16 @@ export function EditMessenger({ initialCedula = '' }) {
   const loadMessengerData = (courier) => {
     setCurrentCourier(courier);
     setSelectedCourierId(getCourierId(courier));
+    const schedule = courier.schedule || courier.horario || '';
+    const { start: scheduleStart, end: scheduleEnd } = parseSchedule(schedule);
     const initialVals = {
       fullName: courier.fullName || courier.nombre || '',
       email: courier.email || '',
       phone: courier.phone || courier.telefono || '',
-      schedule: courier.schedule || courier.horario || '',
-      maxLoadCapacityKg: courier.maxPackageWeightKg ?? courier.maxLoadCapacityKg ?? courier.cap ?? courier.capacidad ?? '',
+      schedule,
+      scheduleStart,
+      scheduleEnd,
+      maxLoadCapacityKg: String(courier.maxPackageWeightKg ?? courier.maxLoadCapacityKg ?? courier.cap ?? courier.capacidad ?? ''),
       password: '',
       status: courier.status || (courier.estado === 'Inactivo' ? 'INACTIVE' : 'ACTIVE')
     };
@@ -202,6 +216,17 @@ export function EditMessenger({ initialCedula = '' }) {
     }
   };
 
+  // Las ruedas de entrada y salida componen el texto de horario que se envía al backend.
+  const handleScheduleChange = (field, value) => {
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      return { ...next, schedule: composeSchedule(next.scheduleStart, next.scheduleEnd) };
+    });
+    if (formErrors.schedule) {
+      setFormErrors((prev) => ({ ...prev, schedule: null }));
+    }
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -217,6 +242,8 @@ export function EditMessenger({ initialCedula = '' }) {
 
     if (!formData.schedule.trim()) {
       errors.schedule = 'El horario es requerido.';
+    } else if (formData.scheduleStart && formData.scheduleEnd && formData.scheduleEnd <= formData.scheduleStart) {
+      errors.schedule = 'La hora de salida debe ser posterior a la de entrada.';
     }
 
     const capNum = Number(formData.maxLoadCapacityKg);
@@ -280,7 +307,8 @@ export function EditMessenger({ initialCedula = '' }) {
 
     setUpdateError(null);
 
-    const idCard = currentCourier.documentNumber || currentCourier.idCard || currentCourier.cedula || currentCourier.id;
+    // El backend resuelve el mensajero por su id de perfil; un documento de solo dígitos se confundiría con un id.
+    const idCard = currentCourier.id;
 
     // Detectar campos modificados para el log
     const modifiedFields = [];
@@ -323,6 +351,10 @@ export function EditMessenger({ initialCedula = '' }) {
     const statusChanged = formData.status !== initialFormValues.status;
     const passwordChanged = Boolean(formData.password);
 
+    // Pasos que el backend ya guardó (y registró en el historial) aunque un paso posterior falle.
+    let dataSaved = false;
+    let passwordSaved = false;
+
     try {
       if (dataChanged) {
         await updateCourier(idCard, {
@@ -332,11 +364,13 @@ export function EditMessenger({ initialCedula = '' }) {
           schedule: formData.schedule,
           maxPackageWeightKg: Number(formData.maxLoadCapacityKg)
         });
+        dataSaved = true;
       }
 
       // El backend guarda la contraseña cifrada, cierra la sesión del mensajero y la registra en el historial.
       if (passwordChanged) {
         await updateCourierPassword(currentCourier.id, formData.password);
+        passwordSaved = true;
       }
 
       // Criterio de aceptación 1: el backend cierra la sesión activa al cambiar el estado de acceso.
@@ -364,6 +398,10 @@ export function EditMessenger({ initialCedula = '' }) {
         status: formData.status
       };
       setCurrentCourier(updatedCourier);
+      // La tabla de la flota refleja de inmediato los datos y el estado guardados.
+      setCouriersList((prev) => prev.map((courier) => (
+        courier.id === updatedCourier.id ? { ...courier, ...updatedCourier } : courier
+      )));
       setInitialFormValues({ ...formData, password: '' });
       setFormData((prev) => ({ ...prev, password: '' }));
 
@@ -373,6 +411,35 @@ export function EditMessenger({ initialCedula = '' }) {
         severity: 'success'
       });
     } catch (err) {
+      // Si un paso anterior ya quedó guardado, la pantalla y el historial deben reflejarlo igualmente:
+      // el historial se recarga y no se vuelve a enviar lo ya guardado (p. ej. la contraseña).
+      if (dataSaved || passwordSaved) {
+        loadHistory(currentCourier.id);
+        loadCouriersList();
+        if (passwordSaved) {
+          setFormData((prev) => ({ ...prev, password: '' }));
+        }
+        if (dataSaved) {
+          const savedData = {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            schedule: formData.schedule,
+            scheduleStart: formData.scheduleStart,
+            scheduleEnd: formData.scheduleEnd,
+            maxLoadCapacityKg: formData.maxLoadCapacityKg
+          };
+          setInitialFormValues((prev) => ({ ...prev, ...savedData }));
+          setCurrentCourier((prev) => ({
+            ...prev,
+            fullName: savedData.fullName,
+            email: savedData.email,
+            phone: savedData.phone,
+            schedule: savedData.schedule,
+            maxPackageWeightKg: Number(savedData.maxLoadCapacityKg)
+          }));
+        }
+      }
       const errorMessage = err.response?.data?.message || err.message || 'Error al actualizar la información del mensajero.';
       setUpdateError(errorMessage);
       setToast({
@@ -512,14 +579,14 @@ export function EditMessenger({ initialCedula = '' }) {
                     </TableCell>
                     <TableCell sx={{ width: '13%', px: 3, py: '14px' }}>
                       <Chip
-                        label={courier.status === 'ACTIVE' || !courier.estado ? 'Activo' : 'Inactivo'}
+                        label={isCourierActive(courier) ? 'Activo' : 'Inactivo'}
                         size="small"
                         sx={{
                           fontSize: '11.5px',
                           fontWeight: 700,
                           borderRadius: '20px',
-                          bgcolor: courier.status === 'ACTIVE' || !courier.estado ? '#E9F3EC' : '#F1ECE7',
-                          color: courier.status === 'ACTIVE' || !courier.estado ? '#2F7D4F' : '#6B6560',
+                          bgcolor: isCourierActive(courier) ? '#E9F3EC' : '#F1ECE7',
+                          color: isCourierActive(courier) ? '#2F7D4F' : '#6B6560',
                         }}
                       />
                     </TableCell>
@@ -604,32 +671,49 @@ export function EditMessenger({ initialCedula = '' }) {
 
               <Box>
                 <Typography sx={LABEL_SX}>Horario</Typography>
-                <TextField
-                  fullWidth
-                  name="schedule"
-                  value={formData.schedule}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.schedule)}
-                  helperText={formErrors.schedule}
-                  placeholder="Ej. 6:00 am – 2:00 pm"
-                  sx={INPUT_SX}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <TimeWheelField
+                    id="scheduleStart"
+                    label="Hora de entrada"
+                    value={formData.scheduleStart}
+                    error={Boolean(formErrors.schedule)}
+                    onChange={(v) => handleScheduleChange('scheduleStart', v)}
+                  />
+                  <Typography component="span" sx={{ color: '#6B6560' }}>a</Typography>
+                  <TimeWheelField
+                    id="scheduleEnd"
+                    label="Hora de salida"
+                    value={formData.scheduleEnd}
+                    error={Boolean(formErrors.schedule)}
+                    onChange={(v) => handleScheduleChange('scheduleEnd', v)}
+                  />
+                </Box>
+                {formData.schedule && !formData.scheduleStart && (
+                  <Typography variant="caption" sx={{ display: 'block', mt: 0.5, mx: 1.75, color: '#6B6560' }}>
+                    Horario actual: {formData.schedule}. Elige las horas para cambiarlo.
+                  </Typography>
+                )}
+                {formErrors.schedule && (
+                  <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
+                    {formErrors.schedule}
+                  </Typography>
+                )}
               </Box>
 
               <Box>
                 <Typography sx={LABEL_SX}>Capacidad máxima de carga (kg)</Typography>
-                <TextField
-                  fullWidth
-                  name="maxLoadCapacityKg"
-                  type="number"
+                <WeightWheelField
+                  id="maxLoadCapacityKg"
+                  label="Capacidad máxima de carga"
                   value={formData.maxLoadCapacityKg}
-                  onChange={handleChange}
                   error={Boolean(formErrors.maxLoadCapacityKg)}
-                  helperText={formErrors.maxLoadCapacityKg}
-                  placeholder="Valor positivo (ej. 25)"
-                  inputProps={{ min: '1', step: 'any' }}
-                  sx={INPUT_SX}
+                  onChange={(v) => handleChange({ target: { name: 'maxLoadCapacityKg', value: v } })}
                 />
+                {formErrors.maxLoadCapacityKg && (
+                  <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
+                    {formErrors.maxLoadCapacityKg}
+                  </Typography>
+                )}
               </Box>
 
               <Box>

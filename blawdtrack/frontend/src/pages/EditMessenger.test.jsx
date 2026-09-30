@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import EditMessenger from './EditMessenger';
 import { useAuth } from '../hooks/useAuth';
 import * as CourierService from '../services/CourierService';
@@ -17,6 +18,23 @@ vi.mock('../services/CourierService', () => ({
   getCourierHistory: vi.fn().mockResolvedValue([])
 }));
 
+// Las ruedas de horario y capacidad son las mismas de "Crear mensajero".
+async function pickTime(user, label, hour, period) {
+  await user.click(screen.getByRole('textbox', { name: label }));
+  const pick = (name, text) =>
+    user.click(within(screen.getByRole('listbox', { name })).getAllByRole('option', { name: text })[0]);
+  await pick(/: hora$/i, hour);
+  await pick(/: am o pm$/i, period);
+  await user.click(screen.getByRole('button', { name: 'Listo' }));
+}
+
+async function pickWeight(user, arrowDownPresses) {
+  await user.click(screen.getByRole('textbox', { name: /capacidad máxima/i }));
+  screen.getByRole('listbox', { name: /capacidad máxima/i }).focus();
+  await user.keyboard(`{ArrowDown>${arrowDownPresses}/}`);
+  await user.click(screen.getByRole('button', { name: 'Listo' }));
+}
+
 describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
   const mockUser = {
     id: 1,
@@ -26,7 +44,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
   };
 
   const mockCourier = {
-    id: '1-0345-0678',
+    id: 7,
     documentNumber: '1-0345-0678',
     fullName: 'María José Solano',
     email: 'maria.solano@example.com',
@@ -58,27 +76,39 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('María José Solano')).toBeTruthy();
-      expect(screen.getByDisplayValue('6:00 am – 2:00 pm')).toBeTruthy();
-      expect(screen.getByDisplayValue('25')).toBeTruthy();
+      // Horario y capacidad se muestran en las ruedas de la pantalla de creación.
+      expect(screen.getByRole('textbox', { name: /hora de entrada/i })).toHaveValue('6:00 am');
+      expect(screen.getByRole('textbox', { name: /hora de salida/i })).toHaveValue('2:00 pm');
+      expect(screen.getByRole('textbox', { name: /capacidad máxima/i })).toHaveValue('25 kg');
     });
   });
 
-  it('T04: Valida en cliente que la capacidad máxima de carga sea un valor numérico positivo (> 0)', async () => {
+  it('T04: Cambiar las ruedas de horario envía el horario compuesto al backend', async () => {
+    const user = userEvent.setup();
     render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
+
+    await pickTime(user, /hora de entrada/i, '08', 'am');
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('25')).toBeTruthy();
+      expect(CourierService.updateCourier).toHaveBeenCalledWith(
+        7,
+        expect.objectContaining({ schedule: '8:00 am – 2:00 pm' })
+      );
     });
+  });
 
-    const capInput = screen.getByDisplayValue('25');
-    fireEvent.change(capInput, { target: { value: '-5' } });
+  it('T04: Valida en cliente que la hora de salida sea posterior a la de entrada', async () => {
+    const user = userEvent.setup();
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
 
-    const saveButton = screen.getByRole('button', { name: /guardar cambios/i });
-    fireEvent.click(saveButton);
+    await pickTime(user, /hora de salida/i, '05', 'am');
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText('La capacidad máxima de carga debe ser un valor numérico positivo.')).toBeTruthy();
-    });
+    expect(await screen.findByText('La hora de salida debe ser posterior a la de entrada.')).toBeTruthy();
+    expect(CourierService.updateCourier).not.toHaveBeenCalled();
   });
 
   it('T04: Bloquea el cambio de estado si el mensajero tiene envíos en proceso o está en labores', async () => {
@@ -114,7 +144,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
     await waitFor(() => {
       expect(CourierService.updateCourier).toHaveBeenCalledWith(
-        '1-0345-0678',
+        7,
         expect.objectContaining({
           fullName: 'María José Solano Editada',
           schedule: '6:00 am – 2:00 pm',
@@ -136,23 +166,73 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
           }]
         : []
     );
+    const user = userEvent.setup();
     render(<EditMessenger initialCedula="1-0345-0678" />);
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('25')).toBeTruthy();
+      expect(screen.getByRole('textbox', { name: /capacidad máxima/i })).toHaveValue('25 kg');
     });
 
-    const capInput = screen.getByDisplayValue('25');
-    fireEvent.change(capInput, { target: { value: '35' } });
+    await pickWeight(user, 10);
+    expect(screen.getByRole('textbox', { name: /capacidad máxima/i })).not.toHaveValue('25 kg');
 
-    const saveButton = screen.getByRole('button', { name: /guardar cambios/i });
-    fireEvent.click(saveButton);
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/Campos modificados: Capacidad de carga/i)).toBeTruthy();
       expect(screen.getByText('Historial de modificaciones')).toBeTruthy();
     });
     CourierService.getCourierHistory.mockResolvedValue([]);
+  });
+
+  const fleetRow = (name) => screen.getAllByRole('row').find((row) => within(row).queryByText(name));
+
+  it('T04: La tabla de la flota marca como Inactivo al mensajero que la API devuelve inactivo', async () => {
+    CourierService.listCouriers.mockResolvedValue([
+      mockCourier,
+      { ...mockCourier, id: 8, documentNumber: '2-0456-0789', fullName: 'Pedro Inactivo', status: 'INACTIVE' }
+    ]);
+    render(<EditMessenger />);
+
+    await waitFor(() => expect(fleetRow('Pedro Inactivo')).toBeTruthy());
+    expect(within(fleetRow('Pedro Inactivo')).getByText('Inactivo')).toBeTruthy();
+    expect(within(fleetRow('María José Solano')).getByText('Activo')).toBeTruthy();
+  });
+
+  it('T04: Al quitar el acceso y guardar, la tabla de la flota pasa a Inactivo', async () => {
+    const user = userEvent.setup();
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
+    expect(within(fleetRow('María José Solano')).getByText('Activo')).toBeTruthy();
+
+    await user.click(screen.getByRole('switch'));
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => {
+      expect(CourierService.updateCourierStatus).toHaveBeenCalledWith(7, 'INACTIVE');
+      expect(within(fleetRow('María José Solano')).getByText('Inactivo')).toBeTruthy();
+    });
+  });
+
+  it('T04: Si falla el cambio de estado tras guardar los datos, el historial se recarga igualmente', async () => {
+    CourierService.updateCourierStatus.mockRejectedValue({
+      response: { data: { message: 'El mensajero tiene envíos activos' } }
+    });
+    const user = userEvent.setup();
+    render(<EditMessenger initialCedula="1-0345-0678" />);
+    await waitFor(() => expect(screen.getByDisplayValue('María José Solano')).toBeTruthy());
+    await waitFor(() => expect(CourierService.getCourierHistory).toHaveBeenCalled());
+    const historyCallsBefore = CourierService.getCourierHistory.mock.calls.length;
+
+    fireEvent.change(screen.getByDisplayValue('María José Solano'), { target: { value: 'María José Editada' } });
+    await user.click(screen.getByRole('switch'));
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => {
+      expect(CourierService.updateCourier).toHaveBeenCalled();
+      expect(CourierService.updateCourierStatus).toHaveBeenCalled();
+      expect(CourierService.getCourierHistory.mock.calls.length).toBeGreaterThan(historyCallsBefore);
+    });
   });
 
   it('T06: Muestra notificación de éxito (Toast) tras guardar los cambios correctamente', async () => {
@@ -181,7 +261,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
     await waitFor(() => {
-      expect(CourierService.updateCourierPassword).toHaveBeenCalledWith('1-0345-0678', 'Nueva2026x');
+      expect(CourierService.updateCourierPassword).toHaveBeenCalledWith(7, 'Nueva2026x');
     });
     expect(CourierService.updateCourierStatus).not.toHaveBeenCalled();
     await waitFor(() => {

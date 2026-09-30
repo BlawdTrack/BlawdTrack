@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierDeactivationEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
@@ -88,6 +89,12 @@ public class CourierController {
                                                @Valid @RequestBody UpdateCourierPasswordRequest request) {
         service.changePassword(id, request.password());
         return ResponseEntity.noContent().build();
+    }
+
+    /** Auditoría de todas las desactivaciones, aunque el mensajero ya se haya reactivado. */
+    @GetMapping("/deactivations")
+    public List<CourierDeactivationEntry> deactivations() {
+        return service.deactivations();
     }
 
     @GetMapping("/{id}/history")

@@ -87,7 +87,7 @@ sequenceDiagram
 
 | Archivo | Rol |
 |---|---|
-| `components/MessengerFleetList.jsx` | Pantalla con lista, búsqueda y auditoría de la sesión. |
+| `components/MessengerFleetList.jsx` | Pantalla con lista, búsqueda y auditoría de desactivaciones. |
 | `components/DeactivateMessengerModal.jsx` | Confirmación de la desactivación. |
 | `hooks/useDeactivateMessenger.js`, `services/CourierService.js` | Llamada al endpoint. |
 
@@ -109,7 +109,6 @@ No hay tests propios de `MessengerFleetList` ni del modal en `develop`.
 ## Limitaciones conocidas en `develop`
 
 - El endpoint `/deactivate` no existe: el botón termina en error.
-- La "Auditoría de desactivaciones" de la pantalla es solo del navegador (se pierde al recargar).
 - La regla de asignaciones activas es provisional hasta que exista el módulo de paquetes.
 
 ## Cambios pendientes en el PR abierto
@@ -117,5 +116,9 @@ No hay tests propios de `MessengerFleetList` ni del modal en `develop`.
 - `PATCH /api/v1/couriers/{id}/deactivate` delega en el cambio de estado de HU004: cierra la sesión,
   valida las asignaciones, audita y conserva la cuenta y el perfil.
 - La pantalla toma la fecha, la hora y el autor de la auditoría del backend.
+- `GET /api/v1/couriers/deactivations` devuelve todas las desactivaciones registradas (fecha, mensajero,
+  documento y autor), de la más reciente a la más antigua, solo para el Super Usuario. La pantalla las
+  carga al abrirse y tras cada desactivación, así que la auditoría se conserva aunque el mensajero se
+  reactive o se recargue la página: en la base de datos nunca se borra.
 - Tests nuevos de la pantalla (confirmar, desactivar por id y 409) y del endpoint (sesión cerrada, 409 y
   permisos).

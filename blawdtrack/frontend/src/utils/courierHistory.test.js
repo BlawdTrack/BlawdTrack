@@ -10,6 +10,11 @@ describe('formatHistoryEntry (HU-004 historial)', () => {
     expect(row.by).toBe('Súper Usuario');
   });
 
+  it('describe el alta del mensajero sin mostrar el detalle interno', () => {
+    expect(formatHistoryEntry({ ...BASE, action: 'CREAR_MENSAJERO', details: 'created' }, 0).text)
+      .toBe('Mensajero registrado');
+  });
+
   it('describe el cambio de estado de acceso y que se cerró la sesión', () => {
     expect(formatHistoryEntry({ ...BASE, action: 'DESACTIVAR_MENSAJERO', details: 'status' }, 0).text)
       .toContain('Inactivo');
