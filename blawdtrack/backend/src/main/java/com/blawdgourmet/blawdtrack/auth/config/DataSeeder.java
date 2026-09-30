@@ -2,6 +2,7 @@ package com.blawdgourmet.blawdtrack.auth.config;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,7 +16,6 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
  * que corre antes (@Order) para que el rol Super Usuario ya exista aquí.
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 @Order(2)
 public class DataSeeder implements CommandLineRunner {
@@ -44,6 +43,24 @@ public class DataSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final boolean resetSuperUserPassword;
+
+    /**
+     * @param resetSuperUserPassword si es {@code true}, cada arranque deja al Super Usuario por defecto con la
+     *        contraseña de desarrollo aunque alguien la haya cambiado (propiedad
+     *        {@code app.seed.super-user.reset-password}). Solo para entornos de desarrollo: esa contraseña
+     *        está en el repositorio, así que en un despliegue real debe estar desactivada.
+     */
+    public DataSeeder(
+            RoleRepository roleRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            @Value("${app.seed.super-user.reset-password:false}") boolean resetSuperUserPassword) {
+        this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.resetSuperUserPassword = resetSuperUserPassword;
+    }
 
     @Override
     public void run(String... args) {
@@ -75,6 +92,20 @@ public class DataSeeder implements CommandLineRunner {
                 );
                 log.info(
                         "Default Super User legacy password updated"
+                );
+                updated = true;
+            }
+
+            if (resetSuperUserPassword && !hasDefaultPassword(admin)) {
+                // changePassword también cierra las sesiones abiertas con la contraseña anterior.
+                admin.changePassword(
+                        passwordEncoder.encode(
+                                DEFAULT_SUPER_USER_PASSWORD
+                        )
+                );
+                log.warn(
+                        "Default Super User password restored (app.seed.super-user.reset-password=true); "
+                                + "disable it outside development"
                 );
                 updated = true;
             }
@@ -144,6 +175,13 @@ public class DataSeeder implements CommandLineRunner {
                         + "A password change should be enforced "
                         + "before going to production.",
                 DEFAULT_SUPER_USER_EMAIL
+        );
+    }
+
+    private boolean hasDefaultPassword(User user) {
+        return passwordEncoder.matches(
+                DEFAULT_SUPER_USER_PASSWORD,
+                user.getPasswordHash()
         );
     }
 
