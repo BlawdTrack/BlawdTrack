@@ -16,6 +16,7 @@ import {
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
 import { deleteAdministrator, getAdministrators, getAdminAuditLog } from '../services/AdminService';
+import { usePolling, keepIfEqual } from '../hooks/usePolling';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
@@ -60,8 +61,8 @@ const CARD_HEADER_SX = {
 /**
  * Pantalla "Eliminar administrador" (HU-008), exclusiva del Super Usuario. Lista los administradores de
  * ventas (`GET /api/v1/admins`), permite buscarlos por tipo y número de documento y abre
- * `DeleteAdminModal` para confirmar. Un administrador con sesión activa no se puede eliminar; los
- * errores del backend (404 y 409) se muestran en el modal y en una notificación.
+ * `DeleteAdminModal` para confirmar. Un administrador con sesión activa sí se puede eliminar: el modal
+ * avisa y su sesión se cierra al borrarlo. Los errores del backend (404) se muestran en el modal.
  */
 const AdminManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -109,6 +110,18 @@ const AdminManagement = () => {
     fetchAuditLog();
   }, []);
 
+  // Refresca la lista en segundo plano para que el estado de sesión ("Sesión activa" / "Sin sesión")
+  // se mantenga al día sin recargar la página. Falla en silencio: si una consulta no responde, se
+  // conserva la lista actual y se reintenta en el siguiente ciclo.
+  usePolling(async () => {
+    try {
+      const data = await getAdministrators();
+      setAdmins((current) => keepIfEqual(current, data));
+    } catch (err) {
+      console.error('No se pudo actualizar la lista de administradores:', err);
+    }
+  });
+
   const handleOpenModal = (admin) => {
     setDeleteError(null);
     setSelectedAdmin(admin);
@@ -132,10 +145,6 @@ const AdminManagement = () => {
 
     if (responseStatus === 404) {
       return 'Administrador no existente.';
-    }
-
-    if (responseStatus === 409) {
-      return 'No se puede eliminar el administrador porque tiene sesiones activas. Cierre sus sesiones e intente nuevamente.';
     }
 
     if (responseStatus === 401 || responseStatus === 403) {
@@ -330,12 +339,12 @@ const AdminManagement = () => {
                           borderRadius: '20px',
                           bgcolor: blocked ? '#FCF3E3' : '#F1ECE7',
                           color: blocked ? '#B27A0C' : '#6B6560',
+                          transition: 'background-color .4s ease, color .4s ease',
                         }}
                       />
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
                         <Button
                           variant="outlined"
-                          disabled={blocked}
                           onClick={() => handleOpenModal(user)}
                           sx={{
                             borderRadius: '10px',
@@ -345,18 +354,13 @@ const AdminManagement = () => {
                             fontSize: '13.5px',
                             textTransform: 'none',
                             bgcolor: '#fff',
-                            color: blocked ? '#9E968D' : '#C0392B',
-                            borderColor: blocked ? '#DCD4CA' : '#C0392B',
-                            '&:hover': { bgcolor: blocked ? '#fff' : '#FCEDEA', borderColor: blocked ? '#DCD4CA' : '#C0392B' },
+                            color: '#C0392B',
+                            borderColor: '#C0392B',
+                            '&:hover': { bgcolor: '#FCEDEA', borderColor: '#C0392B' },
                           }}
                         >
                           Eliminar
                         </Button>
-                        {blocked && (
-                          <Typography sx={{ fontSize: '10.5px', color: '#9E968D' }}>
-                            Requiere cierre de sesión
-                          </Typography>
-                        )}
                       </Box>
                     </Box>
                   </Box>
