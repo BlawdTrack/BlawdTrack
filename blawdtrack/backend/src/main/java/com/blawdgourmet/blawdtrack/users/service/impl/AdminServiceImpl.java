@@ -27,7 +27,6 @@ import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminSummaryResponse;
-import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -198,10 +197,10 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
 
         boolean hasActiveSession = hasActiveSession(admin);
-        boolean eligible = !hasActiveSession;
-        String reason = eligible
-                ? null
-                : "El administrador tiene una sesión activa. Debe cerrarla antes de eliminarlo.";
+        boolean eligible = true;
+        String reason = hasActiveSession
+                ? "El administrador tiene una sesión abierta; se cerrará automáticamente al eliminarlo."
+                : null;
 
         return new AdminDeletionEligibilityResponse(
                 admin.getId(),
@@ -227,11 +226,8 @@ public class AdminServiceImpl implements AdminService {
             throw new AccessDeniedException("No se puede eliminar un usuario que no es Administrador de Ventas.");
         }
 
-        if (hasActiveSession(user)) {
-            throw new AdminSessionActiveException(
-                    "El administrador tiene una sesión activa. Cierre primero la sesión antes de eliminarlo.");
-        }
-
+        // Una sesión abierta no bloquea la eliminación: al borrar al usuario el filtro JWT deja de
+        // encontrarlo y su token se rechaza en la siguiente petición, lo que cierra la sesión.
         auditService.registrarEliminacionAdministrador(actor, user);
         relatedRecordsCleaner.removeFor(user.getId());
         userRepository.delete(user);
