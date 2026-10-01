@@ -39,6 +39,15 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Confirma que la sesión del token sigue vigente (204). Si el usuario fue desactivado, eliminado o cerró
+     * sesión, el filtro JWT responde 401 antes de llegar aquí; el frontend lo consulta periódicamente.
+     */
+    @GetMapping("/session")
+    public ResponseEntity<Void> session() {
+        return ResponseEntity.noContent().build();
+    }
+
     /** Cierra la sesión del usuario autenticado (cualquier rol): invalida su token y limpia su última sesión. */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal AuthenticatedUser user) {

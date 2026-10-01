@@ -144,7 +144,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /** Rutas bajo /api/v1/auth/ que exigen sesión: el filtro debe validar su token. */
     private static final Set<String> AUTHENTICATED_AUTH_ROUTES = Set.of(
             "/api/v1/auth/password-reset/request-own",
-            "/api/v1/auth/logout");
+            "/api/v1/auth/logout",
+            "/api/v1/auth/session");
 
     private boolean isPublicRoute(HttpServletRequest request) {
         String uri = request.getRequestURI();

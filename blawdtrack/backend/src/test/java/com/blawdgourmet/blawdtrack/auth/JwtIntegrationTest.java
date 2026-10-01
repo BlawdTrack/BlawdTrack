@@ -120,14 +120,41 @@ class JwtIntegrationTest {
         entityManager.clear();
         assertThat(users.findById(user.getId()).orElseThrow().getLastLoginAt()).isNotNull();
 
+        mvc.perform(get("/api/v1/auth/session").header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
         mvc.perform(post("/api/v1/auth/logout").header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
+        mvc.perform(get("/api/v1/auth/session").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
 
         entityManager.clear();
         assertThat(users.findById(user.getId()).orElseThrow().getLastLoginAt()).isNull();
         mvc.perform(get("/test/jwt/me").header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized());
         mvc.perform(post("/api/v1/auth/logout")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/auth/session")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void sesionDejaDeSerValidaCuandoElUsuarioEsDesactivado() throws Exception {
+        Role role = roles.save(Role.builder().name("DESACTIVADO_ROLE").build());
+        User user = users.saveAndFlush(User.builder()
+                .documentId("DESACT1").fullName("Usuario Desactivado")
+                .email("desactivado@example.com")
+                .passwordHash(passwordEncoder.encode("Desact-password1!"))
+                .status(UserStatus.ACTIVE).role(role).build());
+        String token = jwtService.generateToken(new UserPrincipal(user));
+
+        mvc.perform(get("/api/v1/auth/session").header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        user.changeStatus(UserStatus.INACTIVE);
+        users.saveAndFlush(user);
+        entityManager.clear();
+
+        mvc.perform(get("/api/v1/auth/session").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

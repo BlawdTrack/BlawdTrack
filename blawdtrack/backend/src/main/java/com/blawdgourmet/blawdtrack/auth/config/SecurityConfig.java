@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         // Restablecer la propia contraseña exige sesión (cualquier rol): va ANTES de la
                         // regla pública de /api/v1/auth/**, que es la que coincidiría primero.
-                        .requestMatchers("/api/v1/auth/password-reset/request-own", "/api/v1/auth/logout").authenticated()
+                        .requestMatchers("/api/v1/auth/password-reset/request-own", "/api/v1/auth/logout", "/api/v1/auth/session").authenticated()
                         .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
                         // La autorizacion se resuelve aqui, antes del binding y la validacion de los
                         // parametros: con solo @PreAuthorize, un rol sin permiso recibiria un 400 de
