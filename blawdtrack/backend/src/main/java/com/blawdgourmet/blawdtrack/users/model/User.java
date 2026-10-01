@@ -123,12 +123,18 @@ public class User {
             return;
         }
         this.status = newStatus;
-        this.tokenVersion++;
+        closeSessions();
     }
 
     /** Reemplaza el hash y sube {@code tokenVersion}, cerrando las sesiones abiertas con la contraseña anterior. */
     public void changePassword(String newPasswordHash) {
         this.passwordHash = newPasswordHash;
+        closeSessions();
+    }
+
+    /** Invalida los JWT emitidos y limpia el último inicio de sesión para que no figure con sesión abierta. */
+    private void closeSessions() {
         this.tokenVersion++;
+        this.lastLoginAt = null;
     }
 }
