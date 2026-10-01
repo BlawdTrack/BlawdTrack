@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { login as loginService } from '../services/AuthService';
+import { login as loginService, logout as logoutService } from '../services/AuthService';
 import {
   saveAuthSession,
   getStoredUser,
   clearAuthSession,
   hasActiveSession,
+  getStoredToken,
   buildUserFromLoginResponse,
 } from '../utils/authStorage';
 import { getLoginError } from '../utils/authErrors';
@@ -84,6 +85,10 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    // Avisa al backend para que registre la sesión como cerrada; si falla (p. ej. el token ya venció)
+    // no importa, la sesión local se cierra igual.
+    const token = getStoredToken();
+    if (token) logoutService(token).catch(() => {});
     clearAuthSession();
     setUser(null);
   };

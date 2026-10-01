@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.auth.security;
 
+import java.util.Set;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -140,13 +141,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .setAuthentication(authentication);
     }
 
-    /** Vive bajo /api/v1/auth/ pero exige sesión: el filtro debe validar su token. */
-    private static final String OWN_PASSWORD_RESET_ROUTE = "/api/v1/auth/password-reset/request-own";
+    /** Rutas bajo /api/v1/auth/ que exigen sesión: el filtro debe validar su token. */
+    private static final Set<String> AUTHENTICATED_AUTH_ROUTES = Set.of(
+            "/api/v1/auth/password-reset/request-own",
+            "/api/v1/auth/logout");
 
     private boolean isPublicRoute(HttpServletRequest request) {
         String uri = request.getRequestURI();
 
-        if (OWN_PASSWORD_RESET_ROUTE.equals(uri)) {
+        if (AUTHENTICATED_AUTH_ROUTES.contains(uri)) {
             return false;
         }
 

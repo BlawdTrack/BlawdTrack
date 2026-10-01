@@ -100,6 +100,37 @@ class JwtIntegrationTest {
     }
 
     @Test
+    void logoutInvalidaElTokenYLimpiaElUltimoInicioDeSesion() throws Exception {
+        Role role = roles.save(Role.builder().name("LOGOUT_ROLE").build());
+        User user = users.saveAndFlush(User.builder()
+                .documentId("LOGOUT1").fullName("Usuario Logout")
+                .email("logout@example.com")
+                .passwordHash(passwordEncoder.encode("Logout-password1!"))
+                .status(UserStatus.ACTIVE).role(role).build());
+
+        var result = mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"logout@example.com","password":"Logout-password1!"}
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+        String token = objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("token").asText();
+        entityManager.clear();
+        assertThat(users.findById(user.getId()).orElseThrow().getLastLoginAt()).isNotNull();
+
+        mvc.perform(post("/api/v1/auth/logout").header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        entityManager.clear();
+        assertThat(users.findById(user.getId()).orElseThrow().getLastLoginAt()).isNull();
+        mvc.perform(get("/test/jwt/me").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/v1/auth/logout")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void tokenExistenteUsaPermisosActualizadosEnCadaSolicitud() throws Exception {
         Permission permission = permissions.save(Permission.builder()
                 .code("TASK103_ACCESS").description("Acceso de prueba").build());

@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +37,13 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.authenticate(request);
         return ResponseEntity.ok(response);
+    }
+
+    /** Cierra la sesión del usuario autenticado (cualquier rol): invalida su token y limpia su última sesión. */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal AuthenticatedUser user) {
+        authService.logout(user.id());
+        return ResponseEntity.noContent().build();
     }
 
     /**
