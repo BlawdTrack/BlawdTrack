@@ -61,6 +61,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("lastLoginAt") LocalDateTime lastLoginAt
     );
 
+    /** Cierra la sesión: limpia el último inicio de sesión y sube la versión para invalidar los JWT emitidos. */
+    @Modifying(
+            clearAutomatically = true,
+            flushAutomatically = true
+    )
+    @Query("""
+            update User u
+            set u.lastLoginAt = null, u.tokenVersion = u.tokenVersion + 1
+            where u.id = :id
+            """)
+    int closeSession(@Param("id") Long id);
+
     Optional<User> findByDocumentTypeAndDocumentNumber(
             DocumentType documentType,
             String documentNumber
