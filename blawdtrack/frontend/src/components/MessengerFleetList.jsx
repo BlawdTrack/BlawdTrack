@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
+import { usePolling, keepIfEqual } from '../hooks/usePolling';
 import { listCouriers, getCourierDeactivations } from '../services/CourierService';
 import { formatHistoryEntry } from '../utils/courierHistory';
 import { getInitials } from '../utils/getInitials';
@@ -121,6 +122,19 @@ export const MessengerFleetList = () => {
 
     fetchMessengers();
   }, [logout]);
+
+  // Mantiene al día la lista y la auditoría sin recargar la página. Falla en silencio: si una consulta
+  // no responde (o la sesión venció, de lo que ya se encarga el interceptor) se conserva lo que hay.
+  usePolling(async () => {
+    try {
+      const data = await listCouriers();
+      if (Array.isArray(data)) setMessengers((current) => keepIfEqual(current, data));
+      const audit = await fetchDeactivationAudit();
+      setAuditLogs((current) => keepIfEqual(current, audit));
+    } catch (refreshError) {
+      console.error('No se pudo actualizar la lista de mensajeros:', refreshError);
+    }
+  });
 
   const handleOpenModal = (messenger) => {
     setSelectedMessenger(messenger);

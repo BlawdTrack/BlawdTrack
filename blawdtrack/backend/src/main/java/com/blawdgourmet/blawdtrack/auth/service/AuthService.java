@@ -30,6 +30,12 @@ public class AuthService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
+    /** Cierra la sesión del usuario: su token deja de ser válido y deja de figurar con sesión activa. */
+    @Transactional
+    public void logout(Long userId) {
+        userRepository.closeSession(userId);
+    }
+
     /**
      * Autentica con correo y contraseña, registra la fecha del último inicio de sesión (que usan
      * otras reglas para saber si hay una sesión activa) y emite el JWT.
