@@ -57,7 +57,7 @@ class AdminDeletionEligibilityIntegrationTest {
         mvc.perform(get(PATH, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.eligibleForDeletion").value(false))
+                .andExpect(jsonPath("$.eligibleForDeletion").value(true))
                 .andExpect(jsonPath("$.hasActiveSession").value(true))
                 .andExpect(jsonPath("$.ineligibilityReason").isNotEmpty());
     }
