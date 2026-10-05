@@ -14,7 +14,6 @@ import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
 import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
-import com.blawdgourmet.blawdtrack.users.exception.AdminSessionActiveException;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.RolePermissionException;
 import com.blawdgourmet.blawdtrack.users.service.UserNotFoundException;
@@ -148,17 +147,6 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
-
-    @ExceptionHandler(AdminSessionActiveException.class)
-    public ResponseEntity<ApiError> manejarSesionActiva(AdminSessionActiveException ex) {
-        ApiError error = ApiError.builder()
-                .code("ADMINISTRADOR_CON_SESION_ACTIVA")
-                .message(ex.getMessage())
-                .status(HttpStatus.CONFLICT.value())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

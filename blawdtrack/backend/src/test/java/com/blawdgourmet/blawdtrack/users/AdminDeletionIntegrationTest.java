@@ -220,18 +220,19 @@ class AdminDeletionIntegrationTest {
     }
 
     @Test
-    void administradorConSesionActivaSeBloquea() throws Exception {
+    void administradorConSesionActivaSeEliminaYSuSesionSeCierra() throws Exception {
         User admin = createAdmin("9-0000-0006", UserStatus.INACTIVE);
         admin.setLastLoginAt(LocalDateTime.now());
         users.saveAndFlush(admin);
 
         mvc.perform(delete(RUTA, admin.getDocumentType(), admin.getDocumentNumber())
                         .header("Authorization", bearerFor(RoleName.SUPER_USER)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("El administrador tiene una sesión activa. Cierre primero la sesión antes de eliminarlo."));
+                .andExpect(status().isOk());
 
-        assertThat(users.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber())).isPresent();
-        assertThat(audits.findAll()).isEmpty();
+        entityManager.clear();
+        assertThat(users.findById(admin.getId())).isEmpty();
+        assertThat(audits.findAll())
+                .anySatisfy(audit -> assertThat(audit.getAction()).isEqualTo("ELIMINAR_ADMINISTRADOR"));
     }
 
     @Test

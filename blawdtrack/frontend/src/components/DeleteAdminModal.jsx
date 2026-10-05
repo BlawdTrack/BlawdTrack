@@ -95,6 +95,12 @@ const DeleteAdminModal = ({
           registrada en auditoría con fecha, hora y responsable.
         </Typography>
 
+        {adminData.hasActiveSession && (
+          <Alert severity="warning" sx={{ borderRadius: '10px', fontWeight: 500 }}>
+            Este administrador tiene una sesión abierta. Se cerrará automáticamente al eliminarlo.
+          </Alert>
+        )}
+
         {errorMessage && (
           <Alert severity="error" sx={{ borderRadius: '10px', fontWeight: 500 }}>
             {errorMessage}

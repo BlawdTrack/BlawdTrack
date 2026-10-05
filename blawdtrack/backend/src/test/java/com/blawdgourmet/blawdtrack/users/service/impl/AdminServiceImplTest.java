@@ -102,7 +102,7 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void recentLoginBlocksDeletionAndExplainsWhy() {
+    void recentLoginDoesNotBlockDeletionButWarns() {
         User administrador = usuarioConRol(RoleName.SALES_ADMIN);
         administrador.setLastLoginAt(LocalDateTime.now().minusMinutes(5));
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, administrador.getDocumentNumber()))
@@ -114,7 +114,7 @@ class AdminServiceImplTest {
         assertThat(response.documentType()).isEqualTo(DocumentType.CEDULA);
         assertThat(response.documentNumber()).isEqualTo(administrador.getDocumentNumber());
         assertThat(response.hasActiveSession()).isTrue();
-        assertThat(response.eligibleForDeletion()).isFalse();
+        assertThat(response.eligibleForDeletion()).isTrue();
         assertThat(response.ineligibilityReason()).isNotBlank();
     }
 

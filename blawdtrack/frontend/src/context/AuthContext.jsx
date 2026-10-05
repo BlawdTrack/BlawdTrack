@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { login as loginService } from '../services/AuthService';
+import { login as loginService, logout as logoutService, checkSession } from '../services/AuthService';
 import {
   saveAuthSession,
   getStoredUser,
   clearAuthSession,
   hasActiveSession,
+  getStoredToken,
   buildUserFromLoginResponse,
 } from '../utils/authStorage';
 import { getLoginError } from '../utils/authErrors';
 import { getHomeRoute, UNKNOWN_ROLE_ERROR } from '../utils/roleRoutes';
 import { SESSION_EXPIRED_ERROR, setSessionExpiredHandler } from '../api/sessionExpiry';
+import { usePolling } from '../hooks/usePolling';
 import { AuthContext } from './authContextInstance';
 
 // Este archivo solo exporta el componente AuthProvider a propósito, para
@@ -84,6 +86,10 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    // Avisa al backend para que registre la sesión como cerrada; si falla (p. ej. el token ya venció)
+    // no importa, la sesión local se cierra igual.
+    const token = getStoredToken();
+    if (token) logoutService(token).catch(() => {});
     clearAuthSession();
     setUser(null);
   };
@@ -102,6 +108,13 @@ export function AuthProvider({ children }) {
   // El interceptor de axios vive fuera de React: se le registra este handler
   // para que pueda avisar cuando llegue un 401 de un endpoint protegido.
   useEffect(() => setSessionExpiredHandler(expireSession), [expireSession]);
+
+  // Si el Súper Usuario desactiva o elimina esta cuenta, el token deja de valer en el backend pero el
+  // navegador no lo sabe hasta la siguiente petición. Esta consulta periódica la provoca: el 401 llega
+  // al interceptor, que cierra la sesión local y manda al login.
+  usePolling(() => {
+    if (user) checkSession().catch(() => {});
+  });
 
   return (
     <AuthContext.Provider

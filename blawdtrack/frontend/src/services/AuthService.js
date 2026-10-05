@@ -13,3 +13,21 @@ export const login = async (email, password) => {
   const response = await axiosClient.post('/v1/auth/login', { email, password });
   return response.data;
 };
+
+/**
+ * Comprueba que la sesión sigue vigente: `GET /api/v1/auth/session`. Un 401 (usuario desactivado, eliminado o
+ * sesión cerrada) lo atiende el interceptor de axios, que cierra la sesión local.
+ * @returns {Promise<void>}
+ */
+export const checkSession = async () => {
+  await axiosClient.get('/v1/auth/session');
+};
+
+/**
+ * Cierra la sesión en el backend: `POST /api/v1/auth/logout`. Recibe el token porque el cliente
+ * lo borra del almacenamiento justo después de llamarlo.
+ * @param {string} token
+ */
+export const logout = async (token) => {
+  await axiosClient.post('/v1/auth/logout', null, { headers: { Authorization: `Bearer ${token}` } });
+};
