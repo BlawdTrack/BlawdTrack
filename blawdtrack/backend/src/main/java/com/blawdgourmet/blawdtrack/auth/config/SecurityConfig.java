@@ -86,6 +86,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         // Permisos individuales de usuarios (HU-009): exclusivos del Super Usuario.
                         .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
+                        // La importacion y la gestion de paquetes (incluida su eliminacion, HU-012)
+                        // pertenecen exclusivamente al Administrador de Ventas. Esta regla se evalua
+                        // antes del binding; @PreAuthorize en el controlador queda como segunda barrera.
+                        .requestMatchers("/api/v1/packages/**").hasRole(RoleName.SALES_ADMIN)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
