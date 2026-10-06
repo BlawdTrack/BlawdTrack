@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 /**
- * API de consulta de paquetes/envíos (HU-XXX).
+ * API de consulta de paquetes/envíos (HU-013, Task 124).
  * Endpoint accesible solo para administradores de ventas (ADMIN_VENTAS).
  */
 @RestController

@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,9 +22,10 @@ import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
-import com.blawdgourmet.blawdtrack.packages.model.Package;
+import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
+import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackageItem;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
-import com.blawdgourmet.blawdtrack.packages.repository.PackageRepository;
+import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -33,7 +34,7 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 /**
  * Tests de autorización y respuesta para GET /api/v1/packages/{shipmentNumber}
- * (HU-XXX: consulta de paquete por número de envío).
+ * (HU-013, Task 124: consulta de paquete por número de envío).
  * El endpoint es accesible solo para ADMIN_VENTAS.
  */
 @SpringBootTest
@@ -45,17 +46,17 @@ class PackageControllerTest {
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
     @Autowired private CourierRepository couriers;
-    @Autowired private PackageRepository packages;
+    @Autowired private DeliveryPackageRepository packages;
     @Autowired private JwtService jwt;
 
     private User adminVentas;
     private User courierUser;
     private Courier courier;
-    private Package pkg;
+    private DeliveryPackage pkg;
 
     @BeforeEach
     void setUp() {
-        // Administrador de ventas (creador del paquete)
+        // Usuario con permiso para consultar el paquete.
         adminVentas = users.saveAndFlush(User.builder()
                 .documentType(DocumentType.CEDULA)
                 .documentNumber("100000001")
@@ -86,28 +87,26 @@ class PackageControllerTest {
                 .maxPackageWeightKg(new BigDecimal("30.00"))
                 .build());
 
-        // Paquete de prueba
-        pkg = packages.saveAndFlush(Package.builder()
+        var item = DeliveryPackageItem.builder()
+                .itemId("ITEM-001")
+                .name("Café molido")
+                .quantity(new BigDecimal("2.00"))
+                .sku("CAFE-001")
+                .unitPrice(new BigDecimal("1250.00"))
+                .build();
+        pkg = DeliveryPackage.builder()
                 .shipmentNumber("ENV-2024-0001")
-                .description("Paquete de prueba")
-                .weightKg(new BigDecimal("5.50"))
-                .lengthCm(new BigDecimal("30.00"))
-                .widthCm(new BigDecimal("20.00"))
-                .heightCm(new BigDecimal("15.00"))
-                .status(PackageStatus.ASSIGNED)
+                .orderNumber("SO-1001")
                 .clientName("Cliente Prueba")
-                .clientDocument("300000003")
                 .clientPhone("77777777")
-                .clientEmail("cliente@example.com")
-                .clientAddress("Calle 123, San José")
                 .deliveryAddress("Avenida 456, San José")
-                .deliveryCity("San José")
-                .deliveryReference("Frente al parque central")
-                .scheduledDeliveryDate(LocalDateTime.now().plusDays(2))
-                .deliveryNotes("Entregar en horario de oficina")
+                .deliverySchedule("De 8 a 5")
+                .status(PackageStatus.ASSIGNED)
                 .assignedCourier(courier)
-                .createdBy(adminVentas)
-                .build());
+                .items(new ArrayList<>())
+                .build();
+        pkg.addItem(item);
+        pkg = packages.saveAndFlush(pkg);
     }
 
     private String token(User user) {
@@ -115,7 +114,7 @@ class PackageControllerTest {
     }
 
     private ResultActions getPackage(String token, String shipmentNumber) throws Exception {
-        return mvc.perform(get("/api/v1/packages/" + shipmentNumber)
+        return mvc.perform(get("/api/v1/packages/{shipmentNumber}", shipmentNumber)
                 .header("Authorization", "Bearer " + token));
     }
 
@@ -123,69 +122,66 @@ class PackageControllerTest {
     void adminVentasConsultaPaqueteExistenteRetornaDetalleCompleto() throws Exception {
         getPackage(token(adminVentas), "ENV-2024-0001")
                 .andExpect(status().isOk())
-                // Datos generales
                 .andExpect(jsonPath("$.id").value(pkg.getId()))
                 .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0001"))
-                .andExpect(jsonPath("$.description").value("Paquete de prueba"))
-                .andExpect(jsonPath("$.weightKg").value(5.50))
-                .andExpect(jsonPath("$.lengthCm").value(30.00))
-                .andExpect(jsonPath("$.widthCm").value(20.00))
-                .andExpect(jsonPath("$.heightCm").value(15.00))
+                .andExpect(jsonPath("$.orderNumber").value("SO-1001"))
+                .andExpect(jsonPath("$.deliverySchedule").value("De 8 a 5"))
                 .andExpect(jsonPath("$.status").value("ASSIGNED"))
-                .andExpect(jsonPath("$.createdAt").exists())
-                .andExpect(jsonPath("$.updatedAt").doesNotExist())
-                // Datos del cliente
                 .andExpect(jsonPath("$.clientName").value("Cliente Prueba"))
-                .andExpect(jsonPath("$.clientDocument").value("300000003"))
                 .andExpect(jsonPath("$.clientPhone").value("77777777"))
-                .andExpect(jsonPath("$.clientEmail").value("cliente@example.com"))
-                .andExpect(jsonPath("$.clientAddress").value("Calle 123, San José"))
-                // Datos de entrega
                 .andExpect(jsonPath("$.deliveryAddress").value("Avenida 456, San José"))
-                .andExpect(jsonPath("$.deliveryCity").value("San José"))
-                .andExpect(jsonPath("$.deliveryReference").value("Frente al parque central"))
-                .andExpect(jsonPath("$.scheduledDeliveryDate").exists())
-                .andExpect(jsonPath("$.actualDeliveryDate").doesNotExist())
-                .andExpect(jsonPath("$.deliveryNotes").value("Entregar en horario de oficina"))
+                .andExpect(jsonPath("$.items[0].itemId").value("ITEM-001"))
+                .andExpect(jsonPath("$.items[0].name").value("Café molido"))
+                .andExpect(jsonPath("$.items[0].quantity").value(2.00))
+                .andExpect(jsonPath("$.items[0].sku").value("CAFE-001"))
+                .andExpect(jsonPath("$.items[0].unitPrice").value(1250.00))
+                .andExpect(jsonPath("$.description").doesNotExist())
+                .andExpect(jsonPath("$.weightKg").doesNotExist())
                 .andExpect(jsonPath("$.recipientSignature").doesNotExist())
-                // Mensajero asignado
+                .andExpect(jsonPath("$.createdBy").doesNotExist())
                 .andExpect(jsonPath("$.assignedCourier").exists())
                 .andExpect(jsonPath("$.assignedCourier.courierId").value(courier.getId()))
-                .andExpect(jsonPath("$.assignedCourier.userId").value(courierUser.getId()))
-                .andExpect(jsonPath("$.assignedCourier.documentType").value("CEDULA"))
-                .andExpect(jsonPath("$.assignedCourier.documentNumber").value("200000002"))
                 .andExpect(jsonPath("$.assignedCourier.fullName").value("Mensajero Test"))
-                .andExpect(jsonPath("$.assignedCourier.email").value("courier-test@example.com"))
                 .andExpect(jsonPath("$.assignedCourier.phone").value("88888888"))
                 .andExpect(jsonPath("$.assignedCourier.schedule").value("Lunes a viernes, 08:00-17:00"))
-                .andExpect(jsonPath("$.assignedCourier.maxPackageWeightKg").value(30.00))
-                .andExpect(jsonPath("$.assignedCourier.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.assignedCourier.role").value("MENSAJERO"))
-                // Administrador que creó el paquete
-                .andExpect(jsonPath("$.createdBy").exists())
-                .andExpect(jsonPath("$.createdBy.userId").value(adminVentas.getId()))
-                .andExpect(jsonPath("$.createdBy.documentType").value("CEDULA"))
-                .andExpect(jsonPath("$.createdBy.documentNumber").value("100000001"))
-                .andExpect(jsonPath("$.createdBy.fullName").value("Admin Ventas Test"))
-                .andExpect(jsonPath("$.createdBy.email").value("adminventas-test@example.com"))
-                .andExpect(jsonPath("$.createdBy.role").value("ADMIN_VENTAS"));
+                .andExpect(jsonPath("$.assignedCourier.email").doesNotExist())
+                .andExpect(jsonPath("$.assignedCourier.documentNumber").doesNotExist())
+                .andExpect(jsonPath("$.assignedCourier.status").doesNotExist())
+                .andExpect(jsonPath("$.assignedCourier.role").doesNotExist());
     }
 
     @Test
-    void adminVentasConsultaPaqueteSinMensajeroAsignadoRetornaNullEnAssignedCourier() throws Exception {
-        // Crear paquete sin mensajero asignado
-        var pkgSinCourier = packages.saveAndFlush(Package.builder()
+    void adminVentasConsultaPaqueteConNumeroEnMinusculasYEspacios() throws Exception {
+        getPackage(token(adminVentas), "  env-2024-0001  ")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0001"));
+    }
+
+    @Test
+    void paqueteImportadoSoloConNumeroPuedeConsultarseConEstadoPendiente() throws Exception {
+        packages.saveAndFlush(DeliveryPackage.builder()
                 .shipmentNumber("ENV-2024-0002")
-                .description("Sin mensajero")
-                .weightKg(new BigDecimal("2.00"))
-                .clientName("Otro Cliente")
-                .deliveryAddress("Dirección entrega")
-                .createdBy(adminVentas)
                 .build());
 
         getPackage(token(adminVentas), "ENV-2024-0002")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0002"))
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andExpect(jsonPath("$.orderNumber").doesNotExist())
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.assignedCourier").doesNotExist());
+    }
+
+    @Test
+    void adminVentasConsultaPaqueteSinMensajeroAsignado() throws Exception {
+        // Crear paquete sin mensajero asignado
+        packages.saveAndFlush(DeliveryPackage.builder()
+                .shipmentNumber("ENV-2024-0003")
+                .build());
+
+        getPackage(token(adminVentas), "ENV-2024-0003")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0003"))
                 .andExpect(jsonPath("$.assignedCourier").doesNotExist());
     }
 

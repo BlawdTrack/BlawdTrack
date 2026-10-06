@@ -1,17 +1,15 @@
 package com.blawdgourmet.blawdtrack.packages.model;
 
 /**
- * Estados posibles de un paquete/envío.
+ * Estados definidos para el flujo de paquetes del backlog.
  */
 public enum PackageStatus {
     PENDING("PENDIENTE"),
     ASSIGNED("ASIGNADO"),
+    SENT("ENVIADO"),
     IN_TRANSIT("EN_TRANSITO"),
-    OUT_FOR_DELIVERY("EN_REPARTO"),
     DELIVERED("ENTREGADO"),
-    FAILED_DELIVERY("ENTREGA_FALLIDA"),
-    RETURNED("DEVUELTO"),
-    CANCELLED("CANCELADO");
+    NOT_DELIVERED("NO_ENTREGADO");
 
     private final String code;
 

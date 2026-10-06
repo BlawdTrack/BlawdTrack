@@ -1,78 +1,45 @@
 package com.blawdgourmet.blawdtrack.packages.dto;
 
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
-import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * Respuesta con el detalle completo de un paquete/envío.
- * Incluye: datos generales, cliente, entrega y mensajero asignado.
+ * Respuesta con los datos de importación y el mensajero asignado.
  */
 public record PackageDetailResponse(
-        // Datos generales
         Long id,
         String shipmentNumber,
-        String description,
-        BigDecimal weightKg,
-        BigDecimal lengthCm,
-        BigDecimal widthCm,
-        BigDecimal heightCm,
-        PackageStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-
-        // Datos del cliente
+        String orderNumber,
         String clientName,
-        String clientDocument,
         String clientPhone,
-        String clientEmail,
-        String clientAddress,
-
-        // Datos de entrega
         String deliveryAddress,
-        String deliveryCity,
-        String deliveryReference,
-        LocalDateTime scheduledDeliveryDate,
-        LocalDateTime actualDeliveryDate,
-        String deliveryNotes,
-        String recipientSignature,
-
-        // Mensajero asignado
-        AssignedCourierInfo assignedCourier,
-
-        // Administrador de ventas que creó el paquete
-        CreatedByInfo createdBy
+        String deliverySchedule,
+        PackageStatus status,
+        List<PackageItemInfo> items,
+        AssignedCourierInfo assignedCourier
 ) {
 
-    /**
-     * Información del mensajero asignado.
-     */
-    public record AssignedCourierInfo(
-            Long courierId,
-            Long userId,
-            DocumentType documentType,
-            String documentNumber,
-            String fullName,
-            String email,
-            String phone,
-            String schedule,
-            BigDecimal maxPackageWeightKg,
-            UserStatus status,
-            String role
+    public PackageDetailResponse {
+        items = List.copyOf(items);
+    }
+
+    public record PackageItemInfo(
+            String itemId,
+            String name,
+            BigDecimal quantity,
+            String sku,
+            BigDecimal unitPrice
     ) {}
 
     /**
-     * Información del administrador de ventas que creó el paquete.
+     * Información mínima necesaria para identificar y contactar al mensajero.
      */
-    public record CreatedByInfo(
-            Long userId,
-            DocumentType documentType,
-            String documentNumber,
+    public record AssignedCourierInfo(
+            Long courierId,
             String fullName,
-            String email,
-            String role
+            String phone,
+            String schedule
     ) {}
 }
