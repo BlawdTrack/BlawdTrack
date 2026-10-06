@@ -1,18 +1,22 @@
-package com.blawdgourmet.blawdtrack.packages.service;
+package com.blawdgourmet.blawdtrack.packages.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 
 class ZohoPackageFileParserTest {
 
-    private final ZohoPackageFileParser parser = new ZohoPackageFileParser();
+    private final ZohoPackageFileParser parser = new ZohoPackageFileParser(
+            List.of(new CsvTableReader(), new XlsxTableReader()), new ZohoPackageGrouper());
 
     @Test
     void agrupaLasLineasDeZohoPorNumeroDeEnvioYConservaEncabezadosDuplicados() {
@@ -48,7 +52,7 @@ class ZohoPackageFileParserTest {
                 header.createCell(index).setCellValue(headers[index]);
             }
             var row = sheet.createRow(1);
-            row.createCell(0).setCellValue("env-00003");
+            row.createCell(0).setCellValue(" env-00003 ");
             row.createCell(1).setCellValue("SO-003");
             row.createCell(2).setCellValue("Cliente Tres");
             row.createCell(3).setCellValue("Direccion tres");
@@ -74,8 +78,67 @@ class ZohoPackageFileParserTest {
     }
 
     @Test
+    void procesaElCsvAnonimizadoDeZohoConCatorceLineasYTresPaquetes() {
+        InputStream input = Objects.requireNonNull(getClass().getResourceAsStream(
+                "/packages/zoho-paquetes-anonimizados.csv"));
+
+        var result = parser.parse(input, "zoho-paquetes-anonimizados.csv");
+
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting(packageData -> packageData.items().size())
+                .containsExactly(5, 4, 5);
+        assertThat(result).extracting(packageData -> packageData.shipmentNumber())
+                .containsExactly("ENV-00953", "ENV-00956", "ENV-00958");
+    }
+
+    @Test
+    void aceptaCsvUtf8ConBom() {
+        String csv = "\uFEFFPacking Number,SO Number,Customer Name\n"
+                + "env-1,SO-1,Cliente Uno\n";
+
+        var result = parser.parse(stream(csv), "x.csv");
+
+        assertThat(result).singleElement()
+                .extracting(packageData -> packageData.shipmentNumber())
+                .isEqualTo("ENV-1");
+    }
+
+    @Test
+    void rechazaUnArchivoVacio() {
+        assertThatThrownBy(() -> parser.parse(stream(""), "x.csv"))
+                .isInstanceOf(PackageFileParsingException.class)
+                .hasMessage("El archivo no contiene encabezados");
+    }
+
+    @Test
+    void rechazaUnaCantidadNoNumericaEIndicaLaFila() {
+        String csv = """
+                Packing Number,SO Number,Customer Name,Item Name,Quantity Packed
+                ENV-1,SO-1,Cliente A,Alfajor,mucho
+                """;
+
+        assertThatThrownBy(() -> parser.parse(stream(csv), "x.csv"))
+                .isInstanceOf(PackageFileParsingException.class)
+                .hasMessageContaining("Fila 2")
+                .hasMessageContaining("Quantity Packed debe ser numerico");
+    }
+
+    @Test
+    void rechazaLaComaComoSeparadorDecimalParaNoAlterarElValor() {
+        String csv = """
+                Packing Number,SO Number,Customer Name,Item Name,Quantity Packed
+                ENV-1,SO-1,Cliente A,Alfajor,"1,5"
+                """;
+
+        assertThatThrownBy(() -> parser.parse(stream(csv), "x.csv"))
+                .isInstanceOf(PackageFileParsingException.class)
+                .hasMessageContaining("debe usar punto como separador decimal: 1,5");
+    }
+
+    @Test
     void rechazaArchivosSinEncabezadosObligatorios() {
-        assertThatThrownBy(() -> parser.parse(stream("Packing Number,Item Name\nENV-1,Alfajor\n"), "x.csv"))
+        assertThatThrownBy(() -> parser.parse(
+                        stream("Packing Number,Item Name\nENV-1,Alfajor\n"), "x.csv"))
                 .isInstanceOf(PackageFileParsingException.class)
                 .hasMessage("Falta el encabezado obligatorio: SO Number");
     }
