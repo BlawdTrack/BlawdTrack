@@ -15,7 +15,11 @@ export default function PageHeader({ title, description, size = 'default' }) {
     <Box sx={{ display: 'flex', alignItems: 'center', gap: large ? 2.5 : 2 }}>
       <ModuleBackButton size={large ? 56 : 44} />
       <Box sx={{ pl: large ? 2.5 : 2, borderLeft: `${large ? 5 : 4}px solid`, borderColor: 'secondary.main' }}>
-        <Typography variant={large ? 'h4' : 'h5'} component="h1" sx={{ color: 'primary.main' }}>
+        <Typography
+          variant={large ? 'h4' : 'h5'}
+          component="h1"
+          sx={{ color: 'primary.main', ...(large && { fontSize: { xs: '1.75rem', md: '2rem' } }) }}
+        >
           {title}
         </Typography>
         {description && (

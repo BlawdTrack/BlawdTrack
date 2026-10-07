@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { INPUT_SX } from './formStyles';
 import { Box, Button, Popover, TextField } from '@mui/material';
 import { Wheel, WHEEL_ITEM_HEIGHT, WHEEL_VISIBLE_ITEMS } from './TimeWheelField';
 
@@ -42,11 +43,7 @@ export function WeightWheelField({ label, value, onChange, error, id }) {
         slotProps={{
           htmlInput: { readOnly: true, 'aria-label': label, style: { cursor: 'pointer' } }
         }}
-        sx={{
-          backgroundColor: '#fff',
-          '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 14, '& fieldset': { borderColor: '#DCD4CA' } },
-          '& .MuiOutlinedInput-input': { py: 1.4 }
-        }}
+        sx={INPUT_SX}
       />
       <Popover
         open={Boolean(anchor)}

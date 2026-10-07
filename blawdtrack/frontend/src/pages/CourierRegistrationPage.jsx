@@ -14,12 +14,13 @@ import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
 import { composeSchedule } from '../utils/courierSchedule';
 import { StatusMessage } from '../components/StatusMessage';
-import PageHeader from '../components/PageHeader';
+import PageHeaderBar from '../components/PageHeaderBar';
+import { LABEL_SX, INPUT_SX } from '../components/formStyles';
 import PageContainer from '../components/PageContainer';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
-// On phones the form uses 2 columns; wide fields span both.
-const SPAN_2_SX = { gridColumn: { xs: 'span 2', md: 'auto' } };
+// The form is a single column on phones and two columns from tablets up; wide fields span both.
+const FULL_ROW_SX = { gridColumn: { md: 'span 2' } };
 
 const INITIAL_FORM_DATA = {
   documentType: 'CEDULA',
@@ -44,12 +45,6 @@ const FIELD_ORDER = [
   'maxPackageWeightKg'
 ];
 
-const LABEL_SX = { fontSize: 12, fontWeight: 700, letterSpacing: '0.5px', color: '#6B6560', mb: 0.75, display: 'block' };
-const INPUT_SX = {
-  backgroundColor: '#fff',
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 14, '& fieldset': { borderColor: '#DCD4CA' } },
-  '& .MuiOutlinedInput-input': { py: 1.4 }
-};
 
 // Returns the weight as a number, or null when blank or not numeric.
 // Number('') is 0, so a blank value must never be coerced silently;
@@ -165,7 +160,7 @@ export function CourierRegistrationPage() {
   });
 
   const renderField = (name, label, extra, span2 = false) => (
-    <Box sx={span2 ? SPAN_2_SX : undefined}>
+    <Box sx={span2 ? FULL_ROW_SX : undefined}>
       <Typography variant="caption" component="label" htmlFor={name} sx={LABEL_SX}>
         {label}
       </Typography>
@@ -174,11 +169,12 @@ export function CourierRegistrationPage() {
   );
 
   return (
-    <PageContainer>
-      <PageHeader
+    <>
+      <PageHeaderBar
         title="Crear mensajero"
         description="Registra a un nuevo mensajero con su horario y la capacidad de carga que puede transportar."
       />
+      <PageContainer>
       <Paper
         elevation={0}
         sx={{
@@ -186,30 +182,30 @@ export function CourierRegistrationPage() {
           border: '1px solid #E4DED7',
           backgroundColor: '#fff',
           boxShadow: '0 12px 30px rgba(26,60,52,.06)',
-          p: { xs: 2, sm: 3.5 },
+          p: { xs: 2.5, md: 4 },
           textAlign: 'left'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 1.5, sm: 3 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 2.5, md: 3 } }}>
           <Box
             sx={{
-              width: 34,
-              height: 34,
-              borderRadius: '9px',
+              width: 40,
+              height: 40,
+              borderRadius: '10px',
               backgroundColor: '#F1ECE7',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}
           >
-            <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2.5px solid #1A3C34' }} />
+            <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '3px solid #1A3C34' }} />
           </Box>
-          <Typography component="h2" sx={{ fontSize: 16, fontWeight: 600, m: 0, color: '#1A3C34' }}>
+          <Typography component="h2" sx={{ fontSize: 18, fontWeight: 600, m: 0, color: '#1A3C34' }}>
             Datos del nuevo mensajero
           </Typography>
         </Box>
 
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2.5 } }}>
+        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {isSuccess && (
             <StatusMessage
               severity="success"
@@ -221,12 +217,14 @@ export function CourierRegistrationPage() {
           <Box
             sx={{
               display: 'grid',
-              gap: { xs: '10px 12px', sm: '18px 22px' },
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: { xs: 2, md: '24px 32px' },
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
               alignItems: 'start'
             }}
           >
             {renderField('fullName', 'NOMBRE COMPLETO', { required: true, placeholder: 'Ej. Ana Lucía Bermúdez' }, true)}
+            {renderField('email', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' })}
+            {renderField('phone', 'TELÉFONO (OPCIONAL)', { type: 'tel', placeholder: '8888-8888' })}
             <Box>
               <Typography variant="caption" component="label" htmlFor="documentType" sx={LABEL_SX}>
                 TIPO DE DOCUMENTO
@@ -240,9 +238,7 @@ export function CourierRegistrationPage() {
               </TextField>
             </Box>
             {renderField('documentNumber', 'NÚMERO DE DOCUMENTO', { required: true, placeholder: DOCUMENT_PLACEHOLDERS[formData.documentType] })}
-            {renderField('phone', 'TELÉFONO (OPCIONAL)', { type: 'tel', placeholder: '8888-8888' }, true)}
-            {renderField('email', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' }, true)}
-            <Box sx={SPAN_2_SX}>
+            <Box>
               <Typography variant="caption" component="label" htmlFor="maxPackageWeightKg" sx={LABEL_SX}>
                 CAPACIDAD MÁXIMA DE CARGA (KG)
               </Typography>
@@ -259,11 +255,11 @@ export function CourierRegistrationPage() {
                 </Typography>
               )}
             </Box>
-            <Box sx={SPAN_2_SX}>
+            <Box>
               <Typography variant="caption" component="label" htmlFor="schedule" sx={LABEL_SX}>
                 HORARIO
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <TimeWheelField
                   id="schedule"
                   label="Hora de entrada"
@@ -271,7 +267,7 @@ export function CourierRegistrationPage() {
                   error={Boolean(fieldErrors.schedule)}
                   onChange={(v) => handleChange({ target: { name: 'scheduleStart', value: v } })}
                 />
-                <Typography component="span" sx={{ color: '#6B6560' }}>a</Typography>
+                <Typography component="span" sx={{ color: '#6B6560', fontSize: 16 }}>a</Typography>
                 <TimeWheelField
                   id="scheduleEnd"
                   label="Hora de salida"
@@ -298,8 +294,9 @@ export function CourierRegistrationPage() {
                 '&:hover': { backgroundColor: '#12322B' },
                 textTransform: 'none',
                 fontWeight: 600,
-                px: 2.75,
-                py: { xs: 1.25, sm: 1.5 },
+                px: 4,
+                minHeight: 52,
+                fontSize: 16,
                 borderRadius: '10px',
                 gap: 1.2,
                 boxShadow: 'none'
@@ -320,7 +317,8 @@ export function CourierRegistrationPage() {
           </Box>
         </Box>
       </Paper>
-    </PageContainer>
+      </PageContainer>
+    </>
   );
 }
 

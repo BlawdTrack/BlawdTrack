@@ -5,7 +5,7 @@ import { getNavigationForRole } from '../config/navigation';
 import { ROUTES } from '../config/routes';
 import { NAV_ITEM_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
-import PageHeader from '../components/PageHeader';
+import PageHeaderBar from '../components/PageHeaderBar';
 import PageContainer from '../components/PageContainer';
 
 /**
@@ -22,11 +22,7 @@ export default function ModuleMenuPage({ groupId }) {
 
   return (
     <>
-      {/* El encabezado va pegado al borde izquierdo del área de contenido (también con el menú lateral
-          colapsado); las tarjetas siguen centradas en el contenedor común. */}
-      <Box sx={{ px: { xs: 2.5, md: 5 }, pt: { xs: 2.5, md: 5 } }}>
-        <PageHeader size="large" title={group.title} description={group.description} />
-      </Box>
+      <PageHeaderBar title={group.title} description={group.description} />
 
       <PageContainer>
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>

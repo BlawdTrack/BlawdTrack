@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { INPUT_SX } from './formStyles';
 import { Box, Button, Popover, TextField } from '@mui/material';
 
 const ITEM_HEIGHT = 40;
@@ -254,11 +255,7 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
         slotProps={{
           htmlInput: { readOnly: true, 'aria-label': label, style: { cursor: 'pointer', textAlign: 'center' } }
         }}
-        sx={{
-          backgroundColor: '#fff',
-          '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 14, '& fieldset': { borderColor: '#DCD4CA' } },
-          '& .MuiOutlinedInput-input': { py: 1.4 }
-        }}
+        sx={INPUT_SX}
       />
       <Popover
         open={Boolean(anchor)}
