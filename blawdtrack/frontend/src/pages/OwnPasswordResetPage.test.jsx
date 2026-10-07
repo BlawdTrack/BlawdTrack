@@ -71,4 +71,17 @@ describe('OwnPasswordResetPage (restablecer la propia contraseña)', () => {
     expect(screen.getAllByRole('button')).toHaveLength(2);
     expect(screen.queryByRole('button', { name: 'Volver' })).toBeNull();
   });
+
+  it('tras enviar bloquea "Enviar de nuevo" y muestra la espera con el tiempo restante', async () => {
+    requestOwnPasswordReset.mockResolvedValue({ message: 'ok' });
+    const user = userEvent.setup();
+    renderPage(USERS.MENSAJERO);
+
+    await user.click(screen.getByRole('button', { name: 'Enviarme el enlace' }));
+
+    expect((await screen.findByRole('button', { name: 'Enviar de nuevo' })).disabled).toBe(true);
+    expect(screen.getByText('Enviando el correo…')).toBeTruthy();
+    expect(screen.getByText('2:00')).toBeTruthy();
+    expect(screen.getByRole('progressbar')).toBeTruthy();
+  });
 });

@@ -1,0 +1,39 @@
+import { Box, LinearProgress, Typography } from '@mui/material';
+
+// Mensajes que van rotando mientras se espera: muestran que el sistema sigue trabajando.
+const WAIT_MESSAGES = [
+  'Enviando el correo…',
+  'Tu correo va en camino…',
+  'Esperando que llegue a tu bandeja…',
+  'Puede tardar unos minutos, el sistema sigue trabajando…',
+];
+const SECONDS_PER_MESSAGE = 6;
+
+const formatClock = (totalSeconds) => (
+  `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, '0')}`
+);
+
+/**
+ * Indicador de espera tras enviar un correo: una barra que avanza, un mensaje que cambia cada pocos segundos
+ * y el tiempo que falta para poder pedir otro. Así se ve que el sistema está haciendo algo y no se colgó.
+ * @param {{ remaining: number, total: number }} props Segundos que faltan y duración total de la espera.
+ */
+export default function MailWaitIndicator({ remaining, total }) {
+  const elapsed = total - remaining;
+  const message = WAIT_MESSAGES[Math.floor(elapsed / SECONDS_PER_MESSAGE) % WAIT_MESSAGES.length];
+
+  return (
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <LinearProgress
+        variant="determinate"
+        value={(elapsed / total) * 100}
+        aria-label="Tiempo de espera para pedir otro correo"
+        sx={{ height: 8, borderRadius: 4, bgcolor: '#F1ECE7' }}
+      />
+      <Typography aria-live="off" sx={{ fontSize: 14, color: '#6B6560' }}>{message}</Typography>
+      <Typography sx={{ fontSize: 14, color: '#6B6560' }}>
+        Podrás pedir otro en <strong>{formatClock(remaining)}</strong>
+      </Typography>
+    </Box>
+  );
+}

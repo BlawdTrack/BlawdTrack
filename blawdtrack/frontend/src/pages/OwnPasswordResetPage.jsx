@@ -4,12 +4,17 @@ import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import { useAuth } from '../hooks/useAuth';
+import { useCountdown } from '../hooks/useCountdown';
+import MailWaitIndicator from '../components/MailWaitIndicator';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
 import PageContainer from '../components/PageContainer';
 import { CARD_SX } from '../components/formStyles';
 import HelpTip from '../components/HelpTip';
 import PageHeaderBar from '../components/PageHeaderBar';
+
+// Tiempo mínimo antes de pedir otro correo: el límite bajo de lo que puede tardar en llegar (2 a 5 minutos).
+const RESEND_WAIT_SECONDS = 120;
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo más tarde.';
@@ -25,13 +30,16 @@ export function OwnPasswordResetPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
+  const resendWait = useCountdown(RESEND_WAIT_SECONDS);
 
   const handleSend = async () => {
+    if (resendWait.running) return;
     setLoading(true);
     setError(null);
     try {
       await requestOwnPasswordReset();
       setSent(true);
+      resendWait.start();
     } catch (requestError) {
       setSent(false);
       setError(
@@ -90,12 +98,14 @@ export function OwnPasswordResetPage() {
             </Box>
           )}
 
+          {resendWait.running && <MailWaitIndicator remaining={resendWait.remaining} total={RESEND_WAIT_SECONDS} />}
+
           <Button
             variant={sent ? 'outlined' : 'contained'}
             disableElevation
             fullWidth
             onClick={handleSend}
-            disabled={loading}
+            disabled={loading || resendWait.running}
             sx={{ minHeight: 52, fontWeight: 700, fontSize: 16, borderRadius: '10px' }}
           >
             {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
