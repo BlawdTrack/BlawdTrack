@@ -6,19 +6,6 @@ import { ROUTES } from './routes';
 // not implemented yet (rendered disabled).
 export const NAVIGATION_GROUPS = [
   {
-    id: 'security',
-    title: 'Seguridad y acceso',
-    shortTitle: 'Acceso',
-    items: [
-      {
-        id: 'password-reset',
-        label: 'Restablecer contraseña',
-        path: ROUTES.PASSWORD_RESET_OWN,
-        roles: [ROLES.SUPER_USER],
-      },
-    ],
-  },
-  {
     id: 'couriers',
     title: 'Mensajeros',
     shortTitle: 'Mensajeros',
@@ -38,10 +25,18 @@ export const NAVIGATION_GROUPS = [
     ],
   },
   {
-    id: 'permissions',
-    title: 'Roles y permisos',
-    shortTitle: 'Permisos',
-    items: [{ id: 'roles-permissions', label: 'Roles y permisos', path: ROUTES.ROLES_PERMISSIONS, roles: [ROLES.SUPER_USER] }],
+    id: 'security',
+    title: 'Seguridad y acceso',
+    shortTitle: 'Acceso',
+    items: [
+      {
+        id: 'password-reset',
+        label: 'Restablecer contraseña',
+        path: ROUTES.PASSWORD_RESET_OWN,
+        roles: [ROLES.SUPER_USER],
+      },
+      { id: 'roles-permissions', label: 'Roles y permisos', path: ROUTES.ROLES_PERMISSIONS, roles: [ROLES.SUPER_USER] },
+    ],
   },
 ];
 

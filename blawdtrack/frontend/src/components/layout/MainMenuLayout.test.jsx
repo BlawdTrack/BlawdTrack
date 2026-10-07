@@ -21,14 +21,17 @@ const tree = (
 );
 
 const sidebar = () => screen.getByRole('complementary');
+// Los grupos del menú arrancan cerrados: hay que abrirlos para llegar a sus enlaces.
+const openGroup = (user, name) => user.click(within(sidebar()).getByRole('button', { name }));
 
 describe('MainMenuLayout sidebar', () => {
   it('renders the four module titles from the mockup', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
-    ['Seguridad y acceso', 'Mensajeros', 'Administradores', 'Roles y permisos'].forEach((title) =>
-      expect(bar.getAllByText(title).length).toBeGreaterThan(0)
+    ['Mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((title) =>
+      expect(bar.getByRole('button', { name: title })).toBeInTheDocument()
     );
+    expect(bar.queryByRole('button', { name: 'Roles y permisos' })).not.toBeInTheDocument();
   });
 
   it('does not show a login entry nor any HU label', () => {
@@ -64,6 +67,7 @@ describe('MainMenuLayout sidebar', () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
+    await openGroup(user, 'Mensajeros');
     await user.click(within(sidebar()).getByRole('link', { name: 'Crear mensajero' }));
     expect(screen.getByText('create courier content')).toBeInTheDocument();
 
@@ -76,6 +80,9 @@ describe('MainMenuLayout sidebar', () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
+    await openGroup(user, 'Mensajeros');
+    await openGroup(user, 'Administradores');
+    await openGroup(user, 'Seguridad y acceso');
 
     await user.click(bar.getByRole('link', { name: 'Actualizar mensajero' }));
     expect(screen.getByText('update courier content')).toBeInTheDocument();
@@ -98,17 +105,17 @@ describe('MainMenuLayout sidebar', () => {
     expect(screen.getByText('login screen')).toBeInTheDocument();
   });
 
-  it('opens and closes a group from its title', async () => {
+  it('starts with every group closed and opens or closes one from its title', async () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
     const groupButton = bar.getByRole('button', { name: 'Mensajeros' });
 
-    expect(groupButton).toHaveAttribute('aria-expanded', 'true');
-    await user.click(groupButton);
     expect(groupButton).toHaveAttribute('aria-expanded', 'false');
     await user.click(groupButton);
     expect(groupButton).toHaveAttribute('aria-expanded', 'true');
+    await user.click(groupButton);
+    expect(groupButton).toHaveAttribute('aria-expanded', 'false');
   });
 
   describe('collapsed sidebar', () => {

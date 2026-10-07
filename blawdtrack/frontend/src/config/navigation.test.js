@@ -40,9 +40,13 @@ describe('navigation config', () => {
     expect(deactivate.path).toBe(ROUTES.COURIER_DEACTIVATE);
   });
 
-  it('puts only "Restablecer contraseña" in Seguridad y acceso', () => {
+  it('orders the groups Mensajeros, Administradores and Seguridad y acceso', () => {
+    expect(NAVIGATION_GROUPS.map((g) => g.title)).toEqual(['Mensajeros', 'Administradores', 'Seguridad y acceso']);
+  });
+
+  it('puts "Restablecer contraseña" and "Roles y permisos" in Seguridad y acceso', () => {
     const security = NAVIGATION_GROUPS.find((g) => g.id === 'security');
-    expect(security.items.map((i) => i.label)).toEqual(['Restablecer contraseña']);
+    expect(security.items.map((i) => i.label)).toEqual(['Restablecer contraseña', 'Roles y permisos']);
   });
 });
 
