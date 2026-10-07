@@ -27,6 +27,7 @@ import { composeSchedule, parseSchedule } from '../utils/courierSchedule';
 import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
 import Toast from '../components/Toast';
+import PageHeader from '../components/PageHeader';
 import StatusMessage from '../components/StatusMessage';
 import './EditMessenger.css';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
@@ -465,6 +466,11 @@ export function EditMessenger({ initialCedula = '' }) {
 
   return (
     <Box className="edit-messenger-container" sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <PageHeader
+        title="Actualizar mensajero"
+        description="Busca al mensajero por su documento, corrige sus datos y guarda los cambios."
+      />
+
       {/* BUSCADOR */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
@@ -527,7 +533,7 @@ export function EditMessenger({ initialCedula = '' }) {
           <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
             Flota de mensajeros
           </Typography>
-          <Typography sx={{ fontSize: '12px', color: '#9E968D' }}>
+          <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
             Selecciona un mensajero para editar sus datos
           </Typography>
         </Box>
@@ -595,14 +601,14 @@ export function EditMessenger({ initialCedula = '' }) {
               })}
               {couriersList.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 8, color: '#9E968D' }}>
+                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 8, color: '#6B6560' }}>
                     No hay mensajeros disponibles
                   </TableCell>
                 </TableRow>
               )}
               {couriersList.length > 0 && visibleCouriers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 8, color: '#9E968D' }}>
+                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 8, color: '#6B6560' }}>
                     No se encontró ningún mensajero con ese documento.
                   </TableCell>
                 </TableRow>
@@ -619,7 +625,7 @@ export function EditMessenger({ initialCedula = '' }) {
             <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
               Editar · {currentCourier.fullName || currentCourier.nombre}
             </Typography>
-            <Typography sx={{ fontSize: '12px', color: '#9E968D' }}>
+            <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
               Cédula {currentCourier.documentNumber || currentCourier.idCard || currentCourier.cedula || currentCourier.id} · no editable
             </Typography>
           </Box>
@@ -851,7 +857,7 @@ export function EditMessenger({ initialCedula = '' }) {
               key={log.id}
               sx={{ p: '14px 24px', borderTop: '1px solid #EFEAE4', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'baseline' }}
             >
-              <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#9E968D', flex: '0 0 150px' }}>
+              <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#6B6560', flex: '0 0 150px' }}>
                 {log.when}
               </Typography>
               <Typography sx={{ fontSize: '13px', color: '#1F2421', flex: '1 1 200px', minWidth: 0, lineHeight: 1.45 }}>
@@ -863,7 +869,7 @@ export function EditMessenger({ initialCedula = '' }) {
             </Box>
           ))}
           {changeLog.length === 0 && (
-            <Typography sx={{ p: '14px 24px', fontSize: '13px', color: '#9E968D' }}>
+            <Typography sx={{ p: '14px 24px', fontSize: '13px', color: '#6B6560' }}>
               Todavía no hay cambios registrados para esta pantalla.
             </Typography>
           )}

@@ -14,6 +14,7 @@ import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
 import { composeSchedule } from '../utils/courierSchedule';
 import { StatusMessage } from '../components/StatusMessage';
+import PageHeader from '../components/PageHeader';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 // On phones the form uses 2 columns; wide fields span both.
@@ -173,6 +174,12 @@ export function CourierRegistrationPage() {
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#FAF8F5', py: { xs: 1.5, sm: 4 }, px: { xs: 1.5, sm: 4 } }}>
+      <Box sx={{ maxWidth: 1200, mx: 'auto', mb: 2.5 }}>
+        <PageHeader
+          title="Crear mensajero"
+          description="Registra a un nuevo mensajero con su horario y la capacidad de carga que puede transportar."
+        />
+      </Box>
       <Paper
         elevation={0}
         sx={{
@@ -200,7 +207,7 @@ export function CourierRegistrationPage() {
           >
             <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2.5px solid #1A3C34' }} />
           </Box>
-          <Typography component="h1" sx={{ fontSize: '1.06rem', fontWeight: 600, m: 0, color: '#1A3C34' }}>
+          <Typography component="h2" sx={{ fontSize: '1.06rem', fontWeight: 600, m: 0, color: '#1A3C34' }}>
             Datos del nuevo mensajero
           </Typography>
         </Box>

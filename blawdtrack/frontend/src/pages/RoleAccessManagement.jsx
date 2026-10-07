@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PageHeader from '../components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import CheckRounded from '@mui/icons-material/CheckRounded';
@@ -167,6 +168,11 @@ function RoleAccessManagement() {
           <ArrowBackRounded aria-hidden="true" />
           Volver a administración
         </button>
+
+        <PageHeader
+          title="Roles y permisos"
+          description="Busca a un usuario y ajusta qué puede hacer dentro del sistema."
+        />
 
         <section className="access-card user-search-card" aria-labelledby="user-search-title">
           <label className="access-card-label" htmlFor="role-user-search" id="user-search-title">

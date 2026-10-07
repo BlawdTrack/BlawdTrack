@@ -11,6 +11,7 @@ import {
 import { useAdminRegistration } from '../hooks/useAdminRegistration';
 import { validateAdminForm } from '../utils/adminFormValidation';
 import { StatusMessage } from '../components/StatusMessage';
+import PageHeader from '../components/PageHeader';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 // On phones the form uses 2 columns; wide fields span both.
@@ -134,6 +135,12 @@ export function AdminRegistrationPage() {
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#FAF8F5', py: { xs: 1.5, sm: 4 }, px: { xs: 1.5, sm: 4 } }}>
+      <Box sx={{ maxWidth: 1200, mx: 'auto', mb: 2.5 }}>
+        <PageHeader
+          title="Crear administrador"
+          description="Registra a un nuevo administrador de ventas. Todos los campos son obligatorios."
+        />
+      </Box>
       <Paper
         elevation={0}
         sx={{
@@ -161,7 +168,7 @@ export function AdminRegistrationPage() {
           >
             <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2.5px solid #1A3C34' }} />
           </Box>
-          <Typography component="h1" sx={{ fontSize: '1.06rem', fontWeight: 600, m: 0, color: '#1A3C34' }}>
+          <Typography component="h2" sx={{ fontSize: '1.06rem', fontWeight: 600, m: 0, color: '#1A3C34' }}>
             Datos del nuevo administrador
           </Typography>
         </Box>

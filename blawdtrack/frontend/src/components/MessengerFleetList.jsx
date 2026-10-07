@@ -19,6 +19,7 @@ import { listCouriers, getCourierDeactivations } from '../services/CourierServic
 import { formatHistoryEntry } from '../utils/courierHistory';
 import { getInitials } from '../utils/getInitials';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
+import PageHeader from './PageHeader';
 
 // Filas del panel de auditoría a partir de las desactivaciones guardadas en el backend.
 const fetchDeactivationAudit = async () => {
@@ -201,6 +202,11 @@ export const MessengerFleetList = () => {
 
   return (
     <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2.5, sm: '40px 32px' }, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <PageHeader
+        title="Desactivar mensajeros"
+        description="Elige al mensajero que dejará de operar y confirma la desactivación. Queda registrada en el historial."
+      />
+
       {/* BUSCADOR */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
@@ -271,7 +277,7 @@ export const MessengerFleetList = () => {
           <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '19px', color: 'primary.main' }}>
             Mensajeros · desactivación de acceso
           </Typography>
-          <Typography sx={{ fontSize: '13px', color: '#9E968D' }}>
+          <Typography sx={{ fontSize: '13px', color: '#6B6560' }}>
             El historial de entregas se conserva siempre
           </Typography>
         </Box>
@@ -316,7 +322,7 @@ export const MessengerFleetList = () => {
                     <Typography sx={{ fontSize: '13px', fontWeight: 600, color: '#2F7D4F' }}>
                       {DUTY_PLACEHOLDER}
                     </Typography>
-                    <Typography sx={{ fontSize: '12.5px', color: '#9E968D' }}>
+                    <Typography sx={{ fontSize: '12.5px', color: '#6B6560' }}>
                       {PENDING_PLACEHOLDER}
                     </Typography>
                   </Box>
@@ -386,7 +392,7 @@ export const MessengerFleetList = () => {
 
         <Box>
           {auditLogs.length === 0 ? (
-            <Typography sx={{ p: '20px 24px', fontSize: '13px', color: '#9E968D', textAlign: 'center' }}>
+            <Typography sx={{ p: '20px 24px', fontSize: '13px', color: '#6B6560', textAlign: 'center' }}>
               No hay desactivaciones registradas.
             </Typography>
           ) : (
@@ -402,7 +408,7 @@ export const MessengerFleetList = () => {
                     gap: '14px',
                   }}
                 >
-                  <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#9E968D', flex: '0 0 150px' }}>
+                  <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#6B6560', flex: '0 0 150px' }}>
                     {log.date}
                   </Typography>
                   <Chip

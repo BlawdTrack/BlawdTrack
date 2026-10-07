@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
+import PageHeader from '../components/PageHeader';
 import { deleteAdministrator, getAdministrators, getAdminAuditLog } from '../services/AdminService';
 import { usePolling, keepIfEqual } from '../hooks/usePolling';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
@@ -223,6 +224,11 @@ const AdminManagement = () => {
 
   return (
     <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2.5, sm: '40px 32px' }, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <PageHeader
+        title="Eliminar administrador"
+        description="Busca al administrador por su documento y confírmalo antes de eliminarlo. Esta acción no se puede deshacer."
+      />
+
       {/* BUSCADOR */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
@@ -235,6 +241,7 @@ const AdminManagement = () => {
             select
             value={searchDocumentType}
             onChange={(e) => setSearchDocumentType(e.target.value)}
+            slotProps={{ htmlInput: { 'aria-label': 'Tipo de documento' } }}
             sx={{ flex: '0 0 150px', minWidth: 130, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
           >
             {DOCUMENT_TYPE_OPTIONS.map((option) => (
@@ -249,6 +256,7 @@ const AdminManagement = () => {
             onChange={(e) => setSearchDocumentNumber(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder={DOCUMENT_PLACEHOLDERS[searchDocumentType]}
+            slotProps={{ htmlInput: { 'aria-label': 'Número de documento' } }}
             sx={{ flex: '1 1 auto', minWidth: 0, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
           />
           <Button
@@ -285,6 +293,11 @@ const AdminManagement = () => {
           <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
             Administradores
           </Typography>
+          {!isLoading && !error && admins.length > 0 && (
+            <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
+              {appliedFilter ? `${visibleAdmins.length} de ${admins.length}` : admins.length} registrados
+            </Typography>
+          )}
         </Box>
 
         <Box>
@@ -298,7 +311,7 @@ const AdminManagement = () => {
             <Alert severity="info" sx={{ m: 2 }}>No hay administradores registrados.</Alert>
           ) : visibleAdmins.length === 0 ? (
             <Alert severity="info" sx={{ m: 2 }}>
-              No se encontró ningún administrador con ese documento.
+              No se encontró ningún administrador con ese documento. Revisa el tipo y el número, o pulsa Limpiar para ver la lista completa.
             </Alert>
           ) : (
             visibleAdmins.map((user, index) => {
@@ -350,6 +363,7 @@ const AdminManagement = () => {
                             borderRadius: '10px',
                             px: 2.25,
                             py: '9px',
+                            minHeight: 44,
                             fontWeight: 600,
                             fontSize: '13.5px',
                             textTransform: 'none',
@@ -381,7 +395,7 @@ const AdminManagement = () => {
 
         <Box>
           {auditLogs.length === 0 ? (
-            <Typography sx={{ p: '20px 24px', fontSize: '13px', color: '#9E968D', textAlign: 'center' }}>
+            <Typography sx={{ p: '20px 24px', fontSize: '13px', color: '#6B6560', textAlign: 'center' }}>
               No hay registros de auditoría recientes.
             </Typography>
           ) : (
@@ -397,7 +411,7 @@ const AdminManagement = () => {
                     gap: '14px',
                   }}
                 >
-                  <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#9E968D', flex: '0 0 150px' }}>
+                  <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#6B6560', flex: '0 0 150px' }}>
                     {log.date}
                   </Typography>
                   <Chip
