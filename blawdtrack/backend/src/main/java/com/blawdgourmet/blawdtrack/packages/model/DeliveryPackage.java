@@ -31,17 +31,17 @@ public class DeliveryPackage {
     @Column(name = "numero_orden", length = 50)
     private String orderNumber;
 
-    @Column(name = "cliente_nombre", length = 120)
-    private String clientName;
+    @Column(name = "nombre_cliente", length = 120)
+    private String customerName;
 
-    @Column(name = "cliente_telefono", length = 20)
-    private String clientPhone;
+    @Column(name = "telefono", length = 30)
+    private String phone;
 
-    @Column(name = "entrega_direccion", length = 300)
-    private String deliveryAddress;
+    @Column(name = "direccion_entrega", length = 500)
+    private String address;
 
-    @Column(name = "entrega_horario", length = 500)
-    private String deliverySchedule;
+    @Column(name = "horario_preferencia", length = 255)
+    private String schedule;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mensajero_id", foreignKey = @ForeignKey(name = "fk_paquetes_mensajero_id"))

@@ -58,10 +58,10 @@ public class PackageService {
                 pkg.getId(),
                 pkg.getShipmentNumber(),
                 pkg.getOrderNumber(),
-                pkg.getClientName(),
-                pkg.getClientPhone(),
-                pkg.getDeliveryAddress(),
-                pkg.getDeliverySchedule(),
+                pkg.getCustomerName(),
+                pkg.getPhone(),
+                pkg.getAddress(),
+                pkg.getSchedule(),
                 pkg.getStatus(),
                 pkg.getItems().stream()
                         .map(item -> new PackageDetailResponse.PackageItemInfo(

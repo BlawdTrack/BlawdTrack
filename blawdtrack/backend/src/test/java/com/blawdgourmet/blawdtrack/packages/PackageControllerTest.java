@@ -97,10 +97,10 @@ class PackageControllerTest {
         pkg = DeliveryPackage.builder()
                 .shipmentNumber("ENV-2024-0001")
                 .orderNumber("SO-1001")
-                .clientName("Cliente Prueba")
-                .clientPhone("77777777")
-                .deliveryAddress("Avenida 456, San José")
-                .deliverySchedule("De 8 a 5")
+                .customerName("Cliente Prueba")
+                .phone("77777777")
+                .address("Avenida 456, San José")
+                .schedule("De 8 a 5")
                 .status(PackageStatus.ASSIGNED)
                 .assignedCourier(courier)
                 .items(new ArrayList<>())
@@ -125,11 +125,11 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$.id").value(pkg.getId()))
                 .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0001"))
                 .andExpect(jsonPath("$.orderNumber").value("SO-1001"))
-                .andExpect(jsonPath("$.deliverySchedule").value("De 8 a 5"))
+                .andExpect(jsonPath("$.schedule").value("De 8 a 5"))
                 .andExpect(jsonPath("$.status").value("ASSIGNED"))
-                .andExpect(jsonPath("$.clientName").value("Cliente Prueba"))
-                .andExpect(jsonPath("$.clientPhone").value("77777777"))
-                .andExpect(jsonPath("$.deliveryAddress").value("Avenida 456, San José"))
+                .andExpect(jsonPath("$.customerName").value("Cliente Prueba"))
+                .andExpect(jsonPath("$.phone").value("77777777"))
+                .andExpect(jsonPath("$.address").value("Avenida 456, San José"))
                 .andExpect(jsonPath("$.items[0].itemId").value("ITEM-001"))
                 .andExpect(jsonPath("$.items[0].name").value("Café molido"))
                 .andExpect(jsonPath("$.items[0].quantity").value(2.00))
@@ -169,19 +169,6 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$.status").value("PENDING"))
                 .andExpect(jsonPath("$.orderNumber").doesNotExist())
                 .andExpect(jsonPath("$.items").isEmpty())
-                .andExpect(jsonPath("$.assignedCourier").doesNotExist());
-    }
-
-    @Test
-    void adminVentasConsultaPaqueteSinMensajeroAsignado() throws Exception {
-        // Crear paquete sin mensajero asignado
-        packages.saveAndFlush(DeliveryPackage.builder()
-                .shipmentNumber("ENV-2024-0003")
-                .build());
-
-        getPackage(token(adminVentas), "ENV-2024-0003")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0003"))
                 .andExpect(jsonPath("$.assignedCourier").doesNotExist());
     }
 

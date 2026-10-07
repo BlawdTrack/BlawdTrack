@@ -1,12 +1,7 @@
 package com.blawdgourmet.blawdtrack.packages.controller;
 
-import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDetailResponse;
-import com.blawdgourmet.blawdtrack.packages.service.PackageNotFoundException;
 import com.blawdgourmet.blawdtrack.packages.service.PackageService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,14 +29,5 @@ public class PackageController {
     @GetMapping("/{shipmentNumber}")
     public PackageDetailResponse getPackageByShipmentNumber(@PathVariable String shipmentNumber) {
         return service.getPackageByShipmentNumber(shipmentNumber);
-    }
-
-    @ExceptionHandler(PackageNotFoundException.class)
-    public ResponseEntity<ErrorResponse> notFound(PackageNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
-                .code("PACKAGE_NOT_FOUND")
-                .message(ex.getMessage())
-                .status(404)
-                .build());
     }
 }

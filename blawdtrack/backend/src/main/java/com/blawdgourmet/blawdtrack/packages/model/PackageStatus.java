@@ -6,7 +6,7 @@ package com.blawdgourmet.blawdtrack.packages.model;
 public enum PackageStatus {
     PENDING("PENDIENTE"),
     ASSIGNED("ASIGNADO"),
-    SENT("ENVIADO"),
+    SHIPPED("ENVIADO"),
     IN_TRANSIT("EN_TRANSITO"),
     DELIVERED("ENTREGADO"),
     NOT_DELIVERED("NO_ENTREGADO");
