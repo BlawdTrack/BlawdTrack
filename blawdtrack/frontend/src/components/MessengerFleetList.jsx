@@ -8,9 +8,7 @@ import {
   CircularProgress,
   Paper,
   Divider,
-  MenuItem,
   Snackbar,
-  TextField,
   Typography,
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
@@ -21,6 +19,10 @@ import { getInitials } from '../utils/getInitials';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
 import PageHeader from './PageHeader';
 import PageContainer from './PageContainer';
+import DocumentSearch from './DocumentSearch';
+import StatusChip from './StatusChip';
+import { CARD_SX } from './formStyles';
+import { useDocumentSearch } from '../hooks/useDocumentSearch';
 
 // Filas del panel de auditoría a partir de las desactivaciones guardadas en el backend.
 const fetchDeactivationAudit = async () => {
@@ -48,27 +50,6 @@ const logAuditError = (auditError) => console.error('Error al cargar la auditor�
 const DUTY_PLACEHOLDER = 'Fuera de labores';
 const PENDING_PLACEHOLDER = 'Sin envíos en proceso';
 
-const DOCUMENT_TYPE_OPTIONS = [
-  { value: 'CEDULA', label: 'Cédula' },
-  { value: 'DIMEX', label: 'DIMEX' },
-  { value: 'PASAPORTE', label: 'Pasaporte' },
-];
-
-const DOCUMENT_PLACEHOLDERS = {
-  CEDULA: 'Ej. 1-2345-6789',
-  DIMEX: 'Ej. 155812345678',
-  PASAPORTE: 'Ej. A12345678',
-};
-
-const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-
-const CARD_SX = {
-  border: '1px solid #E4DED7',
-  borderRadius: '18px',
-  bgcolor: '#fff',
-  boxShadow: '0 12px 30px rgba(26,60,52,.06)',
-};
-
 const CARD_HEADER_SX = {
   p: { xs: 2.5, sm: '18px 24px' },
   borderBottom: '1px solid #E4DED7',
@@ -95,9 +76,7 @@ export const MessengerFleetList = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [auditLogs, setAuditLogs] = useState([]);
 
-  const [searchDocumentType, setSearchDocumentType] = useState('CEDULA');
-  const [searchDocumentNumber, setSearchDocumentNumber] = useState('');
-  const [appliedFilter, setAppliedFilter] = useState(null);
+  const search = useDocumentSearch();
 
   useEffect(() => {
     const fetchMessengers = async () => {
@@ -163,27 +142,7 @@ export const MessengerFleetList = () => {
     setSnackbarOpen(true);
   };
 
-  const handleSearch = () => {
-    const trimmed = searchDocumentNumber.trim();
-    if (!trimmed) {
-      setAppliedFilter(null);
-      return;
-    }
-    setAppliedFilter({ documentType: searchDocumentType, documentNumber: normalizeDocument(trimmed) });
-  };
-
-  const handleClearSearch = () => {
-    setSearchDocumentNumber('');
-    setAppliedFilter(null);
-  };
-
-  const visibleMessengers = appliedFilter
-    ? messengers.filter(
-        (messenger) =>
-          messenger.documentType === appliedFilter.documentType
-          && normalizeDocument(messenger.documentNumber).includes(appliedFilter.documentNumber)
-      )
-    : messengers;
+  const visibleMessengers = search.filter(messengers);
 
   if (isLoading) {
     return (
@@ -215,52 +174,8 @@ export const MessengerFleetList = () => {
             Buscar mensajero por documento
           </Typography>
         </Box>
-        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' }, display: 'flex', gap: 1.5, flexWrap: { xs: 'wrap', sm: 'nowrap' }, alignItems: 'center' }}>
-          <TextField
-            select
-            value={searchDocumentType}
-            onChange={(e) => setSearchDocumentType(e.target.value)}
-            sx={{ flex: '0 0 150px', minWidth: 130, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
-          >
-            {DOCUMENT_TYPE_OPTIONS.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            fullWidth
-            value={searchDocumentNumber}
-            onChange={(e) => setSearchDocumentNumber(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder={DOCUMENT_PLACEHOLDERS[searchDocumentType]}
-            sx={{ flex: '1 1 auto', minWidth: 0, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
-          />
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={handleSearch}
-            sx={{
-              flex: '0 0 auto',
-              bgcolor: 'primary.main',
-              color: '#fff',
-              fontWeight: 600,
-              px: 3.5,
-              textTransform: 'none',
-              borderRadius: '10px',
-              '&:hover': { bgcolor: '#12322B' },
-            }}
-          >
-            Buscar
-          </Button>
-          {appliedFilter && (
-            <Button
-              onClick={handleClearSearch}
-              sx={{ flex: '0 0 auto', color: '#6B6560', textTransform: 'none', fontWeight: 600, px: 1.5 }}
-            >
-              Limpiar
-            </Button>
-          )}
+        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' } }}>
+          <DocumentSearch search={search} />
         </Box>
       </Paper>
 
@@ -328,17 +243,7 @@ export const MessengerFleetList = () => {
                     </Typography>
                   </Box>
 
-                  <Chip
-                    label={isActive ? 'Activo' : 'Inactivo'}
-                    sx={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      borderRadius: '20px',
-                      height: '28px',
-                      bgcolor: isActive ? '#E9F3EC' : '#F1ECE7',
-                      color: isActive ? '#2F7D4F' : '#6B6560',
-                    }}
-                  />
+                  <StatusChip active={isActive} />
 
                   <Button
                     variant="outlined"

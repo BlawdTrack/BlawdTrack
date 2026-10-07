@@ -10,17 +10,10 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
+import { INLINE_LABEL_SX } from '../components/formStyles';
 import blawdtrackLogo from '../assets/Logo.png';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const LABEL_SX = {
-  fontSize: 12,
-  fontWeight: 600,
-  color: 'text.secondary',
-  textTransform: 'uppercase',
-  letterSpacing: '0.4px',
-};
 
 function validateForm(data) {
   const errors = { email: '', password: '' };
@@ -185,7 +178,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           {error && <StatusMessage severity={error.severity} message={error.message} />}
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <Typography component="label" htmlFor="login-email" sx={LABEL_SX}>
+            <Typography component="label" htmlFor="login-email" sx={INLINE_LABEL_SX}>
               Correo electrónico
             </Typography>
             <TextField
@@ -205,7 +198,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <Typography component="label" htmlFor="login-password" sx={LABEL_SX}>
+            <Typography component="label" htmlFor="login-password" sx={INLINE_LABEL_SX}>
               Contraseña
             </Typography>
             <PasswordField

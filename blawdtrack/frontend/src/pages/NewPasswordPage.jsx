@@ -11,6 +11,7 @@ import { StatusMessage } from '../components/StatusMessage';
 import { RecoverySteps } from '../components/RecoverySteps';
 import AuthCardLayout from '../components/AuthCardLayout';
 import PasswordField from '../components/PasswordField';
+import { INLINE_LABEL_SX, INPUT_SX } from '../components/formStyles';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import { PasswordRequirements } from '../components/PasswordRequirements';
 import { meetsClientPasswordRules } from '../utils/passwordRules';
@@ -36,19 +37,6 @@ const TITLE_SX = {
   fontWeight: 600,
   fontSize: 18,
   color: 'primary.main',
-};
-
-const LABEL_SX = {
-  fontSize: 12,
-  fontWeight: 700,
-  letterSpacing: '0.5px',
-  textTransform: 'uppercase',
-  color: '#6B6560',
-};
-
-const INPUT_SX = {
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 16 },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
 };
 
 const BUTTON_SX = { borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 16 };
@@ -211,7 +199,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         </Typography>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <Typography component="label" htmlFor="new-password" sx={LABEL_SX}>
+          <Typography component="label" htmlFor="new-password" sx={INLINE_LABEL_SX}>
             Nueva contraseña
           </Typography>
           <PasswordField
@@ -231,7 +219,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         </Box>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <Typography component="label" htmlFor="confirm-password" sx={LABEL_SX}>
+          <Typography component="label" htmlFor="confirm-password" sx={INLINE_LABEL_SX}>
             Confirmar contraseña
           </Typography>
           <PasswordField

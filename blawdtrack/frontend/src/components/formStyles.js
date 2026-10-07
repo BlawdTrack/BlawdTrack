@@ -12,9 +12,20 @@ export const LABEL_SX = {
   textTransform: 'uppercase',
 };
 
+/** Etiqueta sin margen inferior, para campos cuyo contenedor ya los separa con `gap`. */
+export const INLINE_LABEL_SX = { ...LABEL_SX, mb: 0 };
+
 /** Campo de texto: 16 px y unos 52 px de alto (cómodo de tocar y de leer). */
 export const INPUT_SX = {
   backgroundColor: '#fff',
   '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 16, '& fieldset': { borderColor: '#DCD4CA' } },
   '& .MuiOutlinedInput-input': { py: 1.6 },
+};
+
+/** Tarjeta blanca de las pantallas de gestión (listas, formularios, historiales). */
+export const CARD_SX = {
+  borderRadius: '18px',
+  border: '1px solid #E4DED7',
+  bgcolor: '#fff',
+  boxShadow: '0 12px 30px rgba(26,60,52,.06)',
 };

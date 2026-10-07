@@ -13,6 +13,7 @@ import { validateAdminForm } from '../utils/adminFormValidation';
 import { StatusMessage } from '../components/StatusMessage';
 import PageHeader from '../components/PageHeader';
 import PageContainer from '../components/PageContainer';
+import { LABEL_SX, INPUT_SX } from '../components/formStyles';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 // On phones the form uses 2 columns; wide fields span both.
@@ -38,13 +39,6 @@ const FIELD_ORDER = [
   'documentNumber',
   'contrasenaInicial'
 ];
-
-const LABEL_SX = { fontSize: 12, fontWeight: 700, letterSpacing: '0.5px', color: '#6B6560', mb: 0.75, display: 'block' };
-const INPUT_SX = {
-  backgroundColor: '#fff',
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 14, '& fieldset': { borderColor: '#DCD4CA' } },
-  '& .MuiOutlinedInput-input': { py: 1.4 }
-};
 
 // Builds the body expected by POST /api/v1/admins (AdminRegistrationRequest).
 function buildAdminPayload(formData) {

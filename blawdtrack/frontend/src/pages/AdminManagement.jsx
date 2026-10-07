@@ -3,8 +3,6 @@ import {
   Box,
   Button,
   Typography,
-  TextField,
-  MenuItem,
   Avatar,
   Paper,
   Divider,
@@ -19,9 +17,10 @@ import PageHeader from '../components/PageHeader';
 import PageContainer from '../components/PageContainer';
 import { deleteAdministrator, getAdministrators, getAdminAuditLog } from '../services/AdminService';
 import { usePolling, keepIfEqual } from '../hooks/usePolling';
-import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
-
-const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+import DocumentSearch from '../components/DocumentSearch';
+import { CARD_SX } from '../components/formStyles';
+import { useDocumentSearch } from '../hooks/useDocumentSearch';
+import { getInitials } from '../utils/getInitials';
 
 // Backend action codes (AuditServiceImpl / AdminServiceImpl) -> presentation.
 const AUDIT_ACTION_LABELS = {
@@ -41,13 +40,6 @@ const mapAuditLogEntry = (entry) => {
     details: entry.details,
     role: 'Súper Usuario',
   };
-};
-
-const CARD_SX = {
-  borderRadius: '18px',
-  border: '1px solid #E4DED7',
-  bgcolor: '#fff',
-  boxShadow: '0 12px 30px rgba(26,60,52,.06)',
 };
 
 const CARD_HEADER_SX = {
@@ -79,9 +71,7 @@ const AdminManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [searchDocumentType, setSearchDocumentType] = useState('CEDULA');
-  const [searchDocumentNumber, setSearchDocumentNumber] = useState('');
-  const [appliedFilter, setAppliedFilter] = useState(null);
+  const search = useDocumentSearch();
 
   const fetchAuditLog = async () => {
     try {
@@ -194,34 +184,7 @@ const AdminManagement = () => {
     }
   };
 
-  const handleSearch = () => {
-    const trimmed = searchDocumentNumber.trim();
-    if (!trimmed) {
-      setAppliedFilter(null);
-      return;
-    }
-    setAppliedFilter({ documentType: searchDocumentType, documentNumber: normalizeDocument(trimmed) });
-  };
-
-  const handleClearSearch = () => {
-    setSearchDocumentNumber('');
-    setAppliedFilter(null);
-  };
-
-  const visibleAdmins = appliedFilter
-    ? admins.filter(
-        (admin) =>
-          admin.documentType === appliedFilter.documentType
-          && normalizeDocument(admin.documentNumber).includes(appliedFilter.documentNumber)
-      )
-    : admins;
-
-  const getInitials = (name) => {
-    if (!name) return '';
-    const names = name.split(' ');
-    if (names.length >= 2) return `${names[0][0]}${names[1][0]}`.toUpperCase();
-    return name.substring(0, 2).toUpperCase();
-  };
+  const visibleAdmins = search.filter(admins);
 
   return (
     <PageContainer>
@@ -237,54 +200,8 @@ const AdminManagement = () => {
             Buscar administrador por documento
           </Typography>
         </Box>
-        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' }, display: 'flex', gap: 1.5, flexWrap: { xs: 'wrap', sm: 'nowrap' }, alignItems: 'center' }}>
-          <TextField
-            select
-            value={searchDocumentType}
-            onChange={(e) => setSearchDocumentType(e.target.value)}
-            slotProps={{ htmlInput: { 'aria-label': 'Tipo de documento' } }}
-            sx={{ flex: '0 0 150px', minWidth: 130, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
-          >
-            {DOCUMENT_TYPE_OPTIONS.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            fullWidth
-            value={searchDocumentNumber}
-            onChange={(e) => setSearchDocumentNumber(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder={DOCUMENT_PLACEHOLDERS[searchDocumentType]}
-            slotProps={{ htmlInput: { 'aria-label': 'Número de documento' } }}
-            sx={{ flex: '1 1 auto', minWidth: 0, bgcolor: '#fff', '& .MuiOutlinedInput-root': { borderRadius: '10px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } } }}
-          />
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={handleSearch}
-            sx={{
-              flex: '0 0 auto',
-              bgcolor: 'primary.main',
-              color: '#fff',
-              fontWeight: 600,
-              px: 3.5,
-              textTransform: 'none',
-              borderRadius: '10px',
-              '&:hover': { bgcolor: '#12322B' },
-            }}
-          >
-            Buscar
-          </Button>
-          {appliedFilter && (
-            <Button
-              onClick={handleClearSearch}
-              sx={{ flex: '0 0 auto', color: '#6B6560', textTransform: 'none', fontWeight: 600, px: 1.5 }}
-            >
-              Limpiar
-            </Button>
-          )}
+        <Box sx={{ p: { xs: 2.5, sm: '20px 24px' } }}>
+          <DocumentSearch search={search} />
         </Box>
       </Paper>
 
@@ -296,7 +213,8 @@ const AdminManagement = () => {
           </Typography>
           {!isLoading && !error && admins.length > 0 && (
             <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
-              {appliedFilter ? `${visibleAdmins.length} de ${admins.length}` : admins.length} registrados
+              {search.isFiltering ? `${visibleAdmins.length} de ${admins.length}` : admins.length}{' '}
+              {admins.length === 1 ? 'registrado' : 'registrados'}
             </Typography>
           )}
         </Box>
