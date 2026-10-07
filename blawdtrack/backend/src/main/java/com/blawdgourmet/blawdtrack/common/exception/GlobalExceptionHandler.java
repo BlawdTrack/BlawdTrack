@@ -14,6 +14,9 @@ import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
 import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
+import com.blawdgourmet.blawdtrack.packages.service.PackageDeliveredException;
+import com.blawdgourmet.blawdtrack.packages.service.PackageDispatchedException;
+import com.blawdgourmet.blawdtrack.packages.service.PackageNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.RolePermissionException;
 import com.blawdgourmet.blawdtrack.users.service.UserNotFoundException;
@@ -147,6 +150,39 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(PackageNotFoundException.class)
+    public ResponseEntity<ApiError> manejarPaqueteNoEncontrado(PackageNotFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("PAQUETE_NO_ENCONTRADO")
+                .message(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(PackageDispatchedException.class)
+    public ResponseEntity<ApiError> manejarPaqueteDespachado(PackageDispatchedException ex) {
+        ApiError error = ApiError.builder()
+                .code("PAQUETE_DESPACHADO")
+                .message(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(PackageDeliveredException.class)
+    public ResponseEntity<ApiError> manejarPaqueteEntregado(PackageDeliveredException ex) {
+        ApiError error = ApiError.builder()
+                .code("PAQUETE_ENTREGADO")
+                .message(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
