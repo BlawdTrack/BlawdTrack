@@ -48,6 +48,14 @@ export function useUserPermissions(notify) {
     }
   };
 
+  // Vuelve a la búsqueda: olvida al usuario y lo que se había marcado.
+  const clear = () => {
+    setUser(null);
+    setSelected(new Set());
+    setSearchError('');
+    setSaveError('');
+  };
+
   const toggle = (code) => {
     setSelected((current) => {
       const next = new Set(current);
@@ -97,6 +105,6 @@ export function useUserPermissions(notify) {
 
   return {
     user, selected, searching, searchError, saving, saveError,
-    hasChanges, canReset, find, toggle, save, reset,
+    hasChanges, canReset, find, clear, toggle, save, reset,
   };
 }

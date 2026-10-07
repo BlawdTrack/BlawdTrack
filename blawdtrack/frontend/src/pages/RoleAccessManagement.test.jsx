@@ -123,4 +123,26 @@ describe('RoleAccessManagement (HU-009 permisos por usuario)', () => {
     expect(screen.getByRole('button', { name: /Restablecer predeterminados/ }).disabled).toBe(true);
     expect(screen.getByRole('button', { name: /Aplicar cambios/ }).disabled).toBe(true);
   });
+  it('Descartar sin cambios vuelve directo a la búsqueda', async () => {
+    renderPage();
+    await search();
+    await screen.findByText('María Solano');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar' }));
+
+    expect(await screen.findByText('Busca a un usuario')).toBeTruthy();
+    expect(screen.queryByText('María Solano')).toBeNull();
+  });
+
+  it('Descartar con cambios pide confirmación antes de volver a la búsqueda', async () => {
+    renderPage();
+    await search();
+    await screen.findByText('María Solano');
+
+    fireEvent.click(screen.getByRole('switch', { name: /Actualizar estado de paquetes/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar' }));
+
+    expect(screen.getByText('María Solano')).toBeTruthy();
+    expect(screen.getByRole('dialog')).toBeTruthy();
+  });
 });
