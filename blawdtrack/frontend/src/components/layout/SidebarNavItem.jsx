@@ -35,7 +35,7 @@ function ItemContent({ label, active, disabled, Icon }) {
           sx={{
             fontSize: 18,
             flex: '0 0 18px',
-            color: active ? '#FF6C0E' : disabled ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.55)',
+            color: active ? '#FF6C0E' : disabled ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.7)',
           }}
         />
       )}
@@ -43,7 +43,7 @@ function ItemContent({ label, active, disabled, Icon }) {
         sx={{
           fontSize: 13.5,
           fontWeight: active ? 600 : 500,
-          color: active ? '#fff' : disabled ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.75)',
+          color: active ? '#fff' : disabled ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.85)',
         }}
       >
         {label}
@@ -71,7 +71,7 @@ export default function SidebarNavItem({ item }) {
   }
 
   return (
-    <NavLink to={item.path} end style={{ textDecoration: 'none' }}>
+    <NavLink to={item.path} end className="sidebar-nav-link" style={{ textDecoration: 'none' }}>
       {({ isActive }) => <ItemContent label={item.label} active={isActive} disabled={false} Icon={Icon} />}
     </NavLink>
   );

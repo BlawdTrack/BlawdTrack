@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, ButtonBase, Typography } from '@mui/material';
 import { NAV_GROUP_ICONS } from './navIcons';
 
 const firstEnabledPath = (group) => group.items.find((item) => item.path)?.path ?? null;
@@ -33,25 +33,29 @@ export default function MobileBottomNav({ groups }) {
         const active = isGroupActive(group, pathname);
         const Icon = NAV_GROUP_ICONS[group.id];
         return (
-          <Box
+          <ButtonBase
             key={group.id}
             onClick={() => target && navigate(target)}
+            disabled={!target}
+            aria-current={active ? 'page' : undefined}
             sx={{
               flex: 1,
+              minHeight: 56,
               pt: 1.25,
               pb: 1.5,
+              flexDirection: 'column',
               textAlign: 'center',
-              cursor: target ? 'pointer' : 'default',
               opacity: target ? 1 : 0.5,
+              '&.Mui-focusVisible': { outline: '2px solid #FF6C0E', outlineOffset: -2 },
             }}
           >
             {Icon && (
-              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? '#FF6C0E' : '#9E968D' }} />
+              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? '#FF6C0E' : '#6B6560' }} />
             )}
-            <Typography sx={{ fontSize: 10.5, fontWeight: 700, color: active ? '#FF6C0E' : '#9E968D' }}>
+            <Typography sx={{ fontSize: 10.5, fontWeight: 700, color: active ? '#FF6C0E' : '#6B6560' }}>
               {group.shortTitle}
             </Typography>
-          </Box>
+          </ButtonBase>
         );
       })}
     </Box>

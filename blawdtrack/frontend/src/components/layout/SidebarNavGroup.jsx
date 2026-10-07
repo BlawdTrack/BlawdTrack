@@ -13,7 +13,7 @@ export default function SidebarNavGroup({ group }) {
           fontWeight: 700,
           letterSpacing: 1,
           textTransform: 'uppercase',
-          color: 'rgba(255,255,255,.35)',
+          color: 'rgba(255,255,255,.6)',
         }}
       >
         {group.title}

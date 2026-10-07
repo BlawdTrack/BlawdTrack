@@ -32,7 +32,7 @@ export default function SidebarBrand() {
           BlawdTrack
         </Typography>
         <Typography
-          sx={{ fontSize: 10, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)' }}
+          sx={{ fontSize: 10, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}
         >
           Blawd Gourmet
         </Typography>

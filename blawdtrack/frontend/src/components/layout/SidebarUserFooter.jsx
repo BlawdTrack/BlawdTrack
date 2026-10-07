@@ -38,7 +38,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
           <Typography sx={{ fontSize: 12.5, fontWeight: 600, color: '#fff' }} noWrap>
             {fullName}
           </Typography>
-          <Typography sx={{ fontSize: 10.5, color: 'rgba(255,255,255,.45)' }} noWrap>
+          <Typography sx={{ fontSize: 10.5, color: 'rgba(255,255,255,.7)' }} noWrap>
             {roleLabel}
           </Typography>
         </Box>

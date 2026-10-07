@@ -37,6 +37,8 @@ export default function MainMenuLayout() {
           height: '100vh',
           overflow: 'auto',
           backgroundColor: '#1A3C34',
+          '& a.sidebar-nav-link:focus-visible': { outline: 'none' },
+          '& a.sidebar-nav-link:focus-visible > div': { outline: '2px solid #FF6C0E', outlineOffset: 1 },
         }}
       >
         <SidebarContent
