@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Box, Tab, Tabs } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { usePolling } from '../hooks/usePolling';
 import { useCourierFleet } from '../hooks/useCourierFleet';
@@ -8,9 +7,8 @@ import { useDocumentSearch } from '../hooks/useDocumentSearch';
 import { useToast } from '../hooks/useToast';
 import { DeactivateMessengerModal } from './DeactivateMessengerModal';
 import CourierDeactivationList from './CourierDeactivationList';
-import DeactivationAuditPanel from './DeactivationAuditPanel';
-import PageContainer from './PageContainer';
-import PageHeaderBar from './PageHeaderBar';
+import AuditPanel from './AuditPanel';
+import SplitScreen from './SplitScreen';
 import Toast from './Toast';
 
 /**
@@ -54,45 +52,36 @@ export const MessengerFleetList = () => {
   const panelDisplay = (view) => ({ xs: mobileView === view ? 'flex' : 'none', md: 'flex' });
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: { md: '100vh' }, minHeight: 0 }}>
-      <PageHeaderBar
+    <>
+      <SplitScreen
         title="Desactivar mensajeros"
         description="Elige al mensajero que dejará de operar y confirma la desactivación. Queda registrada en el historial."
-      />
-
-      <PageContainer wide sx={{ flex: 1, minHeight: 0 }}>
-        <Tabs
-          value={mobileView}
-          onChange={(_, value) => setMobileView(value)}
-          variant="fullWidth"
-          sx={{ display: { md: 'none' }, borderBottom: '1px solid #E4DED7' }}
-        >
-          <Tab value="fleet" label="Mensajeros" />
-          <Tab value="audit" label={`Auditoría (${audit.entries.length})`} />
-        </Tabs>
-
-        <Box
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            display: 'grid',
-            gap: 3,
-            gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) 420px' },
-            gridTemplateRows: { md: 'minmax(0, 1fr)' },
-          }}
-        >
-          <CourierDeactivationList
-            couriers={visibleCouriers}
-            totalCount={fleet.couriers.length}
-            loading={fleet.loading}
-            errorMessage={fleet.error?.message}
-            search={search}
-            onDeactivate={setSelectedCourier}
-            sx={{ display: panelDisplay('fleet') }}
-          />
-          <DeactivationAuditPanel entries={audit.entries} sx={{ display: panelDisplay('audit') }} />
-        </Box>
-      </PageContainer>
+        columns="minmax(0, 1fr) 420px"
+        tabs={{
+          value: mobileView,
+          onChange: setMobileView,
+          items: [
+            { value: 'fleet', label: 'Mensajeros' },
+            { value: 'audit', label: `Auditoría (${audit.entries.length})` },
+          ],
+        }}
+      >
+        <CourierDeactivationList
+          couriers={visibleCouriers}
+          totalCount={fleet.couriers.length}
+          loading={fleet.loading}
+          errorMessage={fleet.error?.message}
+          search={search}
+          onDeactivate={setSelectedCourier}
+          sx={{ display: panelDisplay('fleet') }}
+        />
+        <AuditPanel
+          title="Auditoría de desactivaciones"
+          entries={audit.entries}
+          emptyMessage="No hay desactivaciones registradas."
+          sx={{ display: panelDisplay('audit') }}
+        />
+      </SplitScreen>
 
       <DeactivateMessengerModal
         isOpen={Boolean(selectedCourier)}
@@ -102,6 +91,6 @@ export const MessengerFleetList = () => {
       />
 
       <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={closeToast} />
-    </Box>
+    </>
   );
 };

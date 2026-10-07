@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box } from '@mui/material';
 import PersonSearchOutlinedIcon from '@mui/icons-material/PersonSearchOutlined';
 import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
 import CourierDetailPanel from '../components/CourierDetailPanel';
 import CourierFleetPanel from '../components/CourierFleetPanel';
 import CourierGeneralHistoryPanel from '../components/CourierGeneralHistoryPanel';
 import EmptyState from '../components/EmptyState';
-import PageContainer from '../components/PageContainer';
-import PageHeaderBar from '../components/PageHeaderBar';
+import SplitScreen from '../components/SplitScreen';
 import Toast from '../components/Toast';
 import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
 import { useConfirmLeave } from '../hooks/useConfirmLeave';
@@ -93,70 +91,58 @@ export function EditMessenger({ initialCedula = '' }) {
   const courierName = getCourierName(editor.courier);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: { md: '100vh' }, minHeight: 0 }}>
-      <PageHeaderBar
+    <>
+      <SplitScreen
         title="Actualizar mensajero"
         description="Busca al mensajero por su documento, corrige sus datos y guarda los cambios."
-      />
+        columns={listOpen ? '420px minmax(0, 1fr)' : 'minmax(0, 1fr)'}
+      >
+        <CourierFleetPanel
+          couriers={search.filter(fleet.couriers)}
+          totalCount={fleet.couriers.length}
+          loading={fleet.loading}
+          selectedKey={editor.courier ? getCourierDocument(editor.courier) : null}
+          onSelect={handleSelect}
+          search={search}
+          canHide={Boolean(editor.courier)}
+          onHide={() => setListOpen(false)}
+          onOpenGeneralHistory={openGeneralHistory}
+          generalHistoryOpen={showGeneral}
+          sx={{ display: { xs: editor.courier || showGeneral ? 'none' : 'flex', md: listOpen ? 'flex' : 'none' } }}
+        />
 
-      <PageContainer wide sx={{ flex: 1, minHeight: 0 }}>
-        <Box
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            display: 'grid',
-            gap: 3,
-            gridTemplateColumns: { xs: '1fr', md: listOpen ? '420px minmax(0, 1fr)' : 'minmax(0, 1fr)' },
-            gridTemplateRows: { md: 'minmax(0, 1fr)' },
-          }}
-        >
-          <CourierFleetPanel
-            couriers={search.filter(fleet.couriers)}
-            totalCount={fleet.couriers.length}
-            loading={fleet.loading}
-            selectedKey={editor.courier ? getCourierDocument(editor.courier) : null}
-            onSelect={handleSelect}
-            search={search}
-            canHide={Boolean(editor.courier)}
-            onHide={() => setListOpen(false)}
-            onOpenGeneralHistory={openGeneralHistory}
-            generalHistoryOpen={showGeneral}
-            sx={{ display: { xs: editor.courier || showGeneral ? 'none' : 'flex', md: listOpen ? 'flex' : 'none' } }}
+        {showGeneral && (
+          <CourierGeneralHistoryPanel
+            history={generalHistory}
+            backLabel={editor.courier ? `Volver a ${courierName}` : 'Volver'}
+            onBack={() => setShowGeneral(false)}
           />
-
-          {showGeneral && (
-            <CourierGeneralHistoryPanel
-              history={generalHistory}
-              backLabel={editor.courier ? `Volver a ${courierName}` : 'Volver'}
-              onBack={() => setShowGeneral(false)}
-            />
-          )}
-          {!showGeneral && editor.courier && (
-            <CourierDetailPanel
-              key={editor.courier.id}
-              editor={editor}
-              onBack={handleBack}
-              onDiscard={handleDiscard}
-              listOpen={listOpen}
-              onShowList={() => setListOpen(true)}
-            />
-          )}
-          {!showGeneral && !editor.courier && (
-            <EmptyState
-              icon={PersonSearchOutlinedIcon}
-              title="Elige un mensajero"
-              description="Selecciona un mensajero de la lista para editar sus datos y ver su historial."
-              sx={{ display: { xs: 'none', md: 'flex' } }}
-            />
-          )}
-        </Box>
-      </PageContainer>
+        )}
+        {!showGeneral && editor.courier && (
+          <CourierDetailPanel
+            key={editor.courier.id}
+            editor={editor}
+            onBack={handleBack}
+            onDiscard={handleDiscard}
+            listOpen={listOpen}
+            onShowList={() => setListOpen(true)}
+          />
+        )}
+        {!showGeneral && !editor.courier && (
+          <EmptyState
+            icon={PersonSearchOutlinedIcon}
+            title="Elige un mensajero"
+            description="Selecciona un mensajero de la lista para editar sus datos y ver su historial."
+            sx={{ display: { xs: 'none', md: 'flex' } }}
+          />
+        )}
+      </SplitScreen>
 
       <UnsavedChangesGuard when={editor.isDirty} />
       <ConfirmLeaveDialog {...dialogProps} />
 
       <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={closeToast} />
-    </Box>
+    </>
   );
 }
 

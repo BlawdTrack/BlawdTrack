@@ -48,7 +48,7 @@ describe('DocumentSearch', () => {
 
 describe('HistoryList', () => {
   const entries = [
-    { id: 'a', when: '07/10/2026 · 01:10 a. m.', text: 'Mensajero registrado', by: 'Super Usuario', courierName: 'Ana Mora', courierDocument: '1-1111-1111' },
+    { id: 'a', when: '07/10/2026 · 01:10 a. m.', text: 'Mensajero registrado', by: 'Super Usuario', subject: 'Ana Mora', subjectDetail: '1-1111-1111' },
   ];
 
   it('shows the empty message when there are no entries', () => {

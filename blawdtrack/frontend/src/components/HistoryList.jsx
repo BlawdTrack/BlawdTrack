@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material';
+import { Fragment } from 'react';
+import { Box, Chip, Typography } from '@mui/material';
 
 function CourierHistoryRow({ entry }) {
   return (
@@ -12,30 +13,52 @@ function CourierHistoryRow({ entry }) {
   );
 }
 
-// En el historial general cada cambio indica de qué mensajero es. La fecha va a la derecha sin saltar de
-// línea y el nombre se recorta si no cabe, así el diseño no depende del ancho del panel.
+const BADGE_COLORS = {
+  success: { bgcolor: '#E9F3EC', color: '#2F7D4F' },
+  danger: { bgcolor: '#FCEDEA', color: '#C0392B' },
+};
+
+// En el historial general cada cambio indica de quién es. La fecha va a la derecha sin saltar de línea y el
+// sujeto se recorta si no cabe, así el diseño no depende del ancho del panel.
 function GeneralHistoryRow({ entry }) {
+  const footer = [entry.subjectDetail, `Por ${entry.by}`].filter(Boolean);
+
   return (
     <Box sx={{ px: 3, py: 1.75, borderTop: '1px solid #EFEAE4' }}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'baseline', gap: 2 }}>
-        <Typography noWrap sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>{entry.courierName}</Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+          {entry.badge && (
+            <Chip
+              label={entry.badge.label}
+              size="small"
+              sx={{ fontSize: 12, fontWeight: 700, borderRadius: '20px', ...BADGE_COLORS[entry.badge.tone] }}
+            />
+          )}
+          {entry.subject && (
+            <Typography noWrap sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>{entry.subject}</Typography>
+          )}
+        </Box>
         <Typography noWrap sx={{ fontSize: 12, fontWeight: 600, color: '#6B6560' }}>{entry.when}</Typography>
       </Box>
       <Typography sx={{ fontSize: 14, color: '#1F2421', mt: 0.5, lineHeight: 1.45 }}>{entry.text}</Typography>
       <Typography sx={{ fontSize: 12, color: '#6B6560', mt: 0.25 }}>
-        <span>{entry.courierDocument}</span>
-        {' · '}
-        <span>Por {entry.by}</span>
+        {footer.map((part, index) => (
+          <Fragment key={part}>
+            {index > 0 && ' · '}
+            <span>{part}</span>
+          </Fragment>
+        ))}
       </Typography>
     </Box>
   );
 }
 
 /**
- * Lista de cambios registrados (fecha, qué cambió y quién). Con `showSubject` cada fila indica además a
- * quién pertenece el cambio (historial general); sin él, es el historial de un solo elemento.
- * @param {{ entries: Array<{ id: string, when: string, text: string, by: string, courierName?: string,
- *   courierDocument?: string }>, emptyMessage: string, showSubject?: boolean }} props
+ * Lista de cambios registrados (fecha, qué cambió y quién). Con `showSubject` cada fila indica además de
+ * quién o de qué es el cambio (historial general o auditoría); sin él, es el historial de un solo elemento.
+ * @param {{ entries: Array<{ id: string, when: string, text: string, by: string, subject?: string,
+ *   subjectDetail?: string, badge?: { label: string, tone: 'success'|'danger' } }>, emptyMessage: string,
+ *   showSubject?: boolean }} props
  */
 export default function HistoryList({ entries, emptyMessage, showSubject = false }) {
   if (entries.length === 0) {
