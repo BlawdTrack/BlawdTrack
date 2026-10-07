@@ -1,3 +1,5 @@
+import { formatDateTime } from './dates';
+
 // Turns the entries of GET /v1/couriers/{id}/history into the rows shown in
 // the "Historial de modificaciones" panel. UI texts are in Spanish.
 
@@ -27,13 +29,9 @@ function describeFields(details) {
 }
 
 export function formatHistoryEntry(entry, index) {
-  const when = new Date(entry.timestamp);
-  const date = when.toLocaleDateString('es-CR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const time = when.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
-
   return {
     id: `${entry.timestamp}-${index}`,
-    when: `${date} · ${time}`,
+    when: formatDateTime(entry.timestamp),
     text: ACTION_TEXTS[entry.action] ?? describeFields(entry.details),
     by: entry.actorName,
     // Solo en el historial general: de quién es el cambio (nombre y documento del mensajero).

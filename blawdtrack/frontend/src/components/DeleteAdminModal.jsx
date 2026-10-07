@@ -9,6 +9,7 @@ import {
   Avatar,
   Alert,
 } from '@mui/material';
+import { getInitials } from '../utils/getInitials';
 
 /**
  * Diálogo de confirmación para eliminar un administrador (HU-008).
@@ -25,13 +26,6 @@ const DeleteAdminModal = ({
   isSubmitting = false,
 }) => {
   if (!adminData) return null;
-
-  const getInitials = (name) => {
-    if (!name) return '';
-    const names = name.split(' ');
-    if (names.length >= 2) return `${names[0][0]}${names[1][0]}`.toUpperCase();
-    return name.substring(0, 2).toUpperCase();
-  };
 
   const documentNumber = adminData.documentNumber
     || adminData.identification
