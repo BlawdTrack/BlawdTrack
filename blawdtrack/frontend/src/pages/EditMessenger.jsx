@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -12,6 +12,8 @@ import {
   Switch,
   Tabs,
   Tab,
+  IconButton,
+  Tooltip,
   Table,
   TableHead,
   TableBody,
@@ -31,10 +33,14 @@ import Toast from '../components/Toast';
 import PageHeaderBar from '../components/PageHeaderBar';
 import { LABEL_SX, INPUT_SX } from '../components/formStyles';
 import PageContainer from '../components/PageContainer';
+import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
+import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
 import StatusMessage from '../components/StatusMessage';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonSearchOutlinedIcon from '@mui/icons-material/PersonSearchOutlined';
+import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import './EditMessenger.css';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
@@ -70,6 +76,10 @@ export function EditMessenger({ initialCedula = '' }) {
   const [selectedCourierId, setSelectedCourierId] = useState(null);
   const [isLoadingCouriers, setIsLoadingCouriers] = useState(true);
   const [activeTab, setActiveTab] = useState('datos');
+  // La flota se puede ocultar para darle todo el ancho al formulario (solo escritorio).
+  const [listOpen, setListOpen] = useState(true);
+  // Acción pendiente mientras se pide confirmar que se descartan los cambios sin guardar.
+  const [pendingLeave, setPendingLeave] = useState(null);
 
   const [searchDocumentType, setSearchDocumentType] = useState('CEDULA');
   const [searchDocumentNumber, setSearchDocumentNumber] = useState('');
@@ -155,14 +165,46 @@ export function EditMessenger({ initialCedula = '' }) {
     loadHistory(courier.id);
   };
 
-  // En móvil el detalle reemplaza a la lista; esto vuelve a ella.
-  const handleBackToList = () => {
+  // Vuelve a "Elige un mensajero": sin selección, sin formulario y con la flota a la vista.
+  const clearSelection = () => {
     setCurrentCourier(null);
     setSelectedCourierId(null);
+    setInitialFormValues(null);
+    setFormErrors({});
+    setUpdateError(null);
+    setChangeLog([]);
+    setActiveTab('datos');
+    setListOpen(true);
   };
 
+  // Hay cambios sin guardar si algún campo del formulario difiere del mensajero tal como se cargó.
+  const isDirty = Boolean(
+    currentCourier
+    && initialFormValues
+    && Object.keys(initialFormValues).some((field) => String(formData[field] ?? '') !== String(initialFormValues[field] ?? ''))
+  );
+
+  // Ejecuta `action` de inmediato o, si hay cambios sin guardar, tras confirmar que se descartan.
+  const runOrConfirmLeave = (action) => {
+    if (isDirty) {
+      setPendingLeave(() => action);
+      return;
+    }
+    action();
+  };
+
+  // En móvil el detalle reemplaza a la lista; esto vuelve a ella.
+  const handleBackToList = () => runOrConfirmLeave(clearSelection);
+
   const handleRowClick = (courier) => {
-    loadMessengerData(courier);
+    if (courier.id === currentCourier?.id) return;
+    runOrConfirmLeave(() => loadMessengerData(courier));
+  };
+
+  const handleConfirmLeave = () => {
+    const action = pendingLeave;
+    setPendingLeave(null);
+    action?.();
   };
 
   const handleSearch = () => {
@@ -187,14 +229,16 @@ export function EditMessenger({ initialCedula = '' }) {
       )
     : couriersList;
 
-  // Cargar por cédula inicial si se proporciona
+  // Cargar por cédula inicial si se proporciona (una sola vez: tras guardar se vuelve a "Elige un mensajero").
+  const initialLoadedRef = useRef(false);
   useEffect(() => {
-    if (initialCedula && couriersList.length > 0) {
+    if (initialCedula && couriersList.length > 0 && !initialLoadedRef.current) {
       const normInitial = normalizeId(initialCedula);
       const found = couriersList.find((m) =>
         normalizeId(getCourierId(m)) === normInitial
       );
       if (found) {
+        initialLoadedRef.current = true;
         loadMessengerData(found);
       }
     }
@@ -376,9 +420,6 @@ export function EditMessenger({ initialCedula = '' }) {
         }
       }
 
-      // Criterio de aceptación 3: el historial (fecha, hora y campos) lo registra y sirve el backend.
-      loadHistory(currentCourier.id);
-
       // Actualizar estado local
       const updatedCourier = {
         ...currentCourier,
@@ -394,8 +435,10 @@ export function EditMessenger({ initialCedula = '' }) {
       setCouriersList((prev) => prev.map((courier) => (
         courier.id === updatedCourier.id ? { ...courier, ...updatedCourier } : courier
       )));
-      setInitialFormValues({ ...formData, password: '' });
-      setFormData((prev) => ({ ...prev, password: '' }));
+
+      // Criterio de aceptación 3: el historial (fecha, hora y campos) lo registra el backend y se ve al
+      // volver a abrir al mensajero. Guardado el cambio, se regresa a "Elige un mensajero".
+      clearSelection();
 
       setToast({
         open: true,
@@ -483,14 +526,14 @@ export function EditMessenger({ initialCedula = '' }) {
         description="Busca al mensajero por su documento, corrige sus datos y guarda los cambios."
       />
 
-      <PageContainer sx={{ flex: 1, minHeight: 0 }}>
+      <PageContainer wide sx={{ flex: 1, minHeight: 0 }}>
         <Box
           sx={{
             flex: 1,
             minHeight: 0,
             display: 'grid',
             gap: 3,
-            gridTemplateColumns: { xs: '1fr', md: '380px minmax(0, 1fr)' },
+            gridTemplateColumns: { xs: '1fr', md: listOpen ? '420px minmax(0, 1fr)' : 'minmax(0, 1fr)' },
             gridTemplateRows: { md: 'minmax(0, 1fr)' },
           }}
         >
@@ -500,15 +543,29 @@ export function EditMessenger({ initialCedula = '' }) {
             sx={{
               ...CARD_SX,
               overflow: 'hidden',
-              display: { xs: currentCourier ? 'none' : 'flex', md: 'flex' },
+              display: { xs: currentCourier ? 'none' : 'flex', md: listOpen ? 'flex' : 'none' },
               flexDirection: 'column',
               minHeight: 0,
             }}
           >
             <Box sx={{ p: 2.5, borderBottom: '1px solid #E4DED7', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
-                Buscar mensajero por documento
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
+                  Buscar mensajero por documento
+                </Typography>
+                {currentCourier && (
+                  <Tooltip title="Ocultar la flota de mensajeros">
+                    <IconButton
+                      onClick={() => setListOpen(false)}
+                      aria-label="Ocultar la flota de mensajeros"
+                      size="small"
+                      sx={{ display: { xs: 'none', md: 'inline-flex' }, color: 'primary.main' }}
+                    >
+                      <ChevronLeftIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <TextField
                   select
@@ -647,6 +704,15 @@ export function EditMessenger({ initialCedula = '' }) {
                 >
                   Volver a la lista
                 </Button>
+                {!listOpen && (
+                  <Button
+                    onClick={() => setListOpen(true)}
+                    startIcon={<ViewSidebarOutlinedIcon />}
+                    sx={{ display: { xs: 'none', md: 'inline-flex' }, color: 'primary.main', fontWeight: 600, border: '1.5px solid #DCD4CA' }}
+                  >
+                    Mostrar flota
+                  </Button>
+                )}
                 <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main', color: '#fff', fontWeight: 700 }}>
                   {getInitials(courierName)}
                 </Avatar>
@@ -680,7 +746,7 @@ export function EditMessenger({ initialCedula = '' }) {
                 sx={{ display: activeTab === 'datos' ? 'flex' : 'none', flexDirection: 'column', flex: 1, minHeight: 0 }}
               >
                 <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }, gap: { xs: 2, lg: '20px 24px' }, alignItems: 'start' }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(0, 1fr))' }, gap: { xs: 2, md: '20px 24px' }, alignItems: 'start' }}>
                     <Box>
                       <Typography sx={LABEL_SX}>Nombre completo</Typography>
                       <TextField
@@ -935,6 +1001,9 @@ export function EditMessenger({ initialCedula = '' }) {
           )}
         </Box>
       </PageContainer>
+
+      <UnsavedChangesGuard when={isDirty} />
+      <ConfirmLeaveDialog open={Boolean(pendingLeave)} onStay={() => setPendingLeave(null)} onLeave={handleConfirmLeave} />
 
       {/* Componente Toast para Notificaciones */}
       <Toast
