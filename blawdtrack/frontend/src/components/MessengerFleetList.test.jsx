@@ -119,6 +119,31 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     expect(logoutMock).not.toHaveBeenCalled();
   });
 
+  it('ofrece "Reintentar" cuando falla la carga y muestra la flota si la segunda vez responde', async () => {
+    CourierService.listCouriers.mockRejectedValueOnce({ response: { status: 500, data: { message: 'Fallo del servidor' } } });
+    CourierService.listCouriers.mockResolvedValue([COURIER]);
+    const user = userEvent.setup();
+    render(<MessengerFleetList />);
+
+    expect(await screen.findByText('Fallo del servidor')).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }));
+
+    expect(await screen.findByRole('button', { name: 'Desactivar' })).toBeTruthy();
+    expect(screen.queryByText('Fallo del servidor')).toBeNull();
+  });
+
+  it('dice cómo reactivar al mensajero, en la ayuda y en el cuadro de confirmación', async () => {
+    const user = userEvent.setup();
+    render(<MessengerFleetList />);
+
+    await user.hover(await screen.findByRole('button', { name: '¿Cuándo se puede desactivar a un mensajero?' }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('puedes volver a activarlo desde Actualizar mensajero');
+    await user.unhover(screen.getByRole('button', { name: '¿Cuándo se puede desactivar a un mensajero?' }));
+
+    await user.click(screen.getByRole('button', { name: 'Desactivar' }));
+    expect(await screen.findByRole('dialog')).toHaveTextContent('puedes volver a activarlo desde Actualizar mensajero');
+  });
+
   it('cierra la sesión si al cargar la flota el backend responde 401', async () => {
     CourierService.listCouriers.mockRejectedValue({ response: { status: 401, data: {} } });
     render(<MessengerFleetList />);

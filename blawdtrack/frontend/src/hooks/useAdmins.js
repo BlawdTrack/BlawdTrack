@@ -8,7 +8,7 @@ const LOAD_ERROR_MESSAGE = 'No se pudieron cargar los datos. Verifica la conexi�
  * Los administradores de ventas (`GET /api/v1/admins`): se cargan al abrir la pantalla, se pueden
  * refrescar en silencio (para el sondeo periódico: así el estado de sesión se mantiene al día) y se quita
  * uno de la lista en memoria al eliminarlo.
- * @returns {{ admins: object[], loading: boolean, error: string|null, refresh: Function,
+ * @returns {{ admins: object[], loading: boolean, error: string|null, reload: Function, refresh: Function,
  *   removeByDocument: (documentNumber: string) => void }}
  */
 export function useAdmins() {
@@ -35,6 +35,20 @@ export function useAdmins() {
     };
   }, []);
 
+  // Vuelve a pedir la lista tras un fallo de carga (el botón "Reintentar").
+  const reload = useCallback(async () => {
+    setLoading(true);
+    try {
+      setAdmins(await getAdministrators());
+      setError(null);
+    } catch (err) {
+      console.error('Error al cargar administradores:', err);
+      setError(LOAD_ERROR_MESSAGE);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Falla en silencio: si una consulta no responde se conserva la lista actual y se reintenta en el
   // siguiente ciclo.
   const refresh = useCallback(async () => {
@@ -55,5 +69,5 @@ export function useAdmins() {
     ));
   }, []);
 
-  return { admins, loading, error, refresh, removeByDocument };
+  return { admins, loading, error, reload, refresh, removeByDocument };
 }

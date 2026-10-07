@@ -4,14 +4,14 @@ import AccountRow from './AccountRow';
 import HistoryButton from './HistoryButton';
 import SearchableListPanel from './SearchableListPanel';
 import StatusChip from './StatusChip';
-import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN } from '../config/deactivationRules';
+import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN, DEACTIVATION_REACTIVATE } from '../config/deactivationRules';
 
 // El backend aún no expone si un mensajero está en labores ni sus paquetes pendientes (ver
 // ProvisionalCourierWorkloadPort): se muestra el mismo texto fijo del mockup en vez de inventar datos
 // reales que todavía no existen.
 const DUTY_PLACEHOLDER = 'Fuera de labores · Sin envíos en proceso';
 
-const RULE_HELP = `${DEACTIVATION_CONDITION} Tras desactivarlo no recibe nuevas asignaciones. ${DEACTIVATION_REASSIGN}`;
+const RULE_HELP = `${DEACTIVATION_CONDITION} Tras desactivarlo no recibe nuevas asignaciones. ${DEACTIVATION_REASSIGN} ${DEACTIVATION_REACTIVATE}`;
 
 /**
  * Panel de la flota para desactivar mensajeros (HU-005): búsqueda por documento y lista con el botón
@@ -19,10 +19,11 @@ const RULE_HELP = `${DEACTIVATION_CONDITION} Tras desactivarlo no recibe nuevas 
  * la consecuencia se repite en el cuadro de confirmación. Solo muestra; la acción la decide quien lo usa
  * con `onDeactivate`.
  * @param {{ couriers: object[], totalCount: number, loading: boolean, errorMessage?: string|null,
- *   search: object, onDeactivate: (courier: object) => void, onOpenAudit: Function, sx?: object }} props
+ *   search: object, onDeactivate: (courier: object) => void, onOpenAudit: Function, onRetry?: Function,
+ *   sx?: object }} props
  *   `couriers` ya viene filtrada; `totalCount` es el total sin filtrar; `onOpenAudit` abre la auditoría.
  */
-export default function CourierDeactivationList({ couriers, totalCount, loading, errorMessage, search, onDeactivate, onOpenAudit, sx }) {
+export default function CourierDeactivationList({ couriers, totalCount, loading, errorMessage, search, onDeactivate, onOpenAudit, onRetry, sx }) {
   return (
     <SearchableListPanel
       searchTitle="Buscar mensajero por documento"
@@ -36,7 +37,7 @@ export default function CourierDeactivationList({ couriers, totalCount, loading,
           title={RULE_HELP}
           slotProps={{ tooltip: { sx: { fontSize: 14, lineHeight: 1.5, maxWidth: 340, p: 1.5 } } }}
         >
-          <IconButton size="small" aria-label="¿Cuándo se puede desactivar a un mensajero?" sx={{ color: '#6B6560' }}>
+          <IconButton aria-label="¿Cuándo se puede desactivar a un mensajero?" sx={{ width: 44, height: 44, my: '-10px', color: '#6B6560' }}>
             <InfoOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -46,6 +47,7 @@ export default function CourierDeactivationList({ couriers, totalCount, loading,
       totalCount={totalCount}
       loading={loading}
       errorMessage={errorMessage}
+      onRetry={onRetry}
       emptyMessage="No hay mensajeros disponibles para mostrar."
       noMatchMessage="No se encontró ningún mensajero con ese documento."
       sx={sx}

@@ -14,7 +14,7 @@ export default function SessionChip({ active }) {
         fontWeight: 700,
         borderRadius: '20px',
         bgcolor: active ? '#FCF3E3' : '#F1ECE7',
-        color: active ? '#B27A0C' : '#6B6560',
+        color: active ? '#8A5A00' : '#6B6560',
         transition: 'background-color .4s ease, color .4s ease',
       }}
     />

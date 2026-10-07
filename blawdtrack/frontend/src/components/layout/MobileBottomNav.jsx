@@ -2,6 +2,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { NAV_GROUP_ICONS } from './navIcons';
 
+// Naranja más oscuro que el de la marca: el de marca sobre blanco no llega a 4.5:1 en texto pequeño.
+const ACTIVE_COLOR = '#C25100';
+
 const isGroupActive = (group, pathname) =>
   pathname === group.path || group.items.some((item) => item.path === pathname);
 
@@ -50,9 +53,9 @@ export default function MobileBottomNav({ groups }) {
             }}
           >
             {Icon && (
-              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? '#FF6C0E' : '#6B6560' }} />
+              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? ACTIVE_COLOR : '#6B6560' }} />
             )}
-            <Typography sx={{ fontSize: 12, fontWeight: 700, color: active ? '#FF6C0E' : '#6B6560' }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: active ? ACTIVE_COLOR : '#6B6560' }}>
               {group.shortTitle}
             </Typography>
           </ButtonBase>

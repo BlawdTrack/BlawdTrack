@@ -9,7 +9,7 @@ import {
 import { useAdminRegistration } from '../hooks/useAdminRegistration';
 import { validateAdminForm } from '../utils/adminFormValidation';
 import { StatusMessage } from '../components/StatusMessage';
-import PageHeader from '../components/PageHeader';
+import PageHeaderBar from '../components/PageHeaderBar';
 import PageContainer from '../components/PageContainer';
 import { ROUTES } from '../config/routes';
 import { LABEL_SX, INPUT_SX } from '../components/formStyles';
@@ -137,11 +137,12 @@ export function AdminRegistrationPage() {
   );
 
   return (
-    <PageContainer>
-      <PageHeader
+    <>
+      <PageHeaderBar
         title="Crear administrador"
         description="Registra a un nuevo administrador de ventas. Todos los campos son obligatorios."
       />
+      <PageContainer>
       <Paper
         elevation={0}
         sx={{
@@ -219,7 +220,8 @@ export function AdminRegistrationPage() {
 
       <UnsavedChangesGuard when={form.shouldBlock} />
       <ConfirmLeaveDialog {...form.dialogProps} />
-    </PageContainer>
+      </PageContainer>
+    </>
   );
 }
 

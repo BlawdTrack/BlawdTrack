@@ -6,3 +6,6 @@ export const DEACTIVATION_CONDITION = 'Un mensajero solo puede desactivarse si e
 
 /** Qué pasa después con lo que tenía pendiente. */
 export const DEACTIVATION_REASSIGN = 'Sus paquetes pendientes deben reasignarse manualmente.';
+
+/** Cómo se deshace una desactivación. */
+export const DEACTIVATION_REACTIVATE = 'Si hace falta, puedes volver a activarlo desde Actualizar mensajero.';

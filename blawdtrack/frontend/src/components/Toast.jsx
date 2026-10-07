@@ -62,8 +62,7 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
         <IconButton
           onClick={(event) => handleClose(event, 'closeButton')}
           aria-label="Cerrar aviso"
-          size="small"
-          sx={{ alignSelf: 'flex-start', width: 36, height: 36, color: '#6B6560', '&:hover': { bgcolor: '#F1ECE7' } }}
+          sx={{ alignSelf: 'flex-start', width: 44, height: 44, color: '#6B6560', '&:hover': { bgcolor: '#F1ECE7' } }}
         >
           <CloseIcon fontSize="small" />
         </IconButton>

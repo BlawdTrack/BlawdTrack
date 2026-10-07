@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import PageHeader from '../components/PageHeader';
+import PageHeaderBar from '../components/PageHeaderBar';
 import PageContainer from '../components/PageContainer';
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import LockOutlined from '@mui/icons-material/LockOutlined';
@@ -156,11 +156,13 @@ function RoleAccessManagement() {
   const canReset = user !== null && user.editable && (user.customized || hasChanges);
 
   return (
-    <PageContainer component="main">
-        <PageHeader
-          title="Roles y permisos"
-          description="Busca a un usuario y ajusta qué puede hacer dentro del sistema."
-        />
+    <>
+      <PageHeaderBar
+        title="Roles y permisos"
+        description="Busca a un usuario y ajusta qué puede hacer dentro del sistema."
+      />
+
+      <PageContainer component="main">
 
         <section className="access-card user-search-card" aria-labelledby="user-search-title">
           <label className="access-card-label" htmlFor="role-user-search" id="user-search-title">
@@ -308,6 +310,7 @@ function RoleAccessManagement() {
         onClose={() => setToast((current) => ({ ...current, open: false }))}
       />
     </PageContainer>
+    </>
   );
 }
 

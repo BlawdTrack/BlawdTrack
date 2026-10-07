@@ -60,6 +60,7 @@ const AdminManagement = () => {
             totalCount={admins.admins.length}
             loading={admins.loading}
             errorMessage={admins.error}
+            onRetry={admins.reload}
             search={search}
             onDelete={deletion.open}
             onOpenAudit={() => setShowAudit(true)}

@@ -53,8 +53,9 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
           <IconButton
             onClick={onToggleCollapsed}
             aria-label={toggleLabel}
-            size="small"
             sx={{
+              width: 44,
+              height: 44,
               color: 'rgba(255,255,255,.75)',
               '&:hover': { color: '#fff', backgroundColor: 'rgba(255,255,255,.08)' },
               '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },

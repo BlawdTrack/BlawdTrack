@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
 import PageContainer from '../components/PageContainer';
-import PageHeader from '../components/PageHeader';
+import PageHeaderBar from '../components/PageHeaderBar';
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo más tarde.';
@@ -41,12 +41,13 @@ export function OwnPasswordResetPage() {
   };
 
   return (
-    <PageContainer>
-      <PageHeader
+    <>
+      <PageHeaderBar
         title="Restablecer contraseña"
         description="Te enviaremos un enlace para elegir una contraseña nueva al correo de tu cuenta. El enlace vence en 15 minutos."
       />
 
+      <PageContainer>
       <Paper elevation={0} sx={{ maxWidth: 640, p: { xs: 3, sm: 4 }, borderRadius: '16px', border: '1px solid #E4DED7' }}>
         <Typography sx={{ mb: 0.75, fontSize: 12, fontWeight: 700, color: '#6B6560' }}>
           CORREO DE TU CUENTA
@@ -89,7 +90,8 @@ export function OwnPasswordResetPage() {
           {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
         </Button>
       </Paper>
-    </PageContainer>
+      </PageContainer>
+    </>
   );
 }
 

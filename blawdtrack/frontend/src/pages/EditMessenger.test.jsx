@@ -371,7 +371,7 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
       await openCourier(user, 'María José Solano');
       await screen.findByDisplayValue('María José Solano');
-      await user.click(screen.getByRole('button', { name: 'Volver' }));
+      await user.click(screen.getByRole('button', { name: 'Volver a la lista' }));
 
       expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
       expect(screen.queryByText('¿Salir sin guardar?')).toBeNull();
@@ -383,14 +383,14 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
       await openCourier(user, 'María José Solano');
       fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
-      await user.click(screen.getByRole('button', { name: 'Volver' }));
+      await user.click(screen.getByRole('button', { name: 'Volver a la lista' }));
 
       expect(await screen.findByText('¿Salir sin guardar?')).toBeTruthy();
       await user.click(screen.getByRole('button', { name: 'Seguir editando' }));
       await waitFor(() => expect(screen.queryByText('¿Salir sin guardar?')).toBeNull());
       expect(screen.getByDisplayValue('Nombre a medias')).toBeTruthy();
 
-      await user.click(screen.getByRole('button', { name: 'Volver' }));
+      await user.click(screen.getByRole('button', { name: 'Volver a la lista' }));
       await user.click(await screen.findByRole('button', { name: 'Salir sin guardar' }));
 
       expect(await screen.findByText('Elige un mensajero')).toBeTruthy();

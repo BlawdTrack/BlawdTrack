@@ -133,7 +133,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
-          minHeight: 36,
+          minHeight: 44,
           px: 1.5,
           border: 0,
           borderRadius: '8px',

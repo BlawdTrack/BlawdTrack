@@ -1,4 +1,4 @@
-import { Alert, Box, CircularProgress, Paper, Typography } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/material';
 import DocumentSearch from './DocumentSearch';
 import { CARD_SX } from './formStyles';
 
@@ -12,9 +12,10 @@ const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color
  * @param {{ searchTitle: string, search: object, listTitle: string, titleExtra?: import('react').ReactNode,
  *   meta?: import('react').ReactNode, items: object[], totalCount: number, loading: boolean,
  *   errorMessage?: string|null, emptyMessage: string, noMatchMessage: string,
- *   renderItem: (item: object) => import('react').ReactNode, footer?: import('react').ReactNode, sx?: object }}
+ *   renderItem: (item: object) => import('react').ReactNode, footer?: import('react').ReactNode,
+ *   onRetry?: Function, sx?: object }}
  *   props `items` ya viene filtrada; `totalCount` es el total sin filtrar; `footer` va fijo al pie del panel
- *   (por ejemplo, el botón que abre la auditoría).
+ *   (por ejemplo, el botón que abre la auditoría); con `onRetry`, el error de carga ofrece "Reintentar".
  */
 export default function SearchableListPanel({
   searchTitle,
@@ -30,6 +31,7 @@ export default function SearchableListPanel({
   noMatchMessage,
   renderItem,
   footer,
+  onRetry,
   sx,
 }) {
   let body;
@@ -40,7 +42,19 @@ export default function SearchableListPanel({
       </Box>
     );
   } else if (errorMessage) {
-    body = <Alert severity="error" sx={{ m: 2 }}>{errorMessage}</Alert>;
+    body = (
+      <Alert
+        severity="error"
+        sx={{ m: 2 }}
+        action={onRetry && (
+          <Button color="inherit" size="small" onClick={onRetry} sx={{ fontWeight: 600 }}>
+            Reintentar
+          </Button>
+        )}
+      >
+        {errorMessage}
+      </Alert>
+    );
   } else if (totalCount === 0) {
     body = <Alert severity="info" sx={{ m: 2 }}>{emptyMessage}</Alert>;
   } else if (items.length === 0) {

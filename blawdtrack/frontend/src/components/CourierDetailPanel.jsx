@@ -26,7 +26,9 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
   return (
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: { xs: 1.5, md: 2 }, flexWrap: 'wrap' }}>
-        <BackButton onClick={onBack} sx={{ flex: { xs: '0 0 100%', md: '0 0 auto' }, justifyContent: 'flex-start' }} />
+        <BackButton onClick={onBack} sx={{ flex: { xs: '0 0 100%', md: '0 0 auto' }, justifyContent: 'flex-start' }}>
+          Volver a la lista
+        </BackButton>
         {!listOpen && (
           <Button
             onClick={onShowList}

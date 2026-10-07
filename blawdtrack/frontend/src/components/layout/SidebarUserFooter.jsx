@@ -15,7 +15,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
         height: 32,
         borderRadius: '50%',
         backgroundColor: '#FF6C0E',
-        color: '#fff',
+        color: '#12322B',
         fontSize: 12,
         fontWeight: 700,
         display: 'flex',
@@ -49,6 +49,8 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
             onClick={onLogout}
             aria-label="Cerrar sesión"
             sx={{
+              width: 44,
+              height: 44,
               color: 'rgba(255,255,255,.75)',
               border: '1px solid rgba(255,255,255,.14)',
               borderRadius: '8px',

@@ -38,6 +38,12 @@ export const theme = createTheme({
     },
   },
   components: {
+    // Los placeholders de MUI son demasiado claros (2.7:1); este gris cumple el 4.5:1 del nivel AA.
+    MuiInputBase: {
+      styleOverrides: {
+        input: { '&::placeholder': { color: '#757575', opacity: 1 } },
+      },
+    },
     // Objetivo táctil mínimo de 44 px (48 px en botones grandes): ley de Fitts.
     MuiButton: {
       styleOverrides: {

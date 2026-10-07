@@ -21,7 +21,7 @@ const renderNav = (route) =>
   );
 
 const tab = (label) => screen.getByText(label);
-const ORANGE = 'rgb(255, 108, 14)';
+const ORANGE = 'rgb(194, 81, 0)';
 
 describe('MobileBottomNav', () => {
   it('renders one tab per group', () => {

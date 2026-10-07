@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { useDeactivateMessenger } from '../hooks/useDeactivateMessenger';
 import { getInitials } from '../utils/getInitials';
-import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN } from '../config/deactivationRules';
+import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN, DEACTIVATION_REACTIVATE } from '../config/deactivationRules';
 
 /**
  * Diálogo de confirmación para desactivar a un mensajero (HU-005). Llama a `useDeactivateMessenger`; un
@@ -100,7 +100,7 @@ export const DeactivateMessengerModal = ({
 
         <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
           El mensajero perderá el acceso de inmediato y no recibirá nuevas
-          asignaciones. Su historial de entregas se conserva.
+          asignaciones. Su historial de entregas se conserva. {DEACTIVATION_REACTIVATE}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 1.25, p: '12px 14px', bgcolor: '#FCF3E3', border: '1px solid #EBC98A', borderRadius: '10px' }}>

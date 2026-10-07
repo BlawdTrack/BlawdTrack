@@ -76,8 +76,7 @@ export default function CourierFleetPanel({
               <IconButton
                 onClick={onHide}
                 aria-label="Ocultar la flota de mensajeros"
-                size="small"
-                sx={{ display: { xs: 'none', md: 'inline-flex' }, color: 'primary.main' }}
+                sx={{ display: { xs: 'none', md: 'inline-flex' }, width: 44, height: 44, my: -1, color: 'primary.main' }}
               >
                 <ChevronLeftIcon />
               </IconButton>

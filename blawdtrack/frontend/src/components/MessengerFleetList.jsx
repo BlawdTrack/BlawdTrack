@@ -70,6 +70,7 @@ export const MessengerFleetList = () => {
             totalCount={fleet.couriers.length}
             loading={fleet.loading}
             errorMessage={fleet.error?.message}
+            onRetry={fleet.reload}
             search={search}
             onDeactivate={setSelectedCourier}
             onOpenAudit={() => setShowAudit(true)}

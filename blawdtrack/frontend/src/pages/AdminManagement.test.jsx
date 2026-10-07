@@ -188,4 +188,18 @@ describe('AdminManagement audit log', () => {
     expect(await screen.findByRole('button', { name: 'Eliminar' })).toBeInTheDocument();
     expect(screen.queryByText('Auditoría de eliminaciones y creaciones')).not.toBeInTheDocument();
   });
+
+  it('offers "Reintentar" when the list fails to load and recovers on the second try', async () => {
+    getAdminAuditLog.mockResolvedValue([]);
+    getAdministrators.mockRejectedValueOnce(new Error('network down'));
+    getAdministrators.mockResolvedValue([admin]);
+    const user = userEvent.setup();
+    render(<AdminManagement />);
+
+    expect(await screen.findByText('No se pudieron cargar los datos. Verifica la conexión con el servidor.')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }));
+
+    expect(await screen.findByText('Fernanda Vindas Rojas')).toBeInTheDocument();
+    expect(screen.queryByText('No se pudieron cargar los datos. Verifica la conexión con el servidor.')).not.toBeInTheDocument();
+  });
 });
