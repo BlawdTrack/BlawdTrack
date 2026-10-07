@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,6 +9,18 @@ import SidebarContent from './SidebarContent';
 import MobileBottomNav from './MobileBottomNav';
 
 const SIDEBAR_WIDTH = 272;
+const SIDEBAR_COLLAPSED_WIDTH = 76;
+const COLLAPSED_STORAGE_KEY = 'blawdtrack.sidebarCollapsed';
+
+// El navegador puede bloquear el almacenamiento (modo privado); en ese caso la barra arranca expandida.
+const readCollapsed = () => {
+  try {
+    return localStorage.getItem(COLLAPSED_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+};
+
 
 /**
  * Diseño del menú principal del Super Usuario: barra lateral en escritorio, barra de pestañas inferior
@@ -17,6 +30,8 @@ const SIDEBAR_WIDTH = 272;
 export default function MainMenuLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
   const groups = getNavigationForRole(user.role);
 
   const handleLogout = () => {
@@ -24,13 +39,25 @@ export default function MainMenuLayout() {
     navigate(ROUTES.LOGIN, { replace: true });
   };
 
+  const handleToggleCollapsed = () => {
+    setCollapsed((current) => {
+      try {
+        localStorage.setItem(COLLAPSED_STORAGE_KEY, String(!current));
+      } catch {
+        // Sin almacenamiento la elección solo dura la sesión de la pestaña.
+      }
+      return !current;
+    });
+  };
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#FAF8F5' }}>
       <Box
         component="aside"
         sx={{
-          flex: `0 0 ${SIDEBAR_WIDTH}px`,
-          width: SIDEBAR_WIDTH,
+          flex: `0 0 ${sidebarWidth}px`,
+          width: sidebarWidth,
+          transition: 'width .2s ease, flex-basis .2s ease',
           display: { xs: 'none', md: 'block' },
           position: 'sticky',
           top: 0,
@@ -46,6 +73,8 @@ export default function MainMenuLayout() {
           user={user}
           roleLabel={ROLE_LABELS[user.role] ?? user.role}
           onLogout={handleLogout}
+          collapsed={collapsed}
+          onToggleCollapsed={handleToggleCollapsed}
         />
       </Box>
 

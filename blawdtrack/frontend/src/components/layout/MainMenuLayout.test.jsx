@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Routes, Route } from 'react-router-dom';
@@ -96,5 +96,39 @@ describe('MainMenuLayout sidebar', () => {
 
     expect(logout).toHaveBeenCalledTimes(1);
     expect(screen.getByText('login screen')).toBeInTheDocument();
+  });
+
+  it('opens and closes a group from its title', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    const bar = within(sidebar());
+    const groupButton = bar.getByRole('button', { name: 'Mensajeros' });
+
+    expect(groupButton).toHaveAttribute('aria-expanded', 'true');
+    await user.click(groupButton);
+    expect(groupButton).toHaveAttribute('aria-expanded', 'false');
+    await user.click(groupButton);
+    expect(groupButton).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  describe('collapsed sidebar', () => {
+    afterEach(() => localStorage.clear());
+
+    it('collapses to icons keeping the links reachable by name, and remembers the choice', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+
+      await user.click(within(sidebar()).getByRole('button', { name: 'Colapsar menú' }));
+
+      const bar = within(sidebar());
+      expect(bar.queryByText('Blawd Gourmet')).not.toBeInTheDocument();
+      expect(bar.getByRole('link', { name: 'Crear mensajero' })).toBeInTheDocument();
+      expect(bar.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument();
+      expect(localStorage.getItem('blawdtrack.sidebarCollapsed')).toBe('true');
+
+      await user.click(bar.getByRole('button', { name: 'Expandir menú' }));
+      expect(within(sidebar()).getByText('Blawd Gourmet')).toBeInTheDocument();
+      expect(localStorage.getItem('blawdtrack.sidebarCollapsed')).toBe('false');
+    });
   });
 });

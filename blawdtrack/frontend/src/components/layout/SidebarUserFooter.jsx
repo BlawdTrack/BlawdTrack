@@ -1,9 +1,68 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
+
 /**
  * Pie de la barra lateral: iniciales, nombre, correo y rol del usuario, y el botón de cerrar sesión.
- * @param {{ fullName: string, email?: string, roleLabel: string, onLogout: Function }} props
+ * Colapsado solo deja el avatar y un botón de cerrar sesión con icono.
+ * @param {{ fullName: string, email?: string, roleLabel: string, onLogout: Function,
+ *   collapsed?: boolean }} props
  */
-export default function SidebarUserFooter({ fullName, email = '', roleLabel, onLogout }) {
+export default function SidebarUserFooter({ fullName, email = '', roleLabel, onLogout, collapsed = false }) {
+  const avatar = (
+    <Box
+      sx={{
+        width: 32,
+        height: 32,
+        borderRadius: '50%',
+        backgroundColor: '#FF6C0E',
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 700,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: '0 0 32px',
+      }}
+    >
+      {email.charAt(0).toUpperCase()}
+    </Box>
+  );
+
+  if (collapsed) {
+    return (
+      <Box
+        sx={{
+          mt: 'auto',
+          py: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 1.25,
+          borderTop: '1px solid rgba(255,255,255,.08)',
+        }}
+      >
+        <Tooltip title={`${fullName} · ${roleLabel}`} placement="right" arrow>
+          <Box>{avatar}</Box>
+        </Tooltip>
+        <Tooltip title="Cerrar sesión" placement="right" arrow>
+          <IconButton
+            onClick={onLogout}
+            aria-label="Cerrar sesión"
+            sx={{
+              color: 'rgba(255,255,255,.75)',
+              border: '1px solid rgba(255,255,255,.14)',
+              borderRadius: '8px',
+              '&:hover': { backgroundColor: 'rgba(255,255,255,.08)' },
+              '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },
+            }}
+          >
+            <LogoutIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ mt: 'auto', p: '16px 18px 18px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
       <Box
@@ -17,45 +76,30 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
           backgroundColor: 'rgba(255,255,255,.05)',
         }}
       >
-        <Box
-          sx={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            backgroundColor: '#FF6C0E',
-            color: '#fff',
-            fontSize: 12,
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: '0 0 32px',
-          }}
-        >
-          {email.charAt(0).toUpperCase()}
-        </Box>
+        {avatar}
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontSize: 12.5, fontWeight: 600, color: '#fff' }} noWrap>
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }} noWrap>
             {fullName}
           </Typography>
-          <Typography sx={{ fontSize: 10.5, color: 'rgba(255,255,255,.7)' }} noWrap>
+          <Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,.7)' }} noWrap>
             {roleLabel}
           </Typography>
         </Box>
       </Box>
       <Button
         fullWidth
-        size="small"
         onClick={onLogout}
+        startIcon={<LogoutIcon fontSize="small" />}
         sx={{
-          color: 'rgba(255,255,255,.75)',
-          fontSize: 12.5,
+          color: 'rgba(255,255,255,.85)',
+          fontSize: 13,
           fontWeight: 600,
           textTransform: 'none',
           borderRadius: '8px',
           border: '1px solid rgba(255,255,255,.14)',
-          py: '8px',
-          '&:hover': { backgroundColor: 'rgba(255,255,255,.06)', borderColor: 'rgba(255,255,255,.14)' },
+          minHeight: 44,
+          '&:hover': { backgroundColor: 'rgba(255,255,255,.08)', borderColor: 'rgba(255,255,255,.14)' },
+          '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },
         }}
       >
         Cerrar sesión
