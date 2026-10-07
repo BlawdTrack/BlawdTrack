@@ -36,5 +36,8 @@ export function formatHistoryEntry(entry, index) {
     when: `${date} · ${time}`,
     text: ACTION_TEXTS[entry.action] ?? describeFields(entry.details),
     by: entry.actorName,
+    // Solo en el historial general: de qué mensajero es el cambio.
+    courierName: entry.courierName,
+    courierDocument: entry.documentNumber,
   };
 }

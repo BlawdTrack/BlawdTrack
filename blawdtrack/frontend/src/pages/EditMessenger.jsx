@@ -22,7 +22,13 @@ import {
   TableContainer
 } from '@mui/material';
 import { useCourier } from '../hooks/useCourier';
-import { listCouriers, updateCourierStatus, updateCourierPassword, getCourierHistory } from '../services/CourierService';
+import {
+  listCouriers,
+  updateCourierStatus,
+  updateCourierPassword,
+  getCourierHistory,
+  getCourierGeneralHistory
+} from '../services/CourierService';
 import { formatHistoryEntry } from '../utils/courierHistory';
 import { MIN_PASSWORD_LENGTH, meetsClientPasswordRules } from '../utils/passwordRules';
 import { getInitials } from '../utils/getInitials';
@@ -41,6 +47,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonSearchOutlinedIcon from '@mui/icons-material/PersonSearchOutlined';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import HistoryIcon from '@mui/icons-material/History';
 import './EditMessenger.css';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
@@ -52,6 +59,8 @@ const normalizeDocument = (value) => (value || '').toString().replace(/[^a-zA-Z0
 const isCourierActive = (courier) => (
   courier.status ? courier.status === 'ACTIVE' : courier.estado !== 'Inactivo'
 );
+
+const recordsLabel = (count) => `${count} ${count === 1 ? 'registro' : 'registros'}`;
 
 const getScheduleTimeRange =(schedule) => (schedule || '').split(',')[0].trim();
 
@@ -78,6 +87,10 @@ export function EditMessenger({ initialCedula = '' }) {
   const [activeTab, setActiveTab] = useState('datos');
   // La flota se puede ocultar para darle todo el ancho al formulario (solo escritorio).
   const [listOpen, setListOpen] = useState(true);
+  // Historial general (todos los mensajeros): reemplaza al detalle en el panel derecho mientras se ve.
+  const [showGeneral, setShowGeneral] = useState(false);
+  const [generalLog, setGeneralLog] = useState([]);
+  const [generalStatus, setGeneralStatus] = useState('idle'); // idle | loading | error
   // Acción pendiente mientras se pide confirmar que se descartan los cambios sin guardar.
   const [pendingLeave, setPendingLeave] = useState(null);
 
@@ -165,6 +178,25 @@ export function EditMessenger({ initialCedula = '' }) {
     loadHistory(courier.id);
   };
 
+  const loadGeneralHistory = useCallback(async () => {
+    setGeneralStatus('loading');
+    try {
+      const entries = await getCourierGeneralHistory();
+      setGeneralLog(Array.isArray(entries) ? entries.map(formatHistoryEntry) : []);
+      setGeneralStatus('idle');
+    } catch (err) {
+      console.error('Error al cargar el historial general de mensajeros:', err);
+      setGeneralLog([]);
+      setGeneralStatus('error');
+    }
+  }, []);
+
+  // Abrir el historial general no toca lo que se está editando: el formulario queda tal cual al volver.
+  const openGeneralHistory = () => {
+    setShowGeneral(true);
+    loadGeneralHistory();
+  };
+
   // Vuelve a "Elige un mensajero": sin selección, sin formulario y con la flota a la vista.
   const clearSelection = () => {
     setCurrentCourier(null);
@@ -175,6 +207,7 @@ export function EditMessenger({ initialCedula = '' }) {
     setChangeLog([]);
     setActiveTab('datos');
     setListOpen(true);
+    setShowGeneral(false);
   };
 
   // Hay cambios sin guardar si algún campo del formulario difiere del mensajero tal como se cargó.
@@ -197,8 +230,14 @@ export function EditMessenger({ initialCedula = '' }) {
   const handleBackToList = () => runOrConfirmLeave(clearSelection);
 
   const handleRowClick = (courier) => {
-    if (courier.id === currentCourier?.id) return;
-    runOrConfirmLeave(() => loadMessengerData(courier));
+    if (courier.id === currentCourier?.id) {
+      setShowGeneral(false);
+      return;
+    }
+    runOrConfirmLeave(() => {
+      setShowGeneral(false);
+      loadMessengerData(courier);
+    });
   };
 
   const handleConfirmLeave = () => {
@@ -512,6 +551,64 @@ export function EditMessenger({ initialCedula = '' }) {
     ? currentCourier.documentNumber || currentCourier.idCard || currentCourier.cedula || currentCourier.id
     : '';
 
+  const generalPanel = (
+    <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', borderBottom: '1px solid #E4DED7' }}>
+        <Button
+          onClick={() => setShowGeneral(false)}
+          startIcon={<ArrowBackIcon />}
+          sx={{ color: 'primary.main', fontWeight: 600, border: '1.5px solid #DCD4CA' }}
+        >
+          {currentCourier ? `Volver a ${courierName}` : 'Volver'}
+        </Button>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>
+          Historial general de mensajeros
+        </Typography>
+        {generalStatus === 'idle' && (
+          <Chip
+            label={recordsLabel(generalLog.length)}
+            size="small"
+            sx={{ fontSize: 12, fontWeight: 600, bgcolor: '#F1ECE7', color: '#6B6560', borderRadius: '20px' }}
+          />
+        )}
+      </Box>
+
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+        {generalStatus === 'loading' && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <CircularProgress size={28} />
+          </Box>
+        )}
+        {generalStatus === 'error' && (
+          <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+            <StatusMessage severity="error" message="No se pudo cargar el historial general. Revisa tu conexión e inténtalo de nuevo." />
+            <Button variant="outlined" onClick={loadGeneralHistory} sx={{ fontWeight: 600 }}>
+              Reintentar
+            </Button>
+          </Box>
+        )}
+        {generalStatus === 'idle' && generalLog.length === 0 && (
+          <Typography sx={{ px: 3, py: 3, fontSize: 14, color: '#6B6560' }}>
+            Todavía no hay cambios registrados en ningún mensajero.
+          </Typography>
+        )}
+        {generalStatus === 'idle' && generalLog.map((log) => (
+          <Box key={log.id} sx={{ px: 3, py: 1.75, borderTop: '1px solid #EFEAE4' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0, flexWrap: 'wrap' }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>{log.courierName}</Typography>
+                <Typography component="span" sx={{ fontSize: 12, color: '#6B6560' }}>{log.courierDocument}</Typography>
+              </Box>
+              <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6B6560' }}>{log.when}</Typography>
+            </Box>
+            <Typography sx={{ fontSize: 14, color: '#1F2421', mt: 0.5, lineHeight: 1.45 }}>{log.text}</Typography>
+            <Typography sx={{ fontSize: 12, color: '#6B6560', mt: 0.25 }}>Por {log.by}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Paper>
+  );
+
   // Una sola vista a la altura de la pantalla en escritorio: la lista a la izquierda y el mensajero
   // seleccionado a la derecha, con el historial en una pestaña. En móvil se muestra la lista o el detalle.
   return (
@@ -538,7 +635,7 @@ export function EditMessenger({ initialCedula = '' }) {
             sx={{
               ...CARD_SX,
               overflow: 'hidden',
-              display: { xs: currentCourier ? 'none' : 'flex', md: listOpen ? 'flex' : 'none' },
+              display: { xs: currentCourier || showGeneral ? 'none' : 'flex', md: listOpen ? 'flex' : 'none' },
               flexDirection: 'column',
               minHeight: 0,
             }}
@@ -683,10 +780,23 @@ export function EditMessenger({ initialCedula = '' }) {
                 </TableBody>
               </Table>
             </TableContainer>
+
+            <Box sx={{ p: 2, borderTop: '1px solid #E4DED7' }}>
+              <Button
+                fullWidth
+                variant={showGeneral ? 'contained' : 'outlined'}
+                disableElevation
+                onClick={openGeneralHistory}
+                startIcon={<HistoryIcon />}
+                sx={{ minHeight: 44, fontWeight: 600, borderRadius: '10px', ...(!showGeneral && { color: 'primary.main', border: '1.5px solid #DCD4CA' }) }}
+              >
+                Ver historial general
+              </Button>
+            </Box>
           </Paper>
 
           {/* DETALLE: datos editables e historial */}
-          {currentCourier ? (
+          {showGeneral ? generalPanel : currentCourier ? (
             <Paper
               elevation={0}
               sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}
@@ -939,7 +1049,7 @@ export function EditMessenger({ initialCedula = '' }) {
                     Historial de modificaciones
                   </Typography>
                   <Chip
-                    label={`${changeLog.length} registros`}
+                    label={recordsLabel(changeLog.length)}
                     size="small"
                     sx={{ fontSize: 12, fontWeight: 600, bgcolor: '#F1ECE7', color: '#6B6560', borderRadius: '20px' }}
                   />
