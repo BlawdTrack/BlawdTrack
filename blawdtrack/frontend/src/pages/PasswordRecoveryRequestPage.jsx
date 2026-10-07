@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { useCountdown } from '../hooks/useCountdown';
+import AuthStateHeader from '../components/AuthStateHeader';
+import MailWaitIndicator, { MAIL_RESEND_WAIT_SECONDS } from '../components/MailWaitIndicator';
+import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import {
   Box,
   Typography,
@@ -37,13 +41,6 @@ const CONNECTION_ERROR_MESSAGE =
   'No pudimos conectar con el servidor. Revisa tu conexión a internet e intenta de nuevo.';
 const GENERIC_ERROR_MESSAGE = 'No se pudo procesar la solicitud. Intenta de nuevo en unos minutos.';
 
-const TITLE_SX = {
-  fontFamily: '"Poppins", sans-serif',
-  fontWeight: 600,
-  fontSize: 18,
-  color: 'primary.main',
-};
-
 const LINK_SX = { fontSize: 12, fontWeight: 600, color: 'primary.main' };
 
 // T04 de HU-002 (#65): solicitud del enlace de restablecimiento. Es UNA
@@ -65,6 +62,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
   const [fieldErrors, setFieldErrors] = useState({ email: '' });
   const [loading, setLoading] = useState(false);
   const [sentEmail, setSentEmail] = useState(null);
+  const resendWait = useCountdown(MAIL_RESEND_WAIT_SECONDS);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'error' });
 
   const closeToast = () => setToast((previous) => ({ ...previous, open: false }));
@@ -76,6 +74,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (resendWait.running) return;
 
     const errors = validateForm({ email });
     setFieldErrors(errors);
@@ -89,6 +88,25 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
     try {
       await requestPasswordReset(submittedEmail);
       setSentEmail(submittedEmail);
+      resendWait.start();
+    } catch (err) {
+      setToast({
+        open: true,
+        message: err.response ? GENERIC_ERROR_MESSAGE : CONNECTION_ERROR_MESSAGE,
+        severity: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // "Enviar de nuevo": repite la solicitud al mismo correo, una vez pasada la espera.
+  const handleResend = async () => {
+    if (resendWait.running || loading) return;
+    setLoading(true);
+    try {
+      await requestPasswordReset(sentEmail);
+      resendWait.start();
     } catch (err) {
       setToast({
         open: true,
@@ -132,9 +150,11 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
               noValidate
               sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
             >
-              <Typography component="h1" sx={TITLE_SX}>
-                Solicitar enlace de restablecimiento
-              </Typography>
+              <AuthStateHeader
+                icon={LockResetOutlinedIcon}
+                title="Recuperar contraseña"
+                description="Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una nueva."
+              />
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -198,36 +218,38 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 textAlign: 'center',
               }}
             >
-              <Box
-                aria-hidden
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '50%',
-                  bgcolor: '#E9F3EC',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+              <AuthStateHeader
+                icon={MarkEmailReadOutlinedIcon}
+                tone="success"
+                title="Revisa tu correo"
+                description={(
+                  <>
+                    {/* Redacción condicional a propósito: el backend no confirma si la cuenta existe o está
+                        activa, así que no se afirma un envío. Tampoco se menciona un tiempo de expiración. */}
+                    Si{' '}
+                    <Box component="strong" sx={{ color: '#1F2421', overflowWrap: 'anywhere' }}>
+                      {sentEmail}
+                    </Box>{' '}
+                    está registrado y activo, recibirás un enlace para restablecer tu contraseña. El
+                    enlace solo puede usarse una vez.
+                  </>
+                )}
+              />
+
+              {resendWait.running && (
+                <MailWaitIndicator remaining={resendWait.remaining} total={MAIL_RESEND_WAIT_SECONDS} />
+              )}
+
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={handleResend}
+                disabled={loading || resendWait.running}
+                sx={{ borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 16 }}
               >
-                <MarkEmailReadOutlinedIcon sx={{ fontSize: 28, color: '#2F7D4F' }} />
-              </Box>
+                {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar de nuevo'}
+              </Button>
 
-              <Typography component="h1" sx={TITLE_SX}>
-                Revisa tu correo
-              </Typography>
-
-              {/* Redacción condicional a propósito: el backend no confirma si la
-                  cuenta existe o está activa, así que no se afirma un envío.
-                  Tampoco se menciona un tiempo de expiración concreto. */}
-              <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
-                Si{' '}
-                <Box component="strong" sx={{ color: '#1F2421', overflowWrap: 'anywhere' }}>
-                  {sentEmail}
-                </Box>{' '}
-                está registrado y activo, recibirás un enlace para restablecer tu contraseña. El
-                enlace solo puede usarse una vez.
-              </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Typography sx={{ fontSize: 14, color: '#6B6560' }}>¿No te llega el correo?</Typography>
                 <HelpTip label="¿Cuánto tarda en llegar el correo?">El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado.</HelpTip>

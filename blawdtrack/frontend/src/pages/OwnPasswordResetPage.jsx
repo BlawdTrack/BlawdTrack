@@ -5,16 +5,13 @@ import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import { useAuth } from '../hooks/useAuth';
 import { useCountdown } from '../hooks/useCountdown';
-import MailWaitIndicator from '../components/MailWaitIndicator';
+import MailWaitIndicator, { MAIL_RESEND_WAIT_SECONDS as RESEND_WAIT_SECONDS } from '../components/MailWaitIndicator';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
 import PageContainer from '../components/PageContainer';
 import { CARD_SX } from '../components/formStyles';
 import HelpTip from '../components/HelpTip';
 import PageHeaderBar from '../components/PageHeaderBar';
-
-// Tiempo mínimo antes de pedir otro correo: el límite bajo de lo que puede tardar en llegar (2 a 5 minutos).
-const RESEND_WAIT_SECONDS = 120;
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo más tarde.';

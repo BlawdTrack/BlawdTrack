@@ -12,7 +12,10 @@ import { RecoverySteps } from '../components/RecoverySteps';
 import AuthCardLayout from '../components/AuthCardLayout';
 import PasswordField from '../components/PasswordField';
 import { INLINE_LABEL_SX, INPUT_SX } from '../components/formStyles';
+import AuthStateHeader from '../components/AuthStateHeader';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import LinkOffOutlinedIcon from '@mui/icons-material/LinkOffOutlined';
+import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import { PasswordRequirements } from '../components/PasswordRequirements';
 import { meetsClientPasswordRules } from '../utils/passwordRules';
 
@@ -32,14 +35,7 @@ const MISSING_TOKEN_MESSAGE =
 const REJECTED_TOKEN_MESSAGE =
   'Este enlace no es válido o ya expiró. Solicita uno nuevo para restablecer tu contraseña.';
 
-const TITLE_SX = {
-  fontFamily: '"Poppins", sans-serif',
-  fontWeight: 600,
-  fontSize: 18,
-  color: 'primary.main',
-};
-
-const BUTTON_SX = { borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 16 };
+const BUTTON_SX = { borderRadius: '10px', minHeight: 52, fontWeight: 600, fontSize: 16 };
 
 // T05 de HU-002 (#66): el usuario llega desde el enlace del correo y define
 // su nueva contraseña. Vistas del mismo flujo (r3/r4 del mockup + el caso sin
@@ -131,30 +127,14 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     content = (
       <Box
         role="status"
-        sx={{ display: 'flex', flexDirection: 'column', gap: '14px', alignItems: 'center', textAlign: 'center' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
       >
-        <Box
-          aria-hidden
-          sx={{
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            bgcolor: '#E9F3EC',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <CheckCircleOutlinedIcon sx={{ fontSize: 30, color: '#2F7D4F' }} />
-        </Box>
-        <Typography component="h1" sx={TITLE_SX}>
-          Contraseña actualizada
-        </Typography>
-        {/* No se afirma que se cerraron las sesiones de otros dispositivos
-            (frase del mockup): el backend no lo hace al confirmar el cambio. */}
-        <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
-          Ya puedes iniciar sesión con tu nueva contraseña.
-        </Typography>
+        <AuthStateHeader
+          icon={CheckCircleOutlinedIcon}
+          tone="success"
+          title="Contraseña actualizada"
+          description="Ya puedes iniciar sesión con tu nueva contraseña."
+        />
         <Button
           fullWidth
           variant="contained"
@@ -167,10 +147,8 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     );
   } else if (!token || tokenRejected) {
     content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <Typography component="h1" sx={TITLE_SX}>
-          Enlace no válido
-        </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <AuthStateHeader icon={LinkOffOutlinedIcon} tone="error" title="Enlace no válido" />
         {/* StatusMessage ya expone role="alert". */}
         <StatusMessage
           severity="error"
@@ -192,11 +170,13 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         component="form"
         onSubmit={handleSubmit}
         noValidate
-        sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
       >
-        <Typography component="h1" sx={TITLE_SX}>
-          Crear nueva contraseña
-        </Typography>
+        <AuthStateHeader
+          icon={LockResetOutlinedIcon}
+          title="Crear nueva contraseña"
+          description="Elige una contraseña segura que no hayas usado antes."
+        />
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <Typography component="label" htmlFor="new-password" sx={INLINE_LABEL_SX}>

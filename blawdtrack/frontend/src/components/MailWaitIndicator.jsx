@@ -5,9 +5,12 @@ const WAIT_MESSAGES = [
   'Enviando el correo…',
   'Tu correo va en camino…',
   'Esperando que llegue a tu bandeja…',
-  'Puede tardar unos minutos, el sistema sigue trabajando…',
+  'Puede tardar un poco, el sistema sigue trabajando…',
 ];
 const SECONDS_PER_MESSAGE = 6;
+
+/** Espera mínima antes de pedir otro correo: el límite bajo de lo que puede tardar en llegar (2 a 5 minutos). */
+export const MAIL_RESEND_WAIT_SECONDS = 120;
 
 const formatClock = (totalSeconds) => (
   `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, '0')}`
