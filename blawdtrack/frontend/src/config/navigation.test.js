@@ -41,7 +41,7 @@ describe('navigation config', () => {
   });
 
   it('orders the groups Mensajeros, Administradores and Seguridad y acceso', () => {
-    expect(NAVIGATION_GROUPS.map((g) => g.title)).toEqual(['Mensajeros', 'Administradores', 'Seguridad y acceso']);
+    expect(NAVIGATION_GROUPS.map((g) => g.title)).toEqual(['Gestión de mensajeros', 'Administradores', 'Seguridad y acceso']);
   });
 
   it('puts "Restablecer contraseña" and "Roles y permisos" in Seguridad y acceso', () => {
@@ -84,7 +84,7 @@ describe('module menus', () => {
 
 describe('getBackTarget', () => {
   it('sends a function screen back to the menu of its module', () => {
-    expect(getBackTarget(ROUTES.COURIER_CREATE)).toEqual({ to: ROUTES.MODULE_COURIERS, label: 'Mensajeros' });
+    expect(getBackTarget(ROUTES.COURIER_CREATE)).toEqual({ to: ROUTES.MODULE_COURIERS, label: 'Gestión de mensajeros' });
     expect(getBackTarget(ROUTES.ADMIN_DELETE)).toEqual({ to: ROUTES.MODULE_ADMINS, label: 'Administradores' });
     expect(getBackTarget(ROUTES.ROLES_PERMISSIONS)).toEqual({ to: ROUTES.MODULE_SECURITY, label: 'Seguridad y acceso' });
   });
@@ -92,7 +92,7 @@ describe('getBackTarget', () => {
   it('also covers nested paths of a function screen', () => {
     expect(getBackTarget(`${ROUTES.COURIER_UPDATE}/1-0345-0678`)).toEqual({
       to: ROUTES.MODULE_COURIERS,
-      label: 'Mensajeros',
+      label: 'Gestión de mensajeros',
     });
   });
 

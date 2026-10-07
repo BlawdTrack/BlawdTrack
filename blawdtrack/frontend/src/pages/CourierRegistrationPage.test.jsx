@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, within } from '@testing-library/react';
+import { Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { CourierRegistrationPage } from './CourierRegistrationPage';
 import { registerCourier } from '../services/CourierService';
-import { renderWithProviders } from '../test-utils';
+import { renderWithProviders, superUser } from '../test-utils';
+import ModuleMenuPage from './ModuleMenuPage';
+import { ROUTES } from '../config/routes';
 
 vi.mock('../services/CourierService', () => ({ registerCourier: vi.fn() }));
 
@@ -37,18 +40,25 @@ describe('CourierRegistrationPage', () => {
     registerCourier.mockReset();
   });
 
-  it('shows the success message with the response email and clears the form', async () => {
+  it('returns to the couriers module menu with a success notice that names the response email', async () => {
     registerCourier.mockResolvedValue({ email: 'ana@blawdgourmet.com' });
     const user = userEvent.setup();
-    renderWithProviders(<CourierRegistrationPage />);
+    renderWithProviders(
+      <Routes>
+        <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
+        <Route path={ROUTES.MODULE_COURIERS} element={<ModuleMenuPage groupId="couriers" />} />
+      </Routes>,
+      { route: ROUTES.COURIER_CREATE, user: superUser }
+    );
 
     await fillForm(user);
     await submit(user);
 
-    const status = await screen.findByRole('status');
-    expect(status).toHaveTextContent('ana@blawdgourmet.com');
-    expect(status).toHaveTextContent('contraseña temporal');
-    expect(screen.getByLabelText(/nombre completo/i)).toHaveValue('');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Gestión de mensajeros' })).toBeInTheDocument();
+    const notice = await screen.findByRole('status');
+    expect(notice).toHaveTextContent('Mensajero creado correctamente');
+    expect(notice).toHaveTextContent('ana@blawdgourmet.com');
+    expect(notice).toHaveTextContent('contraseña temporal');
     expect(registerCourier).toHaveBeenCalledWith(
       expect.objectContaining({ documentType: 'CEDULA', maxPackageWeightKg: 20, schedule: '8:00 am – 4:00 pm' })
     );

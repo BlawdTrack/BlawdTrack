@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Paper,
   Box,
@@ -18,6 +19,7 @@ import PageHeaderBar from '../components/PageHeaderBar';
 import { LABEL_SX, INPUT_SX } from '../components/formStyles';
 import PageContainer from '../components/PageContainer';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
+import { ROUTES } from '../config/routes';
 
 // The form is a single column on phones and two columns from tablets up; wide fields span both.
 const FULL_ROW_SX = { gridColumn: { md: 'span 2' } };
@@ -78,14 +80,14 @@ function buildCourierPayload(formData) {
 /**
  * Pantalla "Crear mensajero" (HU-003), exclusiva del Super Usuario. Valida el formulario en el cliente
  * (`validateCourierForm`), arma el cuerpo de `POST /api/v1/couriers` y muestra los errores del backend
- * junto a cada campo (`normalizeCourierError`). La contraseña temporal la genera y envía el backend.
+ * junto a cada campo (`normalizeCourierError`). La contraseña temporal la genera y envía el backend. Al
+ * crear el mensajero vuelve al menú de gestión de mensajeros con un aviso de éxito.
  */
 export function CourierRegistrationPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const {
     isSubmitting,
-    isSuccess,
-    registeredEmail,
     fieldErrors,
     globalMessage,
     severity,
@@ -139,7 +141,15 @@ export function CourierRegistrationPage() {
 
     const outcome = await register(buildCourierPayload(formData));
     if (outcome?.ok) {
-      setFormData(INITIAL_FORM_DATA);
+      // Todo salió bien: se avisa en el menú del módulo, a donde se regresa de inmediato.
+      navigate(ROUTES.MODULE_COURIERS, {
+        state: {
+          notice: {
+            severity: 'success',
+            message: `Mensajero creado correctamente. Se envió un correo a ${outcome.email} con la contraseña temporal; deberá cambiarla en su primer ingreso.`
+          }
+        }
+      });
     } else if (outcome) {
       focusFirstError(outcome.fieldErrors);
     }
@@ -206,12 +216,6 @@ export function CourierRegistrationPage() {
         </Box>
 
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {isSuccess && (
-            <StatusMessage
-              severity="success"
-              message={`Mensajero registrado correctamente. Se envió un correo a ${registeredEmail} con la contraseña temporal; deberá cambiarla en su primer ingreso.`}
-            />
-          )}
           {globalMessage && <StatusMessage severity={severity} message={globalMessage} />}
 
           <Box

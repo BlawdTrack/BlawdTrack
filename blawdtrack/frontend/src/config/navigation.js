@@ -8,7 +8,7 @@ import { ROUTES } from './routes';
 export const NAVIGATION_GROUPS = [
   {
     id: 'couriers',
-    title: 'Mensajeros',
+    title: 'Gestión de mensajeros',
     shortTitle: 'Mensajeros',
     path: ROUTES.MODULE_COURIERS,
     description: 'Registra a tu equipo de reparto, corrige sus datos o retíralo de la operación.',

@@ -28,7 +28,7 @@ describe('MainMenuLayout sidebar', () => {
   it('renders the four module titles from the mockup', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
-    ['Mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((title) =>
+    ['Gestión de mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((title) =>
       expect(bar.getByRole('button', { name: title })).toBeInTheDocument()
     );
     expect(bar.queryByRole('button', { name: 'Roles y permisos' })).not.toBeInTheDocument();
@@ -67,7 +67,7 @@ describe('MainMenuLayout sidebar', () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
-    await openGroup(user, 'Mensajeros');
+    await openGroup(user, 'Gestión de mensajeros');
     await user.click(within(sidebar()).getByRole('link', { name: 'Crear mensajero' }));
     expect(screen.getByText('create courier content')).toBeInTheDocument();
 
@@ -80,7 +80,7 @@ describe('MainMenuLayout sidebar', () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
-    await openGroup(user, 'Mensajeros');
+    await openGroup(user, 'Gestión de mensajeros');
     await openGroup(user, 'Administradores');
     await openGroup(user, 'Seguridad y acceso');
 
@@ -109,7 +109,7 @@ describe('MainMenuLayout sidebar', () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
-    const groupButton = bar.getByRole('button', { name: 'Mensajeros' });
+    const groupButton = bar.getByRole('button', { name: 'Gestión de mensajeros' });
 
     expect(groupButton).toHaveAttribute('aria-expanded', 'false');
     await user.click(groupButton);
@@ -129,14 +129,14 @@ describe('MainMenuLayout sidebar', () => {
 
       const bar = within(sidebar());
       expect(bar.queryByText('Blawd Gourmet')).not.toBeInTheDocument();
-      ['Mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((name) =>
+      ['Gestión de mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((name) =>
         expect(bar.getByRole('button', { name })).toBeInTheDocument()
       );
       expect(bar.queryByRole('link', { name: 'Crear mensajero' })).not.toBeInTheDocument();
       expect(bar.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument();
       expect(localStorage.getItem('blawdtrack.sidebarCollapsed')).toBe('true');
 
-      await user.click(bar.getByRole('button', { name: 'Mensajeros' }));
+      await user.click(bar.getByRole('button', { name: 'Gestión de mensajeros' }));
       await user.click(await screen.findByRole('menuitem', { name: 'Crear mensajero' }));
       expect(screen.getByText('create courier content')).toBeInTheDocument();
 
@@ -164,10 +164,10 @@ describe('MainMenuLayout sidebar', () => {
         const user = userEvent.setup();
         await collapse(user);
 
-        await user.hover(trigger('Mensajeros'));
+        await user.hover(trigger('Gestión de mensajeros'));
         expect(await screen.findByRole('menuitem', { name: 'Desactivar mensajero' })).toBeInTheDocument();
 
-        await user.unhover(trigger('Mensajeros'));
+        await user.unhover(trigger('Gestión de mensajeros'));
         await waitFor(() => expect(screen.queryByRole('menuitem', { name: 'Desactivar mensajero' })).not.toBeInTheDocument());
       });
 
@@ -175,9 +175,9 @@ describe('MainMenuLayout sidebar', () => {
         const user = userEvent.setup();
         await collapse(user);
 
-        await user.hover(trigger('Mensajeros'));
+        await user.hover(trigger('Gestión de mensajeros'));
         const item = await screen.findByRole('menuitem', { name: 'Desactivar mensajero' });
-        await user.unhover(trigger('Mensajeros'));
+        await user.unhover(trigger('Gestión de mensajeros'));
         await user.hover(item);
 
         await new Promise((resolve) => setTimeout(resolve, 300));
@@ -189,8 +189,8 @@ describe('MainMenuLayout sidebar', () => {
         await collapse(user);
         stubPanelRect({ left: 90, top: 100, bottom: 260 });
 
-        fireEvent.mouseEnter(trigger('Mensajeros'));
-        fireEvent.mouseMove(trigger('Mensajeros'), { clientX: 40, clientY: 100 });
+        fireEvent.mouseEnter(trigger('Gestión de mensajeros'));
+        fireEvent.mouseMove(trigger('Gestión de mensajeros'), { clientX: 40, clientY: 100 });
         await screen.findByRole('menuitem', { name: 'Crear mensajero' });
 
         fireEvent.mouseMove(trigger('Administradores'), { clientX: 45, clientY: 150 });
@@ -205,8 +205,8 @@ describe('MainMenuLayout sidebar', () => {
         await collapse(user);
         stubPanelRect({ left: 90, top: 100, bottom: 260 });
 
-        fireEvent.mouseEnter(trigger('Mensajeros'));
-        fireEvent.mouseMove(trigger('Mensajeros'), { clientX: 40, clientY: 100 });
+        fireEvent.mouseEnter(trigger('Gestión de mensajeros'));
+        fireEvent.mouseMove(trigger('Gestión de mensajeros'), { clientX: 40, clientY: 100 });
         await screen.findByRole('menuitem', { name: 'Crear mensajero' });
 
         // Pasa por encima de "Administradores" yendo en diagonal hacia el menú de Mensajeros.

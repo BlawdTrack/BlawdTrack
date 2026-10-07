@@ -7,6 +7,8 @@ import { NAV_ITEM_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
 import PageHeaderBar from '../components/PageHeaderBar';
 import PageContainer from '../components/PageContainer';
+import Toast from '../components/Toast';
+import { useRouteNotice } from '../hooks/useRouteNotice';
 
 /**
  * Menú de un módulo (Mensajeros, Administradores, Seguridad y acceso): lista las funciones del módulo
@@ -16,6 +18,7 @@ import PageContainer from '../components/PageContainer';
  */
 export default function ModuleMenuPage({ groupId }) {
   const { user } = useAuth();
+  const { notice, open: noticeOpen, close: closeNotice } = useRouteNotice();
   const group = getNavigationForRole(user.role).find((candidate) => candidate.id === groupId);
 
   if (!group) return <Navigate to={ROUTES.MAIN_MENU} replace />;
@@ -37,6 +40,14 @@ export default function ModuleMenuPage({ groupId }) {
           ))}
         </Box>
       </PageContainer>
+
+      <Toast
+        open={noticeOpen}
+        message={notice?.message ?? ''}
+        severity={notice?.severity}
+        autoHideDuration={8000}
+        onClose={closeNotice}
+      />
     </>
   );
 }

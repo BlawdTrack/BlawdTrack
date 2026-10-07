@@ -45,7 +45,7 @@ export const useCourier = () => {
       const response = await registerCourier(payload);
       setRegisteredEmail(response?.email ?? payload.email);
       setIsSuccess(true);
-      return { ok: true };
+      return { ok: true, email: response?.email ?? payload.email };
     } catch (error) {
       const normalized = normalizeCourierError(error);
       setFieldErrors(normalized.fieldErrors);

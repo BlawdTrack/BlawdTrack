@@ -26,7 +26,7 @@ describe('PageHeader', () => {
 
   it('puts a back arrow before the title that goes from a function to its module menu', () => {
     renderAt(ROUTES.COURIER_CREATE);
-    const arrow = screen.getByRole('link', { name: 'Volver a Mensajeros' });
+    const arrow = screen.getByRole('link', { name: 'Volver a Gestión de mensajeros' });
     expect(arrow).toHaveAttribute('href', ROUTES.MODULE_COURIERS);
     expect(arrow.compareDocumentPosition(screen.getByRole('heading', { level: 1 }))).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING

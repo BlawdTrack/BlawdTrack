@@ -16,7 +16,7 @@ describe('ModuleMenuPage', () => {
   it('lists the functions of the module as links to their screens', () => {
     renderWithProviders(tree, { route: ROUTES.MODULE_COURIERS, user: superUser });
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Mensajeros' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Gestión de mensajeros' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Crear mensajero/ })).toHaveAttribute('href', ROUTES.COURIER_CREATE);
     expect(screen.getByRole('link', { name: /Actualizar mensajero/ })).toHaveAttribute('href', ROUTES.COURIER_UPDATE);
     expect(screen.getByRole('link', { name: /Desactivar mensajero/ })).toHaveAttribute('href', ROUTES.COURIER_DEACTIVATE);
