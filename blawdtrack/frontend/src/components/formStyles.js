@@ -9,6 +9,7 @@ export const LABEL_SX = {
   color: '#6B6560',
   mb: 0.75,
   display: 'block',
+  textTransform: 'uppercase',
 };
 
 /** Campo de texto: 16 px y unos 52 px de alto (cómodo de tocar y de leer). */
