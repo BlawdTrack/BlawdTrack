@@ -2,12 +2,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { NAV_GROUP_ICONS } from './navIcons';
 
-const firstEnabledPath = (group) => group.items.find((item) => item.path)?.path ?? null;
-const isGroupActive = (group, pathname) => group.items.some((item) => item.path === pathname);
+const isGroupActive = (group, pathname) =>
+  pathname === group.path || group.items.some((item) => item.path === pathname);
 
 /**
- * Barra de pestañas inferior para teléfonos: una pestaña por grupo de navegación, que lleva a la
- * primera pantalla disponible del grupo.
+ * Barra de pestañas inferior para teléfonos: una pestaña por grupo de navegación, que lleva al menú
+ * del módulo.
  * @param {{ groups: Array }} props Grupos de `getNavigationForRole`.
  */
 export default function MobileBottomNav({ groups }) {
@@ -29,7 +29,7 @@ export default function MobileBottomNav({ groups }) {
       }}
     >
       {groups.map((group) => {
-        const target = firstEnabledPath(group);
+        const target = group.path;
         const active = isGroupActive(group, pathname);
         const Icon = NAV_GROUP_ICONS[group.id];
         return (

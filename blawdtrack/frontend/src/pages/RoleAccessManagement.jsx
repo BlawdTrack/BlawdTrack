@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import PageHeader from '../components/PageHeader';
-import { useNavigate } from 'react-router-dom';
-import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import RestartAltRounded from '@mui/icons-material/RestartAltRounded';
@@ -61,7 +59,6 @@ const getRequestError = (error, fallback) => {
  * catálogo del frontend.
  */
 function RoleAccessManagement() {
-  const navigate = useNavigate();
   const [documentType, setDocumentType] = useState('CEDULA');
   const [documentNumber, setDocumentNumber] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -160,15 +157,6 @@ function RoleAccessManagement() {
   return (
     <main className="role-access-page">
       <div className="role-access-shell">
-        <button
-          className="access-back-button"
-          type="button"
-          onClick={() => navigate('/administradores')}
-        >
-          <ArrowBackRounded aria-hidden="true" />
-          Volver a administración
-        </button>
-
         <PageHeader
           title="Roles y permisos"
           description="Busca a un usuario y ajusta qué puede hacer dentro del sistema."

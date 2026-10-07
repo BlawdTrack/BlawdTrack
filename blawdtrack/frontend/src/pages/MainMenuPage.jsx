@@ -1,87 +1,11 @@
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { ROUTES } from '../config/routes';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
 import { getNavigationForRole } from '../config/navigation';
 import { NAV_GROUP_ICONS } from '../components/layout/navIcons';
-
-/** Tarjeta de un grupo del menú con sus pantallas como enlaces directos (reconocer antes que recordar). */
-function QuickAccessCard({ group }) {
-  const Icon = NAV_GROUP_ICONS[group.id];
-
-  return (
-    <Box
-      component="section"
-      aria-labelledby={`quick-${group.id}`}
-      sx={{
-        bgcolor: 'background.paper',
-        border: '1px solid #E4DED7',
-        borderRadius: '16px',
-        p: 2.5,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.5,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-        {Icon && (
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: '10px',
-              bgcolor: '#FFE8D9',
-              color: 'secondary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Icon sx={{ fontSize: 20 }} />
-          </Box>
-        )}
-        <Typography id={`quick-${group.id}`} component="h2" sx={{ fontWeight: 600, fontSize: 15, color: 'primary.main' }}>
-          {group.title}
-        </Typography>
-      </Box>
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        {group.items.map((item) =>
-          item.path ? (
-            <Box
-              key={item.id}
-              component={RouterLink}
-              to={item.path}
-              sx={{
-                minHeight: 44,
-                px: 1.5,
-                display: 'flex',
-                alignItems: 'center',
-                borderRadius: '8px',
-                color: 'text.primary',
-                fontSize: 14,
-                fontWeight: 500,
-                textDecoration: 'none',
-                '&:hover': { bgcolor: '#F1ECE7' },
-                '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 1 },
-              }}
-            >
-              {item.label}
-            </Box>
-          ) : (
-            <Box
-              key={item.id}
-              sx={{ minHeight: 44, px: 1.5, display: 'flex', alignItems: 'center', color: 'text.secondary', fontSize: 14 }}
-            >
-              {item.label} · próximamente
-            </Box>
-          )
-        )}
-      </Box>
-    </Box>
-  );
-}
+import MenuCard from '../components/MenuCard';
 
 /**
  * Inicio del Super Usuario dentro del menú principal: saludo con su nombre y su rol, accesos rápidos a
@@ -130,11 +54,18 @@ export default function MainMenuPage() {
       {groups.length > 0 && (
         <Box component="section" aria-labelledby="quick-access-title">
           <Typography id="quick-access-title" variant="h6" component="h2" sx={{ mb: 2, color: 'primary.main' }}>
-            ¿Qué quieres hacer hoy?
+            ¿Qué módulo quieres abrir?
           </Typography>
-          <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+          <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
             {groups.map((group) => (
-              <QuickAccessCard key={group.id} group={group} />
+              <MenuCard
+                key={group.id}
+                to={group.path}
+                icon={NAV_GROUP_ICONS[group.id]}
+                title={group.title}
+                description={group.description}
+                meta={group.items.length === 1 ? '1 función' : `${group.items.length} funciones`}
+              />
             ))}
           </Box>
         </Box>

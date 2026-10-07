@@ -37,4 +37,12 @@ describe('MainMenuPage', () => {
     expect(logout).toHaveBeenCalledTimes(1);
     expect(screen.getByText('login screen')).toBeInTheDocument();
   });
+
+  it('offers one card per module that leads to the module menu', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+
+    expect(screen.getByRole('link', { name: /Mensajeros/ })).toHaveAttribute('href', ROUTES.MODULE_COURIERS);
+    expect(screen.getByRole('link', { name: /Administradores/ })).toHaveAttribute('href', ROUTES.MODULE_ADMINS);
+    expect(screen.getByRole('link', { name: /Seguridad y acceso/ })).toHaveAttribute('href', ROUTES.MODULE_SECURITY);
+  });
 });

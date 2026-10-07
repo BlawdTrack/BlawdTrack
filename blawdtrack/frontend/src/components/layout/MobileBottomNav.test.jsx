@@ -43,18 +43,23 @@ describe('MobileBottomNav', () => {
     );
   });
 
-  it('navigates to the first available screen of each module', async () => {
+  it('navigates to the menu of each module', async () => {
     const user = userEvent.setup();
     renderNav(ROUTES.MAIN_MENU);
 
     await user.click(tab('Mensajeros'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.COURIER_CREATE);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_COURIERS);
 
     await user.click(tab('Admins'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.ADMIN_CREATE);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_ADMINS);
 
     await user.click(tab('Acceso'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PASSWORD_RESET_OWN);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_SECURITY);
+  });
+
+  it('highlights the tab on the module menu itself', () => {
+    renderNav(ROUTES.MODULE_ADMINS);
+    expect(tab('Admins')).toHaveStyle({ color: ORANGE });
   });
 
   it('highlights Acceso on the roles & permissions screen, now part of Seguridad y acceso', () => {

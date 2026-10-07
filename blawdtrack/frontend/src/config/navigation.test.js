@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { NAVIGATION_GROUPS, getNavigationForRole } from './navigation';
+import { NAVIGATION_GROUPS, getNavigationForRole, getBackTarget } from './navigation';
 import { ROLES } from './roles';
 import { ROUTES } from './routes';
 
@@ -67,5 +67,43 @@ describe('getNavigationForRole', () => {
     const before = JSON.stringify(NAVIGATION_GROUPS);
     getNavigationForRole(ROLES.COURIER);
     expect(JSON.stringify(NAVIGATION_GROUPS)).toBe(before);
+  });
+});
+
+describe('module menus', () => {
+  it('gives every group its own menu route and a description, and every item a description', () => {
+    const known = Object.values(ROUTES);
+    NAVIGATION_GROUPS.forEach((group) => {
+      expect(known).toContain(group.path);
+      expect(group.description).toBeTruthy();
+    });
+    allItems.forEach((item) => expect(item.description).toBeTruthy());
+    expect(new Set(NAVIGATION_GROUPS.map((g) => g.path)).size).toBe(NAVIGATION_GROUPS.length);
+  });
+});
+
+describe('getBackTarget', () => {
+  it('sends a function screen back to the menu of its module', () => {
+    expect(getBackTarget(ROUTES.COURIER_CREATE)).toEqual({ to: ROUTES.MODULE_COURIERS, label: 'Mensajeros' });
+    expect(getBackTarget(ROUTES.ADMIN_DELETE)).toEqual({ to: ROUTES.MODULE_ADMINS, label: 'Administradores' });
+    expect(getBackTarget(ROUTES.ROLES_PERMISSIONS)).toEqual({ to: ROUTES.MODULE_SECURITY, label: 'Seguridad y acceso' });
+  });
+
+  it('also covers nested paths of a function screen', () => {
+    expect(getBackTarget(`${ROUTES.COURIER_UPDATE}/1-0345-0678`)).toEqual({
+      to: ROUTES.MODULE_COURIERS,
+      label: 'Mensajeros',
+    });
+  });
+
+  it('sends a module menu back to the main menu', () => {
+    NAVIGATION_GROUPS.forEach((group) =>
+      expect(getBackTarget(group.path)).toEqual({ to: ROUTES.MAIN_MENU, label: 'Menú principal' })
+    );
+  });
+
+  it('has no back target on the main menu or on unknown paths', () => {
+    expect(getBackTarget(ROUTES.MAIN_MENU)).toBeNull();
+    expect(getBackTarget('/no-existe')).toBeNull();
   });
 });

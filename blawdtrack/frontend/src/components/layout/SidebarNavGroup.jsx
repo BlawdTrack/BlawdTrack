@@ -26,7 +26,7 @@ import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from './navIcons';
 export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
-  const hasActiveItem = group.items.some((item) => item.path === pathname);
+  const hasActiveItem = pathname === group.path || group.items.some((item) => item.path === pathname);
   const listId = `sidebar-group-${group.id}`;
 
   if (collapsed) {
