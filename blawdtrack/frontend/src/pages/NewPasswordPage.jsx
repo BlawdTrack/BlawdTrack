@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Container,
-  Paper,
   Box,
   Typography,
-  TextField,
   Button,
   CircularProgress,
 } from '@mui/material';
 import { confirmPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
 import { RecoverySteps } from '../components/RecoverySteps';
+import AuthCardLayout from '../components/AuthCardLayout';
+import PasswordField from '../components/PasswordField';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import { PasswordRequirements } from '../components/PasswordRequirements';
 import { meetsClientPasswordRules } from '../utils/passwordRules';
 
@@ -51,7 +51,7 @@ const INPUT_SX = {
   '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
 };
 
-const BUTTON_SX = { borderRadius: '10px', py: '15px', fontWeight: 600, fontSize: 15 };
+const BUTTON_SX = { borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 15 };
 
 // T05 de HU-002 (#66): el usuario llega desde el enlace del correo y define
 // su nueva contraseña. Vistas del mismo flujo (r3/r4 del mockup + el caso sin
@@ -157,15 +157,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
             justifyContent: 'center',
           }}
         >
-          <Box
-            sx={{
-              width: 20,
-              height: 10,
-              borderLeft: '3px solid #2F7D4F',
-              borderBottom: '3px solid #2F7D4F',
-              transform: 'rotate(-45deg) translateY(-2px)',
-            }}
-          />
+          <CheckCircleOutlinedIcon sx={{ fontSize: 30, color: '#2F7D4F' }} />
         </Box>
         <Typography component="h1" sx={TITLE_SX}>
           Contraseña actualizada
@@ -222,12 +214,12 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
           <Typography component="label" htmlFor="new-password" sx={LABEL_SX}>
             Nueva contraseña
           </Typography>
-          <TextField
+          <PasswordField
             id="new-password"
+            visibilityLabel="nueva contraseña"
             fullWidth
             required
             name="newPassword"
-            type="password"
             placeholder="••••••••"
             autoComplete="new-password"
             value={newPassword}
@@ -242,12 +234,12 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
           <Typography component="label" htmlFor="confirm-password" sx={LABEL_SX}>
             Confirmar contraseña
           </Typography>
-          <TextField
+          <PasswordField
             id="confirm-password"
+            visibilityLabel="confirmación de contraseña"
             fullWidth
             required
             name="confirmPassword"
-            type="password"
             placeholder="••••••••"
             autoComplete="new-password"
             value={confirmPassword}
@@ -270,27 +262,13 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-      <Container maxWidth={false}>
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: '18px',
-            overflow: 'hidden',
-            border: '1px solid #E4DED7',
-            boxShadow: '0 16px 38px rgba(26,60,52,.07)',
-          }}
-        >
-          <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />
+    <AuthCardLayout>
+      <RecoverySteps current={3} />
 
-          <RecoverySteps current={3} />
-
-          <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
-            <Box sx={{ width: '100%', maxWidth: 460 }}>{content}</Box>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+      <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ width: '100%', maxWidth: 460 }}>{content}</Box>
+      </Box>
+    </AuthCardLayout>
   );
 }
 

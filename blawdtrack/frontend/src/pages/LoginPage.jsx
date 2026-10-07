@@ -6,13 +6,10 @@ import {
   Button,
   CircularProgress,
   Link,
-  IconButton,
-  InputAdornment,
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
+import PasswordField from '../components/PasswordField';
 import blawdtrackLogo from '../assets/Logo.png';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,7 +47,6 @@ function validateForm(data) {
 export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
   const { login, loading, error, resetError } = useAuth();
 
   const handleChange = (event) => {
@@ -212,12 +208,11 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             <Typography component="label" htmlFor="login-password" sx={LABEL_SX}>
               Contraseña
             </Typography>
-            <TextField
+            <PasswordField
               fullWidth
               required
               id="login-password"
               name="password"
-              type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               autoComplete="current-password"
               value={formData.password}
@@ -225,21 +220,6 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               disabled={loading}
               error={Boolean(fieldErrors.password)}
               helperText={fieldErrors.password}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        edge="end"
-                        onClick={() => setShowPassword((visible) => !visible)}
-                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      >
-                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
             />
             <Link
               component="button"

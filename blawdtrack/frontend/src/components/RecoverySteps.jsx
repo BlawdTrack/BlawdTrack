@@ -21,12 +21,12 @@ export function RecoverySteps({ current }) {
       sx={{
         listStyle: 'none',
         m: 0,
-        px: '28px',
-        py: '22px',
+        px: { xs: '16px', sm: '28px' },
+        py: '18px',
         borderBottom: '1px solid #E4DED7',
         display: 'flex',
         gap: '10px',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
       }}
     >
       {STEPS.map(({ number, label }) => {
@@ -39,7 +39,7 @@ export function RecoverySteps({ current }) {
             key={number}
             aria-current={isCurrent ? 'step' : undefined}
             sx={{
-              flex: '1 1 180px',
+              flex: { xs: isCurrent ? '1 1 auto' : '0 0 auto', sm: '1 1 180px' },
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
@@ -63,7 +63,7 @@ export function RecoverySteps({ current }) {
                 // Verde de marca en el paso actual, verde de éxito en los
                 // ya completados y gris en los pendientes.
                 bgcolor: isCurrent ? 'primary.main' : isDone ? '#2F7D4F' : '#E4DED7',
-                color: isCurrent || isDone ? '#fff' : '#9E968D',
+                color: isCurrent || isDone ? '#fff' : '#6B6560',
               }}
             >
               {number}
@@ -71,10 +71,11 @@ export function RecoverySteps({ current }) {
             <Typography
               component="span"
               sx={{
+                display: { xs: isCurrent ? 'inline' : 'none', sm: 'inline' },
                 fontSize: 12.5,
                 fontWeight: 600,
                 lineHeight: 1.3,
-                color: isCurrent ? 'primary.main' : '#9E968D',
+                color: isCurrent ? 'primary.main' : '#6B6560',
               }}
             >
               {label}

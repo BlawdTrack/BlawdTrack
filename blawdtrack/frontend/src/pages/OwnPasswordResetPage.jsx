@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, Container, Paper, Typography } from '@mui/material';
+import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import { useAuth } from '../hooks/useAuth';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
@@ -49,10 +50,23 @@ export function OwnPasswordResetPage() {
             en 15 minutos.
           </Typography>
 
-          <Typography sx={{ mb: 0.5, fontSize: '12.5px', fontWeight: 700, color: '#6B6560' }}>
+          <Typography sx={{ mb: 0.75, fontSize: '12.5px', fontWeight: 700, color: '#6B6560' }}>
             CORREO DE TU CUENTA
           </Typography>
-          <Typography sx={{ mb: 3, fontWeight: 600, wordBreak: 'break-all' }}>{user?.email}</Typography>
+          <Box
+            sx={{
+              mb: 3,
+              p: 1.75,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.25,
+              borderRadius: '10px',
+              bgcolor: '#F1ECE7',
+            }}
+          >
+            <MailOutlinedIcon sx={{ color: 'primary.main' }} />
+            <Typography sx={{ fontWeight: 600, wordBreak: 'break-all' }}>{user?.email}</Typography>
+          </Box>
 
           {error && (
             <Box sx={{ mb: 2 }}>
@@ -72,7 +86,7 @@ export function OwnPasswordResetPage() {
             variant="contained"
             onClick={handleSend}
             disabled={loading}
-            sx={{ width: { xs: '100%', sm: 'auto' }, px: 3, py: 1.2, fontWeight: 700 }}
+            sx={{ width: { xs: '100%', sm: 'auto' }, px: 3, minHeight: 48, fontWeight: 700 }}
           >
             {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
           </Button>
