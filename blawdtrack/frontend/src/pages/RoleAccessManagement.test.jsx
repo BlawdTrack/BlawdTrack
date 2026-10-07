@@ -31,10 +31,11 @@ const renderPage = () => render(
 
 const search = async (number = '123456789', type) => {
   if (type) {
-    fireEvent.change(screen.getByLabelText('Tipo de documento'), { target: { value: type } });
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    fireEvent.click(screen.getByRole('option', { name: 'Pasaporte' }));
   }
-  fireEvent.change(screen.getByPlaceholderText(/Ej\./), { target: { value: number } });
-  fireEvent.click(screen.getByRole('button', { name: /Buscar usuario/ }));
+  fireEvent.change(screen.getByLabelText('Número de documento'), { target: { value: number } });
+  fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 };
 
 describe('RoleAccessManagement (HU-009 permisos por usuario)', () => {
