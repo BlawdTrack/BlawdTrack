@@ -39,7 +39,7 @@ const TITLE_SX = {
 };
 
 const LABEL_SX = {
-  fontSize: 11.5,
+  fontSize: 12,
   fontWeight: 700,
   letterSpacing: '0.5px',
   textTransform: 'uppercase',
@@ -47,11 +47,11 @@ const LABEL_SX = {
 };
 
 const INPUT_SX = {
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 15 },
+  '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 16 },
   '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
 };
 
-const BUTTON_SX = { borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 15 };
+const BUTTON_SX = { borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 16 };
 
 // T05 de HU-002 (#66): el usuario llega desde el enlace del correo y define
 // su nueva contraseña. Vistas del mismo flujo (r3/r4 del mockup + el caso sin
@@ -164,7 +164,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         </Typography>
         {/* No se afirma que se cerraron las sesiones de otros dispositivos
             (frase del mockup): el backend no lo hace al confirmar el cambio. */}
-        <Typography sx={{ fontSize: 13.5, color: '#6B6560', lineHeight: 1.55 }}>
+        <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
           Ya puedes iniciar sesión con tu nueva contraseña.
         </Typography>
         <Button

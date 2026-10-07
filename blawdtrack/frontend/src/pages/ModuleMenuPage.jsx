@@ -6,6 +6,7 @@ import { ROUTES } from '../config/routes';
 import { NAV_ITEM_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
 import PageHeader from '../components/PageHeader';
+import PageContainer from '../components/PageContainer';
 
 /**
  * Menú de un módulo (Mensajeros, Administradores, Seguridad y acceso): lista las funciones del módulo
@@ -20,7 +21,7 @@ export default function ModuleMenuPage({ groupId }) {
   if (!group) return <Navigate to={ROUTES.MAIN_MENU} replace />;
 
   return (
-    <Box sx={{ maxWidth: 1040, mx: 'auto', p: { xs: 2.5, md: 5 }, display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <PageContainer>
       <PageHeader title={group.title} description={group.description} />
 
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
@@ -34,6 +35,6 @@ export default function ModuleMenuPage({ groupId }) {
           />
         ))}
       </Box>
-    </Box>
+    </PageContainer>
   );
 }

@@ -7,6 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
 import { getPasswordResetRoute } from '../utils/roleRoutes';
 import logo from '../assets/Logo.png';
+import PageContainer from './PageContainer';
 
 const CARD_SX = {
   bgcolor: 'background.paper',
@@ -85,10 +86,7 @@ export function ProvisionalHomePage({ title, description }) {
         </Button>
       </Box>
 
-      <Box
-        component="main"
-        sx={{ maxWidth: 880, mx: 'auto', p: { xs: 2.5, md: 5 }, display: 'flex', flexDirection: 'column', gap: 3 }}
-      >
+      <PageContainer component="main">
         <Box sx={{ pl: 2, borderLeft: '4px solid', borderColor: 'secondary.main' }}>
           <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>Bienvenid@, {user?.fullName}</Typography>
           <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
@@ -133,7 +131,7 @@ export function ProvisionalHomePage({ title, description }) {
             </Box>
           )}
         </Box>
-      </Box>
+      </PageContainer>
     </Box>
   );
 }

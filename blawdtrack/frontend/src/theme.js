@@ -21,32 +21,34 @@ export const theme = createTheme({
       secondary: '#6B6560',
     },
   },
+  // Escala tipográfica única de la aplicación: 12 (etiquetas y ayudas) · 14 (texto secundario) ·
+  // 16 (texto base) · 18 (títulos de sección) · 24 (título de pantalla) · 32 (portadas).
   typography: {
     fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
-    h4: {
-      fontFamily: '"Poppins", "Inter", sans-serif',
-      fontWeight: 600,
-    },
-    h5: {
-      fontFamily: '"Poppins", "Inter", sans-serif',
-      fontWeight: 600,
-    },
-    h6: {
-      fontFamily: '"Poppins", "Inter", sans-serif',
-      fontWeight: 600,
-    },
+    h4: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: '2rem', lineHeight: 1.25 },
+    h5: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: '1.5rem', lineHeight: 1.3 },
+    h6: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: '1.125rem', lineHeight: 1.35 },
+    body1: { fontSize: '1rem', lineHeight: 1.5 },
+    body2: { fontSize: '0.875rem', lineHeight: 1.5 },
+    caption: { fontSize: '0.75rem', lineHeight: 1.4 },
     button: {
       textTransform: 'none',
       fontWeight: 600,
+      fontSize: '0.875rem',
     },
   },
   components: {
+    // Objetivo táctil mínimo de 44 px (48 px en botones grandes): ley de Fitts.
     MuiButton: {
       styleOverrides: {
         root: {
           borderRadius: '10px',
-          paddingTop: '12px',
-          paddingBottom: '12px',
+          minHeight: 44,
+          padding: '8px 20px',
+        },
+        sizeLarge: {
+          minHeight: 48,
+          fontSize: '1rem',
         },
       },
     },

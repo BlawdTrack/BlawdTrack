@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Box, Button, Container, Paper, Typography } from '@mui/material';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import { useAuth } from '../hooks/useAuth';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
-import ModuleBackButton from '../components/ModuleBackButton';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo más tarde.';
@@ -40,63 +41,55 @@ export function OwnPasswordResetPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
-      <Container maxWidth="sm">
-        <Box sx={{ mb: 2 }}>
-          <ModuleBackButton />
+    <PageContainer>
+      <PageHeader
+        title="Restablecer contraseña"
+        description="Te enviaremos un enlace para elegir una contraseña nueva al correo de tu cuenta. El enlace vence en 15 minutos."
+      />
+
+      <Paper elevation={0} sx={{ maxWidth: 640, p: { xs: 3, sm: 4 }, borderRadius: '16px', border: '1px solid #E4DED7' }}>
+        <Typography sx={{ mb: 0.75, fontSize: 12, fontWeight: 700, color: '#6B6560' }}>
+          CORREO DE TU CUENTA
+        </Typography>
+        <Box
+          sx={{
+            mb: 3,
+            p: 1.75,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.25,
+            borderRadius: '10px',
+            bgcolor: '#F1ECE7',
+          }}
+        >
+          <MailOutlinedIcon sx={{ color: 'primary.main' }} />
+          <Typography sx={{ fontWeight: 600, wordBreak: 'break-all' }}>{user?.email}</Typography>
         </Box>
-        <Paper elevation={0} sx={{ p: { xs: 3, sm: 4 }, borderRadius: '18px', border: '1px solid #E4DED7' }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-            Restablecer contraseña
-          </Typography>
-          <Typography sx={{ color: 'text.secondary', mb: 3 }}>
-            Te enviaremos un enlace para elegir una contraseña nueva al correo de tu cuenta. El enlace vence
-            en 15 minutos.
-          </Typography>
 
-          <Typography sx={{ mb: 0.75, fontSize: '12.5px', fontWeight: 700, color: '#6B6560' }}>
-            CORREO DE TU CUENTA
-          </Typography>
-          <Box
-            sx={{
-              mb: 3,
-              p: 1.75,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.25,
-              borderRadius: '10px',
-              bgcolor: '#F1ECE7',
-            }}
-          >
-            <MailOutlinedIcon sx={{ color: 'primary.main' }} />
-            <Typography sx={{ fontWeight: 600, wordBreak: 'break-all' }}>{user?.email}</Typography>
+        {error && (
+          <Box sx={{ mb: 2 }}>
+            <StatusMessage severity="error" message={error} />
           </Box>
+        )}
+        {sent && (
+          <Box sx={{ mb: 2 }}>
+            <StatusMessage
+              severity="success"
+              message={`Revisa tu correo (${user?.email}): te enviamos el enlace para restablecer tu contraseña.`}
+            />
+          </Box>
+        )}
 
-          {error && (
-            <Box sx={{ mb: 2 }}>
-              <StatusMessage severity="error" message={error} />
-            </Box>
-          )}
-          {sent && (
-            <Box sx={{ mb: 2 }}>
-              <StatusMessage
-                severity="success"
-                message={`Revisa tu correo (${user?.email}): te enviamos el enlace para restablecer tu contraseña.`}
-              />
-            </Box>
-          )}
-
-          <Button
-            variant="contained"
-            onClick={handleSend}
-            disabled={loading}
-            sx={{ width: { xs: '100%', sm: 'auto' }, px: 3, minHeight: 48, fontWeight: 700 }}
-          >
-            {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
-          </Button>
-        </Paper>
-      </Container>
-    </Box>
+        <Button
+          variant="contained"
+          onClick={handleSend}
+          disabled={loading}
+          sx={{ width: { xs: '100%', sm: 'auto' }, px: 3, minHeight: 48, fontWeight: 700 }}
+        >
+          {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
+        </Button>
+      </Paper>
+    </PageContainer>
   );
 }
 

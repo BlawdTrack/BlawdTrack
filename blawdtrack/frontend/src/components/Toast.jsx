@@ -45,7 +45,7 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
         }}
       >
         <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: accentColor, flexShrink: 0 }} />
-        <Typography sx={{ fontSize: 13.5, color: '#1F2421' }}>{message}</Typography>
+        <Typography sx={{ fontSize: 14, color: '#1F2421' }}>{message}</Typography>
       </Box>
     </Snackbar>
   );

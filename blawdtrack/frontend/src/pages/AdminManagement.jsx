@@ -16,6 +16,7 @@ import {
 
 import DeleteAdminModal from '../components/DeleteAdminModal';
 import PageHeader from '../components/PageHeader';
+import PageContainer from '../components/PageContainer';
 import { deleteAdministrator, getAdministrators, getAdminAuditLog } from '../services/AdminService';
 import { usePolling, keepIfEqual } from '../hooks/usePolling';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
@@ -223,7 +224,7 @@ const AdminManagement = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: '1400px', margin: '0 auto', p: { xs: 2.5, sm: '40px 32px' }, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <PageContainer>
       <PageHeader
         title="Eliminar administrador"
         description="Busca al administrador por su documento y confírmalo antes de eliminarlo. Esta acción no se puede deshacer."
@@ -232,7 +233,7 @@ const AdminManagement = () => {
       {/* BUSCADOR */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
             Buscar administrador por documento
           </Typography>
         </Box>
@@ -290,11 +291,11 @@ const AdminManagement = () => {
       {/* LISTA DE ADMINISTRADORES */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
             Administradores
           </Typography>
           {!isLoading && !error && admins.length > 0 && (
-            <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
               {appliedFilter ? `${visibleAdmins.length} de ${admins.length}` : admins.length} registrados
             </Typography>
           )}
@@ -330,14 +331,14 @@ const AdminManagement = () => {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75, minWidth: 0 }}>
-                      <Avatar sx={{ width: 40, height: 40, bgcolor: '#F1ECE7', color: '#6B6560', fontWeight: 700, fontSize: '13px', flex: '0 0 40px' }}>
+                      <Avatar sx={{ width: 40, height: 40, bgcolor: '#F1ECE7', color: '#6B6560', fontWeight: 700, fontSize: 14, flex: '0 0 40px' }}>
                         {getInitials(user.name)}
                       </Avatar>
                       <Box sx={{ minWidth: 0 }}>
-                        <Typography sx={{ fontSize: '14.5px', fontWeight: 600, color: '#1F2421' }}>
+                        <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>
                           {user.name}
                         </Typography>
-                        <Typography sx={{ fontSize: '12.5px', color: '#6B6560' }}>
+                        <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
                           {user.identification || user.id} · {user.email}
                         </Typography>
                       </Box>
@@ -347,7 +348,7 @@ const AdminManagement = () => {
                         label={blocked ? 'Sesión activa' : 'Sin sesión'}
                         size="small"
                         sx={{
-                          fontSize: '11.5px',
+                          fontSize: 12,
                           fontWeight: 700,
                           borderRadius: '20px',
                           bgcolor: blocked ? '#FCF3E3' : '#F1ECE7',
@@ -365,7 +366,7 @@ const AdminManagement = () => {
                             py: '9px',
                             minHeight: 44,
                             fontWeight: 600,
-                            fontSize: '13.5px',
+                            fontSize: 14,
                             textTransform: 'none',
                             bgcolor: '#fff',
                             color: '#C0392B',
@@ -388,14 +389,14 @@ const AdminManagement = () => {
       {/* AUDITORÍA */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
             Auditoría de eliminaciones y creaciones
           </Typography>
         </Box>
 
         <Box>
           {auditLogs.length === 0 ? (
-            <Typography sx={{ p: '20px 24px', fontSize: '13px', color: '#6B6560', textAlign: 'center' }}>
+            <Typography sx={{ p: '20px 24px', fontSize: 14, color: '#6B6560', textAlign: 'center' }}>
               No hay registros de auditoría recientes.
             </Typography>
           ) : (
@@ -411,24 +412,24 @@ const AdminManagement = () => {
                     gap: '14px',
                   }}
                 >
-                  <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#6B6560', flex: '0 0 150px' }}>
+                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6B6560', flex: '0 0 150px' }}>
                     {log.date}
                   </Typography>
                   <Chip
                     label={log.action}
                     size="small"
                     sx={{
-                      fontSize: '11.5px',
+                      fontSize: 12,
                       fontWeight: 700,
                       borderRadius: '20px',
                       bgcolor: log.isCreation ? '#E9F3EC' : '#FCEDEA',
                       color: log.isCreation ? '#2F7D4F' : '#C0392B',
                     }}
                   />
-                  <Typography sx={{ fontSize: '13px', color: '#1F2421', flex: '1 1 200px', minWidth: 0 }}>
+                  <Typography sx={{ fontSize: 14, color: '#1F2421', flex: '1 1 200px', minWidth: 0 }}>
                     {log.details}
                   </Typography>
-                  <Typography sx={{ fontSize: '11.5px', color: '#6B6560' }}>
+                  <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
                     {log.role}
                   </Typography>
                 </Box>
@@ -465,7 +466,7 @@ const AdminManagement = () => {
           {deleteError}
         </Alert>
       </Snackbar>
-    </Box>
+    </PageContainer>
   );
 };
 

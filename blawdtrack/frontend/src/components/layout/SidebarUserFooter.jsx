@@ -78,10 +78,10 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
       >
         {avatar}
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }} noWrap>
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#fff' }} noWrap>
             {fullName}
           </Typography>
-          <Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,.7)' }} noWrap>
+          <Typography sx={{ fontSize: 12, color: 'rgba(255,255,255,.7)' }} noWrap>
             {roleLabel}
           </Typography>
         </Box>
@@ -92,7 +92,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
         startIcon={<LogoutIcon fontSize="small" />}
         sx={{
           color: 'rgba(255,255,255,.85)',
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 600,
           textTransform: 'none',
           borderRadius: '8px',

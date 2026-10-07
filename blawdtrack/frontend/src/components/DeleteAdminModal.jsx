@@ -61,7 +61,7 @@ const DeleteAdminModal = ({
         >
           <Box sx={{ width: '3px', height: '14px', bgcolor: '#C0392B', borderRadius: '2px' }} />
         </Box>
-        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '17px', color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
           Eliminar administrador
         </Typography>
       </DialogTitle>
@@ -77,20 +77,20 @@ const DeleteAdminModal = ({
             borderRadius: '12px',
           }}
         >
-          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: '#fff', fontWeight: 700, fontSize: '12.5px', flex: '0 0 38px' }}>
+          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: '#fff', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
             {getInitials(adminData.name)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: '13.5px', fontWeight: 600, color: '#1F2421' }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>
               {adminData.name}
             </Typography>
-            <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
+            <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
               {documentNumber} · {adminData.email}
             </Typography>
           </Box>
         </Box>
 
-        <Typography sx={{ fontSize: '13.5px', color: '#6B6560', lineHeight: 1.55 }}>
+        <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
           Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda
           registrada en auditoría con fecha, hora y responsable.
         </Typography>
@@ -118,7 +118,7 @@ const DeleteAdminModal = ({
             borderRadius: '10px',
             textTransform: 'none',
             fontWeight: 600,
-            fontSize: '14px',
+            fontSize: 14,
             px: 2.5,
           }}
         >
@@ -135,7 +135,7 @@ const DeleteAdminModal = ({
             fontWeight: 600,
             borderRadius: '10px',
             px: 2.5,
-            fontSize: '14px',
+            fontSize: 14,
             boxShadow: 'none',
             '&:hover': { bgcolor: '#A5301F', boxShadow: 'none' },
           }}

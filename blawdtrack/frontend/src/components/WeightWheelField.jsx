@@ -44,7 +44,7 @@ export function WeightWheelField({ label, value, onChange, error, id }) {
         }}
         sx={{
           backgroundColor: '#fff',
-          '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '0.9rem', '& fieldset': { borderColor: '#DCD4CA' } },
+          '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 14, '& fieldset': { borderColor: '#DCD4CA' } },
           '& .MuiOutlinedInput-input': { py: 1.4 }
         }}
       />

@@ -12,10 +12,13 @@ import { useAdminRegistration } from '../hooks/useAdminRegistration';
 import { validateAdminForm } from '../utils/adminFormValidation';
 import { StatusMessage } from '../components/StatusMessage';
 import PageHeader from '../components/PageHeader';
+import PageContainer from '../components/PageContainer';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 // On phones the form uses 2 columns; wide fields span both.
 const SPAN_2_SX = { gridColumn: { xs: 'span 2', md: 'auto' } };
+// Campos con texto largo (correo, contraseña): dos columnas también en escritorio.
+const SPAN_2_ALWAYS_SX = { gridColumn: 'span 2' };
 
 const INITIAL_FORM_DATA = {
   documentType: 'CEDULA',
@@ -36,10 +39,10 @@ const FIELD_ORDER = [
   'contrasenaInicial'
 ];
 
-const LABEL_SX = { fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px', color: '#6B6560', mb: 0.75, display: 'block' };
+const LABEL_SX = { fontSize: 12, fontWeight: 700, letterSpacing: '0.5px', color: '#6B6560', mb: 0.75, display: 'block' };
 const INPUT_SX = {
   backgroundColor: '#fff',
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '0.9rem', '& fieldset': { borderColor: '#DCD4CA' } },
+  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 14, '& fieldset': { borderColor: '#DCD4CA' } },
   '& .MuiOutlinedInput-input': { py: 1.4 }
 };
 
@@ -125,7 +128,7 @@ export function AdminRegistrationPage() {
   });
 
   const renderField = (name, label, extra, span2 = false) => (
-    <Box sx={span2 ? SPAN_2_SX : undefined}>
+    <Box sx={span2 === 'always' ? SPAN_2_ALWAYS_SX : span2 ? SPAN_2_SX : undefined}>
       <Typography variant="caption" component="label" htmlFor={name} sx={LABEL_SX}>
         {label}
       </Typography>
@@ -134,18 +137,14 @@ export function AdminRegistrationPage() {
   );
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#FAF8F5', py: { xs: 1.5, sm: 4 }, px: { xs: 1.5, sm: 4 } }}>
-      <Box sx={{ maxWidth: 1200, mx: 'auto', mb: 2.5 }}>
-        <PageHeader
-          title="Crear administrador"
-          description="Registra a un nuevo administrador de ventas. Todos los campos son obligatorios."
-        />
-      </Box>
+    <PageContainer>
+      <PageHeader
+        title="Crear administrador"
+        description="Registra a un nuevo administrador de ventas. Todos los campos son obligatorios."
+      />
       <Paper
         elevation={0}
         sx={{
-          maxWidth: 1200,
-          mx: 'auto',
           borderRadius: '18px',
           border: '1px solid #E4DED7',
           backgroundColor: '#fff',
@@ -168,7 +167,7 @@ export function AdminRegistrationPage() {
           >
             <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2.5px solid #1A3C34' }} />
           </Box>
-          <Typography component="h2" sx={{ fontSize: '1.06rem', fontWeight: 600, m: 0, color: '#1A3C34' }}>
+          <Typography component="h2" sx={{ fontSize: 16, fontWeight: 600, m: 0, color: '#1A3C34' }}>
             Datos del nuevo administrador
           </Typography>
         </Box>
@@ -204,9 +203,9 @@ export function AdminRegistrationPage() {
               </TextField>
             </Box>
             {renderField('documentNumber', 'NÚMERO DE DOCUMENTO', { required: true, placeholder: DOCUMENT_PLACEHOLDERS[formData.documentType] })}
-            {renderField('numeroTelefono', 'TELÉFONO', { required: true, type: 'tel', placeholder: '8888-8888' })}
-            {renderField('correoElectronico', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' }, true)}
-            {renderField('contrasenaInicial', 'CONTRASEÑA INICIAL', { required: true, type: 'password', placeholder: 'Mínimo 8 caracteres, letras y números' }, true)}
+            {renderField('numeroTelefono', 'TELÉFONO', { required: true, type: 'tel', placeholder: '8888-8888' }, true)}
+            {renderField('correoElectronico', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' }, 'always')}
+            {renderField('contrasenaInicial', 'CONTRASEÑA INICIAL', { required: true, type: 'password', placeholder: 'Mínimo 8 caracteres, letras y números' }, 'always')}
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
@@ -241,7 +240,7 @@ export function AdminRegistrationPage() {
           </Box>
         </Box>
       </Paper>
-    </Box>
+    </PageContainer>
   );
 }
 

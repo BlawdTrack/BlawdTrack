@@ -43,7 +43,7 @@ const TITLE_SX = {
   color: 'primary.main',
 };
 
-const LINK_SX = { fontSize: 12.5, fontWeight: 600, color: 'primary.main' };
+const LINK_SX = { fontSize: 12, fontWeight: 600, color: 'primary.main' };
 
 // T04 de HU-002 (#65): solicitud del enlace de restablecimiento. Es UNA
 // pantalla con dos vistas del mismo flujo (r1 y r2 del bloque `hu002` del
@@ -140,7 +140,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                   component="label"
                   htmlFor="recovery-email"
                   sx={{
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: 700,
                     letterSpacing: '0.5px',
                     textTransform: 'uppercase',
@@ -163,7 +163,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                   error={Boolean(fieldErrors.email)}
                   helperText={fieldErrors.email}
                   sx={{
-                    '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 15 },
+                    '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 16 },
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
                   }}
                 />
@@ -177,7 +177,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                sx={{ borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 15 }}
+                sx={{ borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 16 }}
               >
                 {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar enlace'}
               </Button>
@@ -217,7 +217,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
               {/* Redacción condicional a propósito: el backend no confirma si la
                   cuenta existe o está activa, así que no se afirma un envío.
                   Tampoco se menciona un tiempo de expiración concreto. */}
-              <Typography sx={{ fontSize: 13.5, color: '#6B6560', lineHeight: 1.55 }}>
+              <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
                 Si{' '}
                 <Box component="strong" sx={{ color: '#1F2421', overflowWrap: 'anywhere' }}>
                   {sentEmail}
@@ -225,7 +225,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 está registrado y activo, recibirás un enlace para restablecer tu contraseña. El
                 enlace solo puede usarse una vez.
               </Typography>
-              <Typography sx={{ fontSize: 12.5, color: '#6B6560' }}>
+              <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
                 Si no lo ves, revisa la carpeta de correo no deseado.
               </Typography>
 

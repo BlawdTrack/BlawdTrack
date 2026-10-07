@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PageHeader from '../components/PageHeader';
+import PageContainer from '../components/PageContainer';
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import RestartAltRounded from '@mui/icons-material/RestartAltRounded';
@@ -155,8 +156,7 @@ function RoleAccessManagement() {
   const canReset = user !== null && user.editable && (user.customized || hasChanges);
 
   return (
-    <main className="role-access-page">
-      <div className="role-access-shell">
+    <PageContainer component="main">
         <PageHeader
           title="Roles y permisos"
           description="Busca a un usuario y ajusta qué puede hacer dentro del sistema."
@@ -301,14 +301,13 @@ function RoleAccessManagement() {
             )}
           </section>
         )}
-      </div>
       <Toast
         open={toast.open}
         message={toast.message}
         severity={toast.severity}
         onClose={() => setToast((current) => ({ ...current, open: false }))}
       />
-    </main>
+    </PageContainer>
   );
 }
 

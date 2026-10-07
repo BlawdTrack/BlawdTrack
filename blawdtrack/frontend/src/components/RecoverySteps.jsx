@@ -72,7 +72,7 @@ export function RecoverySteps({ current }) {
               component="span"
               sx={{
                 display: { xs: isCurrent ? 'inline' : 'none', sm: 'inline' },
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: 600,
                 lineHeight: 1.3,
                 color: isCurrent ? 'primary.main' : '#6B6560',

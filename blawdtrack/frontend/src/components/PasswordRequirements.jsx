@@ -28,7 +28,7 @@ function Rule({ label, state, note }) {
   return (
     <Box
       component="li"
-      sx={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: 12.5, lineHeight: 1.35, color }}
+      sx={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: 12, lineHeight: 1.35, color }}
     >
       <Box
         component="span"
@@ -45,7 +45,7 @@ function Rule({ label, state, note }) {
       <span>
         {label}
         {note && (
-          <Box component="span" sx={{ ml: 0.75, fontSize: 11.5, color: NEUTRAL_TEXT }}>
+          <Box component="span" sx={{ ml: 0.75, fontSize: 12, color: NEUTRAL_TEXT }}>
             ({note})
           </Box>
         )}
@@ -77,7 +77,7 @@ export function PasswordRequirements({ password, historyRejected = false }) {
     >
       <Typography
         id="password-requirements-title"
-        sx={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: '#6B6560' }}
+        sx={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: '#6B6560' }}
       >
         Requisitos
       </Typography>

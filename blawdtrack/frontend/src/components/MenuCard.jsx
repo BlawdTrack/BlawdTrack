@@ -57,7 +57,7 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
           {title}
         </Typography>
         {description && (
-          <Typography sx={{ fontSize: 13.5, color: 'text.secondary', mt: 0.25, lineHeight: 1.45 }}>{description}</Typography>
+          <Typography sx={{ fontSize: 14, color: 'text.secondary', mt: 0.25, lineHeight: 1.45 }}>{description}</Typography>
         )}
         {!to && (
           <Typography sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary', mt: 0.75 }}>Próximamente</Typography>

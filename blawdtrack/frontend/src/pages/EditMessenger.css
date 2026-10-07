@@ -1,18 +1,5 @@
 /* EditMessenger.css - Estilos complementarios para la vista Editar Mensajero */
 
-.edit-messenger-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-@media (max-width: 768px) {
-  .edit-messenger-container {
-    padding: 12px;
-    max-width: 100%;
-  }
-}
-
 .edit-messenger-title {
   color: #1A3C34;
   font-weight: 700;
@@ -47,5 +34,5 @@
   color: #6B6560;
   font-weight: 700;
   letter-spacing: 0.5px;
-  font-size: 10px;
+  font-size: 12px;
 }

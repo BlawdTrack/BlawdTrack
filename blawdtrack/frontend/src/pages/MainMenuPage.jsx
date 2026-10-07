@@ -6,6 +6,7 @@ import { ROLE_LABELS } from '../config/roles';
 import { getNavigationForRole } from '../config/navigation';
 import { NAV_GROUP_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
+import PageContainer from '../components/PageContainer';
 import { getGreeting } from '../utils/greeting';
 
 /**
@@ -23,7 +24,7 @@ export default function MainMenuPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1040, mx: 'auto', p: { xs: 2.5, md: 5 }, display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <PageContainer>
       <Box
         sx={{
           bgcolor: 'primary.main',
@@ -31,17 +32,17 @@ export default function MainMenuPage() {
           borderRadius: '16px',
           borderLeft: '6px solid',
           borderColor: 'secondary.main',
-          p: { xs: 3, md: 5 },
+          p: { xs: 3, md: 4 },
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
           gap: 1,
         }}
       >
-        <Typography sx={{ fontSize: 15, color: 'rgba(255,255,255,0.75)' }}>Bienvenid@ al sistema</Typography>
+        <Typography sx={{ fontSize: 16, color: 'rgba(255,255,255,0.75)' }}>Bienvenid@ al sistema</Typography>
         <Typography
           component="h1"
-          sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: { xs: 34, md: 44 }, letterSpacing: '-0.5px' }}
+          sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: { xs: 28, md: 36 }, letterSpacing: '-0.5px' }}
         >
           BlawdTrack
         </Typography>
@@ -57,7 +58,7 @@ export default function MainMenuPage() {
           <Typography id="quick-access-title" variant="h5" component="h2" sx={{ color: 'primary.main' }}>
             {getGreeting()}
           </Typography>
-          <Typography sx={{ fontSize: 15, color: 'text.secondary', mt: 0.5, mb: 2.5 }}>
+          <Typography sx={{ fontSize: 16, color: 'text.secondary', mt: 0.5, mb: 2.5 }}>
             ¿Qué deseas hacer hoy?
           </Typography>
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
@@ -80,6 +81,6 @@ export default function MainMenuPage() {
       >
         Cerrar sesión
       </Button>
-    </Box>
+    </PageContainer>
   );
 }

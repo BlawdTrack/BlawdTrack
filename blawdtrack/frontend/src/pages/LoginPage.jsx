@@ -226,7 +226,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               type="button"
               onClick={() => onForgotPassword?.()}
               underline="hover"
-              sx={{ alignSelf: 'flex-end', color: 'primary.main', fontWeight: 600, fontSize: 13, mt: 0.5 }}
+              sx={{ alignSelf: 'flex-end', color: 'primary.main', fontWeight: 600, fontSize: 14, mt: 0.5 }}
             >
               ¿Olvidaste tu contraseña?
             </Link>
@@ -238,7 +238,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             variant="contained"
             size="large"
             disabled={loading}
-            sx={{ fontWeight: 'bold', fontSize: 15, minHeight: 48, display: 'flex', gap: '10px' }}
+            sx={{ fontWeight: 'bold', fontSize: 16, minHeight: 48, display: 'flex', gap: '10px' }}
           >
             {loading ? (
               <CircularProgress size={22} sx={{ color: 'inherit' }} />

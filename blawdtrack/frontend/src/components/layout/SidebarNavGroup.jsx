@@ -76,7 +76,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
             <ClickAwayListener onClickAway={(event) => !anchorEl?.contains(event.target) && close()}>
               <Paper elevation={8} sx={{ minWidth: 220, borderRadius: '12px', border: '1px solid #E4DED7', py: 0.5 }}>
                 <Typography
-                  sx={{ px: 2, py: 0.75, fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'text.secondary' }}
+                  sx={{ px: 2, py: 0.75, fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'text.secondary' }}
                 >
                   {group.title}
                 </Typography>
@@ -140,7 +140,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           background: 'transparent',
           cursor: 'pointer',
           fontFamily: 'inherit',
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: 700,
           letterSpacing: 1,
           textTransform: 'uppercase',

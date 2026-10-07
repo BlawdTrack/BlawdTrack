@@ -68,7 +68,7 @@ export const DeactivateMessengerModal = ({
         >
           <Box sx={{ width: '3px', height: '14px', bgcolor: '#C0392B', borderRadius: '2px' }} />
         </Box>
-        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '17px', color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
           Desactivar mensajero
         </Typography>
       </DialogTitle>
@@ -84,20 +84,20 @@ export const DeactivateMessengerModal = ({
             borderRadius: '12px',
           }}
         >
-          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: '#fff', fontWeight: 700, fontSize: '12.5px', flex: '0 0 38px' }}>
+          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: '#fff', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
             {getInitials(courier.fullName)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: '13.5px', fontWeight: 600, color: '#1F2421' }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>
               {courier.fullName}
             </Typography>
-            <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
+            <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
               {courier.documentNumber} · {courier.schedule}
             </Typography>
           </Box>
         </Box>
 
-        <Typography sx={{ fontSize: '13.5px', color: '#6B6560', lineHeight: 1.55 }}>
+        <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
           El mensajero perderá el acceso de inmediato y no recibirá nuevas
           asignaciones. Su historial de entregas se conserva.
         </Typography>
@@ -122,7 +122,7 @@ export const DeactivateMessengerModal = ({
             borderRadius: '10px',
             textTransform: 'none',
             fontWeight: 600,
-            fontSize: '14px',
+            fontSize: 14,
             px: 2.5,
           }}
         >
@@ -139,7 +139,7 @@ export const DeactivateMessengerModal = ({
             fontWeight: 600,
             borderRadius: '10px',
             px: 2.5,
-            fontSize: '14px',
+            fontSize: 14,
             boxShadow: 'none',
             '&:hover': { bgcolor: '#A5301F', boxShadow: 'none' },
           }}

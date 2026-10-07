@@ -38,11 +38,11 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
       </Box>
       {!collapsed && (
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={{ fontWeight: 600, fontSize: 15.5, color: '#fff', lineHeight: 1.25, letterSpacing: '.2px' }}>
+          <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#fff', lineHeight: 1.25, letterSpacing: '.2px' }}>
             BlawdTrack
           </Typography>
           <Typography
-            sx={{ fontSize: 10, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}
+            sx={{ fontSize: 12, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}
           >
             Blawd Gourmet
           </Typography>

@@ -28,6 +28,7 @@ import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
 import Toast from '../components/Toast';
 import PageHeader from '../components/PageHeader';
+import PageContainer from '../components/PageContainer';
 import StatusMessage from '../components/StatusMessage';
 import './EditMessenger.css';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
@@ -64,12 +65,12 @@ const LABEL_SX = {
   mb: '6px',
   display: 'block',
   textTransform: 'uppercase',
-  fontSize: '11.5px',
+  fontSize: 12,
   letterSpacing: '.5px',
 };
 const INPUT_SX = {
   bgcolor: '#fff',
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '14.5px', '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } },
+  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 14, '& fieldset': { borderColor: '#DCD4CA', borderWidth: '1.5px' } },
 };
 
 /**
@@ -465,7 +466,7 @@ export function EditMessenger({ initialCedula = '' }) {
   const isActive = formData.status === 'ACTIVE';
 
   return (
-    <Box className="edit-messenger-container" sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <PageContainer>
       <PageHeader
         title="Actualizar mensajero"
         description="Busca al mensajero por su documento, corrige sus datos y guarda los cambios."
@@ -474,7 +475,7 @@ export function EditMessenger({ initialCedula = '' }) {
       {/* BUSCADOR */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={CARD_HEADER_SX}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
             Buscar mensajero por documento
           </Typography>
         </Box>
@@ -530,10 +531,10 @@ export function EditMessenger({ initialCedula = '' }) {
       {/* Flota de Mensajeros */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={{ p: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5 }}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
             Flota de mensajeros
           </Typography>
-          <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
+          <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
             Selecciona un mensajero para editar sus datos
           </Typography>
         </Box>
@@ -548,7 +549,7 @@ export function EditMessenger({ initialCedula = '' }) {
                   ['Carga', '13%'],
                   ['Estado', '13%'],
                 ].map(([h, w]) => (
-                  <TableCell key={h} sx={{ width: w, fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '.9px', border: 0, whiteSpace: 'nowrap' }}>
+                  <TableCell key={h} sx={{ width: w, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: '#6B6560', letterSpacing: '.9px', border: 0, whiteSpace: 'nowrap' }}>
                     {h}
                   </TableCell>
                 ))}
@@ -566,21 +567,21 @@ export function EditMessenger({ initialCedula = '' }) {
                   >
                     <TableCell sx={{ width: '26%', px: 3, py: '14px' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                        <Avatar sx={{ width: 30, height: 30, flex: '0 0 30px', bgcolor: isSelected ? 'primary.main' : '#F1ECE7', color: isSelected ? '#fff' : '#6B6560', fontWeight: 700, fontSize: '11.5px' }}>
+                        <Avatar sx={{ width: 30, height: 30, flex: '0 0 30px', bgcolor: isSelected ? 'primary.main' : '#F1ECE7', color: isSelected ? '#fff' : '#6B6560', fontWeight: 700, fontSize: 12 }}>
                           {getInitials(courier.fullName || courier.nombre)}
                         </Avatar>
-                        <Typography sx={{ fontWeight: 600, color: '#1F2421', fontSize: '13.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Typography sx={{ fontWeight: 600, color: '#1F2421', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {courier.fullName || courier.nombre}
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ width: '18%', px: 3, py: '14px', fontSize: '13px', color: '#6B6560', whiteSpace: 'nowrap' }}>
+                    <TableCell sx={{ width: '18%', px: 3, py: '14px', fontSize: 14, color: '#6B6560', whiteSpace: 'nowrap' }}>
                       {courier.documentNumber || courier.idCard || courier.cedula || courier.id || ''}
                     </TableCell>
-                    <TableCell sx={{ width: '30%', px: 3, py: '14px', fontSize: '13px', color: '#6B6560' }}>
+                    <TableCell sx={{ width: '30%', px: 3, py: '14px', fontSize: 14, color: '#6B6560' }}>
                       {getScheduleTimeRange(courier.schedule || courier.horario)}
                     </TableCell>
-                    <TableCell sx={{ width: '13%', px: 3, py: '14px', fontSize: '13px', color: '#6B6560', whiteSpace: 'nowrap' }}>
+                    <TableCell sx={{ width: '13%', px: 3, py: '14px', fontSize: 14, color: '#6B6560', whiteSpace: 'nowrap' }}>
                       {courier.maxPackageWeightKg ?? courier.maxLoadCapacityKg ?? courier.cap ?? courier.capacidad ?? ''} kg
                     </TableCell>
                     <TableCell sx={{ width: '13%', px: 3, py: '14px' }}>
@@ -588,7 +589,7 @@ export function EditMessenger({ initialCedula = '' }) {
                         label={isCourierActive(courier) ? 'Activo' : 'Inactivo'}
                         size="small"
                         sx={{
-                          fontSize: '11.5px',
+                          fontSize: 12,
                           fontWeight: 700,
                           borderRadius: '20px',
                           bgcolor: isCourierActive(courier) ? '#E9F3EC' : '#F1ECE7',
@@ -622,10 +623,10 @@ export function EditMessenger({ initialCedula = '' }) {
       {currentCourier ? (
         <Paper elevation={0} sx={{ ...CARD_SX, p: { xs: 2.5, sm: '26px 28px' } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5, mb: '20px' }}>
-            <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '16px', color: 'primary.main' }}>
+            <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
               Editar · {currentCourier.fullName || currentCourier.nombre}
             </Typography>
-            <Typography sx={{ fontSize: '12px', color: '#6B6560' }}>
+            <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
               Cédula {currentCourier.documentNumber || currentCourier.idCard || currentCourier.cedula || currentCourier.id} · no editable
             </Typography>
           </Box>
@@ -752,16 +753,16 @@ export function EditMessenger({ initialCedula = '' }) {
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
-                <Typography sx={{ fontSize: '13.5px', fontWeight: 600, color: '#1F2421' }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>
                   Estado de acceso
                 </Typography>
-                <Typography sx={{ fontSize: '12px', color: '#6B6560', lineHeight: 1.4 }}>
+                <Typography sx={{ fontSize: 12, color: '#6B6560', lineHeight: 1.4 }}>
                   {isActive
                     ? 'Habilitado. Al revocarlo, la sesión activa se cierra de inmediato.'
                     : 'Revocado. El mensajero no puede iniciar sesión.'}
                 </Typography>
                 {isStatusDisabled && (
-                  <Typography sx={{ fontSize: '11px', color: '#C0392B', fontWeight: 600 }}>
+                  <Typography sx={{ fontSize: 12, color: '#C0392B', fontWeight: 600 }}>
                     Solo puedes cambiar el estado fuera de labores y sin envíos en proceso.
                   </Typography>
                 )}
@@ -804,7 +805,7 @@ export function EditMessenger({ initialCedula = '' }) {
                   fontWeight: 600,
                   px: '22px',
                   py: '14px',
-                  fontSize: '14.5px',
+                  fontSize: 14,
                   borderRadius: '10px',
                   '&:hover': { bgcolor: '#12322B' },
                 }}
@@ -822,7 +823,7 @@ export function EditMessenger({ initialCedula = '' }) {
                   fontWeight: 600,
                   px: '20px',
                   py: '14px',
-                  fontSize: '14.5px',
+                  fontSize: 14,
                   borderRadius: '10px',
                 }}
               >
@@ -833,7 +834,7 @@ export function EditMessenger({ initialCedula = '' }) {
         </Paper>
       ) : (
         <Paper elevation={0} sx={{ ...CARD_SX, p: 4, textAlign: 'center' }}>
-          <Typography sx={{ color: '#6B6560', fontSize: '14px' }}>
+          <Typography sx={{ color: '#6B6560', fontSize: 14 }}>
             Selecciona un mensajero de la flota arriba para editar sus datos.
           </Typography>
         </Paper>
@@ -842,13 +843,13 @@ export function EditMessenger({ initialCedula = '' }) {
       {/* Historial de Modificaciones (Log) */}
       <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
         <Box sx={{ p: '16px 24px', borderBottom: '1px solid #E4DED7', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: '15px', color: 'primary.main' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
             Historial de modificaciones
           </Typography>
           <Chip
             label={`${changeLog.length} registros`}
             size="small"
-            sx={{ fontSize: '11px', fontWeight: 600, bgcolor: '#F1ECE7', color: '#6B6560', borderRadius: '20px' }}
+            sx={{ fontSize: 12, fontWeight: 600, bgcolor: '#F1ECE7', color: '#6B6560', borderRadius: '20px' }}
           />
         </Box>
         <Box>
@@ -857,19 +858,19 @@ export function EditMessenger({ initialCedula = '' }) {
               key={log.id}
               sx={{ p: '14px 24px', borderTop: '1px solid #EFEAE4', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'baseline' }}
             >
-              <Typography sx={{ fontSize: '11.5px', fontWeight: 600, color: '#6B6560', flex: '0 0 150px' }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6B6560', flex: '0 0 150px' }}>
                 {log.when}
               </Typography>
-              <Typography sx={{ fontSize: '13px', color: '#1F2421', flex: '1 1 200px', minWidth: 0, lineHeight: 1.45 }}>
+              <Typography sx={{ fontSize: 14, color: '#1F2421', flex: '1 1 200px', minWidth: 0, lineHeight: 1.45 }}>
                 {log.text}
               </Typography>
-              <Typography sx={{ fontSize: '11.5px', color: '#6B6560' }}>
+              <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
                 {log.by}
               </Typography>
             </Box>
           ))}
           {changeLog.length === 0 && (
-            <Typography sx={{ p: '14px 24px', fontSize: '13px', color: '#6B6560' }}>
+            <Typography sx={{ p: '14px 24px', fontSize: 14, color: '#6B6560' }}>
               Todavía no hay cambios registrados para esta pantalla.
             </Typography>
           )}
@@ -883,7 +884,7 @@ export function EditMessenger({ initialCedula = '' }) {
         severity={toast.severity}
         onClose={() => setToast((prev) => ({ ...prev, open: false }))}
       />
-    </Box>
+    </PageContainer>
   );
 }
 

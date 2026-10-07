@@ -52,7 +52,7 @@ export default function MobileBottomNav({ groups }) {
             {Icon && (
               <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? '#FF6C0E' : '#6B6560' }} />
             )}
-            <Typography sx={{ fontSize: 10.5, fontWeight: 700, color: active ? '#FF6C0E' : '#6B6560' }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: active ? '#FF6C0E' : '#6B6560' }}>
               {group.shortTitle}
             </Typography>
           </ButtonBase>
