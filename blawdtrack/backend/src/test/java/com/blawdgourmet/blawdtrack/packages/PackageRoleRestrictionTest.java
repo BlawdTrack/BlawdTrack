@@ -1,21 +1,32 @@
 package com.blawdgourmet.blawdtrack.packages;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.packages.controller.PackageDeletionController;
+import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
+import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
+import com.blawdgourmet.blawdtrack.packages.service.PackageNotFoundException;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
@@ -39,6 +50,8 @@ class PackageRoleRestrictionTest {
     @Autowired private JwtService jwt;
     @Autowired private UserRepository users;
     @Autowired private RoleRepository roles;
+    @Autowired private DeliveryPackageRepository packages;
+    @Autowired private PackageDeletionController controller;
 
     private final AtomicInteger documentNumberSequence = new AtomicInteger(1);
 
@@ -69,14 +82,59 @@ class PackageRoleRestrictionTest {
     }
 
     @Test
-    void administradorDeVentasSuperaLaRestriccionDeRol() throws Exception {
-        int httpStatus = mvc.perform(
-                        delete(DELETE_URL).header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
-                .andReturn().getResponse().getStatus();
+    void administradorDeVentasEliminaElPaquete() throws Exception {
+        packages.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-0001").build());
 
-        // Aun no existe el endpoint (T01): lo unico que se verifica aqui es que la restriccion
-        // de rol no lo bloquea. Cuando T01 este integrado, este caso debe afirmar 200/404/409.
-        assertThat(httpStatus).isNotIn(401, 403);
+        mvc.perform(delete(DELETE_URL).header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Paquete eliminado correctamente."));
+
+        assertThat(packages.findByShipmentNumber("ENV-0001")).isEmpty();
+    }
+
+    @Test
+    void mensajeroNoEliminaElPaqueteExistente() throws Exception {
+        packages.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-0001").build());
+
+        mvc.perform(delete(DELETE_URL).header("Authorization", "Bearer " + token(RoleName.COURIER)))
+                .andExpect(status().isForbidden());
+
+        assertThat(packages.findByShipmentNumber("ENV-0001")).isPresent();
+    }
+
+    // Las pruebas siguientes invocan el controller directamente para verificar el @PreAuthorize
+    // por si solo: con MockMvc la regla de URL de SecurityConfig responde antes y lo taparia.
+
+    @Test
+    void preAuthorizeRechazaAlMensajero() {
+        autenticarComo(RoleName.COURIER);
+        assertThatThrownBy(() -> controller.deletePackage("ENV-0001", null))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void preAuthorizeRechazaAlSuperUsuario() {
+        autenticarComo(RoleName.SUPER_USER);
+        assertThatThrownBy(() -> controller.deletePackage("ENV-0001", null))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void preAuthorizePermiteAlAdministradorDeVentas() {
+        autenticarComo(RoleName.SALES_ADMIN);
+        // Supera el guard y llega al servicio, que no encuentra el paquete.
+        assertThatThrownBy(() -> controller.deletePackage("ENV-NO-EXISTE", null))
+                .isInstanceOf(PackageNotFoundException.class);
+    }
+
+    @AfterEach
+    void limpiarContextoDeSeguridad() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private static void autenticarComo(String rol) {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                "actor-de-prueba", "n/a", List.of(new SimpleGrantedAuthority("ROLE_" + rol))));
     }
 
     private String token(String rol) {
