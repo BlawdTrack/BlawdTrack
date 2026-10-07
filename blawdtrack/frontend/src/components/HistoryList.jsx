@@ -12,19 +12,21 @@ function CourierHistoryRow({ entry }) {
   );
 }
 
-// En el historial general cada cambio indica de qué mensajero es; el diseño no depende del ancho del panel.
+// En el historial general cada cambio indica de qué mensajero es. La fecha va a la derecha sin saltar de
+// línea y el nombre se recorta si no cabe, así el diseño no depende del ancho del panel.
 function GeneralHistoryRow({ entry }) {
   return (
     <Box sx={{ px: 3, py: 1.75, borderTop: '1px solid #EFEAE4' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2, flexWrap: 'wrap' }}>
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0, flexWrap: 'wrap' }}>
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>{entry.courierName}</Typography>
-          <Typography component="span" sx={{ fontSize: 12, color: '#6B6560' }}>{entry.courierDocument}</Typography>
-        </Box>
-        <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6B6560' }}>{entry.when}</Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'baseline', gap: 2 }}>
+        <Typography noWrap sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>{entry.courierName}</Typography>
+        <Typography noWrap sx={{ fontSize: 12, fontWeight: 600, color: '#6B6560' }}>{entry.when}</Typography>
       </Box>
       <Typography sx={{ fontSize: 14, color: '#1F2421', mt: 0.5, lineHeight: 1.45 }}>{entry.text}</Typography>
-      <Typography sx={{ fontSize: 12, color: '#6B6560', mt: 0.25 }}>Por {entry.by}</Typography>
+      <Typography sx={{ fontSize: 12, color: '#6B6560', mt: 0.25 }}>
+        <span>{entry.courierDocument}</span>
+        {' · '}
+        <span>Por {entry.by}</span>
+      </Typography>
     </Box>
   );
 }

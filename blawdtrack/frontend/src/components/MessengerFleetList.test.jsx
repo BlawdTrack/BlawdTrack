@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MessengerFleetList } from './MessengerFleetList';
 import * as CourierService from '../services/CourierService';
 
+const { logoutMock } = vi.hoisted(() => ({ logoutMock: vi.fn() }));
+
 vi.mock('../hooks/useAuth', () => ({
-  useAuth: () => ({ user: { fullName: 'Súper Usuario' }, logout: vi.fn() }),
+  useAuth: () => ({ user: { fullName: 'Súper Usuario' }, logout: logoutMock }),
 }));
 
 vi.mock('../services/CourierService', () => ({
@@ -61,7 +64,8 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
 
     await waitFor(() => expect(CourierService.deactivateCourier).toHaveBeenCalledWith(7));
     expect(await screen.findByText('Inactivo', { selector: 'button' })).toBeTruthy();
-    expect(await screen.findByText(/Mensajero María Solano · 123456789/)).toBeTruthy();
+    expect(await screen.findByText('Por Súper Usuario')).toBeTruthy();
+    expect(screen.getByText('Estado de acceso: Inactivo (sesión cerrada inmediatamente)')).toBeTruthy();
     expect(CourierService.getCourierDeactivations).toHaveBeenCalledTimes(2);
   });
 
@@ -70,8 +74,8 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     CourierService.getCourierDeactivations.mockResolvedValue([DEACTIVATION]);
     render(<MessengerFleetList />);
 
-    expect(await screen.findByText(/Mensajero María Solano · 123456789/)).toBeTruthy();
-    expect(screen.getByText('Desactivación')).toBeTruthy();
+    expect(await screen.findByText('Por Súper Usuario')).toBeTruthy();
+    expect(screen.getByText('1 registro')).toBeTruthy();
     expect(await screen.findByRole('button', { name: 'Desactivar' })).toBeTruthy();
   });
 
@@ -82,7 +86,8 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     ]);
     render(<MessengerFleetList />);
 
-    await waitFor(() => expect(screen.getAllByText('Desactivación')).toHaveLength(2));
+    await waitFor(() => expect(screen.getAllByText('Por Súper Usuario')).toHaveLength(2));
+    expect(screen.getByText('2 registros')).toBeTruthy();
   });
 
   it('si el backend responde 409 muestra el motivo y no marca al mensajero como inactivo', async () => {
@@ -98,5 +103,62 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     // Solo la carga inicial: una desactivación rechazada no vuelve a consultar la auditoría.
     expect(CourierService.getCourierDeactivations).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Inactivo', { selector: 'button' })).toBeNull();
+  });
+
+  it('muestra el motivo si no se puede cargar la flota', async () => {
+    CourierService.listCouriers.mockRejectedValue({ response: { status: 500, data: { message: 'Fallo del servidor' } } });
+    render(<MessengerFleetList />);
+
+    expect(await screen.findByText('Fallo del servidor')).toBeTruthy();
+    expect(logoutMock).not.toHaveBeenCalled();
+  });
+
+  it('cierra la sesión si al cargar la flota el backend responde 401', async () => {
+    CourierService.listCouriers.mockRejectedValue({ response: { status: 401, data: {} } });
+    render(<MessengerFleetList />);
+
+    await waitFor(() => expect(logoutMock).toHaveBeenCalledTimes(1));
+  });
+
+  it('filtra la flota por documento y avisa cuando ninguno coincide', async () => {
+    CourierService.listCouriers.mockResolvedValue([
+      COURIER,
+      { ...COURIER, id: 8, documentNumber: '987654321', fullName: 'Pedro Mora' },
+    ]);
+    const user = userEvent.setup();
+    render(<MessengerFleetList />);
+    await screen.findByText('Pedro Mora');
+
+    await user.type(screen.getByRole('textbox', { name: 'Número de documento' }), '9876');
+    await user.click(screen.getByRole('button', { name: 'Buscar' }));
+    expect(screen.queryByText('María Solano', { selector: 'p' })).toBeNull();
+    expect(screen.getByText('Pedro Mora')).toBeTruthy();
+
+    await user.clear(screen.getByRole('textbox', { name: 'Número de documento' }));
+    await user.type(screen.getByRole('textbox', { name: 'Número de documento' }), '000');
+    await user.click(screen.getByRole('button', { name: 'Buscar' }));
+    expect(await screen.findByText('No se encontró ningún mensajero con ese documento.')).toBeTruthy();
+  });
+
+  it('deja a un mensajero ya inactivo sin botón para desactivarlo', async () => {
+    CourierService.listCouriers.mockResolvedValue([{ ...COURIER, status: 'INACTIVE' }]);
+    render(<MessengerFleetList />);
+
+    const button = await screen.findByText('Inactivo', { selector: 'button' });
+    expect(button).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Desactivar' })).toBeNull();
+  });
+
+  it('muestra un aviso al desactivar con éxito y se puede cerrar con la X', async () => {
+    CourierService.deactivateCourier.mockResolvedValue({ ...COURIER, status: 'INACTIVE' });
+    const user = userEvent.setup();
+    render(<MessengerFleetList />);
+
+    await user.click(await screen.findByRole('button', { name: 'Desactivar' }));
+    await user.click(await screen.findByRole('button', { name: 'Sí, desactivar' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Mensajero desactivado correctamente.');
+    await user.click(screen.getByRole('button', { name: 'Cerrar aviso' }));
+    await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
   });
 });

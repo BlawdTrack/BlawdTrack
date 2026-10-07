@@ -19,7 +19,7 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
       value={search.documentType}
       onChange={(event) => search.setDocumentType(event.target.value)}
       slotProps={{ htmlInput: { 'aria-label': 'Tipo de documento' } }}
-      sx={{ flex: stacked ? '0 0 120px' : '0 0 150px', minWidth: stacked ? 0 : 130, ...INPUT_SX }}
+      sx={{ flex: stacked ? '0 0 120px' : { xs: '1 1 100%', sm: '0 0 150px' }, minWidth: stacked ? 0 : { sm: 130 }, ...INPUT_SX }}
     >
       {DOCUMENT_TYPE_OPTIONS.map((option) => (
         <MenuItem key={option.value} value={option.value}>
@@ -37,7 +37,7 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
       onKeyDown={(event) => event.key === 'Enter' && search.search()}
       placeholder={DOCUMENT_PLACEHOLDERS[search.documentType]}
       slotProps={{ htmlInput: { 'aria-label': 'Número de documento' } }}
-      sx={{ flex: '1 1 auto', minWidth: 0, ...INPUT_SX }}
+      sx={{ flex: stacked ? '1 1 auto' : { xs: '1 1 100%', sm: '1 1 auto' }, minWidth: 0, ...INPUT_SX }}
     />
   );
 
@@ -47,7 +47,7 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
       disableElevation
       onClick={search.search}
       startIcon={stacked ? <SearchIcon /> : undefined}
-      sx={{ flex: stacked ? 1 : '0 0 auto', px: stacked ? undefined : 3.5, minHeight: stacked ? 44 : 52, fontWeight: 600, borderRadius: '10px' }}
+      sx={{ flex: stacked ? 1 : { xs: '1 1 100%', sm: '0 0 auto' }, px: stacked ? undefined : 3.5, minHeight: stacked ? 44 : 52, fontWeight: 600, borderRadius: '10px' }}
     >
       Buscar
     </Button>
