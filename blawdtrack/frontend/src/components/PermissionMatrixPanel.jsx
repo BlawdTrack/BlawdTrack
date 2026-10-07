@@ -2,6 +2,7 @@ import { Alert, Avatar, Box, Button, CircularProgress, Paper, Switch, Typography
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import RestartAltRounded from '@mui/icons-material/RestartAltRounded';
 import SaveOutlined from '@mui/icons-material/SaveOutlined';
+import HelpTip from './HelpTip';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/roleAccess';
 
@@ -56,7 +57,10 @@ export default function PermissionMatrixPanel({
           <>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.5 }}>
               <Typography component="h3" sx={{ fontWeight: 700, fontSize: 16 }}>{roleGroup.name}</Typography>
-              <Typography sx={{ fontSize: 14, color: '#6B6560' }}>{roleGroup.permissions.length} permisos · solo se pueden modificar los de su rol</Typography>
+              <Typography sx={{ fontSize: 14, color: '#6B6560' }}>{roleGroup.permissions.length} permisos</Typography>
+              <HelpTip label="¿Qué permisos se pueden modificar?">
+                Solo se pueden modificar los permisos que corresponden al rol del usuario.
+              </HelpTip>
               {!user.editable && (
                 <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: '#6B6560', fontSize: 14 }}>
                   <LockOutlined fontSize="small" aria-hidden="true" />

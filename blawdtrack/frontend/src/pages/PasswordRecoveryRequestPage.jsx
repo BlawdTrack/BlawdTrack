@@ -10,6 +10,7 @@ import {
 import { requestPasswordReset } from '../services/PasswordRecoveryService';
 import { Toast } from '../components/Toast';
 import { RecoverySteps } from '../components/RecoverySteps';
+import HelpTip from '../components/HelpTip';
 import AuthCardLayout from '../components/AuthCardLayout';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 
@@ -136,6 +137,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
               </Typography>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography
                   component="label"
                   htmlFor="recovery-email"
@@ -149,6 +151,10 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 >
                   Correo electrónico registrado
                 </Typography>
+                <HelpTip label="¿Qué se valida al enviar el enlace?" sx={{ width: 32, height: 32, my: '-6px' }}>
+                  Validamos que la cuenta exista y esté activa antes de enviar el correo.
+                </HelpTip>
+                </Box>
                 <TextField
                   id="recovery-email"
                   fullWidth
@@ -167,9 +173,6 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
                   }}
                 />
-                <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
-                  Validamos que la cuenta exista y esté activa antes de enviar el correo.
-                </Typography>
               </Box>
 
               <Button
@@ -225,9 +228,10 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 está registrado y activo, recibirás un enlace para restablecer tu contraseña. El
                 enlace solo puede usarse una vez.
               </Typography>
-              <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
-                Si no lo ves, revisa la carpeta de correo no deseado.
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography sx={{ fontSize: 14, color: '#6B6560' }}>¿No te llega el correo?</Typography>
+                <HelpTip label="¿Cuánto tarda en llegar el correo?">El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado.</HelpTip>
+              </Box>
 
               <Link
                 component="button"

@@ -1,6 +1,5 @@
-import { IconButton, Tooltip, Typography } from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AccountRow from './AccountRow';
+import HelpTip from './HelpTip';
 import HistoryButton from './HistoryButton';
 import SearchableListPanel from './SearchableListPanel';
 import StatusChip from './StatusChip';
@@ -11,7 +10,7 @@ import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN, DEACTIVATION_REACTIVATE 
 // reales que todavía no existen.
 const DUTY_PLACEHOLDER = 'Fuera de labores · Sin envíos en proceso';
 
-const RULE_HELP = `${DEACTIVATION_CONDITION} Tras desactivarlo no recibe nuevas asignaciones. ${DEACTIVATION_REASSIGN} ${DEACTIVATION_REACTIVATE}`;
+const RULE_HELP = `${DEACTIVATION_CONDITION} Tras desactivarlo no recibe nuevas asignaciones. ${DEACTIVATION_REASSIGN} ${DEACTIVATION_REACTIVATE} El historial de entregas se conserva siempre.`;
 
 /**
  * Panel de la flota para desactivar mensajeros (HU-005): búsqueda por documento y lista con el botón
@@ -30,19 +29,8 @@ export default function CourierDeactivationList({ couriers, totalCount, loading,
       search={search}
       listTitle="Mensajeros · desactivación de acceso"
       titleExtra={(
-        <Tooltip
-          arrow
-          enterTouchDelay={0}
-          leaveTouchDelay={8000}
-          title={RULE_HELP}
-          slotProps={{ tooltip: { sx: { fontSize: 14, lineHeight: 1.5, maxWidth: 340, p: 1.5 } } }}
-        >
-          <IconButton aria-label="¿Cuándo se puede desactivar a un mensajero?" sx={{ width: 44, height: 44, my: '-10px', color: '#6B6560' }}>
-            <InfoOutlinedIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <HelpTip label="¿Cuándo se puede desactivar a un mensajero?">{RULE_HELP}</HelpTip>
       )}
-      meta={<Typography sx={{ fontSize: 12, color: '#6B6560' }}>El historial de entregas se conserva siempre</Typography>}
       items={couriers}
       totalCount={totalCount}
       loading={loading}

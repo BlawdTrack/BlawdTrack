@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
 import PageContainer from '../components/PageContainer';
+import HelpTip from '../components/HelpTip';
 import PageHeaderBar from '../components/PageHeaderBar';
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
@@ -44,7 +45,7 @@ export function OwnPasswordResetPage() {
     <>
       <PageHeaderBar
         title="Restablecer contraseña"
-        description="Te enviaremos un enlace para elegir una contraseña nueva al correo de tu cuenta. El enlace vence en 15 minutos."
+        description="Te enviaremos un enlace al correo de tu cuenta para elegir una contraseña nueva."
       />
 
       <PageContainer>
@@ -81,6 +82,7 @@ export function OwnPasswordResetPage() {
           </Box>
         )}
 
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Button
           variant="contained"
           onClick={handleSend}
@@ -89,6 +91,10 @@ export function OwnPasswordResetPage() {
         >
           {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
         </Button>
+        <HelpTip label="¿Cuánto tarda en llegar el correo?">
+          El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado. El enlace vence en 15 minutos.
+        </HelpTip>
+        </Box>
       </Paper>
       </PageContainer>
     </>
