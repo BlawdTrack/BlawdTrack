@@ -38,6 +38,17 @@ describe('MainMenuPage', () => {
     expect(screen.getByText('login screen')).toBeInTheDocument();
   });
 
+  it('greets according to the time of day and asks what to do', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    expect(screen.getByRole('heading', { level: 2, name: /^(Buenos días|Buenas tardes|Buenas noches)$/ })).toBeInTheDocument();
+    expect(screen.getByText('¿Qué deseas hacer hoy?')).toBeInTheDocument();
+  });
+
+  it('does not show how many functions each module has', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    expect(screen.queryByText(/\d+ funciones?/)).not.toBeInTheDocument();
+  });
+
   it('offers one card per module that leads to the module menu', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 

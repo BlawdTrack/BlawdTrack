@@ -11,7 +11,6 @@ const tree = (
     <Route path={ROUTES.LOGIN} element={<div>login screen</div>} />
     <Route element={<MainMenuLayout />}>
       <Route path={ROUTES.MAIN_MENU} element={<div>menu content</div>} />
-      <Route path={ROUTES.MODULE_COURIERS} element={<div>couriers module content</div>} />
       <Route path={ROUTES.COURIER_CREATE} element={<div>create courier content</div>} />
       <Route path={ROUTES.COURIER_UPDATE} element={<div>update courier content</div>} />
       <Route path={ROUTES.COURIER_DEACTIVATE} element={<div>deactivate content</div>} />
@@ -104,24 +103,6 @@ describe('MainMenuLayout sidebar', () => {
 
     expect(logout).toHaveBeenCalledTimes(1);
     expect(screen.getByText('login screen')).toBeInTheDocument();
-  });
-
-  describe('back arrow', () => {
-    it('is not shown on the main menu', () => {
-      renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
-      expect(screen.queryByRole('link', { name: /^volver a/i })).not.toBeInTheDocument();
-    });
-
-    it('goes from a function screen to its module menu, and from there to the main menu', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(tree, { route: ROUTES.COURIER_CREATE, user: superUser });
-
-      await user.click(screen.getByRole('link', { name: 'Volver a Mensajeros' }));
-      expect(screen.getByText('couriers module content')).toBeInTheDocument();
-
-      await user.click(screen.getByRole('link', { name: 'Volver a Menú principal' }));
-      expect(screen.getByText('menu content')).toBeInTheDocument();
-    });
   });
 
   it('starts with every group closed and opens or closes one from its title', async () => {

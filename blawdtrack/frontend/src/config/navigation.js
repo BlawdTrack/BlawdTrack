@@ -11,7 +11,7 @@ export const NAVIGATION_GROUPS = [
     title: 'Mensajeros',
     shortTitle: 'Mensajeros',
     path: ROUTES.MODULE_COURIERS,
-    description: 'Crea, actualiza y desactiva a los mensajeros.',
+    description: 'Registra a tu equipo de reparto, corrige sus datos o retíralo de la operación.',
     items: [
       {
         id: 'courier-create',
@@ -41,7 +41,7 @@ export const NAVIGATION_GROUPS = [
     title: 'Administradores',
     shortTitle: 'Admins',
     path: ROUTES.MODULE_ADMINS,
-    description: 'Da de alta o elimina a los administradores de ventas.',
+    description: 'Da de alta a quienes gestionan las ventas o quítales el acceso.',
     items: [
       {
         id: 'admin-create',
@@ -64,7 +64,7 @@ export const NAVIGATION_GROUPS = [
     title: 'Seguridad y acceso',
     shortTitle: 'Acceso',
     path: ROUTES.MODULE_SECURITY,
-    description: 'Tu contraseña y los permisos de cada usuario.',
+    description: 'Cambia tu contraseña y decide qué puede hacer cada persona.',
     items: [
       {
         id: 'password-reset',

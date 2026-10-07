@@ -6,10 +6,10 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
  * Tarjeta de los menús (principal y de cada módulo): icono, título, descripción corta y una flecha que
  * indica que lleva a otra pantalla. Toda la tarjeta es el enlace (objetivo grande, ley de Fitts). Sin
  * `to` se muestra deshabilitada con el aviso "Próximamente".
- * @param {{ to?: string|null, icon?: import('react').ElementType, title: string, description?: string,
- *   meta?: string }} props `meta` es un dato breve bajo la descripción (por ejemplo, cuántas funciones tiene).
+ * @param {{ to?: string|null, icon?: import('react').ElementType, title: string,
+ *   description?: string }} props
  */
-export default function MenuCard({ to = null, icon: Icon, title, description, meta }) {
+export default function MenuCard({ to = null, icon: Icon, title, description }) {
   const linkProps = to ? { component: RouterLink, to } : { 'aria-disabled': true };
 
   return (
@@ -59,10 +59,8 @@ export default function MenuCard({ to = null, icon: Icon, title, description, me
         {description && (
           <Typography sx={{ fontSize: 13.5, color: 'text.secondary', mt: 0.25, lineHeight: 1.45 }}>{description}</Typography>
         )}
-        {(meta || !to) && (
-          <Typography sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary', mt: 0.75 }}>
-            {to ? meta : 'Próximamente'}
-          </Typography>
+        {!to && (
+          <Typography sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary', mt: 0.75 }}>Próximamente</Typography>
         )}
       </Box>
       {to && <ChevronRightIcon sx={{ color: 'text.secondary' }} />}

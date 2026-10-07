@@ -4,6 +4,7 @@ import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import { useAuth } from '../hooks/useAuth';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
+import ModuleBackButton from '../components/ModuleBackButton';
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo más tarde.';
@@ -41,6 +42,9 @@ export function OwnPasswordResetPage() {
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
       <Container maxWidth="sm">
+        <Box sx={{ mb: 2 }}>
+          <ModuleBackButton />
+        </Box>
         <Paper elevation={0} sx={{ p: { xs: 3, sm: 4 }, borderRadius: '18px', border: '1px solid #E4DED7' }}>
           <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
             Restablecer contraseña

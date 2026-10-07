@@ -6,6 +6,7 @@ import { ROLE_LABELS } from '../config/roles';
 import { getNavigationForRole } from '../config/navigation';
 import { NAV_GROUP_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
+import { getGreeting } from '../utils/greeting';
 
 /**
  * Inicio del Super Usuario dentro del menú principal: saludo con su nombre y su rol, accesos rápidos a
@@ -53,8 +54,11 @@ export default function MainMenuPage() {
 
       {groups.length > 0 && (
         <Box component="section" aria-labelledby="quick-access-title">
-          <Typography id="quick-access-title" variant="h6" component="h2" sx={{ mb: 2, color: 'primary.main' }}>
-            ¿Qué módulo quieres abrir?
+          <Typography id="quick-access-title" variant="h5" component="h2" sx={{ color: 'primary.main' }}>
+            {getGreeting()}
+          </Typography>
+          <Typography sx={{ fontSize: 15, color: 'text.secondary', mt: 0.5, mb: 2.5 }}>
+            ¿Qué deseas hacer hoy?
           </Typography>
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
             {groups.map((group) => (
@@ -64,7 +68,6 @@ export default function MainMenuPage() {
                 icon={NAV_GROUP_ICONS[group.id]}
                 title={group.title}
                 description={group.description}
-                meta={group.items.length === 1 ? '1 función' : `${group.items.length} funciones`}
               />
             ))}
           </Box>
