@@ -350,6 +350,20 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
       expect(fleetRow('María José Editada')).toBeTruthy();
     });
 
+    it('"Descartar" vuelve de una vez a "Elige un mensajero" sin pedir confirmación ni guardar', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
+      await user.click(screen.getByRole('button', { name: 'Descartar' }));
+
+      expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+      expect(screen.queryByText('¿Salir sin guardar?')).toBeNull();
+      expect(screen.queryByDisplayValue('Nombre a medias')).toBeNull();
+      expect(CourierService.updateCourier).not.toHaveBeenCalled();
+    });
+
     it('cambia de mensajero sin avisos cuando no hay cambios sin guardar', async () => {
       const user = userEvent.setup();
       render(<EditMessenger />);

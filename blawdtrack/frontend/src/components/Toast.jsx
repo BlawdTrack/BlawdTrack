@@ -1,4 +1,3 @@
-import React from 'react';
 import { Snackbar, Box, Typography } from '@mui/material';
 
 // Notificación flotante, tal como aparece en el mockup (pantallas D y F:
@@ -25,27 +24,29 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
       open={open}
       onClose={onClose}
       autoHideDuration={autoHideDuration}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      // Esquina inferior derecha en escritorio; en móvil, sobre la barra de pestañas inferior.
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      sx={{ bottom: { xs: 100, sm: 32 }, right: { sm: 32 } }}
     >
       <Box
         role="status"
         aria-live="polite"
         sx={{
           bgcolor: '#ffffff',
-          borderRadius: '10px',
-          borderLeft: `4px solid ${accentColor}`,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-          px: 2,
-          py: 1.75,
+          borderRadius: '12px',
+          borderLeft: `6px solid ${accentColor}`,
+          boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
+          px: 2.5,
+          py: 2.25,
           display: 'flex',
           alignItems: 'center',
-          gap: 1.25,
-          minWidth: { xs: 'auto', sm: 280 },
-          maxWidth: { xs: '100%', sm: 380 },
+          gap: 1.75,
+          minWidth: { xs: 'auto', sm: 360 },
+          maxWidth: { xs: '100%', sm: 520 },
         }}
       >
-        <Box sx={{ width: 20, height: 20, borderRadius: '50%', bgcolor: accentColor, flexShrink: 0 }} />
-        <Typography sx={{ fontSize: 14, color: '#1F2421' }}>{message}</Typography>
+        <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: accentColor, flexShrink: 0 }} />
+        <Typography sx={{ fontSize: 16, lineHeight: 1.45, color: '#1F2421' }}>{message}</Typography>
       </Box>
     </Snackbar>
   );

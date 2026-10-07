@@ -485,13 +485,8 @@ export function EditMessenger({ initialCedula = '' }) {
     }
   };
 
-  const handleReset = () => {
-    if (initialFormValues) {
-      setFormData(initialFormValues);
-      setFormErrors({});
-      setUpdateError(null);
-    }
-  };
+  // "Descartar": abandona la edición y vuelve de una vez a "Elige un mensajero", sin guardar nada.
+  const handleDiscard = clearSelection;
 
   const inLabor = currentCourier?.inLabor || currentCourier?.enLabores || false;
   const pendingPackages = currentCourier?.pendingPackages || currentCourier?.pendientes || 0;
@@ -922,7 +917,7 @@ export function EditMessenger({ initialCedula = '' }) {
                   <Button
                     type="button"
                     variant="outlined"
-                    onClick={handleReset}
+                    onClick={handleDiscard}
                     disabled={submitting}
                     sx={{ color: 'primary.main', border: '1.5px solid #DCD4CA', fontWeight: 600, px: 3, minHeight: 48, fontSize: 16, borderRadius: '10px' }}
                   >
