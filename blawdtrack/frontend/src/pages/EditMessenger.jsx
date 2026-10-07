@@ -226,7 +226,7 @@ export function EditMessenger({ initialCedula = '' }) {
     action();
   };
 
-  // En móvil el detalle reemplaza a la lista; esto vuelve a ella.
+  // "Volver": regresa a "Elige un mensajero" (en móvil, a la lista); con cambios sin guardar pide confirmar.
   const handleBackToList = () => runOrConfirmLeave(clearSelection);
 
   const handleRowClick = (courier) => {
@@ -805,9 +805,15 @@ export function EditMessenger({ initialCedula = '' }) {
                 <Button
                   onClick={handleBackToList}
                   startIcon={<ArrowBackIcon />}
-                  sx={{ display: { xs: 'flex', md: 'none' }, flex: '0 0 100%', justifyContent: 'flex-start', color: 'primary.main', fontWeight: 600, ml: -1 }}
+                  sx={{
+                    flex: { xs: '0 0 100%', md: '0 0 auto' },
+                    justifyContent: 'flex-start',
+                    color: 'primary.main',
+                    fontWeight: 600,
+                    border: '1.5px solid #DCD4CA',
+                  }}
                 >
-                  Volver a la lista
+                  Volver
                 </Button>
                 {!listOpen && (
                   <Button
