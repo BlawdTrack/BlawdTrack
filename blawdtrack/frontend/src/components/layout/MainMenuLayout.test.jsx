@@ -121,7 +121,7 @@ describe('MainMenuLayout sidebar', () => {
   describe('collapsed sidebar', () => {
     afterEach(() => localStorage.clear());
 
-    it('collapses to icons keeping the links reachable by name, and remembers the choice', async () => {
+    it('collapses to one icon per group that opens a menu with its screens, and remembers the choice', async () => {
       const user = userEvent.setup();
       renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
@@ -129,9 +129,20 @@ describe('MainMenuLayout sidebar', () => {
 
       const bar = within(sidebar());
       expect(bar.queryByText('Blawd Gourmet')).not.toBeInTheDocument();
-      expect(bar.getByRole('link', { name: 'Crear mensajero' })).toBeInTheDocument();
+      ['Mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((name) =>
+        expect(bar.getByRole('button', { name })).toBeInTheDocument()
+      );
+      expect(bar.queryByRole('link', { name: 'Crear mensajero' })).not.toBeInTheDocument();
       expect(bar.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument();
       expect(localStorage.getItem('blawdtrack.sidebarCollapsed')).toBe('true');
+
+      await user.click(bar.getByRole('button', { name: 'Mensajeros' }));
+      await user.click(await screen.findByRole('menuitem', { name: 'Crear mensajero' }));
+      expect(screen.getByText('create courier content')).toBeInTheDocument();
+
+      await user.click(bar.getByRole('button', { name: 'Seguridad y acceso' }));
+      expect(await screen.findByRole('menuitem', { name: 'Roles y permisos' })).toBeInTheDocument();
+      await user.keyboard('{Escape}');
 
       await user.click(bar.getByRole('button', { name: 'Expandir menú' }));
       expect(within(sidebar()).getByText('Blawd Gourmet')).toBeInTheDocument();

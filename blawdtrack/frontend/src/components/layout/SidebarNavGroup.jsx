@@ -1,29 +1,93 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Box, Collapse, Divider } from '@mui/material';
+import { NavLink, useLocation } from 'react-router-dom';
+import { Box, Collapse, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SidebarNavItem from './SidebarNavItem';
+import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from './navIcons';
 
 /**
  * Un grupo del menú. Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
- * y, si la pantalla actual es del grupo, lo marca con un punto naranja); con la barra colapsada solo se
- * ven los iconos, separados del grupo anterior por una línea.
- * @param {{ group: { id: string, title: string, items: Array }, collapsed?: boolean,
- *   showDivider?: boolean }} props
+ * y, si la pantalla actual es del grupo, lo marca con un punto naranja). Con la barra colapsada el grupo
+ * es un solo icono que despliega la lista de sus pantallas en un menú flotante.
+ * @param {{ group: { id: string, title: string, items: Array }, collapsed?: boolean }} props
  */
-export default function SidebarNavGroup({ group, collapsed = false, showDivider = false }) {
+export default function SidebarNavGroup({ group, collapsed = false }) {
   const [open, setOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState(null);
   const { pathname } = useLocation();
   const hasActiveItem = group.items.some((item) => item.path === pathname);
   const listId = `sidebar-group-${group.id}`;
 
   if (collapsed) {
+    const GroupIcon = NAV_GROUP_ICONS[group.id];
+    const menuId = `${listId}-menu`;
+    const closeMenu = () => setMenuAnchor(null);
+
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        {showDivider && <Divider sx={{ borderColor: 'rgba(255,255,255,.1)', my: 1 }} />}
-        {group.items.map((item) => (
-          <SidebarNavItem key={item.id} item={item} collapsed />
-        ))}
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Tooltip title={group.title} placement="right" arrow>
+          <Box
+            component="button"
+            type="button"
+            onClick={(event) => setMenuAnchor(event.currentTarget)}
+            aria-label={group.title}
+            aria-haspopup="menu"
+            aria-expanded={Boolean(menuAnchor)}
+            aria-controls={menuAnchor ? menuId : undefined}
+            sx={{
+              width: 48,
+              height: 48,
+              border: 0,
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              backgroundColor: hasActiveItem || menuAnchor ? 'rgba(255,108,14,.18)' : 'transparent',
+              color: hasActiveItem ? '#FF6C0E' : 'rgba(255,255,255,.75)',
+              '&:hover': { backgroundColor: hasActiveItem ? 'rgba(255,108,14,.18)' : 'rgba(255,255,255,.08)' },
+              '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 1 },
+            }}
+          >
+            {GroupIcon && <GroupIcon sx={{ fontSize: 22 }} />}
+          </Box>
+        </Tooltip>
+        <Menu
+          id={menuId}
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor)}
+          onClose={closeMenu}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+          slotProps={{ paper: { sx: { ml: 1, minWidth: 220, borderRadius: '12px', border: '1px solid #E4DED7' } } }}
+        >
+          <Typography
+            sx={{ px: 2, py: 0.75, fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'text.secondary' }}
+          >
+            {group.title}
+          </Typography>
+          {group.items.map((item) => {
+            const ItemIcon = NAV_ITEM_ICONS[item.id];
+            const active = item.path === pathname;
+            return (
+              <MenuItem
+                key={item.id}
+                {...(item.path ? { component: NavLink, to: item.path, end: true } : {})}
+                disabled={!item.path}
+                selected={active}
+                onClick={closeMenu}
+                sx={{ minHeight: 44, fontSize: 14, fontWeight: active ? 600 : 500 }}
+              >
+                {ItemIcon && (
+                  <ListItemIcon sx={{ minWidth: 34, color: active ? 'secondary.main' : 'text.secondary' }}>
+                    <ItemIcon fontSize="small" />
+                  </ListItemIcon>
+                )}
+                {item.path ? item.label : `${item.label} · próximamente`}
+              </MenuItem>
+            );
+          })}
+        </Menu>
       </Box>
     );
   }

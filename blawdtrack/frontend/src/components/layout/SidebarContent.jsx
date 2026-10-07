@@ -21,12 +21,12 @@ export default function SidebarContent({ groups, user, roleLabel, onLogout, coll
           py: 2,
           display: 'flex',
           flexDirection: 'column',
-          gap: collapsed ? 0 : 2.25,
+          gap: collapsed ? 1 : 2.25,
           overflowY: 'auto',
         }}
       >
-        {groups.map((group, index) => (
-          <SidebarNavGroup key={group.id} group={group} collapsed={collapsed} showDivider={index > 0} />
+        {groups.map((group) => (
+          <SidebarNavGroup key={group.id} group={group} collapsed={collapsed} />
         ))}
       </Box>
       <SidebarUserFooter
