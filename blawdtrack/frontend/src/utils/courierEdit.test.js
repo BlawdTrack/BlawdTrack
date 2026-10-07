@@ -6,7 +6,6 @@ import {
   getScheduleTimeRange,
   getStatusLock,
   isCourierActive,
-  isFormDirty,
   recordsLabel,
   validateCourierEditForm,
 } from './courierEdit';
@@ -61,14 +60,8 @@ describe('isCourierActive and getScheduleTimeRange', () => {
   });
 });
 
-describe('isFormDirty and diffCourierForm', () => {
+describe('diffCourierForm', () => {
   const initial = courierToFormValues(courier);
-
-  it('is clean until some field differs from what was loaded', () => {
-    expect(isFormDirty(initial, initial)).toBe(false);
-    expect(isFormDirty({ ...initial, phone: '1' }, initial)).toBe(true);
-    expect(isFormDirty(initial, null)).toBe(false);
-  });
 
   it('groups the changes by the call they need', () => {
     expect(diffCourierForm(initial, initial)).toEqual({

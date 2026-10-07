@@ -3,12 +3,12 @@ import { useCourier } from './useCourier';
 import { useCourierHistory } from './useCourierHistory';
 import { updateCourierPassword, updateCourierStatus } from '../services/CourierService';
 import { composeSchedule } from '../utils/courierSchedule';
+import { isFormDirty } from '../utils/forms';
 import {
   EMPTY_COURIER_FORM,
   courierToFormValues,
   diffCourierForm,
   getStatusLock,
-  isFormDirty,
   validateCourierEditForm,
 } from '../utils/courierEdit';
 

@@ -4,16 +4,20 @@ import {
   Box,
   Typography,
   TextField,
-  MenuItem,
-  Button,
-  CircularProgress
+  MenuItem
 } from '@mui/material';
 import { useAdminRegistration } from '../hooks/useAdminRegistration';
 import { validateAdminForm } from '../utils/adminFormValidation';
 import { StatusMessage } from '../components/StatusMessage';
 import PageHeader from '../components/PageHeader';
 import PageContainer from '../components/PageContainer';
+import { ROUTES } from '../config/routes';
 import { LABEL_SX, INPUT_SX } from '../components/formStyles';
+import FormActions from '../components/FormActions';
+import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
+import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
+import { useFormLeave } from '../hooks/useFormLeave';
+import { isFormDirty } from '../utils/forms';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 
 // On phones the form uses 2 columns; wide fields span both.
@@ -54,6 +58,8 @@ function buildAdminPayload(formData) {
 
 export function AdminRegistrationPage() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  // Con datos escritos, salir (menú, otra pantalla, cerrar la pestaña) o descartar pide confirmación.
+  const form = useFormLeave({ isDirty: isFormDirty(formData, INITIAL_FORM_DATA), discardTo: ROUTES.MODULE_ADMINS });
   const {
     isSubmitting,
     isSuccess,
@@ -202,38 +208,17 @@ export function AdminRegistrationPage() {
             {renderField('contrasenaInicial', 'CONTRASEÑA INICIAL', { required: true, type: 'password', placeholder: 'Mínimo 8 caracteres, letras y números' }, 'always')}
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              sx={{
-                backgroundColor: '#1A3C34',
-                '&:hover': { backgroundColor: '#12322B' },
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 2.75,
-                py: { xs: 1.25, sm: 1.5 },
-                borderRadius: '10px',
-                gap: 1.2,
-                boxShadow: 'none'
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <CircularProgress size={18} color="inherit" />
-                  Registrando…
-                </>
-              ) : (
-                <>
-                  Registrar administrador
-                  <Box component="span" sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#FF6C0E' }} />
-                </>
-              )}
-            </Button>
-          </Box>
+          <FormActions
+            submitLabel="Registrar administrador"
+            submittingLabel="Registrando…"
+            isSubmitting={isSubmitting}
+            onDiscard={form.discard}
+          />
         </Box>
       </Paper>
+
+      <UnsavedChangesGuard when={form.shouldBlock} />
+      <ConfirmLeaveDialog {...form.dialogProps} />
     </PageContainer>
   );
 }

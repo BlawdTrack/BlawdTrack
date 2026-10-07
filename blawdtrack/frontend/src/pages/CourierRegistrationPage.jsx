@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Paper,
   Box,
   Typography,
   TextField,
   MenuItem,
-  Button,
-  CircularProgress
 } from '@mui/material';
 import { useCourier } from '../hooks/useCourier';
 import { validateCourierForm } from '../utils/courierFormValidation';
@@ -20,6 +17,11 @@ import { LABEL_SX, INPUT_SX } from '../components/formStyles';
 import PageContainer from '../components/PageContainer';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 import { ROUTES } from '../config/routes';
+import FormActions from '../components/FormActions';
+import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
+import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
+import { useFormLeave } from '../hooks/useFormLeave';
+import { isFormDirty } from '../utils/forms';
 
 // The form is a single column on phones and two columns from tablets up; wide fields span both.
 const FULL_ROW_SX = { gridColumn: { md: 'span 2' } };
@@ -84,8 +86,9 @@ function buildCourierPayload(formData) {
  * crear el mensajero vuelve al menú de gestión de mensajeros con un aviso de éxito.
  */
 export function CourierRegistrationPage() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  // Con datos escritos, salir (menú, otra pantalla, cerrar la pestaña) o descartar pide confirmación.
+  const form = useFormLeave({ isDirty: isFormDirty(formData, INITIAL_FORM_DATA), discardTo: ROUTES.MODULE_COURIERS });
   const {
     isSubmitting,
     fieldErrors,
@@ -142,7 +145,7 @@ export function CourierRegistrationPage() {
     const outcome = await register(buildCourierPayload(formData));
     if (outcome?.ok) {
       // Todo salió bien: se avisa en el menú del módulo, a donde se regresa de inmediato.
-      navigate(ROUTES.MODULE_COURIERS, {
+      form.leave(ROUTES.MODULE_COURIERS, {
         state: {
           notice: {
             severity: 'success',
@@ -288,40 +291,18 @@ export function CourierRegistrationPage() {
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              sx={{
-                backgroundColor: '#1A3C34',
-                '&:hover': { backgroundColor: '#12322B' },
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 4,
-                minHeight: 52,
-                fontSize: 16,
-                borderRadius: '10px',
-                gap: 1.2,
-                boxShadow: 'none'
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <CircularProgress size={18} color="inherit" />
-                  Registrando…
-                </>
-              ) : (
-                <>
-                  Registrar mensajero
-                  <Box component="span" sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#FF6C0E' }} />
-                </>
-              )}
-            </Button>
-          </Box>
+          <FormActions
+            submitLabel="Registrar mensajero"
+            submittingLabel="Registrando…"
+            isSubmitting={isSubmitting}
+            onDiscard={form.discard}
+          />
         </Box>
       </Paper>
       </PageContainer>
+
+      <UnsavedChangesGuard when={form.shouldBlock} />
+      <ConfirmLeaveDialog {...form.dialogProps} />
     </>
   );
 }

@@ -2,6 +2,7 @@
 // devuelve la API, cómo se arma su formulario, cuándo hay cambios sin guardar y qué es válido.
 import { MIN_PASSWORD_LENGTH, meetsClientPasswordRules } from './passwordRules';
 import { parseSchedule } from './courierSchedule';
+export { isFormDirty } from './forms';
 
 /** Formulario vacío (sin mensajero seleccionado). */
 export const EMPTY_COURIER_FORM = {
@@ -57,11 +58,6 @@ export function courierToFormValues(courier) {
     status: courier.status || (courier.estado === 'Inactivo' ? 'INACTIVE' : 'ACTIVE'),
   };
 }
-
-/** Hay cambios sin guardar si algún campo difiere de los valores con que se cargó el mensajero. */
-export const isFormDirty = (formData, initialValues) =>
-  Boolean(initialValues)
-  && Object.keys(initialValues).some((field) => String(formData[field] ?? '') !== String(initialValues[field] ?? ''));
 
 /**
  * Qué cambió respecto a lo cargado, agrupado por lo que hay que enviar al backend: los datos
