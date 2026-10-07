@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Avatar, Box, Button, Chip, Paper, Tab, Tabs, Typography } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
+import BackButton from './BackButton';
 import CourierEditForm from './CourierEditForm';
 import HistoryList from './HistoryList';
 import StatusChip from './StatusChip';
@@ -26,13 +26,7 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
   return (
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: { xs: 1.5, md: 2 }, flexWrap: 'wrap' }}>
-        <Button
-          onClick={onBack}
-          startIcon={<ArrowBackIcon />}
-          sx={{ ...OUTLINE_BUTTON_SX, flex: { xs: '0 0 100%', md: '0 0 auto' }, justifyContent: 'flex-start' }}
-        >
-          Volver
-        </Button>
+        <BackButton onClick={onBack} sx={{ flex: { xs: '0 0 100%', md: '0 0 auto' }, justifyContent: 'flex-start' }} />
         {!listOpen && (
           <Button
             onClick={onShowList}

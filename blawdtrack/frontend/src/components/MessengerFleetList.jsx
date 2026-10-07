@@ -13,9 +13,9 @@ import Toast from './Toast';
 
 /**
  * Pantalla "Desactivar mensajero" (HU-005), exclusiva del Super Usuario. En una sola vista a la altura de la
- * pantalla: la flota (con búsqueda por documento) y la auditoría de todas las desactivaciones registradas,
- * aunque el mensajero se haya reactivado después. Desactivar abre `DeactivateMessengerModal` para
- * confirmar. En móvil las dos vistas se alternan con pestañas. Solo coordina: los datos vienen de
+ * pantalla: la flota (con búsqueda por documento) o, con un botón, la auditoría de todas las
+ * desactivaciones registradas, aunque el mensajero se haya reactivado después. Desactivar abre
+ * `DeactivateMessengerModal` para confirmar. Solo coordina: los datos vienen de
  * `useCourierFleet` y `useDeactivationAudit`, y las partes visuales son componentes aparte.
  */
 export const MessengerFleetList = () => {
@@ -26,7 +26,8 @@ export const MessengerFleetList = () => {
   const { toast, notify, close: closeToast } = useToast();
 
   const [selectedCourier, setSelectedCourier] = useState(null);
-  const [mobileView, setMobileView] = useState('fleet');
+  // La auditoría reemplaza a la lista mientras se ve (como el historial general de Actualizar mensajero).
+  const [showAudit, setShowAudit] = useState(false);
 
   // Una sesión vencida al cargar la flota cierra la sesión (el resto de errores se muestran en la lista).
   const loadErrorStatus = fleet.error?.status;
@@ -48,39 +49,33 @@ export const MessengerFleetList = () => {
   };
 
   const visibleCouriers = search.filter(fleet.couriers);
-  // En móvil solo se ve una de las dos vistas; en escritorio, ambas lado a lado.
-  const panelDisplay = (view) => ({ xs: mobileView === view ? 'flex' : 'none', md: 'flex' });
-
   return (
     <>
       <SplitScreen
         title="Desactivar mensajeros"
         description="Elige al mensajero que dejará de operar y confirma la desactivación. Queda registrada en el historial."
-        columns="minmax(0, 1fr) 420px"
-        tabs={{
-          value: mobileView,
-          onChange: setMobileView,
-          items: [
-            { value: 'fleet', label: 'Mensajeros' },
-            { value: 'audit', label: `Auditoría (${audit.entries.length})` },
-          ],
-        }}
+        columns="minmax(0, 1fr)"
       >
-        <CourierDeactivationList
-          couriers={visibleCouriers}
-          totalCount={fleet.couriers.length}
-          loading={fleet.loading}
-          errorMessage={fleet.error?.message}
-          search={search}
-          onDeactivate={setSelectedCourier}
-          sx={{ display: panelDisplay('fleet') }}
-        />
-        <AuditPanel
-          title="Auditoría de desactivaciones"
-          entries={audit.entries}
-          emptyMessage="No hay desactivaciones registradas."
-          sx={{ display: panelDisplay('audit') }}
-        />
+        {showAudit ? (
+          <AuditPanel
+            title="Auditoría de desactivaciones"
+            entries={audit.entries}
+            emptyMessage="No hay desactivaciones registradas."
+            onBack={() => setShowAudit(false)}
+            sx={{ display: 'flex' }}
+          />
+        ) : (
+          <CourierDeactivationList
+            couriers={visibleCouriers}
+            totalCount={fleet.couriers.length}
+            loading={fleet.loading}
+            errorMessage={fleet.error?.message}
+            search={search}
+            onDeactivate={setSelectedCourier}
+            onOpenAudit={() => setShowAudit(true)}
+            sx={{ display: 'flex' }}
+          />
+        )}
       </SplitScreen>
 
       <DeactivateMessengerModal

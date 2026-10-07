@@ -12,8 +12,9 @@ const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color
  * @param {{ searchTitle: string, search: object, listTitle: string, titleExtra?: import('react').ReactNode,
  *   meta?: import('react').ReactNode, items: object[], totalCount: number, loading: boolean,
  *   errorMessage?: string|null, emptyMessage: string, noMatchMessage: string,
- *   renderItem: (item: object) => import('react').ReactNode, sx?: object }} props `items` ya viene filtrada;
- *   `totalCount` es el total sin filtrar.
+ *   renderItem: (item: object) => import('react').ReactNode, footer?: import('react').ReactNode, sx?: object }}
+ *   props `items` ya viene filtrada; `totalCount` es el total sin filtrar; `footer` va fijo al pie del panel
+ *   (por ejemplo, el botón que abre la auditoría).
  */
 export default function SearchableListPanel({
   searchTitle,
@@ -28,6 +29,7 @@ export default function SearchableListPanel({
   emptyMessage,
   noMatchMessage,
   renderItem,
+  footer,
   sx,
 }) {
   let body;
@@ -63,6 +65,8 @@ export default function SearchableListPanel({
       </Box>
 
       <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>{body}</Box>
+
+      {footer}
     </Paper>
   );
 }

@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  Button,
   CircularProgress,
   IconButton,
   Paper,
@@ -15,8 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import HistoryIcon from '@mui/icons-material/History';
 import DocumentSearch from './DocumentSearch';
+import HistoryButton from './HistoryButton';
 import StatusChip from './StatusChip';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/getInitials';
@@ -162,18 +161,7 @@ export default function CourierFleetPanel({
         </Table>
       </TableContainer>
 
-      <Box sx={{ p: 2, borderTop: '1px solid #E4DED7' }}>
-        <Button
-          fullWidth
-          variant={generalHistoryOpen ? 'contained' : 'outlined'}
-          disableElevation
-          onClick={onOpenGeneralHistory}
-          startIcon={<HistoryIcon />}
-          sx={{ minHeight: 44, fontWeight: 600, borderRadius: '10px', ...(!generalHistoryOpen && { color: 'primary.main', border: '1.5px solid #DCD4CA' }) }}
-        >
-          Ver historial general
-        </Button>
-      </Box>
+      <HistoryButton label="Ver historial general" onClick={onOpenGeneralHistory} active={generalHistoryOpen} />
     </Paper>
   );
 }

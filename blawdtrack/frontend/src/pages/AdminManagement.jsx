@@ -13,9 +13,10 @@ import { useToast } from '../hooks/useToast';
 
 /**
  * Pantalla "Eliminar administrador" (HU-008), exclusiva del Super Usuario. En una sola vista a la altura de
- * la pantalla: los administradores de ventas (con búsqueda por documento) y la auditoría de altas y bajas.
+ * la pantalla: los administradores de ventas (con búsqueda por documento) o, con un botón, la auditoría de
+ * altas y bajas.
  * Eliminar abre `DeleteAdminModal` para confirmar; un administrador con sesión abierta sí se puede eliminar
- * (el cuadro avisa y su sesión se cierra al borrarlo). En móvil las dos vistas se alternan con pestañas.
+ * (el cuadro avisa y su sesión se cierra al borrarlo). La auditoría queda detrás del botón "Ver auditoría".
  * Solo coordina: los datos vienen de `useAdmins`, `useAdminAuditLog` y `useAdminDeletion`.
  */
 const AdminManagement = () => {
@@ -23,7 +24,8 @@ const AdminManagement = () => {
   const audit = useAdminAuditLog();
   const search = useDocumentSearch();
   const { toast, notify, close: closeToast } = useToast();
-  const [mobileView, setMobileView] = useState('admins');
+  // La auditoría reemplaza a la lista mientras se ve (como el historial general de Actualizar mensajero).
+  const [showAudit, setShowAudit] = useState(false);
 
   const deletion = useAdminDeletion({
     // La auditoría ya la escribió el backend: se vuelve a pedir en vez de adivinar su forma aquí.
@@ -37,39 +39,33 @@ const AdminManagement = () => {
   // Mantiene al día el estado de sesión ("Sesión activa" / "Sin sesión") sin recargar la página.
   usePolling(admins.refresh);
 
-  // En móvil solo se ve una de las dos vistas; en escritorio, ambas lado a lado.
-  const panelDisplay = (view) => ({ xs: mobileView === view ? 'flex' : 'none', md: 'flex' });
-
   return (
     <>
       <SplitScreen
         title="Eliminar administrador"
         description="Busca al administrador por su documento y confírmalo antes de eliminarlo. Esta acción no se puede deshacer."
-        columns="minmax(0, 1fr) 420px"
-        tabs={{
-          value: mobileView,
-          onChange: setMobileView,
-          items: [
-            { value: 'admins', label: 'Administradores' },
-            { value: 'audit', label: `Auditoría (${audit.entries.length})` },
-          ],
-        }}
+        columns="minmax(0, 1fr)"
       >
-        <AdminListPanel
-          admins={search.filter(admins.admins)}
-          totalCount={admins.admins.length}
-          loading={admins.loading}
-          errorMessage={admins.error}
-          search={search}
-          onDelete={deletion.open}
-          sx={{ display: panelDisplay('admins') }}
-        />
-        <AuditPanel
-          title="Auditoría de eliminaciones y creaciones"
-          entries={audit.entries}
-          emptyMessage="No hay registros de auditoría recientes."
-          sx={{ display: panelDisplay('audit') }}
-        />
+        {showAudit ? (
+          <AuditPanel
+            title="Auditoría de eliminaciones y creaciones"
+            entries={audit.entries}
+            emptyMessage="No hay registros de auditoría recientes."
+            onBack={() => setShowAudit(false)}
+            sx={{ display: 'flex' }}
+          />
+        ) : (
+          <AdminListPanel
+            admins={search.filter(admins.admins)}
+            totalCount={admins.admins.length}
+            loading={admins.loading}
+            errorMessage={admins.error}
+            search={search}
+            onDelete={deletion.open}
+            onOpenAudit={() => setShowAudit(true)}
+            sx={{ display: 'flex' }}
+          />
+        )}
       </SplitScreen>
 
       <DeleteAdminModal

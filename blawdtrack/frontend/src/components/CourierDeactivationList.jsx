@@ -1,6 +1,7 @@
 import { IconButton, Tooltip, Typography } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AccountRow from './AccountRow';
+import HistoryButton from './HistoryButton';
 import SearchableListPanel from './SearchableListPanel';
 import StatusChip from './StatusChip';
 import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN } from '../config/deactivationRules';
@@ -18,10 +19,10 @@ const RULE_HELP = `${DEACTIVATION_CONDITION} Tras desactivarlo no recibe nuevas 
  * la consecuencia se repite en el cuadro de confirmación. Solo muestra; la acción la decide quien lo usa
  * con `onDeactivate`.
  * @param {{ couriers: object[], totalCount: number, loading: boolean, errorMessage?: string|null,
- *   search: object, onDeactivate: (courier: object) => void, sx?: object }} props `couriers` ya viene
- *   filtrada; `totalCount` es el total sin filtrar.
+ *   search: object, onDeactivate: (courier: object) => void, onOpenAudit: Function, sx?: object }} props
+ *   `couriers` ya viene filtrada; `totalCount` es el total sin filtrar; `onOpenAudit` abre la auditoría.
  */
-export default function CourierDeactivationList({ couriers, totalCount, loading, errorMessage, search, onDeactivate, sx }) {
+export default function CourierDeactivationList({ couriers, totalCount, loading, errorMessage, search, onDeactivate, onOpenAudit, sx }) {
   return (
     <SearchableListPanel
       searchTitle="Buscar mensajero por documento"
@@ -48,6 +49,7 @@ export default function CourierDeactivationList({ couriers, totalCount, loading,
       emptyMessage="No hay mensajeros disponibles para mostrar."
       noMatchMessage="No se encontró ningún mensajero con ese documento."
       sx={sx}
+      footer={<HistoryButton label="Ver auditoría" onClick={onOpenAudit} />}
       renderItem={(courier) => {
         const isActive = courier.status === 'ACTIVE';
         return (

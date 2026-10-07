@@ -33,6 +33,8 @@ const COURIER = {
   status: 'ACTIVE',
 };
 
+const openAudit = (user) => user.click(screen.getByRole('button', { name: 'Ver auditoría' }));
+
 describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -64,6 +66,7 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
 
     await waitFor(() => expect(CourierService.deactivateCourier).toHaveBeenCalledWith(7));
     expect(await screen.findByText('Inactivo', { selector: 'button' })).toBeTruthy();
+    await userEvent.click(await screen.findByRole('button', { name: 'Ver auditoría' }));
     expect(await screen.findByText('Por Súper Usuario')).toBeTruthy();
     expect(screen.getByText('Estado de acceso: Inactivo (sesión cerrada inmediatamente)')).toBeTruthy();
     expect(CourierService.getCourierDeactivations).toHaveBeenCalledTimes(2);
@@ -74,9 +77,10 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     CourierService.getCourierDeactivations.mockResolvedValue([DEACTIVATION]);
     render(<MessengerFleetList />);
 
+    expect(await screen.findByRole('button', { name: 'Desactivar' })).toBeTruthy();
+    await openAudit(userEvent.setup());
     expect(await screen.findByText('Por Súper Usuario')).toBeTruthy();
     expect(screen.getByText('1 registro')).toBeTruthy();
-    expect(await screen.findByRole('button', { name: 'Desactivar' })).toBeTruthy();
   });
 
   it('lista todas las desactivaciones guardadas, no solo la última', async () => {
@@ -86,6 +90,8 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     ]);
     render(<MessengerFleetList />);
 
+    await screen.findByRole('button', { name: 'Desactivar' });
+    await openAudit(userEvent.setup());
     await waitFor(() => expect(screen.getAllByText('Por Súper Usuario')).toHaveLength(2));
     expect(screen.getByText('2 registros')).toBeTruthy();
   });
@@ -184,5 +190,22 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     const dialog = await screen.findByRole('dialog');
     expect(dialog).toHaveTextContent('solo puede desactivarse si está fuera de labores y sin envíos en proceso');
     expect(dialog).toHaveTextContent('Sus paquetes pendientes deben reasignarse manualmente.');
+  });
+
+  it('deja la auditoría detrás de un botón y "Volver" regresa a la lista', async () => {
+    CourierService.getCourierDeactivations.mockResolvedValue([DEACTIVATION]);
+    const user = userEvent.setup();
+    render(<MessengerFleetList />);
+
+    expect(await screen.findByRole('button', { name: 'Desactivar' })).toBeTruthy();
+    expect(screen.queryByText('Auditoría de desactivaciones')).toBeNull();
+
+    await openAudit(user);
+    expect(await screen.findByText('Auditoría de desactivaciones')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Desactivar' })).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Volver' }));
+    expect(await screen.findByRole('button', { name: 'Desactivar' })).toBeTruthy();
+    expect(screen.queryByText('Auditoría de desactivaciones')).toBeNull();
   });
 });

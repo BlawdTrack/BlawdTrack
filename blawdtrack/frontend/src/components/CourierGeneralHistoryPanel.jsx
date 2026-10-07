@@ -1,5 +1,5 @@
 import { Box, Button, Chip, CircularProgress, Paper, Typography } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BackButton from './BackButton';
 import HistoryList from './HistoryList';
 import StatusMessage from './StatusMessage';
 import { CARD_SX } from './formStyles';
@@ -17,13 +17,7 @@ export default function CourierGeneralHistoryPanel({ history, backLabel, onBack 
   return (
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', borderBottom: '1px solid #E4DED7' }}>
-        <Button
-          onClick={onBack}
-          startIcon={<ArrowBackIcon />}
-          sx={{ color: 'primary.main', fontWeight: 600, border: '1.5px solid #DCD4CA' }}
-        >
-          {backLabel}
-        </Button>
+        <BackButton onClick={onBack}>{backLabel}</BackButton>
         <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>
           Historial general de mensajeros
         </Typography>
