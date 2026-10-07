@@ -1,4 +1,5 @@
-import { Snackbar, Box, Typography } from '@mui/material';
+import { Snackbar, Box, IconButton, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 // Notificación flotante, tal como aparece en el mockup (pantallas D y F:
 // "Notificaciones toast"). Se apoya en el Snackbar de MUI solo para el
@@ -11,18 +12,28 @@ const SEVERITY_STYLES = {
   warning: '#C9860F',
 };
 
+/** Segundos que dura un aviso antes de cerrarse solo: tiempo para leer una o dos frases sin estorbar. */
+export const DEFAULT_TOAST_DURATION_MS = 6000;
+
 /**
+ * Aviso flotante en la esquina inferior derecha. Se cierra solo (6 segundos por defecto; se pausa mientras
+ * se pasa el cursor por encima) y también con la X. Un clic en otra parte de la pantalla no lo cierra, para
+ * que no desaparezca antes de que se alcance a leer.
  * @param {{ open: boolean, message: string, severity?: 'success'|'error'|'warning',
- *   onClose: Function, autoHideDuration?: number }} props Notificación flotante que se cierra sola
- *   a los 4 segundos por defecto.
+ *   onClose: Function, autoHideDuration?: number }} props
  */
-export function Toast({ open, message, severity = 'success', onClose, autoHideDuration = 4000 }) {
+export function Toast({ open, message, severity = 'success', onClose, autoHideDuration = DEFAULT_TOAST_DURATION_MS }) {
   const accentColor = SEVERITY_STYLES[severity] || SEVERITY_STYLES.success;
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    onClose?.(event, reason);
+  };
 
   return (
     <Snackbar
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       autoHideDuration={autoHideDuration}
       // Esquina inferior derecha en escritorio; en móvil, sobre la barra de pestañas inferior.
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -36,8 +47,9 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
           borderRadius: '12px',
           borderLeft: `6px solid ${accentColor}`,
           boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
-          px: 2.5,
-          py: 2.25,
+          pl: 2.5,
+          pr: 1,
+          py: 1.5,
           display: 'flex',
           alignItems: 'center',
           gap: 1.75,
@@ -46,7 +58,15 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
         }}
       >
         <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: accentColor, flexShrink: 0 }} />
-        <Typography sx={{ fontSize: 16, lineHeight: 1.45, color: '#1F2421' }}>{message}</Typography>
+        <Typography sx={{ flex: 1, fontSize: 16, lineHeight: 1.45, color: '#1F2421' }}>{message}</Typography>
+        <IconButton
+          onClick={(event) => handleClose(event, 'closeButton')}
+          aria-label="Cerrar aviso"
+          size="small"
+          sx={{ alignSelf: 'flex-start', width: 36, height: 36, color: '#6B6560', '&:hover': { bgcolor: '#F1ECE7' } }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
       </Box>
     </Snackbar>
   );

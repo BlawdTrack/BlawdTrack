@@ -45,7 +45,6 @@ export default function ModuleMenuPage({ groupId }) {
         open={noticeOpen}
         message={notice?.message ?? ''}
         severity={notice?.severity}
-        autoHideDuration={8000}
         onClose={closeNotice}
       />
     </>
