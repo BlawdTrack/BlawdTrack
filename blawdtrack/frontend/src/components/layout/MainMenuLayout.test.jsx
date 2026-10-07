@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, within, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Routes, Route } from 'react-router-dom';
 import MainMenuLayout from './MainMenuLayout';
@@ -147,6 +147,79 @@ describe('MainMenuLayout sidebar', () => {
       await user.click(bar.getByRole('button', { name: 'Expandir menú' }));
       expect(within(sidebar()).getByText('Blawd Gourmet')).toBeInTheDocument();
       expect(localStorage.getItem('blawdtrack.sidebarCollapsed')).toBe('false');
+    });
+
+    describe('hover flyouts', () => {
+      const collapse = async (user) => {
+        renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+        await user.click(within(sidebar()).getByRole('button', { name: 'Colapsar menú' }));
+      };
+      const trigger = (name) => within(sidebar()).getByRole('button', { name });
+      const stubPanelRect = (rect) =>
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 220, height: 160, right: 310, ...rect });
+
+      afterEach(() => vi.restoreAllMocks());
+
+      it('opens a group menu on hover and closes it when the cursor leaves', async () => {
+        const user = userEvent.setup();
+        await collapse(user);
+
+        await user.hover(trigger('Mensajeros'));
+        expect(await screen.findByRole('menuitem', { name: 'Desactivar mensajero' })).toBeInTheDocument();
+
+        await user.unhover(trigger('Mensajeros'));
+        await waitFor(() => expect(screen.queryByRole('menuitem', { name: 'Desactivar mensajero' })).not.toBeInTheDocument());
+      });
+
+      it('keeps the menu open while the cursor is inside it', async () => {
+        const user = userEvent.setup();
+        await collapse(user);
+
+        await user.hover(trigger('Mensajeros'));
+        const item = await screen.findByRole('menuitem', { name: 'Desactivar mensajero' });
+        await user.unhover(trigger('Mensajeros'));
+        await user.hover(item);
+
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        expect(screen.getByRole('menuitem', { name: 'Desactivar mensajero' })).toBeInTheDocument();
+      });
+
+      it('switches straight to the neighbouring group when the cursor is not heading to the open menu', async () => {
+        const user = userEvent.setup();
+        await collapse(user);
+        stubPanelRect({ left: 90, top: 100, bottom: 260 });
+
+        fireEvent.mouseEnter(trigger('Mensajeros'));
+        fireEvent.mouseMove(trigger('Mensajeros'), { clientX: 40, clientY: 100 });
+        await screen.findByRole('menuitem', { name: 'Crear mensajero' });
+
+        fireEvent.mouseMove(trigger('Administradores'), { clientX: 45, clientY: 150 });
+        fireEvent.mouseEnter(trigger('Administradores'));
+
+        expect(await screen.findByRole('menuitem', { name: 'Crear administrador' })).toBeInTheDocument();
+        expect(screen.queryByRole('menuitem', { name: 'Crear mensajero' })).not.toBeInTheDocument();
+      });
+
+      it('does not open the neighbouring group while the cursor travels diagonally to the open menu', async () => {
+        const user = userEvent.setup();
+        await collapse(user);
+        stubPanelRect({ left: 90, top: 100, bottom: 260 });
+
+        fireEvent.mouseEnter(trigger('Mensajeros'));
+        fireEvent.mouseMove(trigger('Mensajeros'), { clientX: 40, clientY: 100 });
+        await screen.findByRole('menuitem', { name: 'Crear mensajero' });
+
+        // Pasa por encima de "Administradores" yendo en diagonal hacia el menú de Mensajeros.
+        fireEvent.mouseMove(trigger('Administradores'), { clientX: 70, clientY: 150 });
+        fireEvent.mouseEnter(trigger('Administradores'));
+        fireEvent.mouseLeave(trigger('Administradores'));
+        const menu = screen.getByRole('menuitem', { name: 'Desactivar mensajero' });
+        fireEvent.mouseEnter(menu.closest('[class*="MuiPopper"]').firstElementChild);
+
+        await new Promise((resolve) => setTimeout(resolve, 450));
+        expect(screen.getByRole('menuitem', { name: 'Desactivar mensajero' })).toBeInTheDocument();
+        expect(screen.queryByRole('menuitem', { name: 'Crear administrador' })).not.toBeInTheDocument();
+      });
     });
   });
 });

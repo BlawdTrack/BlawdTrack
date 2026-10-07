@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import SidebarBrand from './SidebarBrand';
 import SidebarNavGroup from './SidebarNavGroup';
 import SidebarUserFooter from './SidebarUserFooter';
+import { useFlyoutHover } from '../../hooks/useFlyoutHover';
 
 /**
  * Contenido de la barra lateral: marca, grupos de navegación y pie con el usuario y el botón de cerrar
@@ -10,6 +11,8 @@ import SidebarUserFooter from './SidebarUserFooter';
  *   onLogout: Function, collapsed?: boolean, onToggleCollapsed?: Function }} props
  */
 export default function SidebarContent({ groups, user, roleLabel, onLogout, collapsed = false, onToggleCollapsed }) {
+  const flyout = useFlyoutHover();
+
   return (
     <Box
       sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#1A3C34' }}
@@ -26,7 +29,7 @@ export default function SidebarContent({ groups, user, roleLabel, onLogout, coll
         }}
       >
         {groups.map((group) => (
-          <SidebarNavGroup key={group.id} group={group} collapsed={collapsed} />
+          <SidebarNavGroup key={group.id} group={group} collapsed={collapsed} flyout={flyout} />
         ))}
       </Box>
       <SidebarUserFooter
