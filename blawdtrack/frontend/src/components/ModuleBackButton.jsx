@@ -3,7 +3,7 @@ import { IconButton, Tooltip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getBackTarget } from '../config/navigation';
 
-function BackArrow() {
+function BackArrow({ size }) {
   const { pathname } = useLocation();
   const target = getBackTarget(pathname);
 
@@ -17,16 +17,16 @@ function BackArrow() {
         to={target.to}
         aria-label={label}
         sx={{
-          width: 44,
-          height: 44,
-          flex: '0 0 44px',
+          width: size,
+          height: size,
+          flex: `0 0 ${size}px`,
           color: 'primary.main',
           border: '1px solid #E4DED7',
           bgcolor: 'background.paper',
           '&:hover': { bgcolor: '#F1ECE7' },
         }}
       >
-        <ArrowBackIcon />
+        <ArrowBackIcon sx={{ fontSize: size > 44 ? 28 : 24 }} />
       </IconButton>
     </Tooltip>
   );
@@ -36,7 +36,8 @@ function BackArrow() {
  * Flecha de retorno de las pantallas del Súper Usuario: desde la pantalla de una función vuelve al menú
  * de su módulo, y desde el menú de un módulo vuelve al menú principal. No muestra nada en el menú
  * principal, en pantallas fuera de los módulos ni si no hay un router (como en pruebas aisladas).
+ * @param {{ size?: number }} props Lado del botón en px (44 por defecto, el mínimo táctil).
  */
-export default function ModuleBackButton() {
-  return useInRouterContext() ? <BackArrow /> : null;
+export default function ModuleBackButton({ size = 44 }) {
+  return useInRouterContext() ? <BackArrow size={size} /> : null;
 }

@@ -21,20 +21,26 @@ export default function ModuleMenuPage({ groupId }) {
   if (!group) return <Navigate to={ROUTES.MAIN_MENU} replace />;
 
   return (
-    <PageContainer>
-      <PageHeader title={group.title} description={group.description} />
-
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-        {group.items.map((item) => (
-          <MenuCard
-            key={item.id}
-            to={item.path}
-            icon={NAV_ITEM_ICONS[item.id]}
-            title={item.label}
-            description={item.description}
-          />
-        ))}
+    <>
+      {/* El encabezado va pegado al borde izquierdo del área de contenido (también con el menú lateral
+          colapsado); las tarjetas siguen centradas en el contenedor común. */}
+      <Box sx={{ px: { xs: 2.5, md: 5 }, pt: { xs: 2.5, md: 5 } }}>
+        <PageHeader size="large" title={group.title} description={group.description} />
       </Box>
-    </PageContainer>
+
+      <PageContainer>
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+          {group.items.map((item) => (
+            <MenuCard
+              key={item.id}
+              to={item.path}
+              icon={NAV_ITEM_ICONS[item.id]}
+              title={item.label}
+              description={item.description}
+            />
+          ))}
+        </Box>
+      </PageContainer>
+    </>
   );
 }
