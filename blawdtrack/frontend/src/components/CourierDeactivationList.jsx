@@ -1,8 +1,10 @@
-import { Alert, Avatar, Box, Button, CircularProgress, Paper, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, CircularProgress, IconButton, Paper, Tooltip, Typography } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DocumentSearch from './DocumentSearch';
 import StatusChip from './StatusChip';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/getInitials';
+import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN } from '../config/deactivationRules';
 
 // El backend aún no expone si un mensajero está en labores ni sus paquetes pendientes (ver
 // ProvisionalCourierWorkloadPort): se muestra el mismo texto fijo del mockup en vez de inventar datos
@@ -56,9 +58,10 @@ function CourierRow({ courier, onDeactivate }) {
 }
 
 /**
- * Panel de la flota para desactivar mensajeros (HU-005): búsqueda por documento, lista con el botón
- * "Desactivar" de cada uno y, al pie, el aviso de cuándo se puede desactivar. Solo muestra; la acción
- * la decide quien lo usa con `onDeactivate`.
+ * Panel de la flota para desactivar mensajeros (HU-005): búsqueda por documento y lista con el botón
+ * "Desactivar" de cada uno. La regla de cuándo se puede desactivar está en el icono de ayuda del título y
+ * la consecuencia se repite en el cuadro de confirmación. Solo muestra; la acción la decide quien lo usa
+ * con `onDeactivate`.
  * @param {{ couriers: object[], totalCount: number, loading: boolean, errorMessage?: string|null,
  *   search: object, onDeactivate: (courier: object) => void, sx?: object }} props `couriers` ya viene
  *   filtrada; `totalCount` es el total sin filtrar.
@@ -91,19 +94,24 @@ export default function CourierDeactivationList({ couriers, totalCount, loading,
       </Box>
 
       <Box sx={{ px: 2.5, py: 1.5, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap' }}>
-        <Typography sx={HEADING_SX}>Mensajeros · desactivación de acceso</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Typography sx={HEADING_SX}>Mensajeros · desactivación de acceso</Typography>
+          <Tooltip
+            arrow
+            enterTouchDelay={0}
+            leaveTouchDelay={8000}
+            title={`${DEACTIVATION_CONDITION} Tras desactivarlo no recibe nuevas asignaciones. ${DEACTIVATION_REASSIGN}`}
+            slotProps={{ tooltip: { sx: { fontSize: 14, lineHeight: 1.5, maxWidth: 340, p: 1.5 } } }}
+          >
+            <IconButton size="small" aria-label="¿Cuándo se puede desactivar a un mensajero?" sx={{ color: '#6B6560' }}>
+              <InfoOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Typography sx={{ fontSize: 12, color: '#6B6560' }}>El historial de entregas se conserva siempre</Typography>
       </Box>
 
       <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>{body}</Box>
-
-      <Box sx={{ bgcolor: '#FCF3E3', borderTop: '1px solid #EBC98A', p: '14px 20px', display: 'flex', gap: '14px' }}>
-        <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: '#C9860F', mt: '6px', flex: '0 0 9px' }} />
-        <Typography sx={{ fontSize: 14, color: '#7A5A12', lineHeight: 1.5 }}>
-          Un mensajero solo puede desactivarse si está fuera de labores y sin envíos en proceso. Tras desactivarlo
-          no recibe nuevas asignaciones y sus paquetes pendientes deben reasignarse manualmente.
-        </Typography>
-      </Box>
     </Paper>
   );
 }

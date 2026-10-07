@@ -161,4 +161,28 @@ describe('MessengerFleetList (HU-005 desactivar mensajero)', () => {
     await user.click(screen.getByRole('button', { name: 'Cerrar aviso' }));
     await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
   });
+
+  it('explica cuándo se puede desactivar con un icono de ayuda, sin una franja fija en la lista', async () => {
+    const user = userEvent.setup();
+    render(<MessengerFleetList />);
+
+    const help = await screen.findByRole('button', { name: '¿Cuándo se puede desactivar a un mensajero?' });
+    expect(screen.queryByText(/solo puede desactivarse si está fuera de labores/i)).toBeNull();
+
+    await user.hover(help);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Un mensajero solo puede desactivarse si está fuera de labores y sin envíos en proceso.'
+    );
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Sus paquetes pendientes deben reasignarse manualmente.');
+  });
+
+  it('recuerda en el cuadro de confirmación la regla y que los paquetes pendientes se reasignan a mano', async () => {
+    render(<MessengerFleetList />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Desactivar' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toHaveTextContent('solo puede desactivarse si está fuera de labores y sin envíos en proceso');
+    expect(dialog).toHaveTextContent('Sus paquetes pendientes deben reasignarse manualmente.');
+  });
 });

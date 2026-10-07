@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useDeactivateMessenger } from '../hooks/useDeactivateMessenger';
 import { getInitials } from '../utils/getInitials';
+import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN } from '../config/deactivationRules';
 
 /**
  * Diálogo de confirmación para desactivar a un mensajero (HU-005). Llama a `useDeactivateMessenger`; un
@@ -101,6 +102,13 @@ export const DeactivateMessengerModal = ({
           El mensajero perderá el acceso de inmediato y no recibirá nuevas
           asignaciones. Su historial de entregas se conserva.
         </Typography>
+
+        <Box sx={{ display: 'flex', gap: 1.25, p: '12px 14px', bgcolor: '#FCF3E3', border: '1px solid #EBC98A', borderRadius: '10px' }}>
+          <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: '#C9860F', mt: '6px', flex: '0 0 9px' }} />
+          <Typography sx={{ fontSize: 14, color: '#7A5A12', lineHeight: 1.5 }}>
+            {DEACTIVATION_CONDITION} {DEACTIVATION_REASSIGN}
+          </Typography>
+        </Box>
 
         {error && (
           <Alert
