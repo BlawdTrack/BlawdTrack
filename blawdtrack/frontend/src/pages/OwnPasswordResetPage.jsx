@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Box, Button, Paper, Typography } from '@mui/material';
+import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
+import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import { useAuth } from '../hooks/useAuth';
 import { requestOwnPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
 import PageContainer from '../components/PageContainer';
+import { CARD_SX } from '../components/formStyles';
 import HelpTip from '../components/HelpTip';
 import PageHeaderBar from '../components/PageHeaderBar';
 
@@ -41,6 +44,8 @@ export function OwnPasswordResetPage() {
     }
   };
 
+  const MAIL_HELP = 'El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado. El enlace vence en 15 minutos.';
+
   return (
     <>
       <PageHeaderBar
@@ -48,54 +53,61 @@ export function OwnPasswordResetPage() {
         description="Te enviaremos un enlace al correo de tu cuenta para elegir una contraseña nueva."
       />
 
-      <PageContainer>
-      <Paper elevation={0} sx={{ maxWidth: 640, p: { xs: 3, sm: 4 }, borderRadius: '16px', border: '1px solid #E4DED7' }}>
-        <Typography sx={{ mb: 0.75, fontSize: 12, fontWeight: 700, color: '#6B6560' }}>
-          CORREO DE TU CUENTA
-        </Typography>
-        <Box
-          sx={{
-            mb: 3,
-            p: 1.75,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.25,
-            borderRadius: '10px',
-            bgcolor: '#F1ECE7',
-          }}
-        >
-          <MailOutlinedIcon sx={{ color: 'primary.main' }} />
-          <Typography sx={{ fontWeight: 600, wordBreak: 'break-all' }}>{user?.email}</Typography>
-        </Box>
-
-        {error && (
-          <Box sx={{ mb: 2 }}>
-            <StatusMessage severity="error" message={error} />
+      <PageContainer component="main" sx={{ alignItems: 'center', pt: { md: 6 } }}>
+        <Paper elevation={0} sx={{ ...CARD_SX, width: '100%', maxWidth: 560, p: { xs: 3, sm: 5 }, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, textAlign: 'center' }}>
+          <Box
+            aria-hidden
+            sx={{ width: 72, height: 72, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: sent ? '#E9F3EC' : '#FFE8D9', color: sent ? '#2F7D4F' : 'secondary.main' }}
+          >
+            {sent ? <MarkEmailReadOutlinedIcon sx={{ fontSize: 36 }} /> : <LockResetOutlinedIcon sx={{ fontSize: 36 }} />}
           </Box>
-        )}
-        {sent && (
-          <Box sx={{ mb: 2 }}>
-            <StatusMessage
-              severity="success"
-              message={`Revisa tu correo (${user?.email}): te enviamos el enlace para restablecer tu contraseña.`}
-            />
-          </Box>
-        )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-        <Button
-          variant="contained"
-          onClick={handleSend}
-          disabled={loading}
-          sx={{ width: { xs: '100%', sm: 'auto' }, px: 3, minHeight: 48, fontWeight: 700 }}
-        >
-          {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
-        </Button>
-        <HelpTip label="¿Cuánto tarda en llegar el correo?">
-          El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado. El enlace vence en 15 minutos.
-        </HelpTip>
-        </Box>
-      </Paper>
+          {sent ? (
+            <Box role="status" sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 24, color: 'primary.main' }}>
+                Revisa tu correo
+              </Typography>
+              <Typography sx={{ fontSize: 16, color: '#6B6560', lineHeight: 1.55 }}>
+                Te enviamos el enlace para restablecer tu contraseña a{' '}
+                <Box component="strong" sx={{ color: '#1F2421', overflowWrap: 'anywhere' }}>{user?.email}</Box>.
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 24, color: 'primary.main' }}>
+                Enviaremos el enlace a
+              </Typography>
+              <Box sx={{ width: '100%', p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.25, borderRadius: '12px', bgcolor: '#F1ECE7' }}>
+                <MailOutlinedIcon sx={{ color: 'primary.main' }} />
+                <Typography sx={{ fontSize: 18, fontWeight: 600, wordBreak: 'break-all' }}>{user?.email}</Typography>
+              </Box>
+            </>
+          )}
+
+          {error && (
+            <Box sx={{ width: '100%', textAlign: 'left' }}>
+              <StatusMessage severity="error" message={error} />
+            </Box>
+          )}
+
+          <Button
+            variant={sent ? 'outlined' : 'contained'}
+            disableElevation
+            fullWidth
+            onClick={handleSend}
+            disabled={loading}
+            sx={{ minHeight: 52, fontWeight: 700, fontSize: 16, borderRadius: '10px' }}
+          >
+            {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
+          </Button>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography sx={{ fontSize: 14, color: '#6B6560' }}>
+              {sent ? '¿No te llega el correo?' : '¿Cuánto tarda en llegar?'}
+            </Typography>
+            <HelpTip label="¿Cuánto tarda en llegar el correo?">{MAIL_HELP}</HelpTip>
+          </Box>
+        </Paper>
       </PageContainer>
     </>
   );
