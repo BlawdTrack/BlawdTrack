@@ -3,7 +3,7 @@ import { TimeWheelField } from './TimeWheelField';
 import { WeightWheelField } from './WeightWheelField';
 import StatusMessage from './StatusMessage';
 import { INPUT_SX, LABEL_SX } from './formStyles';
-import { CARD_PATTERN_SX } from '../theme';
+import { CARD_PATTERN_SX, RADIUS } from '../theme';
 
 const FIELD_GRID_SX = {
   display: 'grid',
@@ -21,13 +21,13 @@ const SWITCH_SX = {
     padding: '3px',
     '&.Mui-checked': {
       transform: 'translateX(19px)',
-      '& + .MuiSwitch-track': { backgroundColor: '#2F7D4F', opacity: 1 },
+      '& + .MuiSwitch-track': { backgroundColor: 'success.main', opacity: 1 },
     },
     '&.Mui-disabled': { opacity: 0.55 },
     '&.Mui-disabled + .MuiSwitch-track': { opacity: 0.55 },
   },
-  '& .MuiSwitch-thumb': { width: 21, height: 21, boxShadow: '0 1px 3px rgba(0,0,0,.25)' },
-  '& .MuiSwitch-track': { borderRadius: '14px', backgroundColor: '#DCD4CA', opacity: 1 },
+  '& .MuiSwitch-thumb': { width: 21, height: 21, boxShadow: 2 },
+  '& .MuiSwitch-track': { borderRadius: RADIUS.md, backgroundColor: 'neutral.borderStrong', opacity: 1 },
 };
 
 function FieldError({ children }) {
@@ -107,7 +107,7 @@ export default function CourierEditForm({ editor, onDiscard }) {
                 error={Boolean(formErrors.schedule)}
                 onChange={(value) => editor.changeSchedule('scheduleStart', value)}
               />
-              <Typography component="span" sx={{ color: '#6B6560' }}>a</Typography>
+              <Typography component="span" sx={{ color: 'text.secondary' }}>a</Typography>
               <TimeWheelField
                 id="scheduleEnd"
                 label="Hora de salida"
@@ -117,7 +117,7 @@ export default function CourierEditForm({ editor, onDiscard }) {
               />
             </Box>
             {formData.schedule && !formData.scheduleStart && (
-              <Typography variant="caption" sx={{ display: 'block', mt: 0.5, mx: 1.75, color: '#6B6560' }}>
+              <Typography variant="caption" sx={{ display: 'block', mt: 0.5, mx: 1.75, color: 'text.secondary' }}>
                 Horario actual: {formData.schedule}. Elige las horas para cambiarlo.
               </Typography>
             )}
@@ -154,8 +154,8 @@ export default function CourierEditForm({ editor, onDiscard }) {
 
         <Box
           sx={{
-            bgcolor: '#F1ECE7',
-            borderRadius: '12px',
+            bgcolor: 'neutral.surface',
+            borderRadius: RADIUS.sm,
             p: '16px 18px',
             display: 'flex',
             alignItems: 'center',
@@ -166,13 +166,13 @@ export default function CourierEditForm({ editor, onDiscard }) {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
             <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>Estado de acceso</Typography>
-            <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.4 }}>
+            <Typography sx={{ fontSize: 14, color: 'text.secondary', lineHeight: 1.4 }}>
               {isActive
                 ? 'Habilitado. Al revocarlo, la sesión activa se cierra de inmediato.'
                 : 'Revocado. El mensajero no puede iniciar sesión.'}
             </Typography>
             {isStatusLocked && (
-              <Typography sx={{ fontSize: 14, color: '#C0392B', fontWeight: 600 }}>
+              <Typography sx={{ fontSize: 14, color: 'error.main', fontWeight: 600 }}>
                 Solo puedes cambiar el estado fuera de labores y sin envíos en proceso.
               </Typography>
             )}
@@ -189,12 +189,12 @@ export default function CourierEditForm({ editor, onDiscard }) {
         {updateError && <StatusMessage severity="error" message={updateError} />}
       </Box>
 
-      <Box sx={{ px: 3, py: 2, borderTop: '1px solid #E4DED7', ...CARD_PATTERN_SX, display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+      <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'neutral.border', ...CARD_PATTERN_SX, display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Button
           type="submit"
           variant="contained"
           disabled={submitting}
-          sx={{ fontWeight: 600, px: 4, minHeight: 48, fontSize: 16, borderRadius: '10px' }}
+          sx={{ fontWeight: 600, px: 4, minHeight: 48, fontSize: 16, borderRadius: RADIUS.sm }}
         >
           {submitting ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Guardar cambios'}
         </Button>
@@ -203,7 +203,7 @@ export default function CourierEditForm({ editor, onDiscard }) {
           variant="outlined"
           onClick={onDiscard}
           disabled={submitting}
-          sx={{ color: 'primary.main', border: '1.5px solid #DCD4CA', fontWeight: 600, px: 3, minHeight: 48, fontSize: 16, borderRadius: '10px' }}
+          sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: 48, fontSize: 16, borderRadius: RADIUS.sm }}
         >
           Descartar
         </Button>

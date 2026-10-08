@@ -29,7 +29,7 @@ export default function MobileBottomNav({ groups }) {
         bottom: 0,
         zIndex: 10,
         ...CARD_PATTERN_SX,
-        borderTop: '1px solid #E4DED7',
+        borderTop: '1px solid', borderColor: 'neutral.border',
       }}
     >
       {groups.map((group) => {
@@ -54,9 +54,9 @@ export default function MobileBottomNav({ groups }) {
             }}
           >
             {Icon && (
-              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? ACTIVE_COLOR : '#6B6560' }} />
+              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? ACTIVE_COLOR : 'text.secondary' }} />
             )}
-            <Typography sx={{ fontSize: 12, fontWeight: 700, color: active ? ACTIVE_COLOR : '#6B6560' }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: active ? ACTIVE_COLOR : 'text.secondary' }}>
               {group.shortTitle}
             </Typography>
           </ButtonBase>

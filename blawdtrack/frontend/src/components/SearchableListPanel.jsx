@@ -65,7 +65,7 @@ export default function SearchableListPanel({
 
   return (
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', flexDirection: 'column', minHeight: 0, ...sx }}>
-      <Box sx={{ p: 2.5, borderBottom: '1px solid #E4DED7', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Box sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'neutral.border', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         <Typography sx={HEADING_SX}>{searchTitle}</Typography>
         <DocumentSearch search={search} />
       </Box>

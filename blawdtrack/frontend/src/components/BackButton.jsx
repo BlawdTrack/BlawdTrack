@@ -11,7 +11,7 @@ export default function BackButton({ onClick, children = 'Volver', sx }) {
     <Button
       onClick={onClick}
       startIcon={<ArrowBackIcon />}
-      sx={{ color: 'primary.main', fontWeight: 600, border: '1.5px solid #DCD4CA', ...sx }}
+      sx={{ color: 'primary.main', fontWeight: 600, border: '1.5px solid', borderColor: 'neutral.borderStrong', ...sx }}
     >
       {children}
     </Button>

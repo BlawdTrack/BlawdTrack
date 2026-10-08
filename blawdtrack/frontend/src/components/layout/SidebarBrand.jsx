@@ -2,6 +2,7 @@ import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import MenuIcon from '@mui/icons-material/Menu';
 import logo from '../../assets/Logo.png';
+import { RADIUS } from '../../theme';
 
 /**
  * Encabezado de la barra lateral con el logo, el nombre de la aplicación y el botón para colapsar o
@@ -26,8 +27,8 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
         sx={{
           width: 38,
           height: 38,
-          borderRadius: '10px',
-          backgroundColor: '#fff',
+          borderRadius: RADIUS.sm,
+          backgroundColor: 'background.paper',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -38,7 +39,7 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
       </Box>
       {!collapsed && (
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#fff', lineHeight: 1.25, letterSpacing: '.2px' }}>
+          <Typography sx={{ fontWeight: 600, fontSize: 16, color: 'common.white', lineHeight: 1.25, letterSpacing: '.2px' }}>
             BlawdTrack
           </Typography>
           <Typography
@@ -57,7 +58,7 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
               width: 44,
               height: 44,
               color: 'rgba(255,255,255,.75)',
-              '&:hover': { color: '#fff', backgroundColor: 'rgba(255,255,255,.08)' },
+              '&:hover': { color: 'common.white', backgroundColor: 'rgba(255,255,255,.08)' },
               '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },
             }}
           >

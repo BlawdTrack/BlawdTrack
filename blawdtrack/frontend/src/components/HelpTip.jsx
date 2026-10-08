@@ -17,7 +17,7 @@ export default function HelpTip({ label, children, sx }) {
       title={children}
       slotProps={{ tooltip: { sx: { fontSize: 14, lineHeight: 1.5, maxWidth: 340, p: 1.5 } } }}
     >
-      <IconButton aria-label={label} sx={{ width: 44, height: 44, my: '-10px', color: '#6B6560', ...sx }}>
+      <IconButton aria-label={label} sx={{ width: 44, height: 44, my: '-10px', color: 'text.secondary', ...sx }}>
         <InfoOutlinedIcon fontSize="small" />
       </IconButton>
     </Tooltip>

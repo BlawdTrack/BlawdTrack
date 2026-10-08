@@ -1,4 +1,5 @@
 import { Chip } from '@mui/material';
+import { RADIUS } from '../theme';
 
 /**
  * Etiqueta "Activo" / "Inactivo" del estado de acceso de una cuenta.
@@ -12,9 +13,9 @@ export default function StatusChip({ active }) {
       sx={{
         fontSize: 12,
         fontWeight: 700,
-        borderRadius: '20px',
-        bgcolor: active ? '#E9F3EC' : '#F1ECE7',
-        color: active ? '#256B41' : '#6B6560',
+        borderRadius: RADIUS.lg,
+        bgcolor: active ? 'success.light' : 'neutral.surface',
+        color: active ? 'success.dark' : 'text.secondary',
       }}
     />
   );

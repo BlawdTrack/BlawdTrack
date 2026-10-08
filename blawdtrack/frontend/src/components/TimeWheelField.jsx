@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { INPUT_SX } from './formStyles';
 import { Box, Button, Popover, TextField } from '@mui/material';
+import { RADIUS } from '../theme';
 
 const ITEM_HEIGHT = 40;
 export const WHEEL_ITEM_HEIGHT = ITEM_HEIGHT;
@@ -261,7 +262,7 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
         open={Boolean(anchor)}
         anchorEl={anchor}
         onClose={() => setAnchor(null)}
-        slotProps={{ paper: { sx: { borderRadius: '14px', p: 1.5, mt: 0.5 } } }}
+        slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1.5, mt: 0.5 } } }}
       >
         <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', gap: 0.5 }}>
           <Box
@@ -272,8 +273,8 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
               right: 0,
               top: ITEM_HEIGHT * ((VISIBLE_ITEMS - 1) / 2),
               height: ITEM_HEIGHT,
-              borderRadius: '10px',
-              backgroundColor: '#F1ECE7',
+              borderRadius: RADIUS.sm,
+              backgroundColor: 'neutral.surface',
               zIndex: 0,
               pointerEvents: 'none'
             }}
@@ -291,8 +292,8 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
             mt: 1,
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: '10px',
-            color: '#fff',
+            borderRadius: RADIUS.sm,
+            color: 'common.white',
             backgroundColor: '#1A3C34',
             '&:hover': { backgroundColor: '#12322B' }
           }}

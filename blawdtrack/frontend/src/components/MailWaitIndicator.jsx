@@ -31,10 +31,10 @@ export default function MailWaitIndicator({ remaining, total }) {
         variant="determinate"
         value={(elapsed / total) * 100}
         aria-label="Tiempo de espera para pedir otro correo"
-        sx={{ height: 8, borderRadius: 4, bgcolor: '#F1ECE7' }}
+        sx={{ height: 8, borderRadius: 4, bgcolor: 'neutral.surface' }}
       />
-      <Typography aria-live="off" sx={{ fontSize: 14, color: '#6B6560' }}>{message}</Typography>
-      <Typography sx={{ fontSize: 14, color: '#6B6560' }}>
+      <Typography aria-live="off" sx={{ fontSize: 14, color: 'text.secondary' }}>{message}</Typography>
+      <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
         Podrás pedir otro en <strong>{formatClock(remaining)}</strong>
       </Typography>
     </Box>

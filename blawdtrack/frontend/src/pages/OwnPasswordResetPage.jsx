@@ -12,6 +12,7 @@ import PageContainer from '../components/PageContainer';
 import { CARD_SX } from '../components/formStyles';
 import HelpTip from '../components/HelpTip';
 import PageHeaderBar from '../components/PageHeaderBar';
+import { RADIUS } from '../theme';
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo más tarde.';
@@ -62,7 +63,7 @@ export function OwnPasswordResetPage() {
         <Paper elevation={0} sx={{ ...CARD_SX, width: '100%', maxWidth: 560, p: { xs: 3, sm: 5 }, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, textAlign: 'center' }}>
           <Box
             aria-hidden
-            sx={{ width: 72, height: 72, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: sent ? '#E9F3EC' : '#FFE8D9', color: sent ? '#2F7D4F' : 'secondary.main' }}
+            sx={{ width: 72, height: 72, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: sent ? 'success.light' : 'secondary.light', color: sent ? 'success.main' : 'secondary.main' }}
           >
             {sent ? <MarkEmailReadOutlinedIcon sx={{ fontSize: 36 }} /> : <LockResetOutlinedIcon sx={{ fontSize: 36 }} />}
           </Box>
@@ -72,7 +73,7 @@ export function OwnPasswordResetPage() {
               <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 24, color: 'primary.main' }}>
                 Revisa tu correo
               </Typography>
-              <Typography sx={{ fontSize: 16, color: '#6B6560', lineHeight: 1.55 }}>
+              <Typography sx={{ fontSize: 16, color: 'text.secondary', lineHeight: 1.55 }}>
                 Te enviamos el enlace para restablecer tu contraseña a{' '}
                 <Box component="strong" sx={{ color: '#1F2421', overflowWrap: 'anywhere' }}>{user?.email}</Box>.
               </Typography>
@@ -82,7 +83,7 @@ export function OwnPasswordResetPage() {
               <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 24, color: 'primary.main' }}>
                 Enviaremos el enlace a
               </Typography>
-              <Box sx={{ width: '100%', p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.25, borderRadius: '12px', bgcolor: '#F1ECE7' }}>
+              <Box sx={{ width: '100%', p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.25, borderRadius: RADIUS.sm, bgcolor: 'neutral.surface' }}>
                 <MailOutlinedIcon sx={{ color: 'primary.main' }} />
                 <Typography sx={{ fontSize: 18, fontWeight: 600, wordBreak: 'break-all' }}>{user?.email}</Typography>
               </Box>
@@ -103,13 +104,13 @@ export function OwnPasswordResetPage() {
             fullWidth
             onClick={handleSend}
             disabled={loading || resendWait.running}
-            sx={{ minHeight: 52, fontWeight: 700, fontSize: 16, borderRadius: '10px' }}
+            sx={{ minHeight: 52, fontWeight: 700, fontSize: 16, borderRadius: RADIUS.sm }}
           >
             {loading ? 'Enviando…' : sent ? 'Enviar de nuevo' : 'Enviarme el enlace'}
           </Button>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography sx={{ fontSize: 14, color: '#6B6560' }}>
+            <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
               {sent ? '¿No te llega el correo?' : '¿Cuánto tarda en llegar?'}
             </Typography>
             <HelpTip label="¿Cuánto tarda en llegar el correo?">{MAIL_HELP}</HelpTip>

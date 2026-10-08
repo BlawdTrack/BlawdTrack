@@ -1,15 +1,16 @@
 import { Box, Typography } from '@mui/material';
 import { evaluatePasswordRules } from '../utils/passwordRules';
+import { RADIUS } from '../theme';
 
 // Checklist "Requisitos" (bloque r3 del mockup). Las reglas 1-3 se evalúan en
 // vivo con lo que el usuario escribe. La regla 4 (distinta de las últimas 3
 // contraseñas) se queda SIEMPRE en estado neutro: el cliente no puede saberlo.
 // Solo pasa a "no cumplida" cuando el propio backend la rechazó
 // (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
-const OK_COLOR = '#2F7D4F';
-const ERROR_COLOR = '#C0392B';
+const OK_COLOR = 'success.main';
+const ERROR_COLOR = 'error.main';
 const NEUTRAL_TEXT = '#9E968D';
-const NEUTRAL_RING = '#DCD4CA';
+const NEUTRAL_RING = 'neutral.borderStrong';
 
 const VISUALLY_HIDDEN = {
   position: 'absolute',
@@ -39,7 +40,8 @@ function Rule({ label, state, note }) {
           flex: '0 0 15px',
           borderRadius: '50%',
           bgcolor: state === 'ok' ? OK_COLOR : 'transparent',
-          border: `1.5px solid ${state === 'ok' ? OK_COLOR : state === 'failed' ? ERROR_COLOR : NEUTRAL_RING}`,
+          border: '1.5px solid',
+          borderColor: state === 'ok' ? OK_COLOR : state === 'failed' ? ERROR_COLOR : NEUTRAL_RING,
         }}
       />
       <span>
@@ -67,8 +69,8 @@ export function PasswordRequirements({ password, historyRejected = false }) {
   return (
     <Box
       sx={{
-        bgcolor: '#F1ECE7',
-        borderRadius: '12px',
+        bgcolor: 'neutral.surface',
+        borderRadius: RADIUS.sm,
         p: '15px 16px',
         display: 'flex',
         flexDirection: 'column',
@@ -77,7 +79,7 @@ export function PasswordRequirements({ password, historyRejected = false }) {
     >
       <Typography
         id="password-requirements-title"
-        sx={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: '#6B6560' }}
+        sx={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: 'text.secondary' }}
       >
         Requisitos
       </Typography>

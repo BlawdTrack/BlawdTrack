@@ -8,6 +8,7 @@ import { NAV_GROUP_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
 import PageContainer from '../components/PageContainer';
 import { getGreeting } from '../utils/greeting';
+import { RADIUS } from '../theme';
 
 /**
  * Inicio del Super Usuario dentro del menú principal: portada con su nombre y su rol, el saludo según la
@@ -38,7 +39,7 @@ export default function MainMenuPage() {
           color: 'primary.contrastText',
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: '24px',
+          borderRadius: RADIUS.lg,
           // Franja naranja recta en el borde superior (con borderTop se curvaba en las esquinas).
           '&::before': {
             content: '""',
@@ -78,7 +79,7 @@ export default function MainMenuPage() {
         </Typography>
         <Chip
           label={ROLE_LABELS[user.role] ?? user.role}
-          sx={{ mt: 1, bgcolor: '#FFE8D9', color: '#B84700', fontWeight: 700, fontSize: 14, height: 32, px: 1 }}
+          sx={{ mt: 1, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: 14, height: 32, px: 1 }}
         />
       </Box>
 

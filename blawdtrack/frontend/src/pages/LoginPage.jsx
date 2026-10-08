@@ -11,7 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
 import { INLINE_LABEL_SX } from '../components/formStyles';
-import { CARD_PATTERN_SX } from '../theme';
+import { CARD_PATTERN_SX, RADIUS } from '../theme';
 import blawdtrackLogo from '../assets/Logo.png';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,8 +94,8 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             sx={{
               width: 44,
               height: 44,
-              borderRadius: '12px',
-              bgcolor: '#fff',
+              borderRadius: RADIUS.sm,
+              bgcolor: 'background.paper',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -139,7 +139,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             sx={{
               width: 40,
               height: 40,
-              borderRadius: '10px',
+              borderRadius: RADIUS.sm,
               bgcolor: 'primary.main',
               display: 'flex',
               alignItems: 'center',
@@ -161,8 +161,8 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             width: '100%',
             maxWidth: 420,
             ...CARD_PATTERN_SX,
-            border: '1px solid #E4DED7',
-            borderRadius: '16px',
+            border: '1px solid', borderColor: 'neutral.border',
+            borderRadius: RADIUS.md,
             p: { xs: 3, sm: 4.5 },
             display: 'flex',
             flexDirection: 'column',
@@ -246,11 +246,11 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             )}
           </Button>
 
-          {/* '#2F7D4F' es el mismo verde de éxito que usa StatusMessage.jsx;
+          {/* 'success.main' es el mismo verde de éxito que usa StatusMessage.jsx;
               el theme no define theme.palette.success, así que se repite el
               valor fijo en vez de inventar un token nuevo. */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#2F7D4F', flexShrink: 0 }} />
+            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'success.main', flexShrink: 0 }} />
             <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
               Conexión a internet requerida · contraseñas encriptadas
             </Typography>

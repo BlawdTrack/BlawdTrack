@@ -19,7 +19,7 @@ export default function UserLookupPanel({ search, error, busy }) {
         </HelpTip>
       </Typography>
       <DocumentSearch search={search} />
-      {busy && <Typography role="status" sx={{ fontSize: 14, color: '#6B6560' }}>Buscando...</Typography>}
+      {busy && <Typography role="status" sx={{ fontSize: 14, color: 'text.secondary' }}>Buscando...</Typography>}
       {error && <Alert severity="error">{error}</Alert>}
     </Paper>
   );

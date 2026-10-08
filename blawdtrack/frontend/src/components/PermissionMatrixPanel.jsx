@@ -18,21 +18,21 @@ export default function PermissionMatrixPanel({
 }) {
   return (
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-      <Box sx={{ p: 2.5, borderBottom: '1px solid #E4DED7', display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'neutral.border', display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
           <Avatar sx={{ width: 48, height: 48, bgcolor: '#12322B', fontWeight: 700 }}>{getInitials(user.fullName)}</Avatar>
           <Box sx={{ minWidth: 0 }}>
             <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>
               {user.fullName}
             </Typography>
-            <Typography sx={{ fontSize: 14, color: '#6B6560' }}>
+            <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
               {user.documentNumber} · rol principal: {roleGroup?.name ?? user.role}
               {user.customized ? ' · permisos personalizados' : ''}
             </Typography>
           </Box>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-          <Button onClick={onDiscard} disabled={saving} sx={{ color: '#6B6560', fontWeight: 600 }}>
+          <Button onClick={onDiscard} disabled={saving} sx={{ color: 'text.secondary', fontWeight: 600 }}>
             Descartar
           </Button>
           <Button variant="outlined" startIcon={<RestartAltRounded />} onClick={onReset} disabled={!canReset || saving}>
@@ -57,12 +57,12 @@ export default function PermissionMatrixPanel({
           <>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.5 }}>
               <Typography component="h3" sx={{ fontWeight: 700, fontSize: 16 }}>{roleGroup.name}</Typography>
-              <Typography sx={{ fontSize: 14, color: '#6B6560' }}>{roleGroup.permissions.length} permisos</Typography>
+              <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>{roleGroup.permissions.length} permisos</Typography>
               <HelpTip label="¿Qué permisos se pueden modificar?">
                 Solo se pueden modificar los permisos que corresponden al rol del usuario.
               </HelpTip>
               {!user.editable && (
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: '#6B6560', fontSize: 14 }}>
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: 14 }}>
                   <LockOutlined fontSize="small" aria-hidden="true" />
                   Fijos
                 </Box>
@@ -74,7 +74,7 @@ export default function PermissionMatrixPanel({
               return (
                 <Box
                   key={permission.code}
-                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, minHeight: 56, borderTop: '1px solid #F1ECE7', opacity: editable ? 1 : 0.75 }}
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, minHeight: 56, borderTop: '1px solid', borderColor: 'neutral.surface', opacity: editable ? 1 : 0.75 }}
                 >
                   <Typography sx={{ fontSize: 16 }}>{permission.description}</Typography>
                   <Switch

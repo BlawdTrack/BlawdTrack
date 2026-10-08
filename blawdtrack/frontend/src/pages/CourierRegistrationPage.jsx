@@ -128,7 +128,7 @@ export function CourierRegistrationPage() {
             error={Boolean(fieldErrors.schedule)}
             onChange={setScheduleHour('scheduleStart')}
           />
-          <Typography component="span" sx={{ color: '#6B6560', fontSize: 16 }}>a</Typography>
+          <Typography component="span" sx={{ color: 'text.secondary', fontSize: 16 }}>a</Typography>
           <TimeWheelField
             id="scheduleEnd"
             label="Hora de salida"

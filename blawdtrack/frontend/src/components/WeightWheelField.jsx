@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { INPUT_SX } from './formStyles';
 import { Box, Button, Popover, TextField } from '@mui/material';
 import { Wheel, WHEEL_ITEM_HEIGHT, WHEEL_VISIBLE_ITEMS } from './TimeWheelField';
+import { RADIUS } from '../theme';
 
 const WEIGHTS = Array.from({ length: 800 }, (_, i) => String(i + 1));
 
@@ -49,7 +50,7 @@ export function WeightWheelField({ label, value, onChange, error, id }) {
         open={Boolean(anchor)}
         anchorEl={anchor}
         onClose={() => setAnchor(null)}
-        slotProps={{ paper: { sx: { borderRadius: '14px', p: 1.5, mt: 0.5 } } }}
+        slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1.5, mt: 0.5 } } }}
       >
         <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Box
@@ -60,13 +61,13 @@ export function WeightWheelField({ label, value, onChange, error, id }) {
               right: 0,
               top: WHEEL_ITEM_HEIGHT * ((WHEEL_VISIBLE_ITEMS - 1) / 2),
               height: WHEEL_ITEM_HEIGHT,
-              borderRadius: '10px',
-              backgroundColor: '#F1ECE7'
+              borderRadius: RADIUS.sm,
+              backgroundColor: 'neutral.surface'
             }}
           />
           <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 1 }}>
             <Wheel items={WEIGHTS} selected={draft} onSelect={setDraft} label={label} />
-            <Box component="span" sx={{ color: '#6B6560', fontWeight: 600 }}>kg</Box>
+            <Box component="span" sx={{ color: 'text.secondary', fontWeight: 600 }}>kg</Box>
           </Box>
         </Box>
         <Button
@@ -76,8 +77,8 @@ export function WeightWheelField({ label, value, onChange, error, id }) {
             mt: 1,
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: '10px',
-            color: '#fff',
+            borderRadius: RADIUS.sm,
+            color: 'common.white',
             backgroundColor: '#1A3C34',
             '&:hover': { backgroundColor: '#12322B' }
           }}

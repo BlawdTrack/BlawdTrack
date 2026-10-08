@@ -1,9 +1,9 @@
 import { Box, Typography } from '@mui/material';
 
 const TONES = {
-  accent: { bg: '#FFE8D9', fg: '#C25100' },
-  success: { bg: '#E9F3EC', fg: '#2F7D4F' },
-  error: { bg: '#FCEDEA', fg: '#C0392B' },
+  accent: { bg: 'secondary.light', fg: 'secondary.dark' },
+  success: { bg: 'success.light', fg: 'success.main' },
+  error: { bg: 'error.light', fg: 'error.main' },
 };
 
 /**
@@ -26,7 +26,7 @@ export default function AuthStateHeader({ icon: Icon, tone = 'accent', title, de
         {title}
       </Typography>
       {description && (
-        <Typography component="div" sx={{ fontSize: 16, color: '#6B6560', lineHeight: 1.55 }}>
+        <Typography component="div" sx={{ fontSize: 16, color: 'text.secondary', lineHeight: 1.55 }}>
           {description}
         </Typography>
       )}

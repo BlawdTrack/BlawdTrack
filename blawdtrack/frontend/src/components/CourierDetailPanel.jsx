@@ -9,8 +9,9 @@ import TabPanel from './TabPanel';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/getInitials';
 import { getCourierDocument, getCourierName, recordsLabel } from '../utils/courierEdit';
+import { RADIUS } from '../theme';
 
-const OUTLINE_BUTTON_SX = { color: 'primary.main', fontWeight: 600, border: '1.5px solid #DCD4CA' };
+const OUTLINE_BUTTON_SX = { color: 'primary.main', fontWeight: 600, border: '1.5px solid', borderColor: 'neutral.borderStrong' };
 
 /**
  * Panel de un mensajero: quién es, y dos pestañas, "Datos" (formulario) e "Historial" (solo los cambios
@@ -38,14 +39,14 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
             Mostrar flota
           </Button>
         )}
-        <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main', color: '#fff', fontWeight: 700 }}>
+        <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main', color: 'common.white', fontWeight: 700 }}>
           {getInitials(getCourierName(courier))}
         </Avatar>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>
             Editar · {getCourierName(courier)}
           </Typography>
-          <Typography sx={{ fontSize: 14, color: '#6B6560' }}>
+          <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
             Cédula {getCourierDocument(courier)} · no editable
           </Typography>
         </Box>
@@ -55,7 +56,7 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
       <Tabs
         value={activeTab}
         onChange={(_, value) => setActiveTab(value)}
-        sx={{ px: 1.5, borderBottom: '1px solid #E4DED7', minHeight: 48 }}
+        sx={{ px: 1.5, borderBottom: '1px solid', borderColor: 'neutral.border', minHeight: 48 }}
       >
         <Tab value="datos" label="Datos" id="tab-datos" aria-controls="panel-datos" />
         <Tab value="historial" label={`Historial (${history.length})`} id="tab-historial" aria-controls="panel-historial" />
@@ -73,7 +74,7 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
           <Chip
             label={recordsLabel(history.length)}
             size="small"
-            sx={{ fontSize: 12, fontWeight: 600, bgcolor: '#F1ECE7', color: '#6B6560', borderRadius: '20px' }}
+            sx={{ fontSize: 12, fontWeight: 600, bgcolor: 'neutral.surface', color: 'text.secondary', borderRadius: RADIUS.lg }}
           />
         </Box>
         <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

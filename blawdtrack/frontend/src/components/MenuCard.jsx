@@ -1,7 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { CARD_PATTERN_SX } from '../theme';
+import { CARD_PATTERN_SX, RADIUS } from '../theme';
 
 /**
  * Tarjeta de los menús (principal y de cada módulo): icono, título y descripción corta. Toda la tarjeta
@@ -27,8 +27,8 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
         minHeight: { xs: 96, md: 260 },
         p: { xs: 2.5, md: 4 },
         ...CARD_PATTERN_SX,
-        border: '1px solid #E4DED7',
-        borderRadius: '20px',
+        border: '1px solid', borderColor: 'neutral.border',
+        borderRadius: RADIUS.lg,
         color: 'text.primary',
         textDecoration: 'none',
         opacity: to ? 1 : 0.6,
@@ -37,9 +37,9 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
         ...(to && {
           '&:hover': {
             borderColor: 'secondary.main',
-            boxShadow: '0 12px 32px rgba(26,60,52,.12)',
+            boxShadow: 8,
             transform: 'translateY(-2px)',
-            '& .menu-card-arrow': { bgcolor: 'secondary.main', color: '#fff' },
+            '& .menu-card-arrow': { bgcolor: 'secondary.main', color: 'common.white' },
           },
           '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 2 },
         }),
@@ -51,8 +51,8 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
             flex: { xs: '0 0 48px', md: '0 0 72px' },
             width: { xs: 48, md: 72 },
             height: { xs: 48, md: 72 },
-            borderRadius: { xs: '12px', md: '18px' },
-            bgcolor: '#FFE8D9',
+            borderRadius: { xs: RADIUS.sm, md: RADIUS.md },
+            bgcolor: 'secondary.light',
             color: 'secondary.main',
             display: 'flex',
             alignItems: 'center',
@@ -84,7 +84,7 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
             width: 36,
             height: 36,
             borderRadius: '50%',
-            bgcolor: '#F1ECE7',
+            bgcolor: 'neutral.surface',
             color: 'primary.main',
             display: 'flex',
             alignItems: 'center',

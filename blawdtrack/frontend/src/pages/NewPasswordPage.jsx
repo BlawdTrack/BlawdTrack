@@ -18,6 +18,7 @@ import LinkOffOutlinedIcon from '@mui/icons-material/LinkOffOutlined';
 import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import { PasswordRequirements } from '../components/PasswordRequirements';
 import { meetsClientPasswordRules } from '../utils/passwordRules';
+import { RADIUS } from '../theme';
 
 // Textos propios del frontend (no se muestra el `message` crudo del backend,
 // que viene en otro idioma). Los tres primeros son los del mockup (`savePwd`).
@@ -35,7 +36,7 @@ const MISSING_TOKEN_MESSAGE =
 const REJECTED_TOKEN_MESSAGE =
   'Este enlace no es válido o ya expiró. Solicita uno nuevo para restablecer tu contraseña.';
 
-const BUTTON_SX = { borderRadius: '10px', minHeight: 52, fontWeight: 600, fontSize: 16 };
+const BUTTON_SX = { borderRadius: RADIUS.sm, minHeight: 52, fontWeight: 600, fontSize: 16 };
 
 // T05 de HU-002 (#66): el usuario llega desde el enlace del correo y define
 // su nueva contraseña. Vistas del mismo flujo (r3/r4 del mockup + el caso sin

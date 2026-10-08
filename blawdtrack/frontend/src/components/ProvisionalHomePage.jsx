@@ -8,12 +8,12 @@ import { ROLE_LABELS } from '../config/roles';
 import { getPasswordResetRoute } from '../utils/roleRoutes';
 import logo from '../assets/Logo.png';
 import PageContainer from './PageContainer';
-import { CARD_PATTERN_SX } from '../theme';
+import { CARD_PATTERN_SX, RADIUS } from '../theme';
 
 const CARD_SX = {
   ...CARD_PATTERN_SX,
-  border: '1px solid #E4DED7',
-  borderRadius: '16px',
+  border: '1px solid', borderColor: 'neutral.border',
+  borderRadius: RADIUS.md,
   p: { xs: 2.5, sm: 3 },
   display: 'flex',
   flexDirection: 'column',
@@ -60,8 +60,8 @@ export function ProvisionalHomePage({ title, description }) {
             sx={{
               width: 36,
               height: 36,
-              borderRadius: '10px',
-              bgcolor: '#fff',
+              borderRadius: RADIUS.sm,
+              bgcolor: 'background.paper',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -96,7 +96,7 @@ export function ProvisionalHomePage({ title, description }) {
           <Chip
             label={ROLE_LABELS[user?.role] ?? user?.role}
             size="small"
-            sx={{ mt: 1, bgcolor: '#FFE8D9', color: '#B84700', fontWeight: 700 }}
+            sx={{ mt: 1, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700 }}
           />
         </Box>
 

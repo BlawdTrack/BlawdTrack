@@ -1,4 +1,5 @@
 import { Chip } from '@mui/material';
+import { RADIUS } from '../theme';
 
 /**
  * Etiqueta de si una cuenta tiene la sesión abierta ("Sesión activa" en ámbar) o no ("Sin sesión").
@@ -12,9 +13,9 @@ export default function SessionChip({ active }) {
       sx={{
         fontSize: 12,
         fontWeight: 700,
-        borderRadius: '20px',
-        bgcolor: active ? '#FCF3E3' : '#F1ECE7',
-        color: active ? '#8A5A00' : '#6B6560',
+        borderRadius: RADIUS.lg,
+        bgcolor: active ? 'warning.light' : 'neutral.surface',
+        color: active ? 'warning.dark' : 'text.secondary',
         transition: 'background-color .4s ease, color .4s ease',
       }}
     />

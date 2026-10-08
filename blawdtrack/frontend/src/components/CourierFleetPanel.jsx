@@ -23,11 +23,11 @@ import { getCourierDocument, getCourierName, getScheduleTimeRange, isCourierActi
 
 const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' };
 const HEADER_CELL_SX = {
-  bgcolor: '#F1ECE7',
+  bgcolor: 'neutral.surface',
   fontSize: 12,
   fontWeight: 700,
   textTransform: 'uppercase',
-  color: '#6B6560',
+  color: 'text.secondary',
   letterSpacing: '.9px',
   border: 0,
   py: 1,
@@ -38,7 +38,7 @@ const STATUS_COLUMN_WIDTH = 104;
 function MessageRow({ children }) {
   return (
     <TableRow>
-      <TableCell colSpan={2} sx={{ textAlign: 'center', py: 6, color: '#6B6560' }}>
+      <TableCell colSpan={2} sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
         {children}
       </TableCell>
     </TableRow>
@@ -68,7 +68,7 @@ export default function CourierFleetPanel({
 }) {
   return (
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', flexDirection: 'column', minHeight: 0, ...sx }}>
-      <Box sx={{ p: 2.5, borderBottom: '1px solid #E4DED7', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Box sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'neutral.border', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
           <Typography sx={HEADING_SX}>Buscar mensajero por documento</Typography>
           {canHide && (
@@ -88,7 +88,7 @@ export default function CourierFleetPanel({
 
       <Box sx={{ px: 2.5, py: 1.5, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
         <Typography sx={HEADING_SX}>Flota de mensajeros</Typography>
-        <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
+        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
           {couriers.length} {couriers.length === 1 ? 'mensajero' : 'mensajeros'}
         </Typography>
       </Box>
@@ -121,8 +121,8 @@ export default function CourierFleetPanel({
                           width: 36,
                           height: 36,
                           flex: '0 0 36px',
-                          bgcolor: selected ? 'primary.main' : '#F1ECE7',
-                          color: selected ? '#fff' : '#6B6560',
+                          bgcolor: selected ? 'primary.main' : 'neutral.surface',
+                          color: selected ? 'common.white' : 'text.secondary',
                           fontWeight: 700,
                           fontSize: 12,
                         }}
@@ -133,7 +133,7 @@ export default function CourierFleetPanel({
                         <Typography sx={{ fontWeight: 600, color: '#1F2421', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {name}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: '#6B6560', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {key ?? ''}
                           {' · '}
                           {getScheduleTimeRange(courier.schedule || courier.horario)}

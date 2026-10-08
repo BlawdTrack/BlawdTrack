@@ -2,6 +2,7 @@ import { Box, Button, MenuItem, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { DOCUMENT_PLACEHOLDERS, DOCUMENT_TYPE_OPTIONS } from '../config/documentTypes';
 import { INPUT_SX } from './formStyles';
+import { RADIUS } from '../theme';
 
 /**
  * Campos para buscar por tipo y número de documento, con los botones "Buscar" y "Limpiar". Es solo la
@@ -47,14 +48,14 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
       disableElevation
       onClick={search.search}
       startIcon={stacked ? <SearchIcon /> : undefined}
-      sx={{ flex: stacked ? 1 : { xs: '1 1 100%', sm: '0 0 auto' }, px: stacked ? undefined : 3.5, minHeight: stacked ? 44 : 52, fontWeight: 600, borderRadius: '10px' }}
+      sx={{ flex: stacked ? 1 : { xs: '1 1 100%', sm: '0 0 auto' }, px: stacked ? undefined : 3.5, minHeight: stacked ? 44 : 52, fontWeight: 600, borderRadius: RADIUS.sm }}
     >
       Buscar
     </Button>
   );
 
   const clearButton = search.isFiltering && (
-    <Button onClick={search.clear} sx={{ flex: '0 0 auto', color: '#6B6560', fontWeight: 600, px: 1.5 }}>
+    <Button onClick={search.clear} sx={{ flex: '0 0 auto', color: 'text.secondary', fontWeight: 600, px: 1.5 }}>
       Limpiar
     </Button>
   );

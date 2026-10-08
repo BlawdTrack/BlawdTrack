@@ -1,5 +1,6 @@
 import { Snackbar, Box, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { RADIUS } from '../theme';
 
 // Notificación flotante, tal como aparece en el mockup (pantallas D y F:
 // "Notificaciones toast"). Se apoya en el Snackbar de MUI solo para el
@@ -7,9 +8,9 @@ import CloseIcon from '@mui/icons-material/Close';
 // completamente propio, para que coincida con el diseño exacto del
 // mockup en vez del Alert por defecto de MUI.
 const SEVERITY_STYLES = {
-  success: '#2F7D4F',
-  error: '#C0392B',
-  warning: '#C9860F',
+  success: 'success.main',
+  error: 'error.main',
+  warning: 'warning.main',
 };
 
 /** Segundos que dura un aviso antes de cerrarse solo: tiempo para leer una o dos frases sin estorbar. */
@@ -43,10 +44,11 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
         role="status"
         aria-live="polite"
         sx={{
-          bgcolor: '#ffffff',
-          borderRadius: '12px',
-          borderLeft: `6px solid ${accentColor}`,
-          boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
+          bgcolor: 'background.paper',
+          borderRadius: RADIUS.sm,
+          borderLeft: '6px solid',
+          borderColor: accentColor,
+          boxShadow: 8,
           pl: 2.5,
           pr: 1,
           py: 1.5,
@@ -62,7 +64,7 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
         <IconButton
           onClick={(event) => handleClose(event, 'closeButton')}
           aria-label="Cerrar aviso"
-          sx={{ alignSelf: 'flex-start', width: 44, height: 44, color: '#6B6560', '&:hover': { bgcolor: '#F1ECE7' } }}
+          sx={{ alignSelf: 'flex-start', width: 44, height: 44, color: 'text.secondary', '&:hover': { bgcolor: 'neutral.surface' } }}
         >
           <CloseIcon fontSize="small" />
         </IconButton>

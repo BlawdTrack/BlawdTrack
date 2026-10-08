@@ -1,13 +1,14 @@
 import { Box, Typography } from '@mui/material';
+import { RADIUS } from '../theme';
 
 // Colores exactos del mockup (bloques "Estados de error" de la pantalla A
 // y "Validación de formato" de la B1). Distinto del componente Toast:
 // este es para mensajes fijos dentro del formulario, no notificaciones
 // flotantes.
 const VARIANTS = {
-  error: { bg: '#FCEDEA', border: '#E8B4AC', dot: '#C0392B', text: '#7A2318' },
-  warning: { bg: '#FCF3E3', border: '#EBC98A', dot: '#C9860F', text: '#7A5A12' },
-  success: { bg: '#E5F1E8', border: '#BFE0CC', dot: '#2F7D4F', text: '#1E5236' },
+  error: { bg: 'error.light', border: 'error.border', dot: 'error.main', text: 'error.text' },
+  warning: { bg: 'warning.light', border: 'warning.border', dot: 'warning.main', text: 'warning.text' },
+  success: { bg: 'success.light', border: 'success.border', dot: 'success.main', text: 'success.text' },
 };
 
 /**
@@ -27,8 +28,9 @@ export function StatusMessage({ severity = 'error', message }) {
       aria-live={isUrgent ? 'assertive' : 'polite'}
       sx={{
         bgcolor: variant.bg,
-        border: `1px solid ${variant.border}`,
-        borderRadius: '10px',
+        border: '1px solid',
+        borderColor: variant.border,
+        borderRadius: RADIUS.sm,
         p: '14px 16px',
         display: 'flex',
         gap: 1.25,

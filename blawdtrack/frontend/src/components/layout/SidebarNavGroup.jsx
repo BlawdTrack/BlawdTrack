@@ -14,6 +14,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SidebarNavItem from './SidebarNavItem';
 import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from './navIcons';
+import { RADIUS } from '../../theme';
 
 /**
  * Un grupo del menú. Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
@@ -51,7 +52,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
             width: 48,
             height: 48,
             border: 0,
-            borderRadius: '10px',
+            borderRadius: RADIUS.sm,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -74,7 +75,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           <Box ref={registerPanel} onMouseEnter={onPanelEnter} onMouseLeave={onPanelLeave} sx={{ pl: 1 }}>
             {/* Un clic sobre el propio icono no es "fuera": ya lo abrió el cursor y no debe cerrarlo. */}
             <ClickAwayListener onClickAway={(event) => !anchorEl?.contains(event.target) && close()}>
-              <Paper elevation={8} sx={{ minWidth: 220, borderRadius: '12px', border: '1px solid #E4DED7', py: 0.5 }}>
+              <Paper elevation={8} sx={{ minWidth: 220, borderRadius: RADIUS.sm, border: '1px solid', borderColor: 'neutral.border', py: 0.5 }}>
                 <Typography
                   sx={{ px: 2, py: 0.75, fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'text.secondary' }}
                 >
@@ -136,7 +137,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           minHeight: 44,
           px: 1.5,
           border: 0,
-          borderRadius: '8px',
+          borderRadius: RADIUS.sm,
           background: 'transparent',
           cursor: 'pointer',
           fontFamily: 'inherit',
@@ -144,8 +145,8 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           fontWeight: 700,
           letterSpacing: 1,
           textTransform: 'uppercase',
-          color: hasActiveItem ? '#fff' : 'rgba(255,255,255,.6)',
-          '&:hover': { color: '#fff', backgroundColor: 'rgba(255,255,255,.05)' },
+          color: hasActiveItem ? 'common.white' : 'rgba(255,255,255,.6)',
+          '&:hover': { color: 'common.white', backgroundColor: 'rgba(255,255,255,.05)' },
           '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 1 },
         }}
       >

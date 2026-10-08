@@ -10,6 +10,7 @@ import {
   Alert,
 } from '@mui/material';
 import { getInitials } from '../utils/getInitials';
+import { RADIUS } from '../theme';
 
 /**
  * Diálogo de confirmación para eliminar un administrador (HU-008).
@@ -38,7 +39,7 @@ const DeleteAdminModal = ({
       onClose={!isSubmitting ? onClose : undefined}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: { borderRadius: '18px', padding: { xs: 1, sm: 1.5 } } }}
+      PaperProps={{ sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 } } }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
         <Box
@@ -46,14 +47,14 @@ const DeleteAdminModal = ({
             width: 34,
             height: 34,
             borderRadius: '50%',
-            bgcolor: '#FCEDEA',
+            bgcolor: 'error.light',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flex: '0 0 34px',
           }}
         >
-          <Box sx={{ width: '3px', height: '14px', bgcolor: '#C0392B', borderRadius: '2px' }} />
+          <Box sx={{ width: '3px', height: '14px', bgcolor: 'error.main', borderRadius: '2px' }} />
         </Box>
         <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
           Eliminar administrador
@@ -67,36 +68,36 @@ const DeleteAdminModal = ({
             alignItems: 'center',
             gap: '12px',
             p: '14px 16px',
-            bgcolor: '#F1ECE7',
-            borderRadius: '12px',
+            bgcolor: 'neutral.surface',
+            borderRadius: RADIUS.sm,
           }}
         >
-          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: '#fff', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
+          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: 'common.white', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
             {getInitials(adminData.name)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>
               {adminData.name}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: '#6B6560' }}>
+            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
               {documentNumber} · {adminData.email}
             </Typography>
           </Box>
         </Box>
 
-        <Typography sx={{ fontSize: 14, color: '#6B6560', lineHeight: 1.55 }}>
+        <Typography sx={{ fontSize: 14, color: 'text.secondary', lineHeight: 1.55 }}>
           Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda
           registrada en auditoría con fecha, hora y responsable.
         </Typography>
 
         {adminData.hasActiveSession && (
-          <Alert severity="warning" sx={{ borderRadius: '10px', fontWeight: 500 }}>
+          <Alert severity="warning" sx={{ borderRadius: RADIUS.sm, fontWeight: 500 }}>
             Este administrador tiene una sesión abierta. Se cerrará automáticamente al eliminarlo.
           </Alert>
         )}
 
         {errorMessage && (
-          <Alert severity="error" sx={{ borderRadius: '10px', fontWeight: 500 }}>
+          <Alert severity="error" sx={{ borderRadius: RADIUS.sm, fontWeight: 500 }}>
             {errorMessage}
           </Alert>
         )}
@@ -108,8 +109,8 @@ const DeleteAdminModal = ({
           disabled={isSubmitting}
           sx={{
             color: 'primary.main',
-            border: '1.5px solid #DCD4CA',
-            borderRadius: '10px',
+            border: '1.5px solid', borderColor: 'neutral.borderStrong',
+            borderRadius: RADIUS.sm,
             textTransform: 'none',
             fontWeight: 600,
             fontSize: 14,
@@ -123,15 +124,15 @@ const DeleteAdminModal = ({
           disabled={isSubmitting}
           variant="contained"
           sx={{
-            bgcolor: '#C0392B',
-            color: '#fff',
+            bgcolor: 'error.main',
+            color: 'common.white',
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: '10px',
+            borderRadius: RADIUS.sm,
             px: 2.5,
             fontSize: 14,
             boxShadow: 'none',
-            '&:hover': { bgcolor: '#A5301F', boxShadow: 'none' },
+            '&:hover': { bgcolor: 'error.dark', boxShadow: 'none' },
           }}
         >
           {isSubmitting ? 'Eliminando...' : 'Sí, eliminar'}

@@ -17,6 +17,7 @@ import { RecoverySteps } from '../components/RecoverySteps';
 import HelpTip from '../components/HelpTip';
 import AuthCardLayout from '../components/AuthCardLayout';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
+import { RADIUS } from '../theme';
 
 // Mismo patrón de validación de cliente que LoginPage.jsx (T04 de HU-001):
 // `fieldErrors` por campo, correo obligatorio con trim y formato válido, y
@@ -131,7 +132,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
       type="button"
       onClick={() => onBackToLogin?.()}
       underline="hover"
-      sx={{ ...LINK_SX, color: '#6B6560' }}
+      sx={{ ...LINK_SX, color: 'text.secondary' }}
     >
       Volver a iniciar sesión
     </Link>
@@ -166,7 +167,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                     fontWeight: 700,
                     letterSpacing: '0.5px',
                     textTransform: 'uppercase',
-                    color: '#6B6560',
+                    color: 'text.secondary',
                   }}
                 >
                   Correo electrónico registrado
@@ -189,8 +190,8 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                   error={Boolean(fieldErrors.email)}
                   helperText={fieldErrors.email}
                   sx={{
-                    '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 16 },
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
+                    '& .MuiOutlinedInput-root': { borderRadius: RADIUS.sm, bgcolor: 'background.paper', fontSize: 16 },
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'neutral.borderStrong', borderWidth: '1.5px' },
                   }}
                 />
               </Box>
@@ -200,7 +201,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                sx={{ borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 16 }}
+                sx={{ borderRadius: RADIUS.sm, minHeight: 48, fontWeight: 600, fontSize: 16 }}
               >
                 {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar enlace'}
               </Button>
@@ -245,13 +246,13 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 variant="outlined"
                 onClick={handleResend}
                 disabled={loading || resendWait.running}
-                sx={{ borderRadius: '10px', minHeight: 48, fontWeight: 600, fontSize: 16 }}
+                sx={{ borderRadius: RADIUS.sm, minHeight: 48, fontWeight: 600, fontSize: 16 }}
               >
                 {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar de nuevo'}
               </Button>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Typography sx={{ fontSize: 14, color: '#6B6560' }}>¿No te llega el correo?</Typography>
+                <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>¿No te llega el correo?</Typography>
                 <HelpTip label="¿Cuánto tarda en llegar el correo?">El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado.</HelpTip>
               </Box>
 

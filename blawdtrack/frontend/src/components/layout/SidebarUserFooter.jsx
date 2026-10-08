@@ -1,5 +1,6 @@
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { RADIUS } from '../../theme';
 
 /**
  * Pie de la barra lateral: iniciales, nombre, correo y rol del usuario, y el botón de cerrar sesión.
@@ -53,7 +54,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
               height: 44,
               color: 'rgba(255,255,255,.75)',
               border: '1px solid rgba(255,255,255,.14)',
-              borderRadius: '8px',
+              borderRadius: RADIUS.sm,
               '&:hover': { backgroundColor: 'rgba(255,255,255,.08)' },
               '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },
             }}
@@ -74,13 +75,13 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
           gap: 1.25,
           p: '10px 12px',
           mb: 1.25,
-          borderRadius: '10px',
+          borderRadius: RADIUS.sm,
           backgroundColor: 'rgba(255,255,255,.05)',
         }}
       >
         {avatar}
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#fff' }} noWrap>
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'common.white' }} noWrap>
             {fullName}
           </Typography>
           <Typography sx={{ fontSize: 12, color: 'rgba(255,255,255,.7)' }} noWrap>
@@ -97,7 +98,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
           fontSize: 14,
           fontWeight: 600,
           textTransform: 'none',
-          borderRadius: '8px',
+          borderRadius: RADIUS.sm,
           border: '1px solid rgba(255,255,255,.14)',
           minHeight: 44,
           '&:hover': { backgroundColor: 'rgba(255,255,255,.08)', borderColor: 'rgba(255,255,255,.14)' },

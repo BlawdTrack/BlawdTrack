@@ -1,7 +1,8 @@
 import { Avatar, Box, Button, Typography } from '@mui/material';
 import { getInitials } from '../utils/getInitials';
+import { RADIUS } from '../theme';
 
-const LINE_COLORS = { muted: '#6B6560', success: '#2F7D4F' };
+const LINE_COLORS = { muted: 'text.secondary', success: 'success.main' };
 
 /**
  * Fila de una cuenta (mensajero, administrador…) en una lista de acciones delicadas: avatar con iniciales,
@@ -13,7 +14,7 @@ const LINE_COLORS = { muted: '#6B6560', success: '#2F7D4F' };
 export default function AccountRow({ name, lines, status, actionLabel, actionDisabled = false, onAction }) {
   return (
     <Box sx={{ px: 2.5, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-      <Avatar sx={{ width: 44, height: 44, bgcolor: '#F1ECE7', color: '#6B6560', fontWeight: 700, fontSize: 14, flex: '0 0 44px' }}>
+      <Avatar sx={{ width: 44, height: 44, bgcolor: 'neutral.surface', color: 'text.secondary', fontWeight: 700, fontSize: 14, flex: '0 0 44px' }}>
         {getInitials(name)}
       </Avatar>
 
@@ -41,15 +42,15 @@ export default function AccountRow({ name, lines, status, actionLabel, actionDis
         disabled={actionDisabled}
         onClick={onAction}
         sx={{
-          borderRadius: '10px',
+          borderRadius: RADIUS.sm,
           px: 2.5,
           minHeight: 44,
           fontWeight: 600,
           fontSize: 14,
-          bgcolor: '#fff',
-          color: actionDisabled ? '#7A736A' : '#C0392B',
-          borderColor: actionDisabled ? '#E4DED7' : '#C0392B',
-          '&:hover': { bgcolor: actionDisabled ? '#fff' : '#FCEDEA', borderColor: actionDisabled ? '#E4DED7' : '#C0392B' },
+          bgcolor: 'background.paper',
+          color: actionDisabled ? '#7A736A' : 'error.main',
+          borderColor: actionDisabled ? 'neutral.border' : 'error.main',
+          '&:hover': { bgcolor: actionDisabled ? 'background.paper' : 'error.light', borderColor: actionDisabled ? 'neutral.border' : 'error.main' },
         }}
       >
         {actionLabel}

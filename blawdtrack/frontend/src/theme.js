@@ -1,13 +1,46 @@
 import { createTheme } from '@mui/material/styles';
 import patternUrl from './assets/background_T.png';
 
+const WHITE = '#ffffff';
+// TODO(marca): confirmar el crema oficial. Se conserva el valor que ya tenía el theme.
+const CREAM = '#FAF8F5';
+
+/**
+ * Radios de la aplicación, tres y no más: `sm` para botones, campos y chips cuadrados; `md` para tarjetas y
+ * paneles; `lg` para las tarjetas de menú, los diálogos y las etiquetas en forma de píldora. Los círculos
+ * (`50%`) y las barras finas de 2–4 px no cuentan como radio de esquina.
+ */
+export const RADIUS = { sm: '10px', md: '16px', lg: '20px' };
+
+// Sombras: una de tarjeta (`1`), una pequeña para piezas diminutas como el pulgar del interruptor (`2`) y una de
+// elementos flotantes (`8`: menús, avisos, diálogos). El resto de niveles de Material cae en estas.
+const CARD_SHADOW = '0 12px 30px rgba(26,60,52,.06)';
+const SMALL_SHADOW = '0 1px 3px rgba(26,60,52,.25)';
+const OVERLAY_SHADOW = '0 12px 32px rgba(26,60,52,.16)';
+const SHADOWS = [
+  'none',
+  CARD_SHADOW,
+  SMALL_SHADOW,
+  ...Array(5).fill(CARD_SHADOW),
+  ...Array(17).fill(OVERLAY_SHADOW),
+];
+
+// Colores de estado: `main` es el color pleno (puntos, iconos, bordes de énfasis), `light` el fondo suave,
+// `border` el contorno del aviso y `text` el texto legible sobre `light`.
+const STATUS = {
+  error: { main: '#C0392B', dark: '#A5301F', light: '#FCEDEA', border: '#E8B4AC', text: '#7A2318', contrastText: WHITE },
+  success: { main: '#2F7D4F', dark: '#256B41', light: '#E9F3EC', border: '#BFE0CC', text: '#1E5236', contrastText: WHITE },
+  warning: { main: '#C9860F', dark: '#8A5A00', light: '#FCF3E3', border: '#EBC98A', text: '#7A5A12', contrastText: WHITE },
+  info: { main: '#1A3C34', dark: '#12322B', light: '#F1ECE7', border: '#DCD4CA', text: '#1A3C34', contrastText: WHITE },
+};
+
 // Velos sobre el patrón: lo dejan como una textura de fondo y el texto conserva el contraste AA.
 const PAGE_VEIL = 'linear-gradient(rgba(250,248,245,0.72), rgba(250,248,245,0.72))';
 const CARD_VEIL = 'linear-gradient(rgba(255,255,255,0.94), rgba(255,255,255,0.94))';
 
 /** Fondo de pantalla: el patrón ilustrado, suave, sobre el crema de marca. */
 export const PAGE_PATTERN_SX = {
-  backgroundColor: '#FAF8F5',
+  backgroundColor: CREAM,
   backgroundImage: `${PAGE_VEIL}, url(${patternUrl})`,
   backgroundSize: 'auto, 520px',
   backgroundRepeat: 'no-repeat, repeat',
@@ -15,7 +48,7 @@ export const PAGE_PATTERN_SX = {
 
 /** Superficie blanca (tarjetas, formularios, diálogos y barras) con el patrón suavizado. No se usa en botones. */
 export const CARD_PATTERN_SX = {
-  backgroundColor: '#fff',
+  backgroundColor: WHITE,
   backgroundImage: `${CARD_VEIL}, url(${patternUrl})`,
   backgroundSize: 'auto, 420px',
   backgroundRepeat: 'no-repeat, repeat',
@@ -28,21 +61,34 @@ export const theme = createTheme({
     primary: {
       main: '#1A3C34',      // Verde Oscuro (Encabezados, botones primarios)
       dark: '#12322B',
-      contrastText: '#ffffff',
+      contrastText: WHITE,
     },
     secondary: {
-      main: '#FF6C0E',    // Anaranjado (Acciones de acento, alertas, foco)
-      contrastText: '#ffffff',
+      main: '#FF6C0E',      // Anaranjado (Acciones de acento, alertas, foco)
+      light: '#FFE8D9',     // Fondo suave de acento (iconos, etiquetas)
+      dark: '#C25100',      // Naranja oscuro: texto de acento sobre blanco (4,7:1)
+      text: '#B84700',      // Naranja de texto sobre `light` (fondo suave de acento) con contraste AA
+      contrastText: WHITE,
+    },
+    ...STATUS,
+    // Neutros cálidos de marca: superficie, contorno suave y contorno de campos.
+    neutral: {
+      main: '#6B6560',
+      surface: '#F1ECE7',
+      border: '#E4DED7',
+      borderStrong: '#DCD4CA',
     },
     background: {
-      default: '#FAF8F5',  // Tono crema/gris claro de fondo de pantalla
-      paper: '#ffffff',    // Tarjetas y formularios en blanco limpio
+      default: CREAM,       // Tono crema/gris claro de fondo de pantalla
+      paper: WHITE,         // Tarjetas y formularios en blanco limpio
     },
     text: {
       primary: '#1F2421',
       secondary: '#6B6560',
     },
   },
+  shape: { borderRadius: 10 },
+  shadows: SHADOWS,
   // Escala tipográfica única de la aplicación: 12 (etiquetas y ayudas) · 14 (texto secundario) ·
   // 16 (texto base) · 18 (títulos de sección) · 24 (título de pantalla) · 32 (portadas).
   typography: {
@@ -64,7 +110,7 @@ export const theme = createTheme({
       styleOverrides: { body: PAGE_PATTERN_SX },
     },
     MuiDialog: {
-      styleOverrides: { paper: CARD_PATTERN_SX },
+      styleOverrides: { paper: { ...CARD_PATTERN_SX, borderRadius: RADIUS.lg } },
     },
     // Los placeholders de MUI son demasiado claros (2.7:1); este gris cumple el 4.5:1 del nivel AA.
     MuiInputBase: {
@@ -76,17 +122,17 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '10px',
+          borderRadius: RADIUS.sm,
           minHeight: 44,
           padding: '8px 20px',
         },
         // Los botones nunca son transparentes: sin relleno, el patrón de fondo se vería a través.
         outlined: {
-          backgroundColor: '#fff',
+          backgroundColor: WHITE,
           '&:hover': { backgroundColor: '#F1ECE7' },
         },
         text: {
-          backgroundColor: '#fff',
+          backgroundColor: WHITE,
           '&:hover': { backgroundColor: '#F1ECE7' },
         },
         contained: {
@@ -98,6 +144,51 @@ export const theme = createTheme({
         },
       },
     },
+    MuiIconButton: {
+      styleOverrides: { root: { borderRadius: RADIUS.sm } },
+    },
+    MuiChip: {
+      styleOverrides: { root: { borderRadius: RADIUS.lg, fontWeight: 700, fontSize: '0.75rem' } },
+    },
+    // Los avisos de MUI usan los mismos tonos que `StatusMessage`: fondo suave, contorno y texto del estado.
+    MuiAlert: {
+      styleOverrides: {
+        root: { borderRadius: RADIUS.sm, fontWeight: 500 },
+        ...Object.fromEntries(
+          Object.entries(STATUS).map(([name, tone]) => [
+            `standard${name[0].toUpperCase()}${name.slice(1)}`,
+            {
+              backgroundColor: tone.light,
+              color: tone.text,
+              border: `1px solid ${tone.border}`,
+              '& .MuiAlert-icon': { color: tone.main },
+            },
+          ])
+        ),
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          borderRadius: RADIUS.md,
+          border: '1px solid #E4DED7',
+          boxShadow: OVERLAY_SHADOW,
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: '#1A3C34',
+          color: WHITE,
+          fontSize: '0.75rem',
+          fontWeight: 500,
+          borderRadius: RADIUS.sm,
+          padding: '6px 10px',
+        },
+        arrow: { color: '#1A3C34' },
+      },
+    },
     MuiTextField: {
       defaultProps: {
         variant: 'outlined',
@@ -105,14 +196,14 @@ export const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': { borderRadius: '10px' },
+          '& .MuiOutlinedInput-root': { borderRadius: RADIUS.sm },
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: '16px',
+          borderRadius: RADIUS.md,
         },
       },
     },

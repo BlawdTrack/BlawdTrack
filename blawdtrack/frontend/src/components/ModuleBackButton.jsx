@@ -21,9 +21,9 @@ function BackArrow({ size }) {
           height: size,
           flex: `0 0 ${size}px`,
           color: 'primary.main',
-          border: '1px solid #E4DED7',
+          border: '1px solid', borderColor: 'neutral.border',
           bgcolor: 'background.paper',
-          '&:hover': { bgcolor: '#F1ECE7' },
+          '&:hover': { bgcolor: 'neutral.surface' },
         }}
       >
         <ArrowBackIcon sx={{ fontSize: size > 44 ? 28 : 24 }} />

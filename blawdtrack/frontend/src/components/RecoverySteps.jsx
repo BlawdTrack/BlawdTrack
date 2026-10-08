@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { RADIUS } from '../theme';
 
 // Indicador de pasos del flujo de recuperación de contraseña (bloque
 // `resetSteps` de assets/mockup-sprint1.html). El paso actual llega por prop
@@ -23,7 +24,7 @@ export function RecoverySteps({ current }) {
         m: 0,
         px: { xs: '16px', sm: '28px' },
         py: '18px',
-        borderBottom: '1px solid #E4DED7',
+        borderBottom: '1px solid', borderColor: 'neutral.border',
         display: 'flex',
         gap: '10px',
         flexWrap: 'nowrap',
@@ -44,8 +45,8 @@ export function RecoverySteps({ current }) {
               alignItems: 'center',
               gap: '10px',
               p: '10px 12px',
-              borderRadius: '10px',
-              bgcolor: isCurrent ? '#F1ECE7' : 'transparent',
+              borderRadius: RADIUS.sm,
+              bgcolor: isCurrent ? 'neutral.surface' : 'transparent',
             }}
           >
             <Box
@@ -62,8 +63,8 @@ export function RecoverySteps({ current }) {
                 fontWeight: 700,
                 // Verde de marca en el paso actual, verde de éxito en los
                 // ya completados y gris en los pendientes.
-                bgcolor: isCurrent ? 'primary.main' : isDone ? '#2F7D4F' : '#E4DED7',
-                color: isCurrent || isDone ? '#fff' : '#6B6560',
+                bgcolor: isCurrent ? 'primary.main' : isDone ? 'success.main' : 'neutral.border',
+                color: isCurrent || isDone ? 'common.white' : 'text.secondary',
               }}
             >
               {number}
@@ -75,7 +76,7 @@ export function RecoverySteps({ current }) {
                 fontSize: 12,
                 fontWeight: 600,
                 lineHeight: 1.3,
-                color: isCurrent ? 'primary.main' : '#6B6560',
+                color: isCurrent ? 'primary.main' : 'text.secondary',
               }}
             >
               {label}
