@@ -13,7 +13,7 @@ import {
 import { useDeactivateMessenger } from '../hooks/useDeactivateMessenger';
 import { getInitials } from '../utils/getInitials';
 import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN, DEACTIVATION_REACTIVATE } from '../config/deactivationRules';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Diálogo de confirmación para desactivar a un mensajero (HU-005). Llama a `useDeactivateMessenger`; un
@@ -52,25 +52,25 @@ export const DeactivateMessengerModal = ({
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 } },
+        sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 }, maxWidth: 480 },
       }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
         <Box
           sx={{
-            width: 34,
-            height: 34,
+            width: 28,
+            height: 28,
             borderRadius: '50%',
             bgcolor: 'error.light',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            flex: '0 0 34px',
+            flex: '0 0 28px',
           }}
         >
           <Box sx={{ width: '3px', height: '14px', bgcolor: 'error.main', borderRadius: '2px' }} />
         </Box>
-        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' }}>
           Desactivar mensajero
         </Typography>
       </DialogTitle>
@@ -80,33 +80,33 @@ export const DeactivateMessengerModal = ({
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            p: '14px 16px',
+            gap: '9.5px',
+            p: '11px 13px',
             bgcolor: 'neutral.surface',
             borderRadius: RADIUS.sm,
           }}
         >
-          <Avatar sx={{ width: 38, height: 38, bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
+          <Avatar sx={{ width: 30, height: 30, bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: FONT.xs, flex: '0 0 30px' }}>
             {getInitials(courier.fullName)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>
+            <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: '#1F2421' }}>
               {courier.fullName}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
               {courier.documentNumber} · {courier.schedule}
             </Typography>
           </Box>
         </Box>
 
-        <Typography sx={{ fontSize: 14, color: 'text.secondary', lineHeight: 1.55 }}>
+        <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.55 }}>
           El mensajero perderá el acceso de inmediato y no recibirá nuevas
           asignaciones. Su historial de entregas se conserva. {DEACTIVATION_REACTIVATE}
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 1.25, p: '12px 14px', bgcolor: 'warning.light', border: '1px solid', borderColor: 'warning.border', borderRadius: RADIUS.sm }}>
-          <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: 'warning.main', mt: '6px', flex: '0 0 9px' }} />
-          <Typography sx={{ fontSize: 14, color: 'warning.text', lineHeight: 1.5 }}>
+        <Box sx={{ display: 'flex', gap: 1.25, p: '9.5px 11px', bgcolor: 'warning.light', border: '1px solid', borderColor: 'warning.border', borderRadius: RADIUS.sm }}>
+          <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'warning.main', mt: '5px', flex: '0 0 7px' }} />
+          <Typography sx={{ fontSize: FONT.sm, color: 'warning.text', lineHeight: 1.5 }}>
             {DEACTIVATION_CONDITION} {DEACTIVATION_REASSIGN}
           </Typography>
         </Box>
@@ -131,7 +131,7 @@ export const DeactivateMessengerModal = ({
             borderRadius: RADIUS.sm,
             textTransform: 'none',
             fontWeight: 600,
-            fontSize: 14,
+            fontSize: FONT.sm,
             px: 2.5,
           }}
         >
@@ -148,7 +148,7 @@ export const DeactivateMessengerModal = ({
             fontWeight: 600,
             borderRadius: RADIUS.sm,
             px: 2.5,
-            fontSize: 14,
+            fontSize: FONT.sm,
             boxShadow: 'none',
             '&:hover': { bgcolor: 'error.dark', boxShadow: 'none' },
           }}

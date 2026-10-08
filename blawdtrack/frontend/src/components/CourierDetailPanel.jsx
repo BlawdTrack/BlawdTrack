@@ -9,7 +9,7 @@ import TabPanel from './TabPanel';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/getInitials';
 import { getCourierDocument, getCourierName, recordsLabel } from '../utils/courierEdit';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 const OUTLINE_BUTTON_SX = { color: 'primary.main', fontWeight: 600, border: '1.5px solid', borderColor: 'neutral.borderStrong' };
 
@@ -39,14 +39,14 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
             Mostrar flota
           </Button>
         )}
-        <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main', color: 'common.white', fontWeight: 700 }}>
+        <Avatar sx={{ width: 38, height: 38, bgcolor: 'primary.main', color: 'common.white', fontWeight: 700 }}>
           {getInitials(getCourierName(courier))}
         </Avatar>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>
             Editar · {getCourierName(courier)}
           </Typography>
-          <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
+          <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
             Cédula {getCourierDocument(courier)} · no editable
           </Typography>
         </Box>
@@ -67,14 +67,14 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
       </TabPanel>
 
       <TabPanel id="historial" active={activeTab === 'historial'}>
-        <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
+        <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' }}>
             Historial de modificaciones
           </Typography>
           <Chip
             label={recordsLabel(history.length)}
             size="small"
-            sx={{ fontSize: 12, fontWeight: 600, bgcolor: 'neutral.surface', color: 'text.secondary', borderRadius: RADIUS.lg }}
+            sx={{ fontSize: FONT.xs, fontWeight: 600, bgcolor: 'neutral.surface', color: 'text.secondary', borderRadius: RADIUS.lg }}
           />
         </Box>
         <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

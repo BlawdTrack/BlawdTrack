@@ -1,7 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
-import { CARD_PATTERN_SX, RADIUS } from '../theme';
+import { CARD_PATTERN_SX, FONT, RADIUS, rem } from '../theme';
 
 // Tarjeta alta y centrada (menús de módulo): icono en cuadro arriba, texto al centro, flecha abajo.
 const CARD_VARIANT_SX = {
@@ -9,64 +9,64 @@ const CARD_VARIANT_SX = {
   justifyContent: { xs: 'flex-start', md: 'center' },
   textAlign: { xs: 'left', md: 'center' },
   gap: { xs: 2, md: 2.5 },
-  minHeight: { xs: 96, md: 260 },
+  minHeight: { xs: 77, md: 208 },
   p: { xs: 2.5, md: 4 },
   borderRadius: RADIUS.lg,
 };
 
-// Fila ancha (menú principal): icono en cuadro a la izquierda, texto alineado a la izquierda y un círculo con
-// la flecha a la derecha. Alto mínimo de 88 px, 24 px de relleno lateral, 20 px de relleno vertical y 20 px
-// entre el icono y el texto.
+// Fila ancha (menú principal): icono en cuadro a la izquierda, texto alineado a la izquierda y un círculo con la
+// flecha a la derecha. Alto mínimo de 72 px (68 px en móvil), unos 20 px de relleno lateral y 16 px entre el
+// icono y el texto.
 const ROW_VARIANT_SX = {
   flexDirection: 'row',
   justifyContent: 'flex-start',
   textAlign: 'left',
   gap: 2.5,
-  minHeight: 88,
+  minHeight: { xs: 68, md: 72 },
   px: 3,
   py: 2.5,
   borderRadius: RADIUS.md,
 };
 
-// Icono de cada variante. En la fila es un cuadro de 48 px (40 px en móvil) con fondo naranja suave; el icono va
+// Icono de cada variante. En la fila es un cuadro de 40 px (36 px en móvil) con fondo naranja suave; el icono va
 // en naranja oscuro porque el naranja pleno sobre ese fondo no llega al 3:1 que se pide a un icono.
 const ICON_BOX_SX = {
   card: {
-    flex: { xs: '0 0 48px', md: '0 0 72px' },
-    width: { xs: 48, md: 72 },
-    height: { xs: 48, md: 72 },
+    flex: { xs: '0 0 40px', md: '0 0 58px' },
+    width: { xs: 40, md: 58 },
+    height: { xs: 40, md: 58 },
     borderRadius: { xs: RADIUS.sm, md: RADIUS.md },
     bgcolor: 'secondary.light',
     color: 'secondary.main',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    '& svg': { fontSize: { xs: 24, md: 36 } },
+    '& svg': { fontSize: { xs: rem(19), md: rem(29) } },
   },
   row: {
     flex: '0 0 auto',
-    width: { xs: 40, md: 48 },
-    height: { xs: 40, md: 48 },
+    width: { xs: 36, md: 40 },
+    height: { xs: 36, md: 40 },
     borderRadius: RADIUS.sm,
     bgcolor: 'secondary.light',
     color: 'secondary.text',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    '& svg': { fontSize: { xs: 22, md: 26 } },
+    '& svg': { fontSize: { xs: rem(20), md: rem(22) } },
   },
 };
 
 const TITLE_SX = {
-  card: { fontWeight: 600, fontSize: { xs: 16, md: 20 }, color: 'primary.main' },
-  row: { fontWeight: 600, fontSize: 18, color: 'primary.main' },
+  card: { fontWeight: 600, fontSize: { xs: FONT.md, md: FONT.xl }, color: 'primary.main' },
+  row: { fontWeight: 600, fontSize: rem(16), color: 'primary.main' },
 };
 
 const DESCRIPTION_SX = {
-  card: { fontSize: { xs: 14, md: 16 }, color: 'text.secondary', mt: 0.5, lineHeight: 1.5 },
+  card: { fontSize: { xs: FONT.sm, md: FONT.md }, color: 'text.secondary', mt: 0.5, lineHeight: 1.5 },
   // Máximo dos líneas; si el texto es más largo se corta con puntos suspensivos.
   row: {
-    fontSize: 14,
+    fontSize: FONT.md,
     color: 'text.secondary',
     mt: 0.5,
     lineHeight: 1.5,
@@ -81,8 +81,8 @@ const DESCRIPTION_SX = {
 const ARROW_SX = {
   card: {
     flex: '0 0 auto',
-    width: 36,
-    height: 36,
+    width: 30,
+    height: 30,
     borderRadius: '50%',
     bgcolor: 'neutral.surface',
     color: 'primary.main',
@@ -94,8 +94,8 @@ const ARROW_SX = {
   },
   row: {
     flex: '0 0 auto',
-    width: 40,
-    height: 40,
+    width: 34,
+    height: 34,
     borderRadius: '50%',
     bgcolor: 'neutral.surface',
     color: 'primary.main',
@@ -164,7 +164,7 @@ export default function MenuCard({ to = null, icon: Icon, title, description, va
         </Typography>
         {description && <Typography sx={DESCRIPTION_SX[variant]}>{description}</Typography>}
         {!to && (
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'text.secondary', mt: 1 }}>Próximamente</Typography>
+          <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: 'text.secondary', mt: 1 }}>Próximamente</Typography>
         )}
       </Box>
       {to && (

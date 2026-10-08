@@ -8,7 +8,7 @@ import { ROLE_LABELS } from '../config/roles';
 import { getPasswordResetRoute } from '../utils/roleRoutes';
 import logo from '../assets/Logo.png';
 import PageContainer from './PageContainer';
-import { CARD_PATTERN_SX, RADIUS } from '../theme';
+import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
 
 const CARD_SX = {
   ...CARD_PATTERN_SX,
@@ -58,8 +58,8 @@ export function ProvisionalHomePage({ title, description }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
           <Box
             sx={{
-              width: 36,
-              height: 36,
+              width: 30,
+              height: 30,
               borderRadius: RADIUS.sm,
               bgcolor: 'background.paper',
               display: 'flex',
@@ -67,7 +67,7 @@ export function ProvisionalHomePage({ title, description }) {
               justifyContent: 'center',
             }}
           >
-            <img src={logo} alt="BlawdTrack" style={{ width: 22, height: 27, objectFit: 'contain' }} />
+            <img src={logo} alt="BlawdTrack" style={{ width: 18, height: 22, objectFit: 'contain' }} />
           </Box>
           <Typography variant="h6" component="span">
             BlawdTrack
@@ -89,7 +89,7 @@ export function ProvisionalHomePage({ title, description }) {
 
       <PageContainer component="main">
         <Box sx={{ pl: 2, borderLeft: '4px solid', borderColor: 'secondary.main' }}>
-          <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>Bienvenid@, {user?.fullName}</Typography>
+          <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>Bienvenid@, {user?.fullName}</Typography>
           <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
             {title}
           </Typography>
@@ -108,7 +108,7 @@ export function ProvisionalHomePage({ title, description }) {
                 Estamos preparando tu panel
               </Typography>
             </Box>
-            <Typography sx={{ fontSize: 14, color: 'text.secondary', lineHeight: 1.6 }}>{description}</Typography>
+            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.6 }}>{description}</Typography>
           </Box>
 
           {passwordResetRoute && (
@@ -119,13 +119,13 @@ export function ProvisionalHomePage({ title, description }) {
                   Tu cuenta
                 </Typography>
               </Box>
-              <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
+              <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
                 Cambia tu contraseña cuando lo necesites. Te enviaremos un enlace a tu correo.
               </Typography>
               <Button
                 variant="contained"
                 onClick={() => navigate(passwordResetRoute)}
-                sx={{ alignSelf: 'flex-start', minHeight: 48, px: 3 }}
+                sx={{ alignSelf: 'flex-start', minHeight: TOUCH_TARGET, px: 3 }}
               >
                 Restablecer contraseña
               </Button>

@@ -1,5 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Aviso de que hay cambios sin guardar antes de salir de lo que se está editando (cambiar de elemento,
@@ -14,13 +14,13 @@ export default function ConfirmLeaveDialog({ open, onStay, onLeave }) {
       onClose={onStay}
       aria-labelledby="confirm-leave-title"
       aria-describedby="confirm-leave-description"
-      slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1, maxWidth: 440 } } }}
+      slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1, maxWidth: 352 } } }}
     >
       <DialogTitle id="confirm-leave-title" sx={{ fontFamily: 'Poppins', fontWeight: 600, color: 'primary.main' }}>
         ¿Salir sin guardar?
       </DialogTitle>
       <DialogContent>
-        <DialogContentText id="confirm-leave-description" sx={{ fontSize: 16 }}>
+        <DialogContentText id="confirm-leave-description" sx={{ fontSize: FONT.md }}>
           Hiciste cambios que todavía no se han guardado. Si sales ahora, se perderán.
         </DialogContentText>
       </DialogContent>

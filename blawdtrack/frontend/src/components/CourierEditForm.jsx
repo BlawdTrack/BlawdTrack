@@ -3,7 +3,7 @@ import { TimeWheelField } from './TimeWheelField';
 import { WeightWheelField } from './WeightWheelField';
 import StatusMessage from './StatusMessage';
 import { INPUT_SX, LABEL_SX } from './formStyles';
-import { CARD_PATTERN_SX, RADIUS } from '../theme';
+import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
 
 const FIELD_GRID_SX = {
   display: 'grid',
@@ -18,7 +18,7 @@ const SWITCH_SX = {
   padding: 0,
   flex: '0 0 46px',
   '& .MuiSwitch-switchBase': {
-    padding: '3px',
+    padding: '2.5px',
     '&.Mui-checked': {
       transform: 'translateX(19px)',
       '& + .MuiSwitch-track': { backgroundColor: 'success.main', opacity: 1 },
@@ -156,23 +156,23 @@ export default function CourierEditForm({ editor, onDiscard }) {
           sx={{
             bgcolor: 'neutral.surface',
             borderRadius: RADIUS.sm,
-            p: '16px 18px',
+            p: '13px 14.5px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '14px',
+            gap: '11px',
             flexWrap: 'wrap',
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>Estado de acceso</Typography>
-            <Typography sx={{ fontSize: 14, color: 'text.secondary', lineHeight: 1.4 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2.5px', minWidth: 0 }}>
+            <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: '#1F2421' }}>Estado de acceso</Typography>
+            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.4 }}>
               {isActive
                 ? 'Habilitado. Al revocarlo, la sesión activa se cierra de inmediato.'
                 : 'Revocado. El mensajero no puede iniciar sesión.'}
             </Typography>
             {isStatusLocked && (
-              <Typography sx={{ fontSize: 14, color: 'error.main', fontWeight: 600 }}>
+              <Typography sx={{ fontSize: FONT.sm, color: 'error.main', fontWeight: 600 }}>
                 Solo puedes cambiar el estado fuera de labores y sin envíos en proceso.
               </Typography>
             )}
@@ -194,7 +194,7 @@ export default function CourierEditForm({ editor, onDiscard }) {
           type="submit"
           variant="contained"
           disabled={submitting}
-          sx={{ fontWeight: 600, px: 4, minHeight: 48, fontSize: 16, borderRadius: RADIUS.sm }}
+          sx={{ fontWeight: 600, px: 4, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
         >
           {submitting ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Guardar cambios'}
         </Button>
@@ -203,7 +203,7 @@ export default function CourierEditForm({ editor, onDiscard }) {
           variant="outlined"
           onClick={onDiscard}
           disabled={submitting}
-          sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: 48, fontSize: 16, borderRadius: RADIUS.sm }}
+          sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
         >
           Descartar
         </Button>

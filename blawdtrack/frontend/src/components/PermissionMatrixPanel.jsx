@@ -5,6 +5,7 @@ import SaveOutlined from '@mui/icons-material/SaveOutlined';
 import HelpTip from './HelpTip';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/roleAccess';
+import { FONT } from '../theme';
 
 /**
  * Panel derecho de "Roles y permisos": los permisos del rol del usuario con un interruptor cada uno. Los
@@ -20,12 +21,12 @@ export default function PermissionMatrixPanel({
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Box sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'neutral.border', display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-          <Avatar sx={{ width: 48, height: 48, bgcolor: '#12322B', fontWeight: 700 }}>{getInitials(user.fullName)}</Avatar>
+          <Avatar sx={{ width: 38, height: 38, bgcolor: '#12322B', fontWeight: 700 }}>{getInitials(user.fullName)}</Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>
+            <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>
               {user.fullName}
             </Typography>
-            <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
               {user.documentNumber} · rol principal: {roleGroup?.name ?? user.role}
               {user.customized ? ' · permisos personalizados' : ''}
             </Typography>
@@ -56,13 +57,13 @@ export default function PermissionMatrixPanel({
         {roleGroup && (
           <>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.5 }}>
-              <Typography component="h3" sx={{ fontWeight: 700, fontSize: 16 }}>{roleGroup.name}</Typography>
-              <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>{roleGroup.permissions.length} permisos</Typography>
+              <Typography component="h3" sx={{ fontWeight: 700, fontSize: FONT.md }}>{roleGroup.name}</Typography>
+              <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{roleGroup.permissions.length} permisos</Typography>
               <HelpTip label="¿Qué permisos se pueden modificar?">
                 Solo se pueden modificar los permisos que corresponden al rol del usuario.
               </HelpTip>
               {!user.editable && (
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: 14 }}>
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: FONT.sm }}>
                   <LockOutlined fontSize="small" aria-hidden="true" />
                   Fijos
                 </Box>
@@ -76,7 +77,7 @@ export default function PermissionMatrixPanel({
                   key={permission.code}
                   sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, minHeight: 56, borderTop: '1px solid', borderColor: 'neutral.surface', opacity: editable ? 1 : 0.75 }}
                 >
-                  <Typography sx={{ fontSize: 16 }}>{permission.description}</Typography>
+                  <Typography sx={{ fontSize: FONT.md }}>{permission.description}</Typography>
                   <Switch
                     checked={checked}
                     disabled={!editable}

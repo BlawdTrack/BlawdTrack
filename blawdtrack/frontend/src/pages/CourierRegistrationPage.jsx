@@ -10,6 +10,7 @@ import DocumentFields from '../components/DocumentFields';
 import RegistrationFormPage from '../components/RegistrationFormPage';
 import { FULL_ROW_SX } from '../components/formStyles';
 import { ROUTES } from '../config/routes';
+import { FONT } from '../theme';
 
 const INITIAL_FORM_DATA = {
   documentType: 'CEDULA',
@@ -128,7 +129,7 @@ export function CourierRegistrationPage() {
             error={Boolean(fieldErrors.schedule)}
             onChange={setScheduleHour('scheduleStart')}
           />
-          <Typography component="span" sx={{ color: 'text.secondary', fontSize: 16 }}>a</Typography>
+          <Typography component="span" sx={{ color: 'text.secondary', fontSize: FONT.md }}>a</Typography>
           <TimeWheelField
             id="scheduleEnd"
             label="Hora de salida"

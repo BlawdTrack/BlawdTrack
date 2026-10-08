@@ -17,7 +17,7 @@ import { RecoverySteps } from '../components/RecoverySteps';
 import HelpTip from '../components/HelpTip';
 import AuthCardLayout from '../components/AuthCardLayout';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT, TOUCH_TARGET } from '../theme';
 import { LINK_BUTTON_SX } from '../components/formStyles';
 
 // Mismo patrón de validación de cliente que LoginPage.jsx (T04 de HU-001):
@@ -43,7 +43,7 @@ const CONNECTION_ERROR_MESSAGE =
   'No pudimos conectar con el servidor. Revisa tu conexión a internet e intenta de nuevo.';
 const GENERIC_ERROR_MESSAGE = 'No se pudo procesar la solicitud. Intenta de nuevo en unos minutos.';
 
-const LINK_SX = { ...LINK_BUTTON_SX, fontSize: 12, fontWeight: 600, color: 'primary.main' };
+const LINK_SX = { ...LINK_BUTTON_SX, fontSize: FONT.xs, fontWeight: 600, color: 'primary.main' };
 
 // T04 de HU-002 (#65): solicitud del enlace de restablecimiento. Es UNA
 // pantalla con dos vistas del mismo flujo (r1 y r2 del bloque `hu002` del
@@ -150,7 +150,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
               component="form"
               onSubmit={handleSubmit}
               noValidate
-              sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+              sx={{ display: 'flex', flexDirection: 'column', gap: '13px' }}
             >
               <AuthStateHeader
                 icon={LockResetOutlinedIcon}
@@ -158,13 +158,13 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 description="Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una nueva."
               />
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography
                   component="label"
                   htmlFor="recovery-email"
                   sx={{
-                    fontSize: 12,
+                    fontSize: FONT.xs,
                     fontWeight: 700,
                     letterSpacing: '0.5px',
                     textTransform: 'uppercase',
@@ -173,7 +173,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 >
                   Correo electrónico registrado
                 </Typography>
-                <HelpTip label="¿Qué se valida al enviar el enlace?" sx={{ width: 32, height: 32, my: '-6px' }}>
+                <HelpTip label="¿Qué se valida al enviar el enlace?" sx={{ width: 32, height: 32, my: '0px' }}>
                   Validamos que la cuenta exista y esté activa antes de enviar el correo.
                 </HelpTip>
                 </Box>
@@ -191,7 +191,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                   error={Boolean(fieldErrors.email)}
                   helperText={fieldErrors.email}
                   sx={{
-                    '& .MuiOutlinedInput-root': { borderRadius: RADIUS.sm, bgcolor: 'background.paper', fontSize: 16 },
+                    '& .MuiOutlinedInput-root': { borderRadius: RADIUS.sm, bgcolor: 'background.paper', fontSize: FONT.md },
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: 'neutral.borderStrong', borderWidth: '1.5px' },
                   }}
                 />
@@ -202,7 +202,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                sx={{ borderRadius: RADIUS.sm, minHeight: 48, fontWeight: 600, fontSize: 16 }}
+                sx={{ borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET, fontWeight: 600, fontSize: FONT.md }}
               >
                 {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar enlace'}
               </Button>
@@ -215,7 +215,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '16px',
+                gap: '13px',
                 alignItems: 'center',
                 textAlign: 'center',
               }}
@@ -247,13 +247,13 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 variant="outlined"
                 onClick={handleResend}
                 disabled={loading || resendWait.running}
-                sx={{ borderRadius: RADIUS.sm, minHeight: 48, fontWeight: 600, fontSize: 16 }}
+                sx={{ borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET, fontWeight: 600, fontSize: FONT.md }}
               >
                 {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar de nuevo'}
               </Button>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>¿No te llega el correo?</Typography>
+                <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>¿No te llega el correo?</Typography>
                 <HelpTip label="¿Cuánto tarda en llegar el correo?">El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado.</HelpTip>
               </Box>
 

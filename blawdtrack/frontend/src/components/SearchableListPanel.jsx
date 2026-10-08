@@ -1,8 +1,9 @@
 import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/material';
 import DocumentSearch from './DocumentSearch';
 import { CARD_SX } from './formStyles';
+import { FONT } from '../theme';
 
-const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' };
+const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' };
 
 /**
  * Panel de una lista que se busca por documento: arriba la búsqueda, luego el título de la lista (con un

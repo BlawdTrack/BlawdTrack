@@ -10,7 +10,7 @@ import {
   Alert,
 } from '@mui/material';
 import { getInitials } from '../utils/getInitials';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Diálogo de confirmación para eliminar un administrador (HU-008).
@@ -39,24 +39,24 @@ const DeleteAdminModal = ({
       onClose={!isSubmitting ? onClose : undefined}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 } } }}
+      PaperProps={{ sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 }, maxWidth: 480 } }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
         <Box
           sx={{
-            width: 34,
-            height: 34,
+            width: 28,
+            height: 28,
             borderRadius: '50%',
             bgcolor: 'error.light',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            flex: '0 0 34px',
+            flex: '0 0 28px',
           }}
         >
           <Box sx={{ width: '3px', height: '14px', bgcolor: 'error.main', borderRadius: '2px' }} />
         </Box>
-        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' }}>
           Eliminar administrador
         </Typography>
       </DialogTitle>
@@ -66,26 +66,26 @@ const DeleteAdminModal = ({
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            p: '14px 16px',
+            gap: '9.5px',
+            p: '11px 13px',
             bgcolor: 'neutral.surface',
             borderRadius: RADIUS.sm,
           }}
         >
-          <Avatar sx={{ width: 38, height: 38, bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
+          <Avatar sx={{ width: 30, height: 30, bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: FONT.xs, flex: '0 0 30px' }}>
             {getInitials(adminData.name)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>
+            <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: '#1F2421' }}>
               {adminData.name}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
               {documentNumber} · {adminData.email}
             </Typography>
           </Box>
         </Box>
 
-        <Typography sx={{ fontSize: 14, color: 'text.secondary', lineHeight: 1.55 }}>
+        <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.55 }}>
           Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda
           registrada en auditoría con fecha, hora y responsable.
         </Typography>
@@ -113,7 +113,7 @@ const DeleteAdminModal = ({
             borderRadius: RADIUS.sm,
             textTransform: 'none',
             fontWeight: 600,
-            fontSize: 14,
+            fontSize: FONT.sm,
             px: 2.5,
           }}
         >
@@ -130,7 +130,7 @@ const DeleteAdminModal = ({
             fontWeight: 600,
             borderRadius: RADIUS.sm,
             px: 2.5,
-            fontSize: 14,
+            fontSize: FONT.sm,
             boxShadow: 'none',
             '&:hover': { bgcolor: 'error.dark', boxShadow: 'none' },
           }}

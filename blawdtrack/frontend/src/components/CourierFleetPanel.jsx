@@ -20,11 +20,12 @@ import StatusChip from './StatusChip';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/getInitials';
 import { getCourierDocument, getCourierName, getScheduleTimeRange, isCourierActive } from '../utils/courierEdit';
+import { FONT } from '../theme';
 
-const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' };
+const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' };
 const HEADER_CELL_SX = {
   bgcolor: 'neutral.surface',
-  fontSize: 12,
+  fontSize: FONT.xs,
   fontWeight: 700,
   textTransform: 'uppercase',
   color: 'text.secondary',
@@ -88,7 +89,7 @@ export default function CourierFleetPanel({
 
       <Box sx={{ px: 2.5, py: 1.5, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 1 }}>
         <Typography sx={HEADING_SX}>Flota de mensajeros</Typography>
-        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
           {couriers.length} {couriers.length === 1 ? 'mensajero' : 'mensajeros'}
         </Typography>
       </Box>
@@ -118,22 +119,22 @@ export default function CourierFleetPanel({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
                       <Avatar
                         sx={{
-                          width: 36,
-                          height: 36,
-                          flex: '0 0 36px',
+                          width: 30,
+                          height: 30,
+                          flex: '0 0 30px',
                           bgcolor: selected ? 'primary.main' : 'neutral.surface',
                           color: selected ? 'common.white' : 'text.secondary',
                           fontWeight: 700,
-                          fontSize: 12,
+                          fontSize: FONT.xs,
                         }}
                       >
                         {getInitials(name)}
                       </Avatar>
                       <Box sx={{ minWidth: 0 }}>
-                        <Typography sx={{ fontWeight: 600, color: '#1F2421', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Typography sx={{ fontWeight: 600, color: '#1F2421', fontSize: FONT.sm, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {name}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {key ?? ''}
                           {' · '}
                           {getScheduleTimeRange(courier.schedule || courier.horario)}

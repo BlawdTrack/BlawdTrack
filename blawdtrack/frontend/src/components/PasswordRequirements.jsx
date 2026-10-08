@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { evaluatePasswordRules } from '../utils/passwordRules';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 // Checklist "Requisitos" (bloque r3 del mockup). Las reglas 1-3 se evalúan en
 // vivo con lo que el usuario escribe. La regla 4 (distinta de las últimas 3
@@ -29,7 +29,7 @@ function Rule({ label, state, note }) {
   return (
     <Box
       component="li"
-      sx={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: 12, lineHeight: 1.35, color }}
+      sx={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: FONT.xs, lineHeight: 1.35, color }}
     >
       <Box
         component="span"
@@ -47,7 +47,7 @@ function Rule({ label, state, note }) {
       <span>
         {label}
         {note && (
-          <Box component="span" sx={{ ml: 0.75, fontSize: 12, color: NEUTRAL_TEXT }}>
+          <Box component="span" sx={{ ml: 0.75, fontSize: FONT.xs, color: NEUTRAL_TEXT }}>
             ({note})
           </Box>
         )}
@@ -71,22 +71,22 @@ export function PasswordRequirements({ password, historyRejected = false }) {
       sx={{
         bgcolor: 'neutral.surface',
         borderRadius: RADIUS.sm,
-        p: '15px 16px',
+        p: '12px 13px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '9px',
+        gap: '7px',
       }}
     >
       <Typography
         id="password-requirements-title"
-        sx={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: 'text.secondary' }}
+        sx={{ fontSize: FONT.xs, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: 'text.secondary' }}
       >
         Requisitos
       </Typography>
       <Box
         component="ul"
         aria-labelledby="password-requirements-title"
-        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}
+        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}
       >
         <Rule label="Mínimo 8 caracteres" state={results.length ? 'ok' : 'pending'} />
         <Rule label="Al menos una letra" state={results.letter ? 'ok' : 'pending'} />

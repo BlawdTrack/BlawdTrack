@@ -8,8 +8,8 @@ import { ROUTES } from '../../config/routes';
 import SidebarContent from './SidebarContent';
 import MobileBottomNav from './MobileBottomNav';
 
-const SIDEBAR_WIDTH = 272;
-const SIDEBAR_COLLAPSED_WIDTH = 76;
+const SIDEBAR_WIDTH = 220;
+const SIDEBAR_COLLAPSED_WIDTH = 62;
 const COLLAPSED_STORAGE_KEY = 'blawdtrack.sidebarCollapsed';
 
 // El navegador puede bloquear el almacenamiento (modo privado); en ese caso la barra arranca expandida.
@@ -78,7 +78,7 @@ export default function MainMenuLayout() {
         />
       </Box>
 
-      <Box component="main" sx={{ flex: 1, minWidth: 0, pb: { xs: '84px', md: 0 } }}>
+      <Box component="main" sx={{ flex: 1, minWidth: 0, pb: { xs: '72px', md: 0 } }}>
         <Outlet />
       </Box>
 

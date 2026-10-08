@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress } from '@mui/material';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT, TOUCH_TARGET } from '../theme';
 
 /**
  * Botones al pie de un formulario de creación: el principal (con un punto naranja, como el resto de la
@@ -13,7 +13,7 @@ export default function FormActions({ submitLabel, submittingLabel, isSubmitting
         type="submit"
         variant="contained"
         disabled={isSubmitting}
-        sx={{ fontWeight: 600, px: 4, minHeight: 52, fontSize: 16, borderRadius: RADIUS.sm, gap: 1.2, boxShadow: 'none' }}
+        sx={{ fontWeight: 600, px: 4, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm, gap: 1.2, boxShadow: 'none' }}
       >
         {isSubmitting ? (
           <>
@@ -32,7 +32,7 @@ export default function FormActions({ submitLabel, submittingLabel, isSubmitting
         variant="outlined"
         onClick={onDiscard}
         disabled={isSubmitting}
-        sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: 52, fontSize: 16, borderRadius: RADIUS.sm }}
+        sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
       >
         Descartar
       </Button>

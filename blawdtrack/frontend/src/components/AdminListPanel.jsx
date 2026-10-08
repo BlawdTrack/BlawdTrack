@@ -3,6 +3,7 @@ import AccountRow from './AccountRow';
 import HistoryButton from './HistoryButton';
 import SearchableListPanel from './SearchableListPanel';
 import SessionChip from './SessionChip';
+import { FONT } from '../theme';
 
 /**
  * Panel de los administradores de ventas (HU-008): búsqueda por documento y lista con el botón "Eliminar"
@@ -22,7 +23,7 @@ export default function AdminListPanel({ admins, totalCount, loading, errorMessa
       search={search}
       listTitle="Administradores"
       meta={!loading && !errorMessage && totalCount > 0 && (
-        <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
           {count} {noun}
         </Typography>
       )}

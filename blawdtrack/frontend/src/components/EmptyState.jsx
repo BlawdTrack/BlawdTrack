@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { CARD_SX } from './formStyles';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Tarjeta de "todavía no hay nada seleccionado": icono, título y una línea que dice qué hacer.
@@ -25,8 +25,8 @@ export default function EmptyState({ icon: Icon, title, description, sx }) {
     >
       <Box
         sx={{
-          width: 72,
-          height: 72,
+          width: 58,
+          height: 58,
           borderRadius: RADIUS.md,
           bgcolor: 'secondary.light',
           color: 'secondary.main',
@@ -35,10 +35,10 @@ export default function EmptyState({ icon: Icon, title, description, sx }) {
           justifyContent: 'center',
         }}
       >
-        <Icon sx={{ fontSize: 36 }} />
+        <Icon sx={{ fontSize: FONT.h1 }} />
       </Box>
-      <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>{title}</Typography>
-      <Typography sx={{ color: 'text.secondary', fontSize: 16, maxWidth: 360 }}>{description}</Typography>
+      <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>{title}</Typography>
+      <Typography sx={{ color: 'text.secondary', fontSize: FONT.md, maxWidth: 360 }}>{description}</Typography>
     </Paper>
   );
 }

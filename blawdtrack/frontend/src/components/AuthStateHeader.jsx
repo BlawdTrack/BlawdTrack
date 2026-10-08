@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { FONT } from '../theme';
 
 const TONES = {
   accent: { bg: 'secondary.light', fg: 'secondary.dark' },
@@ -18,15 +19,15 @@ export default function AuthStateHeader({ icon: Icon, tone = 'accent', title, de
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, textAlign: 'center' }}>
       <Box
         aria-hidden
-        sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: bg, color: fg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        sx={{ width: 52, height: 52, borderRadius: '50%', bgcolor: bg, color: fg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        <Icon sx={{ fontSize: 32 }} />
+        <Icon sx={{ fontSize: FONT.h2 }} />
       </Box>
-      <Typography component="h1" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: 24, color: 'primary.main' }}>
+      <Typography component="h1" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: FONT.h3, color: 'primary.main' }}>
         {title}
       </Typography>
       {description && (
-        <Typography component="div" sx={{ fontSize: 16, color: 'text.secondary', lineHeight: 1.55 }}>
+        <Typography component="div" sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.55 }}>
           {description}
         </Typography>
       )}

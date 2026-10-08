@@ -4,7 +4,7 @@ import HistoryList from './HistoryList';
 import StatusMessage from './StatusMessage';
 import { CARD_SX } from './formStyles';
 import { recordsLabel } from '../utils/courierEdit';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Historial general: los cambios de TODOS los mensajeros, cada uno con el mensajero al que pertenece.
@@ -19,14 +19,14 @@ export default function CourierGeneralHistoryPanel({ history, backLabel, onBack 
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', borderBottom: '1px solid', borderColor: 'neutral.border' }}>
         <BackButton onClick={onBack}>{backLabel}</BackButton>
-        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 18, color: 'primary.main' }}>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>
           Historial general de mensajeros
         </Typography>
         {status === 'idle' && (
           <Chip
             label={recordsLabel(entries.length)}
             size="small"
-            sx={{ fontSize: 12, fontWeight: 600, bgcolor: 'neutral.surface', color: 'text.secondary', borderRadius: RADIUS.lg }}
+            sx={{ fontSize: FONT.xs, fontWeight: 600, bgcolor: 'neutral.surface', color: 'text.secondary', borderRadius: RADIUS.lg }}
           />
         )}
       </Box>

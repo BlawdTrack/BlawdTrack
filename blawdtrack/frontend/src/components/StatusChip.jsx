@@ -1,5 +1,5 @@
 import { Chip } from '@mui/material';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Etiqueta "Activo" / "Inactivo" del estado de acceso de una cuenta.
@@ -11,7 +11,7 @@ export default function StatusChip({ active }) {
       label={active ? 'Activo' : 'Inactivo'}
       size="small"
       sx={{
-        fontSize: 12,
+        fontSize: FONT.xs,
         fontWeight: 700,
         borderRadius: RADIUS.lg,
         bgcolor: active ? 'success.light' : 'neutral.surface',

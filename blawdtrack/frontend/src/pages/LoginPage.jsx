@@ -11,7 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
 import { INLINE_LABEL_SX, LINK_BUTTON_SX } from '../components/formStyles';
-import { CARD_PATTERN_SX, RADIUS } from '../theme';
+import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
 import blawdtrackLogo from '../assets/Logo.png';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -92,8 +92,8 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box
             sx={{
-              width: 44,
-              height: 44,
+              width: 36,
+              height: 36,
               borderRadius: RADIUS.sm,
               bgcolor: 'background.paper',
               display: 'flex',
@@ -101,7 +101,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               justifyContent: 'center',
             }}
           >
-            <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 28, height: 34, objectFit: 'contain' }} />
+            <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 22, height: 27, objectFit: 'contain' }} />
           </Box>
           <Typography variant="h6" component="span">
             BlawdTrack
@@ -114,12 +114,12 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             <br />
             siempre a la vista.
           </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.75)', maxWidth: 360 }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.75)', maxWidth: 290 }}>
             Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar.
           </Typography>
         </Box>
 
-        <Box sx={{ width: 48, height: 4, borderRadius: 2, bgcolor: 'secondary.main' }} />
+        <Box sx={{ width: 38, height: 4, borderRadius: 2, bgcolor: 'secondary.main' }} />
       </Box>
 
       <Box
@@ -137,8 +137,8 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
         <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1.25, mb: 4 }}>
           <Box
             sx={{
-              width: 40,
-              height: 40,
+              width: 32,
+              height: 32,
               borderRadius: RADIUS.sm,
               bgcolor: 'primary.main',
               display: 'flex',
@@ -146,7 +146,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               justifyContent: 'center',
             }}
           >
-            <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 24, height: 29, objectFit: 'contain' }} />
+            <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 19, height: 23, objectFit: 'contain' }} />
           </Box>
           <Typography variant="h6" component="span" sx={{ color: 'primary.main' }}>
             BlawdTrack
@@ -159,7 +159,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           noValidate
           sx={{
             width: '100%',
-            maxWidth: 420,
+            maxWidth: 340,
             ...CARD_PATTERN_SX,
             border: '1px solid', borderColor: 'neutral.border',
             borderRadius: RADIUS.md,
@@ -173,14 +173,14 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
               Iniciar sesión
             </Typography>
-            <Typography sx={{ fontSize: 14, color: 'text.secondary', mt: 0.75 }}>
+            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', mt: 0.75 }}>
               Ingresa con tu correo y contraseña. El sistema te llevará al panel de tu rol.
             </Typography>
           </Box>
 
           {error && <StatusMessage severity={error.severity} message={error.message} />}
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <Typography component="label" htmlFor="login-email" sx={INLINE_LABEL_SX}>
               Correo electrónico
             </Typography>
@@ -200,7 +200,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             />
           </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <Typography component="label" htmlFor="login-password" sx={INLINE_LABEL_SX}>
               Contraseña
             </Typography>
@@ -222,7 +222,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               type="button"
               onClick={() => onForgotPassword?.()}
               underline="hover"
-              sx={{ ...LINK_BUTTON_SX, alignSelf: 'flex-end', mr: -1, color: 'primary.main', fontWeight: 600, fontSize: 14 }}
+              sx={{ ...LINK_BUTTON_SX, alignSelf: 'flex-end', mr: -1, color: 'primary.main', fontWeight: 600, fontSize: FONT.sm }}
             >
               ¿Olvidaste tu contraseña?
             </Link>
@@ -234,7 +234,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             variant="contained"
             size="large"
             disabled={loading}
-            sx={{ fontWeight: 'bold', fontSize: 16, minHeight: 48, display: 'flex', gap: '10px' }}
+            sx={{ fontWeight: 'bold', fontSize: FONT.md, minHeight: TOUCH_TARGET, display: 'flex', gap: '8px' }}
           >
             {loading ? (
               <CircularProgress size={22} sx={{ color: 'inherit' }} />
@@ -249,9 +249,9 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           {/* 'success.main' es el mismo verde de éxito que usa StatusMessage.jsx;
               el theme no define theme.palette.success, así que se repite el
               valor fijo en vez de inventar un token nuevo. */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6.5px' }}>
             <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'success.main', flexShrink: 0 }} />
-            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
               Conexión a internet requerida · contraseñas encriptadas
             </Typography>
           </Box>

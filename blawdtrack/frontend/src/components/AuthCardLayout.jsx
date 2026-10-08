@@ -23,8 +23,8 @@ export default function AuthCardLayout({ children }) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 3 }}>
         <Box
           sx={{
-            width: 40,
-            height: 40,
+            width: 32,
+            height: 32,
             borderRadius: RADIUS.sm,
             bgcolor: 'primary.main',
             display: 'flex',
@@ -32,7 +32,7 @@ export default function AuthCardLayout({ children }) {
             justifyContent: 'center',
           }}
         >
-          <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 24, height: 29, objectFit: 'contain' }} />
+          <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 19, height: 23, objectFit: 'contain' }} />
         </Box>
         <Typography variant="h6" component="span" sx={{ color: 'primary.main' }}>
           BlawdTrack
@@ -42,7 +42,7 @@ export default function AuthCardLayout({ children }) {
       <Box
         sx={{
           width: '100%',
-          maxWidth: 560,
+          maxWidth: 450,
           ...CARD_PATTERN_SX,
           border: '1px solid', borderColor: 'neutral.border',
           borderRadius: RADIUS.md,

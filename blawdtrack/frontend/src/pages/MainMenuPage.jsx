@@ -8,7 +8,7 @@ import { NAV_GROUP_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
 import PageContainer from '../components/PageContainer';
 import { getGreeting } from '../utils/greeting';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT, rem, TOUCH_TARGET } from '../theme';
 
 /**
  * Inicio del Super Usuario dentro del menú principal: portada con su rol (en la etiqueta), el saludo según la
@@ -28,7 +28,9 @@ export default function MainMenuPage() {
   return (
     <PageContainer
       sx={{
-        minHeight: { xs: 'calc(100vh - 84px)', md: '100vh' },
+        // Ancho máximo del menú principal: 1100 px.
+        maxWidth: 1100,
+        minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },
         justifyContent: 'center',
         gap: { xs: 4, md: 6 },
       }}
@@ -52,8 +54,8 @@ export default function MainMenuPage() {
           },
           px: { xs: 3, md: 6 },
           // La franja naranja ocupa los 6 px de arriba, así que el relleno superior es un poco mayor.
-          pt: 2.75,
-          pb: 2,
+          pt: 2.25,
+          pb: 1.75,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -66,19 +68,19 @@ export default function MainMenuPage() {
           sx={{
             fontFamily: '"Poppins", sans-serif',
             fontWeight: 700,
-            fontSize: { xs: 36, md: 56 },
+            fontSize: { xs: FONT.h1, md: FONT.hero },
             lineHeight: 1.1,
             letterSpacing: '-0.5px',
           }}
         >
           BlawdTrack
         </Typography>
-        <Typography sx={{ fontSize: { xs: 16, md: 18 }, color: 'rgba(255,255,255,0.9)' }}>
+        <Typography sx={{ fontSize: { xs: FONT.md, md: FONT.lg }, color: 'rgba(255,255,255,0.9)' }}>
           Sistema de paquetería
         </Typography>
         <Chip
           label={ROLE_LABELS[user.role] ?? user.role}
-          sx={{ mt: 0.5, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: 14, height: 32, px: 1 }}
+          sx={{ mt: 0.5, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: FONT.sm, height: 28, px: 1 }}
         />
       </Box>
 
@@ -88,11 +90,11 @@ export default function MainMenuPage() {
             id="quick-access-title"
             variant="h4"
             component="h2"
-            sx={{ color: 'primary.main', fontSize: { xs: 28, md: 32 } }}
+            sx={{ color: 'primary.main', fontSize: { xs: rem(22.5), md: FONT.h2 } }}
           >
             {getGreeting()}
           </Typography>
-          <Typography sx={{ fontSize: 18, color: 'text.secondary', mt: 0.5, mb: { xs: 3, md: 4 } }}>
+          <Typography sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: 0.5, mb: { xs: 3, md: 4 } }}>
             ¿Qué deseas hacer hoy?
           </Typography>
           <Box
@@ -118,7 +120,7 @@ export default function MainMenuPage() {
 
       <Button
         onClick={handleLogout}
-        sx={{ display: { xs: 'inline-flex', md: 'none' }, alignSelf: 'center', color: 'primary.main', minHeight: 48 }}
+        sx={{ display: { xs: 'inline-flex', md: 'none' }, alignSelf: 'center', color: 'primary.main', minHeight: TOUCH_TARGET }}
       >
         Cerrar sesión
       </Button>

@@ -1,5 +1,5 @@
 import { Chip } from '@mui/material';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Etiqueta de si una cuenta tiene la sesión abierta ("Sesión activa" en ámbar) o no ("Sin sesión").
@@ -11,7 +11,7 @@ export default function SessionChip({ active }) {
       label={active ? 'Sesión activa' : 'Sin sesión'}
       size="small"
       sx={{
-        fontSize: 12,
+        fontSize: FONT.xs,
         fontWeight: 700,
         borderRadius: RADIUS.lg,
         bgcolor: active ? 'warning.light' : 'neutral.surface',

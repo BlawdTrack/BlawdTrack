@@ -14,6 +14,30 @@ const CREAM = '#FAF8F5';
  */
 export const RADIUS = { sm: '10px', md: '16px', lg: '20px' };
 
+/**
+ * Escala de la aplicación (0,8 de la anterior). La raíz tipográfica pasa de 16 a 13 px y todo lo escrito en rem
+ * escala con ella; `rem(px)` convierte un tamaño en píxeles a rem sobre esa raíz, así el tamaño sigue las
+ * preferencias de fuente del navegador. Mínimos que no bajan: texto de 12 px (`FONT.xs`) y áreas táctiles de 44 px.
+ */
+export const ROOT_FONT_PX = 13;
+export const rem = (px) => `${Number((px / ROOT_FONT_PX).toFixed(4))}rem`;
+
+/** Escala tipográfica: etiquetas, texto secundario, texto base, subtítulos, títulos de sección y de pantalla, portada. */
+export const FONT = {
+  xs: rem(12),
+  sm: rem(12.5),
+  md: rem(13),
+  lg: rem(14.5),
+  xl: rem(16.5),
+  h3: rem(19),
+  h2: rem(26),
+  h1: rem(29),
+  hero: rem(45),
+};
+
+/** Alto mínimo de campos y botones: área táctil (ley de Fitts). No se reduce con la escala. */
+export const TOUCH_TARGET = 44;
+
 // Sombras: una de tarjeta (`1`), una pequeña para piezas diminutas como el pulgar del interruptor (`2`) y una de
 // elementos flotantes (`8`: menús, avisos, diálogos). El resto de niveles de Material cae en estas.
 const CARD_SHADOW = '0 12px 30px rgba(26,60,52,.06)';
@@ -117,26 +141,28 @@ export const theme = createTheme({
     },
   },
   shape: { borderRadius: 10 },
+  // Base de espaciado: 6,4 px (antes 8 px), así que todos los `p`, `m` y `gap` numéricos escalan 0,8.
+  spacing: 6.4,
   shadows: SHADOWS,
   // Escala tipográfica única de la aplicación: 12 (etiquetas y ayudas) · 14 (texto secundario) ·
   // 16 (texto base) · 18 (títulos de sección) · 24 (título de pantalla) · 32 (portadas).
   typography: {
     fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
-    h4: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: '2rem', lineHeight: 1.25 },
-    h5: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: '1.5rem', lineHeight: 1.3 },
-    h6: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: '1.125rem', lineHeight: 1.35 },
-    body1: { fontSize: '1rem', lineHeight: 1.5 },
-    body2: { fontSize: '0.875rem', lineHeight: 1.5 },
-    caption: { fontSize: '0.75rem', lineHeight: 1.4 },
+    h4: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: FONT.h2, lineHeight: 1.25 },
+    h5: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: FONT.h3, lineHeight: 1.3 },
+    h6: { fontFamily: '"Poppins", "Inter", sans-serif', fontWeight: 600, fontSize: FONT.lg, lineHeight: 1.35 },
+    body1: { fontSize: FONT.md, lineHeight: 1.5 },
+    body2: { fontSize: FONT.sm, lineHeight: 1.5 },
+    caption: { fontSize: FONT.xs, lineHeight: 1.4 },
     button: {
       textTransform: 'none',
       fontWeight: 600,
-      fontSize: '0.875rem',
+      fontSize: FONT.sm,
     },
   },
   components: {
     MuiCssBaseline: {
-      styleOverrides: { body: PAGE_PATTERN_SX },
+      styleOverrides: { html: { fontSize: `${(ROOT_FONT_PX / 16) * 100}%` }, body: PAGE_PATTERN_SX },
     },
     MuiDialog: {
       styleOverrides: { paper: { ...CARD_PATTERN_SX, borderRadius: RADIUS.lg } },
@@ -152,8 +178,8 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: RADIUS.sm,
-          minHeight: 44,
-          padding: '8px 20px',
+          minHeight: TOUCH_TARGET,
+          padding: '6px 16px',
         },
         // Los botones nunca son transparentes: sin relleno, el patrón de fondo se vería a través.
         outlined: {
@@ -168,8 +194,8 @@ export const theme = createTheme({
           '&.Mui-disabled': { backgroundColor: '#E4DED7', color: '#6B6560' },
         },
         sizeLarge: {
-          minHeight: 48,
-          fontSize: '1rem',
+          minHeight: TOUCH_TARGET,
+          fontSize: FONT.md,
         },
       },
     },
@@ -181,7 +207,7 @@ export const theme = createTheme({
       },
     },
     MuiIconButton: {
-      styleOverrides: { root: { borderRadius: RADIUS.sm, minWidth: 44, minHeight: 44 } },
+      styleOverrides: { root: { borderRadius: RADIUS.sm, minWidth: TOUCH_TARGET, minHeight: TOUCH_TARGET } },
     },
     MuiLink: {
       styleOverrides: {
@@ -189,7 +215,7 @@ export const theme = createTheme({
       },
     },
     MuiChip: {
-      styleOverrides: { root: { borderRadius: RADIUS.lg, fontWeight: 700, fontSize: '0.75rem' } },
+      styleOverrides: { root: { borderRadius: RADIUS.lg, fontWeight: 700, fontSize: FONT.xs } },
     },
     // Los avisos de MUI usan los mismos tonos que `StatusMessage`: fondo suave, contorno y texto del estado.
     MuiAlert: {
@@ -222,10 +248,10 @@ export const theme = createTheme({
         tooltip: {
           backgroundColor: '#1A3C34',
           color: WHITE,
-          fontSize: '0.75rem',
+          fontSize: FONT.xs,
           fontWeight: 500,
           borderRadius: RADIUS.sm,
-          padding: '6px 10px',
+          padding: '5px 8px',
         },
         arrow: { color: '#1A3C34' },
       },
@@ -237,7 +263,7 @@ export const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': { borderRadius: RADIUS.sm },
+          '& .MuiOutlinedInput-root': { borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET },
         },
       },
     },

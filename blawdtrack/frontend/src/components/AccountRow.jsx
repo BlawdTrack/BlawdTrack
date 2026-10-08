@@ -1,6 +1,6 @@
 import { Avatar, Box, Button, Typography } from '@mui/material';
 import { getInitials } from '../utils/getInitials';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 const LINE_COLORS = { muted: 'text.secondary', success: 'success.main' };
 
@@ -14,17 +14,17 @@ const LINE_COLORS = { muted: 'text.secondary', success: 'success.main' };
 export default function AccountRow({ name, lines, status, actionLabel, actionDisabled = false, onAction }) {
   return (
     <Box sx={{ px: 2.5, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-      <Avatar sx={{ width: 44, height: 44, bgcolor: 'neutral.surface', color: 'text.secondary', fontWeight: 700, fontSize: 14, flex: '0 0 44px' }}>
+      <Avatar sx={{ width: 36, height: 36, bgcolor: 'neutral.surface', color: 'text.secondary', fontWeight: 700, fontSize: FONT.sm, flex: '0 0 36px' }}>
         {getInitials(name)}
       </Avatar>
 
       <Box sx={{ flex: '1 1 220px', minWidth: 0 }}>
-        <Typography sx={{ fontSize: 16, fontWeight: 600, color: '#1F2421' }}>{name}</Typography>
+        <Typography sx={{ fontSize: FONT.md, fontWeight: 600, color: '#1F2421' }}>{name}</Typography>
         {lines.map((line, index) => (
           <Typography
             key={line.text}
             sx={{
-              fontSize: index === 0 ? 14 : 12,
+              fontSize: index === 0 ? FONT.sm : FONT.xs,
               fontWeight: index === 0 ? 400 : 600,
               color: LINE_COLORS[line.tone ?? 'muted'],
               overflowWrap: 'anywhere',
@@ -46,7 +46,7 @@ export default function AccountRow({ name, lines, status, actionLabel, actionDis
           px: 2.5,
           minHeight: 44,
           fontWeight: 600,
-          fontSize: 14,
+          fontSize: FONT.sm,
           bgcolor: 'background.paper',
           color: actionDisabled ? '#7A736A' : 'error.main',
           borderColor: actionDisabled ? 'neutral.border' : 'error.main',

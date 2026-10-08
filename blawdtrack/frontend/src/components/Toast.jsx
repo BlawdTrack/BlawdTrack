@@ -1,6 +1,6 @@
 import { Snackbar, Box, IconButton, Typography } from '@mui/material';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 // Notificación flotante, tal como aparece en el mockup (pantallas D y F:
 // "Notificaciones toast"). Se apoya en el Snackbar de MUI solo para el
@@ -60,7 +60,7 @@ export function Toast({ open, message, severity = 'success', onClose, autoHideDu
         }}
       >
         <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: accentColor, flexShrink: 0 }} />
-        <Typography sx={{ flex: 1, fontSize: 16, lineHeight: 1.45, color: '#1F2421' }}>{message}</Typography>
+        <Typography sx={{ flex: 1, fontSize: FONT.md, lineHeight: 1.45, color: '#1F2421' }}>{message}</Typography>
         <IconButton
           onClick={(event) => handleClose(event, 'closeButton')}
           aria-label="Cerrar aviso"

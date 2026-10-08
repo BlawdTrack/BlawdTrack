@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { INPUT_SX } from './formStyles';
 import { Box, Button, Popover, TextField } from '@mui/material';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 const ITEM_HEIGHT = 40;
 export const WHEEL_ITEM_HEIGHT = ITEM_HEIGHT;
@@ -197,7 +197,7 @@ export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              fontSize: isSelected ? '1.25rem' : '1rem',
+              fontSize: isSelected ? FONT.xl : FONT.md,
               fontWeight: isSelected ? 700 : 400,
               color: isSelected ? '#1A3C34' : 'text.secondary'
             }}

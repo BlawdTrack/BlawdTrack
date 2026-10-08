@@ -1,15 +1,15 @@
 import { Fragment } from 'react';
 import { Box, Chip, Typography } from '@mui/material';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 function CourierHistoryRow({ entry }) {
   return (
     <Box
-      sx={{ px: 3, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'baseline' }}
+      sx={{ px: 3, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', gap: '11px', flexWrap: 'wrap', alignItems: 'baseline' }}
     >
-      <Typography sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary', flex: '0 0 150px' }}>{entry.when}</Typography>
-      <Typography sx={{ fontSize: 14, color: '#1F2421', flex: '1 1 200px', minWidth: 0, lineHeight: 1.45 }}>{entry.text}</Typography>
-      <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{entry.by}</Typography>
+      <Typography sx={{ fontSize: FONT.xs, fontWeight: 600, color: 'text.secondary', flex: '0 0 150px' }}>{entry.when}</Typography>
+      <Typography sx={{ fontSize: FONT.sm, color: '#1F2421', flex: '1 1 200px', minWidth: 0, lineHeight: 1.45 }}>{entry.text}</Typography>
+      <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>{entry.by}</Typography>
     </Box>
   );
 }
@@ -32,17 +32,17 @@ function GeneralHistoryRow({ entry }) {
             <Chip
               label={entry.badge.label}
               size="small"
-              sx={{ fontSize: 12, fontWeight: 700, borderRadius: RADIUS.lg, ...BADGE_COLORS[entry.badge.tone] }}
+              sx={{ fontSize: FONT.xs, fontWeight: 700, borderRadius: RADIUS.lg, ...BADGE_COLORS[entry.badge.tone] }}
             />
           )}
           {entry.subject && (
-            <Typography noWrap sx={{ fontSize: 14, fontWeight: 600, color: '#1F2421' }}>{entry.subject}</Typography>
+            <Typography noWrap sx={{ fontSize: FONT.sm, fontWeight: 600, color: '#1F2421' }}>{entry.subject}</Typography>
           )}
         </Box>
-        <Typography noWrap sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary' }}>{entry.when}</Typography>
+        <Typography noWrap sx={{ fontSize: FONT.xs, fontWeight: 600, color: 'text.secondary' }}>{entry.when}</Typography>
       </Box>
-      <Typography sx={{ fontSize: 14, color: '#1F2421', mt: 0.5, lineHeight: 1.45 }}>{entry.text}</Typography>
-      <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.25 }}>
+      <Typography sx={{ fontSize: FONT.sm, color: '#1F2421', mt: 0.5, lineHeight: 1.45 }}>{entry.text}</Typography>
+      <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary', mt: 0.25 }}>
         {footer.map((part, index) => (
           <Fragment key={part}>
             {index > 0 && ' · '}
@@ -63,7 +63,7 @@ function GeneralHistoryRow({ entry }) {
  */
 export default function HistoryList({ entries, emptyMessage, showSubject = false }) {
   if (entries.length === 0) {
-    return <Typography sx={{ px: 3, py: 2, fontSize: 14, color: 'text.secondary' }}>{emptyMessage}</Typography>;
+    return <Typography sx={{ px: 3, py: 2, fontSize: FONT.sm, color: 'text.secondary' }}>{emptyMessage}</Typography>;
   }
 
   const Row = showSubject ? GeneralHistoryRow : CourierHistoryRow;

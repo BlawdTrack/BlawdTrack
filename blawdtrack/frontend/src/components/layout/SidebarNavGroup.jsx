@@ -14,7 +14,7 @@ import {
 import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
 import SidebarNavItem from './SidebarNavItem';
 import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from './navIcons';
-import { RADIUS } from '../../theme';
+import { RADIUS, FONT } from '../../theme';
 
 /**
  * Un grupo del menú. Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
@@ -49,8 +49,8 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           aria-expanded={menuOpen}
           aria-controls={menuOpen ? menuId : undefined}
           sx={{
-            width: 48,
-            height: 48,
+            width: 44,
+            height: 44,
             border: 0,
             borderRadius: RADIUS.sm,
             display: 'flex',
@@ -63,7 +63,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
             '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 1 },
           }}
         >
-          {GroupIcon && <GroupIcon sx={{ fontSize: 22 }} />}
+          {GroupIcon && <GroupIcon sx={{ fontSize: FONT.xl }} />}
         </Box>
         <Popper
           open={menuOpen}
@@ -75,9 +75,9 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           <Box ref={registerPanel} onMouseEnter={onPanelEnter} onMouseLeave={onPanelLeave} sx={{ pl: 1 }}>
             {/* Un clic sobre el propio icono no es "fuera": ya lo abrió el cursor y no debe cerrarlo. */}
             <ClickAwayListener onClickAway={(event) => !anchorEl?.contains(event.target) && close()}>
-              <Paper elevation={8} sx={{ minWidth: 220, borderRadius: RADIUS.sm, border: '1px solid', borderColor: 'neutral.border', py: 0.5 }}>
+              <Paper elevation={8} sx={{ minWidth: 176, borderRadius: RADIUS.sm, border: '1px solid', borderColor: 'neutral.border', py: 0.5 }}>
                 <Typography
-                  sx={{ px: 2, py: 0.75, fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'text.secondary' }}
+                  sx={{ px: 2, py: 0.75, fontSize: FONT.xs, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'text.secondary' }}
                 >
                   {group.title}
                 </Typography>
@@ -101,10 +101,10 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
                         disabled={!item.path}
                         selected={active}
                         onClick={close}
-                        sx={{ minHeight: 44, fontSize: 14, fontWeight: active ? 600 : 500 }}
+                        sx={{ minHeight: 44, fontSize: FONT.sm, fontWeight: active ? 600 : 500 }}
                       >
                         {ItemIcon && (
-                          <ListItemIcon sx={{ minWidth: 34, color: active ? 'secondary.main' : 'text.secondary' }}>
+                          <ListItemIcon sx={{ minWidth: 28, color: active ? 'secondary.main' : 'text.secondary' }}>
                             <ItemIcon fontSize="small" />
                           </ListItemIcon>
                         )}
@@ -122,7 +122,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5px' }}>
       <Box
         component="button"
         type="button"
@@ -141,7 +141,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           background: 'transparent',
           cursor: 'pointer',
           fontFamily: 'inherit',
-          fontSize: 12,
+          fontSize: FONT.xs,
           fontWeight: 700,
           letterSpacing: 1,
           textTransform: 'uppercase',
@@ -156,16 +156,16 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
             <Box
               component="span"
               aria-hidden="true"
-              sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'secondary.main' }}
+              sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'secondary.main' }}
             />
           )}
         </Box>
         <ExpandMoreOutlinedIcon
-          sx={{ fontSize: 18, transition: 'transform .2s ease', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+          sx={{ fontSize: FONT.lg, transition: 'transform .2s ease', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
         />
       </Box>
       <Collapse in={open} id={listId}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5px' }}>
           {group.items.map((item) => (
             <SidebarNavItem key={item.id} item={item} />
           ))}

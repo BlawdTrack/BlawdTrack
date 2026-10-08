@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import { RADIUS } from '../../theme';
+import { RADIUS, FONT } from '../../theme';
 
 /**
  * Pie de la barra lateral: iniciales, nombre, correo y rol del usuario, y el botón de cerrar sesión.
@@ -12,17 +12,17 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
   const avatar = (
     <Box
       sx={{
-        width: 32,
-        height: 32,
+        width: 26,
+        height: 26,
         borderRadius: '50%',
         backgroundColor: '#FF6C0E',
         color: '#12322B',
-        fontSize: 12,
+        fontSize: FONT.xs,
         fontWeight: 700,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        flex: '0 0 32px',
+        flex: '0 0 26px',
       }}
     >
       {email.charAt(0).toUpperCase()}
@@ -67,13 +67,13 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
   }
 
   return (
-    <Box sx={{ mt: 'auto', p: '16px 18px 18px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+    <Box sx={{ mt: 'auto', p: '13px 14.5px 14.5px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
           gap: 1.25,
-          p: '10px 12px',
+          p: '8px 9.5px',
           mb: 1.25,
           borderRadius: RADIUS.sm,
           backgroundColor: 'rgba(255,255,255,.05)',
@@ -81,10 +81,10 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
       >
         {avatar}
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'common.white' }} noWrap>
+          <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: 'common.white' }} noWrap>
             {fullName}
           </Typography>
-          <Typography sx={{ fontSize: 12, color: 'rgba(255,255,255,.7)' }} noWrap>
+          <Typography sx={{ fontSize: FONT.xs, color: 'rgba(255,255,255,.7)' }} noWrap>
             {roleLabel}
           </Typography>
         </Box>
@@ -95,7 +95,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
         startIcon={<LogoutOutlinedIcon fontSize="small" />}
         sx={{
           color: 'rgba(255,255,255,.85)',
-          fontSize: 14,
+          fontSize: FONT.sm,
           fontWeight: 600,
           textTransform: 'none',
           borderRadius: RADIUS.sm,

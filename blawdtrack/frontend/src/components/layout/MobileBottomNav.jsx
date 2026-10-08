@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { NAV_GROUP_ICONS } from './navIcons';
-import { CARD_PATTERN_SX } from '../../theme';
+import { CARD_PATTERN_SX, FONT } from '../../theme';
 
 // Naranja más oscuro que el de la marca: el de marca sobre blanco no llega a 4.5:1 en texto pequeño.
 const ACTIVE_COLOR = '#C25100';
@@ -44,7 +44,7 @@ export default function MobileBottomNav({ groups }) {
             aria-current={active ? 'page' : undefined}
             sx={{
               flex: 1,
-              minHeight: 56,
+              minHeight: 48,
               pt: 1.25,
               pb: 1.5,
               flexDirection: 'column',
@@ -54,9 +54,9 @@ export default function MobileBottomNav({ groups }) {
             }}
           >
             {Icon && (
-              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? ACTIVE_COLOR : 'text.secondary' }} />
+              <Icon sx={{ fontSize: FONT.xl, mb: 0.375, color: active ? ACTIVE_COLOR : 'text.secondary' }} />
             )}
-            <Typography sx={{ fontSize: 12, fontWeight: 700, color: active ? ACTIVE_COLOR : 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT.xs, fontWeight: 700, color: active ? ACTIVE_COLOR : 'text.secondary' }}>
               {group.shortTitle}
             </Typography>
           </ButtonBase>

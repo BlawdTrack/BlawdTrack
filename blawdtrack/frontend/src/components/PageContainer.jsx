@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 
 /** Ancho máximo del contenido de todas las pantallas dentro del menú principal. */
-export const PAGE_MAX_WIDTH = 1120;
+export const PAGE_MAX_WIDTH = 900;
 
 /**
  * Contenedor común de las pantallas del Súper Usuario: mismo ancho máximo, márgenes y separación entre

@@ -3,7 +3,7 @@ import BackButton from './BackButton';
 import HistoryList from './HistoryList';
 import { CARD_SX } from './formStyles';
 import { recordsLabel } from '../utils/courierEdit';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Panel de auditoría: lo que quedó registrado, de lo más reciente a lo más antiguo, con a quién afectó y
@@ -17,11 +17,11 @@ export default function AuditPanel({ title, entries, emptyMessage, onBack, sx })
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', flexDirection: 'column', minHeight: 0, ...sx }}>
       <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', borderBottom: '1px solid', borderColor: 'neutral.border' }}>
         {onBack && <BackButton onClick={onBack} />}
-        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: 16, color: 'primary.main' }}>{title}</Typography>
+        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' }}>{title}</Typography>
         <Chip
           label={recordsLabel(entries.length)}
           size="small"
-          sx={{ fontSize: 12, fontWeight: 600, bgcolor: 'neutral.surface', color: 'text.secondary', borderRadius: RADIUS.lg }}
+          sx={{ fontSize: FONT.xs, fontWeight: 600, bgcolor: 'neutral.surface', color: 'text.secondary', borderRadius: RADIUS.lg }}
         />
       </Box>
       <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

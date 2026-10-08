@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { RADIUS } from '../theme';
+import { RADIUS, FONT } from '../theme';
 
 // Indicador de pasos del flujo de recuperación de contraseña (bloque
 // `resetSteps` de assets/mockup-sprint1.html). El paso actual llega por prop
@@ -23,10 +23,10 @@ export function RecoverySteps({ current }) {
         listStyle: 'none',
         m: 0,
         px: { xs: '16px', sm: '28px' },
-        py: '18px',
+        py: '14.5px',
         borderBottom: '1px solid', borderColor: 'neutral.border',
         display: 'flex',
-        gap: '10px',
+        gap: '8px',
         flexWrap: 'nowrap',
       }}
     >
@@ -43,8 +43,8 @@ export function RecoverySteps({ current }) {
               flex: { xs: isCurrent ? '1 1 auto' : '0 0 auto', sm: '1 1 180px' },
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              p: '10px 12px',
+              gap: '8px',
+              p: '8px 9.5px',
               borderRadius: RADIUS.sm,
               bgcolor: isCurrent ? 'neutral.surface' : 'transparent',
             }}
@@ -52,14 +52,14 @@ export function RecoverySteps({ current }) {
             <Box
               component="span"
               sx={{
-                width: 24,
-                height: 24,
-                flex: '0 0 24px',
+                width: 20,
+                height: 20,
+                flex: '0 0 20px',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 12,
+                fontSize: FONT.xs,
                 fontWeight: 700,
                 // Verde de marca en el paso actual, verde de éxito en los
                 // ya completados y gris en los pendientes.
@@ -73,7 +73,7 @@ export function RecoverySteps({ current }) {
               component="span"
               sx={{
                 display: { xs: isCurrent ? 'inline' : 'none', sm: 'inline' },
-                fontSize: 12,
+                fontSize: FONT.xs,
                 fontWeight: 600,
                 lineHeight: 1.3,
                 color: isCurrent ? 'primary.main' : 'text.secondary',
