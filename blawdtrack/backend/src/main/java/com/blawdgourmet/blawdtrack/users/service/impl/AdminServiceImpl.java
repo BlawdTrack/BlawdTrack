@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationException;
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
@@ -33,6 +35,7 @@ import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
+import com.blawdgourmet.blawdtrack.users.service.AdminRegisteredEvent;
 import com.blawdgourmet.blawdtrack.users.service.AdminService;
 import com.blawdgourmet.blawdtrack.users.service.AdminUniquenessValidator;
 import com.blawdgourmet.blawdtrack.users.service.UserRelatedRecordsCleaner;
@@ -43,7 +46,8 @@ import com.blawdgourmet.blawdtrack.users.validation.DocumentNormalizer;
  * - Ningún campo puede quedar vacío (se valida mediante Bean Validation en el DTO).
  * - La cédula debe ser única y tener un formato válido.
  * - El correo debe ser único.
- * - La contraseña se cifra antes de persistirse.
+ * - La contraseña temporal la genera el sistema, se cifra antes de persistirse y se envía por correo al
+ *   administrador una vez confirmada la transacción.
  * - El usuario se crea con el rol de "Administrador de Ventas".
  * - La creación queda registrada en el historial de auditoría.
  */
@@ -57,16 +61,8 @@ public class AdminServiceImpl implements AdminService {
     private final AdminUniquenessValidator adminUniquenessValidator;
     private final UserRelatedRecordsCleaner relatedRecordsCleaner;
     private final AuditLogRepository auditLogRepository;
-
-    public AdminServiceImpl(
-            UserRepository userRepository,
-            RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder,
-            AuditService auditService,
-            AuditLogRepository auditLogRepository) {
-        this(userRepository, roleRepository, passwordEncoder, auditService,
-                new AdminUniquenessValidator(userRepository), auditLogRepository, null);
-    }
+    private final TemporaryPasswordGenerator temporaryPasswords;
+    private final ApplicationEventPublisher events;
 
     @Autowired
     public AdminServiceImpl(
@@ -76,7 +72,9 @@ public class AdminServiceImpl implements AdminService {
             AuditService auditService,
             AdminUniquenessValidator adminUniquenessValidator,
             AuditLogRepository auditLogRepository,
-            UserRelatedRecordsCleaner relatedRecordsCleaner) {
+            UserRelatedRecordsCleaner relatedRecordsCleaner,
+            TemporaryPasswordGenerator temporaryPasswords,
+            ApplicationEventPublisher events) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -84,6 +82,8 @@ public class AdminServiceImpl implements AdminService {
         this.adminUniquenessValidator = adminUniquenessValidator;
         this.auditLogRepository = auditLogRepository;
         this.relatedRecordsCleaner = relatedRecordsCleaner;
+        this.temporaryPasswords = temporaryPasswords;
+        this.events = events;
     }
 
     @Value("${security.jwt.expiration-ms}")
@@ -119,13 +119,15 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> new BusinessConfigurationException(
                         "The role '" + RoleName.SALES_ADMIN + "' is not registered in the roles table."));
 
+        String temporaryPassword = temporaryPasswords.generate();
+
         User nuevoAdministrador = User.builder()
                 .documentType(documentType)
                 .documentNumber(documentNumber)
                 .documentId(documentNumber)
                 .fullName(request.nombreCompleto().trim())
                 .email(correo)
-                .passwordHash(passwordEncoder.encode(request.contrasenaInicial()))
+                .passwordHash(passwordEncoder.encode(temporaryPassword))
                 .phone(request.numeroTelefono().trim())
                 .status(UserStatus.ACTIVE)
                 .role(rolAdministrador)
@@ -142,6 +144,13 @@ public class AdminServiceImpl implements AdminService {
         }
 
         auditService.registrarCreacionAdministrador(actor, administradorGuardado);
+
+        events.publishEvent(new AdminRegisteredEvent(
+                administradorGuardado.getId(),
+                administradorGuardado.getEmail(),
+                administradorGuardado.getFullName(),
+                temporaryPassword
+        ));
 
         return new AdminRegistrationResponse(
                 administradorGuardado.getId(),

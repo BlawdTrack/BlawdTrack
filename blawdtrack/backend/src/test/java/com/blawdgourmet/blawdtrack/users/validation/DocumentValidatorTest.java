@@ -46,20 +46,20 @@ class DocumentValidatorTest {
     @ParameterizedTest
     @MethodSource("validDocuments")
     void aceptaDocumentosValidos(DocumentType type, String value) {
-        var request = new AdminRegistrationRequest("Nombre", "88888888", "user@example.com", "Clave1234", type, value);
+        var request = new AdminRegistrationRequest("Nombre", "88888888", "user@example.com", type, value);
         assertThat(VALIDATOR.validate(request)).isEmpty();
     }
 
     @ParameterizedTest
     @MethodSource("invalidDocuments")
     void rechazaDocumentosInvalidos(DocumentType type, String value) {
-        var request = new AdminRegistrationRequest("Nombre", "88888888", "user@example.com", "Clave1234", type, value);
+        var request = new AdminRegistrationRequest("Nombre", "88888888", "user@example.com", type, value);
         assertThat(VALIDATOR.validate(request)).isNotEmpty();
     }
 
     @Test
     void aceptaValoresNulosSinNpe() {
-        var request = new AdminRegistrationRequest("Nombre", "88888888", "user@example.com", "Clave1234", null, null);
+        var request = new AdminRegistrationRequest("Nombre", "88888888", "user@example.com", null, null);
         assertThat(VALIDATOR.validate(request)).isNotEmpty();
     }
 }

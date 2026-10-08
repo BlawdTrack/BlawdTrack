@@ -52,7 +52,7 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana.admin@example.com","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"123456789"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana.admin@example.com","documentType":"CEDULA","documentNumber":"123456789"}
                         """))
                 .andExpect(status().isCreated());
         assertThat(users.count()).isGreaterThan(count);
@@ -66,7 +66,7 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"user@host","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"123456789"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"user@host","documentType":"CEDULA","documentNumber":"123456789"}
                         """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
@@ -79,7 +79,7 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"12345678"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","documentType":"CEDULA","documentNumber":"12345678"}
                         """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errores[0].campo").value("documentNumber"));
@@ -91,7 +91,7 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","contrasenaInicial":"Clave1234","documentNumber":"123456789"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","documentNumber":"123456789"}
                         """))
                 .andExpect(status().isBadRequest());
     }
@@ -105,7 +105,7 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"new@example.com","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"1-2345-6789"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"new@example.com","documentType":"CEDULA","documentNumber":"1-2345-6789"}
                         """))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("DOCUMENTO_DUPLICADO"));
@@ -120,7 +120,7 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"Duplicado@Example.com","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"555555555"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"Duplicado@Example.com","documentType":"CEDULA","documentNumber":"555555555"}
                         """))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("DUPLICATE_EMAIL"));
@@ -132,7 +132,7 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", "Bearer " + token("SUPER_USUARIO", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","contrasenaInicial":"Clave1234","documentType":"DIMEX","documentNumber":"123456789"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","documentType":"DIMEX","documentNumber":"123456789"}
                         """))
                 .andExpect(status().isCreated());
     }
@@ -143,14 +143,14 @@ class AdminRegistrationValidationTest {
                 .header("Authorization", "Bearer " + token("ADMIN_VENTAS", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"123456789"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","documentType":"CEDULA","documentNumber":"123456789"}
                         """))
                 .andExpect(status().isForbidden());
         mvc.perform(post("/api/v1/admins")
                 .header("Authorization", "Bearer " + token("MENSAJERO", UserStatus.ACTIVE))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana2@example.com","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"1234567890"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana2@example.com","documentType":"CEDULA","documentNumber":"1234567890"}
                         """))
                 .andExpect(status().isForbidden());
     }
@@ -160,7 +160,7 @@ class AdminRegistrationValidationTest {
         mvc.perform(post("/api/v1/admins")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"123456789"}
+                        {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana@example.com","documentType":"CEDULA","documentNumber":"123456789"}
                         """))
                 .andExpect(status().isUnauthorized());
     }
