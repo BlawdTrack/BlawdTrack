@@ -72,7 +72,7 @@ const DeleteAdminModal = ({
             borderRadius: RADIUS.sm,
           }}
         >
-          <Avatar sx={{ width: 38, height: 38, bgcolor: '#9E968D', color: 'common.white', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
+          <Avatar sx={{ width: 38, height: 38, bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: 12, flex: '0 0 38px' }}>
             {getInitials(adminData.name)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>

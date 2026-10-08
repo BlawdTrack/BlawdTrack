@@ -9,7 +9,7 @@ import { RADIUS } from '../theme';
 // (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
 const OK_COLOR = 'success.main';
 const ERROR_COLOR = 'error.main';
-const NEUTRAL_TEXT = '#9E968D';
+const NEUTRAL_TEXT = 'text.secondary';
 const NEUTRAL_RING = 'neutral.borderStrong';
 
 const VISUALLY_HIDDEN = {

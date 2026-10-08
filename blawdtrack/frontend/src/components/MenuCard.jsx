@@ -39,7 +39,7 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
             borderColor: 'secondary.main',
             boxShadow: 8,
             transform: 'translateY(-2px)',
-            '& .menu-card-arrow': { bgcolor: 'secondary.main', color: 'common.white' },
+            '& .menu-card-arrow': { bgcolor: 'secondary.main', color: 'primary.main' },
           },
           '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 2 },
         }),

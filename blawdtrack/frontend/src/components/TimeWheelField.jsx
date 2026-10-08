@@ -199,7 +199,7 @@ export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
               cursor: 'pointer',
               fontSize: isSelected ? '1.25rem' : '1rem',
               fontWeight: isSelected ? 700 : 400,
-              color: isSelected ? '#1A3C34' : '#9E968D'
+              color: isSelected ? '#1A3C34' : 'text.secondary'
             }}
           >
             {items[mod(k, n)]}
