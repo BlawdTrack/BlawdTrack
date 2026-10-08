@@ -14,12 +14,12 @@ const tree = (
 );
 
 describe('MainMenuPage', () => {
-  it('shows the welcome text, the logged user and the role', () => {
+  it('shows the app title and the role once, without a second welcome or the user name', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
-    expect(screen.getByText('Bienvenid@ al sistema')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'BlawdTrack' })).toBeInTheDocument();
-    expect(screen.getByText(/Alicia Admin/)).toBeInTheDocument();
-    expect(screen.getByText('Súper Usuario')).toBeInTheDocument();
+    expect(screen.getAllByText('Súper Usuario')).toHaveLength(1);
+    expect(screen.queryByText('Bienvenid@ al sistema')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Alicia Admin/)).not.toBeInTheDocument();
   });
 
   it('falls back to the raw role when it has no label', () => {

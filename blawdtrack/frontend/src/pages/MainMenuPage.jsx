@@ -11,8 +11,8 @@ import { getGreeting } from '../utils/greeting';
 import { RADIUS } from '../theme';
 
 /**
- * Inicio del Super Usuario dentro del menú principal: portada con su nombre y su rol, el saludo según la
- * hora y una tarjeta por módulo que su rol puede usar. Todo va centrado y repartido en la altura de la
+ * Inicio del Super Usuario dentro del menú principal: portada con su rol (en la etiqueta), el saludo según la
+ * hora y una fila por módulo que su rol puede usar. Todo va centrado y repartido en la altura de la
  * pantalla; en móvil se agrega el botón de cerrar sesión.
  */
 export default function MainMenuPage() {
@@ -59,9 +59,6 @@ export default function MainMenuPage() {
           gap: 1.5,
         }}
       >
-        <Typography sx={{ fontSize: { xs: 16, md: 18 }, color: 'rgba(255,255,255,0.8)' }}>
-          Bienvenid@ al sistema
-        </Typography>
         <Typography
           component="h1"
           sx={{
@@ -75,7 +72,7 @@ export default function MainMenuPage() {
           BlawdTrack
         </Typography>
         <Typography sx={{ fontSize: { xs: 16, md: 18 }, color: 'rgba(255,255,255,0.9)' }}>
-          Sistema de paquetería · {user.fullName}
+          Sistema de paquetería
         </Typography>
         <Chip
           label={ROLE_LABELS[user.role] ?? user.role}
@@ -100,7 +97,7 @@ export default function MainMenuPage() {
             sx={{
               display: 'grid',
               gap: { xs: 2, md: 3 },
-              gridTemplateColumns: { xs: '1fr', md: `repeat(${Math.min(groups.length, 3)}, 1fr)` },
+              gridTemplateColumns: '1fr',
             }}
           >
             {groups.map((group) => (
@@ -110,6 +107,7 @@ export default function MainMenuPage() {
                 icon={NAV_GROUP_ICONS[group.id]}
                 title={group.title}
                 description={group.description}
+                variant="row"
               />
             ))}
           </Box>
