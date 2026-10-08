@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
-import { INLINE_LABEL_SX } from '../components/formStyles';
+import { INLINE_LABEL_SX, LINK_BUTTON_SX } from '../components/formStyles';
 import { CARD_PATTERN_SX, RADIUS } from '../theme';
 import blawdtrackLogo from '../assets/Logo.png';
 
@@ -222,7 +222,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               type="button"
               onClick={() => onForgotPassword?.()}
               underline="hover"
-              sx={{ alignSelf: 'flex-end', color: 'primary.main', fontWeight: 600, fontSize: 14, mt: 0.5 }}
+              sx={{ ...LINK_BUTTON_SX, alignSelf: 'flex-end', mr: -1, color: 'primary.main', fontWeight: 600, fontSize: 14 }}
             >
               ¿Olvidaste tu contraseña?
             </Link>

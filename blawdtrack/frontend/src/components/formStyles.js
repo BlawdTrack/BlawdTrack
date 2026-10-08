@@ -31,5 +31,19 @@ export const CARD_SX = {
   boxShadow: 1,
 };
 
+/**
+ * Enlace con forma de botón de texto ("¿Olvidaste tu contraseña?", "Usar otro correo"): el texto sigue siendo
+ * pequeño, pero el área que se puede pulsar mide al menos 44 px (ley de Fitts).
+ */
+export const LINK_BUTTON_SX = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: 44,
+  minHeight: 44,
+  px: 1,
+  borderRadius: RADIUS.sm,
+};
+
 /** Hace que un campo ocupe toda la fila del formulario de dos columnas (en móvil ya es una sola). */
 export const FULL_ROW_SX = { gridColumn: { md: 'span 2' } };

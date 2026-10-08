@@ -2,6 +2,8 @@ import { createTheme } from '@mui/material/styles';
 import patternUrl from './assets/background_T.png';
 
 const WHITE = '#ffffff';
+// Foco visible de teclado: verde de marca (12:1 sobre blanco). La barra lateral, que es oscura, define el suyo en naranja.
+const FOCUS_OUTLINE = '2px solid #1A3C34';
 // TODO(marca): confirmar el crema oficial. Se conserva el valor que ya tenía el theme.
 const CREAM = '#FAF8F5';
 
@@ -144,8 +146,20 @@ export const theme = createTheme({
         },
       },
     },
+    // Foco visible en todo lo que se puede pulsar (botones, iconos, enlaces), y objetivo táctil mínimo de 44 px
+    // también en los botones de icono.
+    MuiButtonBase: {
+      styleOverrides: {
+        root: { '&.Mui-focusVisible': { outline: FOCUS_OUTLINE, outlineOffset: 2 } },
+      },
+    },
     MuiIconButton: {
-      styleOverrides: { root: { borderRadius: RADIUS.sm } },
+      styleOverrides: { root: { borderRadius: RADIUS.sm, minWidth: 44, minHeight: 44 } },
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: { '&:focus-visible': { outline: FOCUS_OUTLINE, outlineOffset: 2, borderRadius: RADIUS.sm } },
+      },
     },
     MuiChip: {
       styleOverrides: { root: { borderRadius: RADIUS.lg, fontWeight: 700, fontSize: '0.75rem' } },

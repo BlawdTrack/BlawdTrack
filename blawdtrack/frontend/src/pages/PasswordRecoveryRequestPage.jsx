@@ -18,6 +18,7 @@ import HelpTip from '../components/HelpTip';
 import AuthCardLayout from '../components/AuthCardLayout';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import { RADIUS } from '../theme';
+import { LINK_BUTTON_SX } from '../components/formStyles';
 
 // Mismo patrón de validación de cliente que LoginPage.jsx (T04 de HU-001):
 // `fieldErrors` por campo, correo obligatorio con trim y formato válido, y
@@ -42,7 +43,7 @@ const CONNECTION_ERROR_MESSAGE =
   'No pudimos conectar con el servidor. Revisa tu conexión a internet e intenta de nuevo.';
 const GENERIC_ERROR_MESSAGE = 'No se pudo procesar la solicitud. Intenta de nuevo en unos minutos.';
 
-const LINK_SX = { fontSize: 12, fontWeight: 600, color: 'primary.main' };
+const LINK_SX = { ...LINK_BUTTON_SX, fontSize: 12, fontWeight: 600, color: 'primary.main' };
 
 // T04 de HU-002 (#65): solicitud del enlace de restablecimiento. Es UNA
 // pantalla con dos vistas del mismo flujo (r1 y r2 del bloque `hu002` del
