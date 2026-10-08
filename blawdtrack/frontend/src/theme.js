@@ -36,24 +36,48 @@ const STATUS = {
   info: { main: '#1A3C34', dark: '#12322B', light: '#F1ECE7', border: '#DCD4CA', text: '#1A3C34', contrastText: WHITE },
 };
 
-// Velos sobre el patrón: lo dejan como una textura de fondo y el texto conserva el contraste AA.
-const PAGE_VEIL = 'linear-gradient(rgba(250,248,245,0.72), rgba(250,248,245,0.72))';
-const CARD_VEIL = 'linear-gradient(rgba(255,255,255,0.94), rgba(255,255,255,0.94))';
+// Patrón de fondo: el PNG (gris frío) no se usa como imagen, sino como MÁSCARA de una capa de verde de marca a muy
+// baja opacidad. Así el dibujo conserva su forma pero se ve como una textura cálida que no compite con el
+// contenido, y el archivo original no se modifica. Opacidades elegidas: 10 % en el fondo de pantalla y 6 % dentro
+// de las tarjetas, donde hay texto y campos.
+const PATTERN_TINT = '#1A3C34';
+const PAGE_PATTERN_OPACITY = 0.1;
+const CARD_PATTERN_OPACITY = 0.06;
 
-/** Fondo de pantalla: el patrón ilustrado, suave, sobre el crema de marca. */
+const patternLayer = (opacity, size) => ({
+  content: '""',
+  position: 'absolute',
+  inset: 0,
+  borderRadius: 'inherit',
+  backgroundColor: PATTERN_TINT,
+  opacity,
+  WebkitMaskImage: `url(${patternUrl})`,
+  maskImage: `url(${patternUrl})`,
+  WebkitMaskSize: `${size}px`,
+  maskSize: `${size}px`,
+  WebkitMaskRepeat: 'repeat',
+  maskRepeat: 'repeat',
+  pointerEvents: 'none',
+  // Detrás del contenido pero encima del color de fondo de su contenedor (que crea su propio contexto de apilado).
+  zIndex: -1,
+});
+
+/** Fondo de pantalla: crema de marca con el patrón ilustrado teñido de verde, fijo detrás de todo. */
 export const PAGE_PATTERN_SX = {
   backgroundColor: CREAM,
-  backgroundImage: `${PAGE_VEIL}, url(${patternUrl})`,
-  backgroundSize: 'auto, 520px',
-  backgroundRepeat: 'no-repeat, repeat',
+  '&::before': { ...patternLayer(PAGE_PATTERN_OPACITY, 520), position: 'fixed', borderRadius: 0 },
 };
 
-/** Superficie blanca (tarjetas, formularios, diálogos y barras) con el patrón suavizado. No se usa en botones. */
+/**
+ * Superficie blanca (tarjetas, formularios, diálogos y barras) con el patrón teñido muy suave. No se usa en
+ * botones. Define `position: relative`: quien la use con otra posición (fija, pegajosa) debe poner este objeto
+ * antes de su propio `position`.
+ */
 export const CARD_PATTERN_SX = {
   backgroundColor: WHITE,
-  backgroundImage: `${CARD_VEIL}, url(${patternUrl})`,
-  backgroundSize: 'auto, 420px',
-  backgroundRepeat: 'no-repeat, repeat',
+  position: 'relative',
+  isolation: 'isolate',
+  '&::before': patternLayer(CARD_PATTERN_OPACITY, 420),
 };
 
 // Paleta y tipografía alineadas al mockup de diseño (Inter + Poppins, verde/naranja BlawdTrack).

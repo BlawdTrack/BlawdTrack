@@ -23,12 +23,12 @@ export default function MobileBottomNav({ groups }) {
       component="nav"
       sx={{
         display: { xs: 'flex', md: 'none' },
+        ...CARD_PATTERN_SX,
         position: 'fixed',
         left: 0,
         right: 0,
         bottom: 0,
         zIndex: 10,
-        ...CARD_PATTERN_SX,
         borderTop: '1px solid', borderColor: 'neutral.border',
       }}
     >
