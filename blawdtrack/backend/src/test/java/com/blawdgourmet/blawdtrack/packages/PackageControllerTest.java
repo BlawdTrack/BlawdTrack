@@ -123,6 +123,22 @@ class PackageControllerTest {
                 .header("Authorization", "Bearer " + token));
     }
 
+    private ResultActions getPackageHistory(String token, String shipmentNumber) throws Exception {
+        return mvc.perform(get("/api/v1/packages/{shipmentNumber}/history", shipmentNumber)
+                .header("Authorization", "Bearer " + token));
+    }
+
+    private void createAuditLog(String action, String details, User actor) {
+        AuditLog log = AuditLog.builder()
+                .actor(actor)
+                .usuarioAfectado(null)
+                .action(action)
+                .details(details)
+                .timestamp(LocalDateTime.now())
+                .build();
+        auditLogs.saveAndFlush(log);
+    }
+
     @Test
     void adminVentasConsultaPaqueteExistenteRetornaDetalleCompleto() throws Exception {
         getPackage(token(adminVentas), "ENV-2024-0001")
@@ -213,6 +229,93 @@ class PackageControllerTest {
     @Test
     void tokenInvalidoRetorna401() throws Exception {
         getPackage("token-invalido", "ENV-2024-0001")
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminVentasConsultaHistorialPaqueteExistenteRetornaListaOrdenada() throws Exception {
+        // Crear registros de auditoría para el paquete (ordenados por timestamp)
+        createAuditLog(
+                AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de PENDING a ASSIGNED",
+                adminVentas
+        );
+        createAuditLog(
+                AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de ASSIGNED a SHIPPED",
+                adminVentas
+        );
+        createAuditLog(
+                AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de SHIPPED a DELIVERED",
+                adminVentas
+        );
+
+        getPackageHistory(token(adminVentas), "ENV-2024-0001")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].action").value("CAMBIAR_ESTADO_PAQUETE"))
+                .andExpect(jsonPath("$[0].previousStatus").value("PENDING"))
+                .andExpect(jsonPath("$[0].newStatus").value("ASSIGNED"))
+                .andExpect(jsonPath("$[0].actorName").value("Admin Ventas Test"))
+                .andExpect(jsonPath("$[1].action").value("CAMBIAR_ESTADO_PAQUETE"))
+                .andExpect(jsonPath("$[1].previousStatus").value("ASSIGNED"))
+                .andExpect(jsonPath("$[1].newStatus").value("SHIPPED"))
+                .andExpect(jsonPath("$[2].action").value("CAMBIAR_ESTADO_PAQUETE"))
+                .andExpect(jsonPath("$[2].previousStatus").value("SHIPPED"))
+                .andExpect(jsonPath("$[2].newStatus").value("DELIVERED"));
+    }
+
+    @Test
+    void adminVentasConsultaHistorialPaqueteInexistenteRetorna404() throws Exception {
+        getPackageHistory(token(adminVentas), "ENV-NO-EXISTE")
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Paquete no encontrado con número de envío: ENV-NO-EXISTE"))
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void adminVentasConsultaHistorialPaqueteSinHistorialRetornaListaVacia() throws Exception {
+        // Crear un paquete sin historial
+        packages.saveAndFlush(DeliveryPackage.builder()
+                .shipmentNumber("ENV-2024-0002")
+                .build());
+
+        getPackageHistory(token(adminVentas), "ENV-2024-0002")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SUPER_USUARIO", "MENSAJERO"})
+    void otrosRolesConsultandoHistorialReciben403(String role) throws Exception {
+        var otroUsuario = users.saveAndFlush(User.builder()
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("999999999")
+                .documentId("999999999")
+                .fullName("Otro Rol " + role)
+                .email("otro-" + role.toLowerCase() + "@example.com")
+                .passwordHash("unused")
+                .status(UserStatus.ACTIVE)
+                .role(roles.findByName(role).orElseThrow())
+                .build());
+
+        getPackageHistory(token(otroUsuario), "ENV-2024-0001")
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void sinTokenConsultandoHistorialRetorna401() throws Exception {
+        mvc.perform(get("/api/v1/packages/ENV-2024-0001/history"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void tokenInvalidoConsultandoHistorialRetorna401() throws Exception {
+        getPackageHistory("token-invalido", "ENV-2024-0001")
                 .andExpect(status().isUnauthorized());
     }
 }
