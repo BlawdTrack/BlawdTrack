@@ -36,27 +36,26 @@ const STATUS = {
   info: { main: '#1A3C34', dark: '#12322B', light: '#F1ECE7', border: '#DCD4CA', text: '#1A3C34', contrastText: WHITE },
 };
 
-// Patrón de fondo: el PNG (gris frío) no se usa como imagen, sino como MÁSCARA de una capa de verde de marca a muy
-// baja opacidad. Así el dibujo conserva su forma pero se ve como una textura cálida que no compite con el
-// contenido, y el archivo original no se modifica. Opacidades elegidas: 10 % en el fondo de pantalla y 6 % dentro
-// de las tarjetas, donde hay texto y campos.
+// Patrón de fondo. El PNG es un RGB de fondo blanco opaco (sin canal alfa) con el dibujo en gris frío, así que no
+// sirve como máscara. Se tiñe sin tocar el archivo con dos modos de mezcla: el verde de marca en modo `color` sobre
+// el PNG (el blanco sigue blanco y el gris pasa a verde claro) y la capa entera en `multiply` sobre el fondo (el
+// blanco no altera el crema ni el blanco de la tarjeta; solo el dibujo lo oscurece, ya verdoso). La opacidad
+// regula cuánto se ve: 50 % en el fondo de pantalla y 30 % dentro de las tarjetas, donde hay texto y campos.
 const PATTERN_TINT = '#1A3C34';
-const PAGE_PATTERN_OPACITY = 0.1;
-const CARD_PATTERN_OPACITY = 0.06;
+const PAGE_PATTERN_OPACITY = 0.5;
+const CARD_PATTERN_OPACITY = 0.3;
 
 const patternLayer = (opacity, size) => ({
   content: '""',
   position: 'absolute',
   inset: 0,
   borderRadius: 'inherit',
-  backgroundColor: PATTERN_TINT,
+  backgroundImage: `linear-gradient(${PATTERN_TINT}, ${PATTERN_TINT}), url(${patternUrl})`,
+  backgroundBlendMode: 'color, normal',
+  backgroundSize: `auto, ${size}px`,
+  backgroundRepeat: 'no-repeat, repeat',
+  mixBlendMode: 'multiply',
   opacity,
-  WebkitMaskImage: `url(${patternUrl})`,
-  maskImage: `url(${patternUrl})`,
-  WebkitMaskSize: `${size}px`,
-  maskSize: `${size}px`,
-  WebkitMaskRepeat: 'repeat',
-  maskRepeat: 'repeat',
   pointerEvents: 'none',
   // Detrás del contenido pero encima del color de fondo de su contenedor (que crea su propio contexto de apilado).
   zIndex: -1,
