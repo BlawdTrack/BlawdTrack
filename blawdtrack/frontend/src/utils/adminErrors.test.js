@@ -11,13 +11,13 @@ describe('normalizeAdminError', () => {
           code: 'VALIDATION_ERROR',
           errores: [
             { campo: 'correoElectronico', mensaje: 'Email address is not in a valid format.' },
-            { campo: 'contrasenaInicial', mensaje: 'Too short.' },
+            { campo: 'numeroTelefono', mensaje: 'Too long.' },
           ],
         })
       );
       expect(out.kind).toBe('validation');
-      expect(Object.keys(out.fieldErrors).sort()).toEqual(['contrasenaInicial', 'correoElectronico']);
-      expect(out.fieldErrors.contrasenaInicial).toMatch(/8 caracteres/);
+      expect(Object.keys(out.fieldErrors).sort()).toEqual(['correoElectronico', 'numeroTelefono']);
+      expect(out.fieldErrors.numeroTelefono).toMatch(/20 caracteres/);
       expect(out.globalMessage).toBeNull();
     });
 

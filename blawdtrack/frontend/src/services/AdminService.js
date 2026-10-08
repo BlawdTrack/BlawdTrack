@@ -36,9 +36,10 @@ const normalizeAdministrator = (administrator) => {
 };
 
 /**
- * Registra un administrador de ventas: `POST /api/v1/admins`.
+ * Registra un administrador de ventas: `POST /api/v1/admins`. El backend genera una contraseña temporal y la
+ * envía por correo al nuevo administrador.
  * @param {{ nombreCompleto: string, numeroTelefono: string, correoElectronico: string,
- *   contrasenaInicial: string, documentType: string, documentNumber: string }} adminData
+ *   documentType: string, documentNumber: string }} adminData
  *   Cuerpo esperado por `AdminRegistrationRequest`.
  */
 export const registerAdministrator = async (adminData) => {

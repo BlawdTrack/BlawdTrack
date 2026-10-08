@@ -17,7 +17,6 @@ async function fillForm(user) {
   await user.type(screen.getByLabelText(/número de documento/i), '1-1204-0388');
   await user.type(screen.getByLabelText(/teléfono/i), '8888-8888');
   await user.type(screen.getByLabelText(/correo electrónico/i), 'ana@blawdgourmet.com');
-  await user.type(screen.getByLabelText(/contraseña inicial/i), 'Clave1234');
 }
 
 const submit = (user) => user.click(screen.getByRole('button', { name: /registrar administrador/i }));
@@ -43,29 +42,23 @@ describe('AdminRegistrationPage', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Administradores' })).toBeInTheDocument();
     const notice = await screen.findByRole('status');
-    expect(notice).toHaveTextContent('Administrador registrado correctamente');
+    expect(notice).toHaveTextContent('Administrador creado correctamente');
+    expect(notice).toHaveTextContent('contraseña temporal');
     expect(notice).toHaveTextContent('ana@blawdgourmet.com');
     expect(registerAdministrator).toHaveBeenCalledWith({
       documentType: 'CEDULA',
       documentNumber: '1-1204-0388',
       nombreCompleto: 'Ana Lucía Bermúdez',
       numeroTelefono: '8888-8888',
-      correoElectronico: 'ana@blawdgourmet.com',
-      contrasenaInicial: 'Clave1234'
+      correoElectronico: 'ana@blawdgourmet.com'
     });
   });
 
-  it('lets the user reveal the initial password and shows only the rules that apply to it', async () => {
-    const user = userEvent.setup();
+  it('does not ask for a password: the backend generates one and emails it', () => {
     renderWithProviders(<AdminRegistrationPage />);
 
-    const password = screen.getByLabelText(/contraseña inicial/i);
-    expect(password).toHaveAttribute('type', 'password');
-    await user.click(screen.getByRole('button', { name: /mostrar contraseña/i }));
-    expect(password).toHaveAttribute('type', 'text');
-
-    expect(screen.getByText('Mínimo 8 caracteres')).toBeInTheDocument();
-    expect(screen.queryByText(/últimas 3 contraseñas/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/contraseña/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/recibirá por correo una contraseña temporal/i)).toBeInTheDocument();
   });
 
   it('blocks the submit and shows inline errors when required fields are empty', async () => {

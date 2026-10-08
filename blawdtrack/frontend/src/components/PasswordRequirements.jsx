@@ -58,11 +58,10 @@ function Rule({ label, state, note }) {
 }
 
 /**
- * @param {{ password: string, historyRejected?: boolean, showHistoryRule?: boolean }} props
- *   `historyRejected` marca la regla de "distinta de las últimas 3 contraseñas" como no cumplida cuando el
- *   backend la rechazó; `showHistoryRule` la oculta cuando no aplica (una contraseña inicial no tiene historial).
+ * @param {{ password: string, historyRejected?: boolean }} props `historyRejected` marca la regla de
+ *   "distinta de las últimas 3 contraseñas" como no cumplida cuando el backend la rechazó.
  */
-export function PasswordRequirements({ password, historyRejected = false, showHistoryRule = true }) {
+export function PasswordRequirements({ password, historyRejected = false }) {
   const results = evaluatePasswordRules(password);
 
   return (
@@ -90,13 +89,11 @@ export function PasswordRequirements({ password, historyRejected = false, showHi
         <Rule label="Mínimo 8 caracteres" state={results.length ? 'ok' : 'pending'} />
         <Rule label="Al menos una letra" state={results.letter ? 'ok' : 'pending'} />
         <Rule label="Al menos un número" state={results.number ? 'ok' : 'pending'} />
-        {showHistoryRule && (
-          <Rule
-            label="Distinta de las últimas 3 contraseñas"
-            state={historyRejected ? 'failed' : 'pending'}
-            note={historyRejected ? undefined : 'se verifica al guardar'}
-          />
-        )}
+        <Rule
+          label="Distinta de las últimas 3 contraseñas"
+          state={historyRejected ? 'failed' : 'pending'}
+          note={historyRejected ? undefined : 'se verifica al guardar'}
+        />
       </Box>
     </Box>
   );
