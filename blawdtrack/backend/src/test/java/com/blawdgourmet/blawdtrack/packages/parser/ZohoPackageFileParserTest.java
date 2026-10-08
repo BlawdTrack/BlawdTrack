@@ -104,6 +104,24 @@ class ZohoPackageFileParserTest {
     }
 
     @Test
+    void conservaRegistrosConCamposObligatoriosVaciosParaValidarlosDespues() {
+        String csv = """
+                Packing Number,SO Number,Customer Name,Shipping Address,Shipping Phone
+                ENV-1,SO-1,Cliente Uno,San Jose,8888-8888
+                ,SO-2,,,
+                """;
+
+        var result = parser.parse(stream(csv), "paquetes.csv");
+
+        assertThat(result).hasSize(2);
+        assertThat(result.getFirst().shipmentNumber()).isEqualTo("ENV-1");
+        assertThat(result.get(1).shipmentNumber()).isNull();
+        assertThat(result.get(1).customerName()).isEmpty();
+        assertThat(result.get(1).address()).isNull();
+        assertThat(result.get(1).phone()).isNull();
+    }
+
+    @Test
     void rechazaUnArchivoVacio() {
         assertThatThrownBy(() -> parser.parse(stream(""), "x.csv"))
                 .isInstanceOf(PackageFileParsingException.class)
