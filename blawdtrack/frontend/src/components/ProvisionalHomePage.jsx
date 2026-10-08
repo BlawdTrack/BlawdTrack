@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
 import { getPasswordResetRoute } from '../utils/roleRoutes';
-import logo from '../assets/Logo.png';
+import BrandLogo from './BrandLogo';
 import PageContainer from './PageContainer';
 import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
 
@@ -55,24 +55,7 @@ export function ProvisionalHomePage({ title, description }) {
           gap: 2,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-          <Box
-            sx={{
-              width: 30,
-              height: 30,
-              borderRadius: RADIUS.sm,
-              bgcolor: 'background.paper',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <img src={logo} alt="BlawdTrack" style={{ width: 18, height: 22, objectFit: 'contain' }} />
-          </Box>
-          <Typography variant="h6" component="span">
-            BlawdTrack
-          </Typography>
-        </Box>
+        <BrandLogo variant="horizontalCream" width={108} />
         <Button
           onClick={handleLogout}
           startIcon={<LogoutOutlinedIcon fontSize="small" />}

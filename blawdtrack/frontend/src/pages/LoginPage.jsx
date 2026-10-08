@@ -12,7 +12,7 @@ import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
 import { INLINE_LABEL_SX, LINK_BUTTON_SX } from '../components/formStyles';
 import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
-import blawdtrackLogo from '../assets/Logo.png';
+import BrandLogo from '../components/BrandLogo';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -89,24 +89,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           borderColor: 'secondary.main',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: RADIUS.sm,
-              bgcolor: 'background.paper',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 22, height: 27, objectFit: 'contain' }} />
-          </Box>
-          <Typography variant="h6" component="span">
-            BlawdTrack
-          </Typography>
-        </Box>
+        <BrandLogo variant="stackedCream" width={150} />
 
         <Box>
           <Typography variant="h4" component="p" sx={{ lineHeight: 1.25, mb: 2 }}>
@@ -134,23 +117,8 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
         }}
       >
         {/* En móvil el panel de marca no se ve, así que la marca va sobre el formulario. */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1.25, mb: 4 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: RADIUS.sm,
-              bgcolor: 'primary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <img src={blawdtrackLogo} alt="BlawdTrack" style={{ width: 19, height: 23, objectFit: 'contain' }} />
-          </Box>
-          <Typography variant="h6" component="span" sx={{ color: 'primary.main' }}>
-            BlawdTrack
-          </Typography>
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, mb: 2 }}>
+          <BrandLogo variant="stacked" width={104} />
         </Box>
 
         <Box

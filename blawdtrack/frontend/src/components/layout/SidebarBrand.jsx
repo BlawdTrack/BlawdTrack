@@ -1,8 +1,8 @@
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import MenuOpenOutlinedIcon from '@mui/icons-material/MenuOpenOutlined';
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
-import logo from '../../assets/Logo.png';
-import { RADIUS, FONT } from '../../theme';
+import BrandLogo from '../BrandLogo';
+import { FONT } from '../../theme';
 
 /**
  * Encabezado de la barra lateral con el logo, el nombre de la aplicación y el botón para colapsar o
@@ -23,27 +23,13 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
         borderBottom: '1px solid rgba(255,255,255,.08)',
       }}
     >
-      <Box
-        sx={{
-          width: 30,
-          height: 30,
-          borderRadius: RADIUS.sm,
-          backgroundColor: 'background.paper',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: '0 0 30px',
-        }}
-      >
-        <img src={logo} alt="BlawdTrack" style={{ width: 18, height: 22, objectFit: 'contain' }} />
-      </Box>
-      {!collapsed && (
+      {collapsed ? (
+        <BrandLogo variant="isologo" width={30} />
+      ) : (
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={{ fontWeight: 600, fontSize: FONT.md, color: 'common.white', lineHeight: 1.25, letterSpacing: '.2px' }}>
-            BlawdTrack
-          </Typography>
+          <BrandLogo variant="horizontalCream" width={108} />
           <Typography
-            sx={{ fontSize: FONT.xs, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}
+            sx={{ mt: 0.75, fontSize: FONT.xs, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}
           >
             Blawd Gourmet
           </Typography>
