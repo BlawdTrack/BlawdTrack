@@ -1,13 +1,13 @@
 import { Fragment } from 'react';
 import { Box, Chip, Typography } from '@mui/material';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 function CourierHistoryRow({ entry }) {
   return (
     <Box
-      sx={{ px: 3, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', gap: '11px', flexWrap: 'wrap', alignItems: 'baseline' }}
+      sx={{ px: 3, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', gap: '0.8462rem', flexWrap: 'wrap', alignItems: 'baseline' }}
     >
-      <Typography sx={{ fontSize: FONT.xs, fontWeight: 600, color: 'text.secondary', flex: '0 0 150px' }}>{entry.when}</Typography>
+      <Typography sx={{ fontSize: FONT.xs, fontWeight: 600, color: 'text.secondary', flex: `0 0 ${rem(150)}` }}>{entry.when}</Typography>
       <Typography sx={{ fontSize: FONT.sm, color: '#1F2421', flex: '1 1 200px', minWidth: 0, lineHeight: 1.45 }}>{entry.text}</Typography>
       <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>{entry.by}</Typography>
     </Box>

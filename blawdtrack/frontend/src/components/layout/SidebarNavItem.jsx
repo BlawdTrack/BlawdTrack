@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { NAV_ITEM_ICONS } from './navIcons';
-import { RADIUS, FONT } from '../../theme';
+import { RADIUS, FONT, rem } from '../../theme';
 
 function ItemContent({ label, active, disabled, Icon }) {
   return (
@@ -10,7 +10,7 @@ function ItemContent({ label, active, disabled, Icon }) {
         position: 'relative',
         minHeight: 44,
         px: 1.75,
-        ml: '2.5px',
+        ml: '0.1923rem',
         borderRadius: RADIUS.sm,
         display: 'flex',
         alignItems: 'center',
@@ -35,7 +35,7 @@ function ItemContent({ label, active, disabled, Icon }) {
         <Icon
           sx={{
             fontSize: FONT.xl,
-            flex: '0 0 17px',
+            flex: `0 0 ${rem(17)}`,
             color: active ? '#FF6C0E' : disabled ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.7)',
           }}
         />

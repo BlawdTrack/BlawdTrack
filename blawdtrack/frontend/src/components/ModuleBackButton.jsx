@@ -2,7 +2,7 @@ import { Link as RouterLink, useInRouterContext, useLocation } from 'react-route
 import { IconButton, Tooltip } from '@mui/material';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import { getBackTarget } from '../config/navigation';
-import { rem } from '../theme';
+import { fontPx } from '../theme';
 
 function BackArrow({ size }) {
   const { pathname } = useLocation();
@@ -27,7 +27,7 @@ function BackArrow({ size }) {
           '&:hover': { bgcolor: 'neutral.surface' },
         }}
       >
-        <ArrowBackOutlinedIcon sx={{ fontSize: size > 44 ? rem(22.5) : rem(19.5) }} />
+        <ArrowBackOutlinedIcon sx={{ fontSize: size > 44 ? fontPx(22.5) : fontPx(19.5) }} />
       </IconButton>
     </Tooltip>
   );

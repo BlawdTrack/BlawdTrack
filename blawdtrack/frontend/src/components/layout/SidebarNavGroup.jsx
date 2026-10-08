@@ -14,7 +14,7 @@ import {
 import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
 import SidebarNavItem from './SidebarNavItem';
 import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from './navIcons';
-import { RADIUS, FONT } from '../../theme';
+import { RADIUS, FONT, rem } from '../../theme';
 
 /**
  * Un grupo del menú. Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
@@ -75,7 +75,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
           <Box ref={registerPanel} onMouseEnter={onPanelEnter} onMouseLeave={onPanelLeave} sx={{ pl: 1 }}>
             {/* Un clic sobre el propio icono no es "fuera": ya lo abrió el cursor y no debe cerrarlo. */}
             <ClickAwayListener onClickAway={(event) => !anchorEl?.contains(event.target) && close()}>
-              <Paper elevation={8} sx={{ minWidth: 176, borderRadius: RADIUS.sm, border: '1px solid', borderColor: 'neutral.border', py: 0.5 }}>
+              <Paper elevation={8} sx={{ minWidth: rem(176), borderRadius: RADIUS.sm, border: '1px solid', borderColor: 'neutral.border', py: 0.5 }}>
                 <Typography
                   sx={{ px: 2, py: 0.75, fontSize: FONT.xs, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'text.secondary' }}
                 >
@@ -104,7 +104,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
                         sx={{ minHeight: 44, fontSize: FONT.sm, fontWeight: active ? 600 : 500 }}
                       >
                         {ItemIcon && (
-                          <ListItemIcon sx={{ minWidth: 28, color: active ? 'secondary.main' : 'text.secondary' }}>
+                          <ListItemIcon sx={{ minWidth: rem(28), color: active ? 'secondary.main' : 'text.secondary' }}>
                             <ItemIcon fontSize="small" />
                           </ListItemIcon>
                         )}
@@ -122,7 +122,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.1154rem' }}>
       <Box
         component="button"
         type="button"
@@ -165,7 +165,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
         />
       </Box>
       <Collapse in={open} id={listId}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5px' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.1154rem' }}>
           {group.items.map((item) => (
             <SidebarNavItem key={item.id} item={item} />
           ))}

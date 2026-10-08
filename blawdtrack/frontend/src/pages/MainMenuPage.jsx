@@ -8,7 +8,7 @@ import { NAV_GROUP_ICONS } from '../components/layout/navIcons';
 import MenuCard from '../components/MenuCard';
 import PageContainer from '../components/PageContainer';
 import { getGreeting } from '../utils/greeting';
-import { RADIUS, FONT, rem, TOUCH_TARGET } from '../theme';
+import { RADIUS, FONT, rem, TOUCH_TARGET, fontPx } from '../theme';
 
 /**
  * Inicio del Super Usuario dentro del menú principal: portada con su rol (en la etiqueta), el saludo según la
@@ -29,7 +29,7 @@ export default function MainMenuPage() {
     <PageContainer
       sx={{
         // Ancho máximo del menú principal: 1100 px.
-        maxWidth: 1100,
+        maxWidth: rem(1100),
         minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },
         justifyContent: 'center',
         gap: { xs: 4, md: 6 },
@@ -80,7 +80,7 @@ export default function MainMenuPage() {
         </Typography>
         <Chip
           label={ROLE_LABELS[user.role] ?? user.role}
-          sx={{ mt: 0.5, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: FONT.sm, height: 28, px: 1 }}
+          sx={{ mt: 0.5, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: FONT.sm, height: rem(28), px: 1 }}
         />
       </Box>
 
@@ -90,7 +90,7 @@ export default function MainMenuPage() {
             id="quick-access-title"
             variant="h4"
             component="h2"
-            sx={{ color: 'primary.main', fontSize: { xs: rem(22.5), md: FONT.h2 } }}
+            sx={{ color: 'primary.main', fontSize: { xs: fontPx(22.5), md: FONT.h2 } }}
           >
             {getGreeting()}
           </Typography>

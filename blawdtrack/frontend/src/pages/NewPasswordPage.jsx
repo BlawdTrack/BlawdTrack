@@ -18,7 +18,7 @@ import LinkOffOutlinedIcon from '@mui/icons-material/LinkOffOutlined';
 import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import { PasswordRequirements } from '../components/PasswordRequirements';
 import { meetsClientPasswordRules } from '../utils/passwordRules';
-import { RADIUS, FONT, TOUCH_TARGET } from '../theme';
+import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 
 // Textos propios del frontend (no se muestra el `message` crudo del backend,
 // que viene en otro idioma). Los tres primeros son los del mockup (`savePwd`).
@@ -128,7 +128,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     content = (
       <Box
         role="status"
-        sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}
       >
         <AuthStateHeader
           icon={CheckCircleOutlinedIcon}
@@ -148,7 +148,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     );
   } else if (!token || tokenRejected) {
     content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}>
         <AuthStateHeader icon={LinkOffOutlinedIcon} tone="error" title="Enlace no válido" />
         {/* StatusMessage ya expone role="alert". */}
         <StatusMessage
@@ -171,7 +171,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         component="form"
         onSubmit={handleSubmit}
         noValidate
-        sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}
       >
         <AuthStateHeader
           icon={LockResetOutlinedIcon}
@@ -179,7 +179,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
           description="Elige una contraseña segura que no hayas usado antes."
         />
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
           <Typography component="label" htmlFor="new-password" sx={INLINE_LABEL_SX}>
             Nueva contraseña
           </Typography>
@@ -199,7 +199,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
           />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
           <Typography component="label" htmlFor="confirm-password" sx={INLINE_LABEL_SX}>
             Confirmar contraseña
           </Typography>
@@ -235,7 +235,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
       <RecoverySteps current={3} />
 
       <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
-        <Box sx={{ width: '100%', maxWidth: 460 }}>{content}</Box>
+        <Box sx={{ width: '100%', maxWidth: rem(460) }}>{content}</Box>
       </Box>
     </AuthCardLayout>
   );

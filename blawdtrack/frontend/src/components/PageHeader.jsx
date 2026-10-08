@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import ModuleBackButton from './ModuleBackButton';
-import { FONT, rem } from '../theme';
+import { FONT, fontPx } from '../theme';
 
 /**
  * Encabezado común de las pantallas de gestión: la flecha para volver al menú anterior (si la pantalla
@@ -19,7 +19,7 @@ export default function PageHeader({ title, description, size = 'default' }) {
         <Typography
           variant={large ? 'h4' : 'h5'}
           component="h1"
-          sx={{ color: 'primary.main', ...(large && { fontSize: { xs: rem(22.5), md: FONT.h2 } }) }}
+          sx={{ color: 'primary.main', ...(large && { fontSize: { xs: fontPx(22.5), md: FONT.h2 } }) }}
         >
           {title}
         </Typography>

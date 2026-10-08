@@ -1,5 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 /**
  * Aviso de que hay cambios sin guardar antes de salir de lo que se está editando (cambiar de elemento,
@@ -14,7 +14,7 @@ export default function ConfirmLeaveDialog({ open, onStay, onLeave }) {
       onClose={onStay}
       aria-labelledby="confirm-leave-title"
       aria-describedby="confirm-leave-description"
-      slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1, maxWidth: 352 } } }}
+      slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1, maxWidth: rem(352) } } }}
     >
       <DialogTitle id="confirm-leave-title" sx={{ fontFamily: 'Poppins', fontWeight: 600, color: 'primary.main' }}>
         ¿Salir sin guardar?

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { INPUT_SX } from './formStyles';
 import { Box, Button, Popover, TextField } from '@mui/material';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 const ITEM_HEIGHT = 40;
 export const WHEEL_ITEM_HEIGHT = ITEM_HEIGHT;
@@ -168,7 +168,7 @@ export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
       sx={{
         position: 'relative',
         height: ITEM_HEIGHT * VISIBLE_ITEMS,
-        width: 64,
+        width: rem(64),
         overflow: 'hidden',
         touchAction: 'none',
         userSelect: 'none',

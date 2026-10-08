@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { CARD_PATTERN_SX, RADIUS } from '../theme';
+import { CARD_PATTERN_SX, RADIUS, rem } from '../theme';
 import BrandLogo from './BrandLogo';
 
 /**
@@ -27,7 +27,7 @@ export default function AuthCardLayout({ children }) {
       <Box
         sx={{
           width: '100%',
-          maxWidth: 450,
+          maxWidth: rem(450),
           ...CARD_PATTERN_SX,
           border: '1px solid', borderColor: 'neutral.border',
           borderRadius: RADIUS.md,

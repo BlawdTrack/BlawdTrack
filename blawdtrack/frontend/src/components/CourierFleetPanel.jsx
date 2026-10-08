@@ -20,7 +20,7 @@ import StatusChip from './StatusChip';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/getInitials';
 import { getCourierDocument, getCourierName, getScheduleTimeRange, isCourierActive } from '../utils/courierEdit';
-import { FONT } from '../theme';
+import { FONT, rem } from '../theme';
 
 const HEADING_SX = { fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' };
 const HEADER_CELL_SX = {
@@ -119,9 +119,9 @@ export default function CourierFleetPanel({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
                       <Avatar
                         sx={{
-                          width: 30,
-                          height: 30,
-                          flex: '0 0 30px',
+                          width: rem(30),
+                          height: rem(30),
+                          flex: `0 0 ${rem(30)}`,
                           bgcolor: selected ? 'primary.main' : 'neutral.surface',
                           color: selected ? 'common.white' : 'text.secondary',
                           fontWeight: 700,

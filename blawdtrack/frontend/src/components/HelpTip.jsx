@@ -1,6 +1,6 @@
 import { IconButton, Tooltip } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { FONT } from '../theme';
+import { FONT, rem } from '../theme';
 
 /**
  * Icono ⓘ que guarda una leyenda: el texto aparece al pasar el cursor, al enfocarlo con el teclado o al tocarlo
@@ -16,9 +16,9 @@ export default function HelpTip({ label, children, sx }) {
       enterTouchDelay={0}
       leaveTouchDelay={8000}
       title={children}
-      slotProps={{ tooltip: { sx: { fontSize: FONT.sm, lineHeight: 1.5, maxWidth: 340, p: 1.5 } } }}
+      slotProps={{ tooltip: { sx: { fontSize: FONT.sm, lineHeight: 1.5, maxWidth: rem(340), p: 1.5 } } }}
     >
-      <IconButton aria-label={label} sx={{ width: 44, height: 44, my: '0px', color: 'text.secondary', ...sx }}>
+      <IconButton aria-label={label} sx={{ width: 44, height: 44, my: '0', color: 'text.secondary', ...sx }}>
         <InfoOutlinedIcon fontSize="small" />
       </IconButton>
     </Tooltip>

@@ -7,9 +7,10 @@ import { ROLE_LABELS } from '../../config/roles';
 import { ROUTES } from '../../config/routes';
 import SidebarContent from './SidebarContent';
 import MobileBottomNav from './MobileBottomNav';
+import { rem } from '../../theme';
 
-const SIDEBAR_WIDTH = 220;
-const SIDEBAR_COLLAPSED_WIDTH = 62;
+const SIDEBAR_WIDTH = rem(220);
+const SIDEBAR_COLLAPSED_WIDTH = rem(62);
 const COLLAPSED_STORAGE_KEY = 'blawdtrack.sidebarCollapsed';
 
 // El navegador puede bloquear el almacenamiento (modo privado); en ese caso la barra arranca expandida.
@@ -55,7 +56,7 @@ export default function MainMenuLayout() {
       <Box
         component="aside"
         sx={{
-          flex: `0 0 ${sidebarWidth}px`,
+          flex: `0 0 ${sidebarWidth}`,
           width: sidebarWidth,
           transition: 'width .2s ease, flex-basis .2s ease',
           display: { xs: 'none', md: 'block' },

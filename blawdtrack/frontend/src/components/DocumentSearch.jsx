@@ -2,7 +2,7 @@ import { Box, Button, MenuItem, TextField } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { DOCUMENT_PLACEHOLDERS, DOCUMENT_TYPE_OPTIONS } from '../config/documentTypes';
 import { INPUT_SX } from './formStyles';
-import { RADIUS } from '../theme';
+import { RADIUS, rem } from '../theme';
 
 /**
  * Campos para buscar por tipo y número de documento, con los botones "Buscar" y "Limpiar". Es solo la
@@ -20,7 +20,7 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
       value={search.documentType}
       onChange={(event) => search.setDocumentType(event.target.value)}
       slotProps={{ htmlInput: { 'aria-label': 'Tipo de documento' } }}
-      sx={{ flex: stacked ? '0 0 120px' : { xs: '1 1 100%', sm: '0 0 150px' }, minWidth: stacked ? 0 : { sm: 130 }, ...INPUT_SX }}
+      sx={{ flex: stacked ? `0 0 ${rem(120)}` : { xs: '1 1 100%', sm: `0 0 ${rem(150)}` }, minWidth: stacked ? 0 : { sm: 130 }, ...INPUT_SX }}
     >
       {DOCUMENT_TYPE_OPTIONS.map((option) => (
         <MenuItem key={option.value} value={option.value}>

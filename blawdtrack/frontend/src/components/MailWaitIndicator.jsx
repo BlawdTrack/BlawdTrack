@@ -1,5 +1,5 @@
 import { Box, LinearProgress, Typography } from '@mui/material';
-import { FONT } from '../theme';
+import { FONT, rem } from '../theme';
 
 // Mensajes que van rotando mientras se espera: muestran que el sistema sigue trabajando.
 const WAIT_MESSAGES = [
@@ -32,7 +32,7 @@ export default function MailWaitIndicator({ remaining, total }) {
         variant="determinate"
         value={(elapsed / total) * 100}
         aria-label="Tiempo de espera para pedir otro correo"
-        sx={{ height: 8, borderRadius: 4, bgcolor: 'neutral.surface' }}
+        sx={{ height: rem(8), borderRadius: 4, bgcolor: 'neutral.surface' }}
       />
       <Typography aria-live="off" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{message}</Typography>
       <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>

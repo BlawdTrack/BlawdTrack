@@ -1,6 +1,6 @@
 import { Avatar, Box, Button, Typography } from '@mui/material';
 import { getInitials } from '../utils/getInitials';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 const LINE_COLORS = { muted: 'text.secondary', success: 'success.main' };
 
@@ -14,7 +14,7 @@ const LINE_COLORS = { muted: 'text.secondary', success: 'success.main' };
 export default function AccountRow({ name, lines, status, actionLabel, actionDisabled = false, onAction }) {
   return (
     <Box sx={{ px: 2.5, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-      <Avatar sx={{ width: 36, height: 36, bgcolor: 'neutral.surface', color: 'text.secondary', fontWeight: 700, fontSize: FONT.sm, flex: '0 0 36px' }}>
+      <Avatar sx={{ width: rem(36), height: rem(36), bgcolor: 'neutral.surface', color: 'text.secondary', fontWeight: 700, fontSize: FONT.sm, flex: `0 0 ${rem(36)}` }}>
         {getInitials(name)}
       </Avatar>
 

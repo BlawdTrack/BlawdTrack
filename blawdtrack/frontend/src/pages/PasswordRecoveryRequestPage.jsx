@@ -17,7 +17,7 @@ import { RecoverySteps } from '../components/RecoverySteps';
 import HelpTip from '../components/HelpTip';
 import AuthCardLayout from '../components/AuthCardLayout';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
-import { RADIUS, FONT, TOUCH_TARGET } from '../theme';
+import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 import { LINK_BUTTON_SX } from '../components/formStyles';
 
 // Mismo patrón de validación de cliente que LoginPage.jsx (T04 de HU-001):
@@ -144,13 +144,13 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
       <RecoverySteps current={sentEmail ? 2 : 1} />
 
       <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
-        <Box sx={{ width: '100%', maxWidth: 460 }}>
+        <Box sx={{ width: '100%', maxWidth: rem(460) }}>
           {sentEmail === null ? (
             <Box
               component="form"
               onSubmit={handleSubmit}
               noValidate
-              sx={{ display: 'flex', flexDirection: 'column', gap: '13px' }}
+              sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
             >
               <AuthStateHeader
                 icon={LockResetOutlinedIcon}
@@ -158,7 +158,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 description="Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una nueva."
               />
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography
                   component="label"
@@ -173,7 +173,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
                 >
                   Correo electrónico registrado
                 </Typography>
-                <HelpTip label="¿Qué se valida al enviar el enlace?" sx={{ width: 32, height: 32, my: '0px' }}>
+                <HelpTip label="¿Qué se valida al enviar el enlace?" sx={{ width: rem(32), height: rem(32), my: '0' }}>
                   Validamos que la cuenta exista y esté activa antes de enviar el correo.
                 </HelpTip>
                 </Box>
@@ -215,7 +215,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '13px',
+                gap: '1rem',
                 alignItems: 'center',
                 textAlign: 'center',
               }}

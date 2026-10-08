@@ -15,6 +15,7 @@ import { useCourierGeneralHistory } from '../hooks/useCourierHistory';
 import { useDocumentSearch } from '../hooks/useDocumentSearch';
 import { useToast } from '../hooks/useToast';
 import { getCourierDocument, getCourierName } from '../utils/courierEdit';
+import { rem } from '../theme';
 
 // Normaliza una cédula para compararla sin importar guiones, espacios ni mayúsculas.
 const normalizeId = (id) => (id || '').toString().replace(/[-\s]/g, '').toLowerCase();
@@ -95,7 +96,7 @@ export function EditMessenger({ initialCedula = '' }) {
       <SplitScreen
         title="Actualizar mensajero"
         description="Busca al mensajero por su documento, corrige sus datos y guarda los cambios."
-        columns={listOpen ? '340px minmax(0, 1fr)' : 'minmax(0, 1fr)'}
+        columns={listOpen ? `${rem(340)} minmax(0, 1fr)` : 'minmax(0, 1fr)'}
       >
         <CourierFleetPanel
           couriers={search.filter(fleet.couriers)}

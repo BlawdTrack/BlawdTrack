@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 // Colores exactos del mockup (bloques "Estados de error" de la pantalla A
 // y "Validación de formato" de la B1). Distinto del componente Toast:
@@ -31,12 +31,12 @@ export function StatusMessage({ severity = 'error', message }) {
         border: '1px solid',
         borderColor: variant.border,
         borderRadius: RADIUS.sm,
-        p: '11px 13px',
+        p: '0.8462rem 1rem',
         display: 'flex',
         gap: 1.25,
       }}
     >
-      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: variant.dot, mt: '4px', flexShrink: 0 }} />
+      <Box sx={{ width: rem(8), height: rem(8), borderRadius: '50%', bgcolor: variant.dot, mt: '0.3077rem', flexShrink: 0 }} />
       <Typography sx={{ fontSize: FONT.sm, color: variant.text, lineHeight: 1.4 }}>{message}</Typography>
     </Box>
   );

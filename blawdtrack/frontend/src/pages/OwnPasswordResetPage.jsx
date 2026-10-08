@@ -12,7 +12,7 @@ import PageContainer from '../components/PageContainer';
 import { CARD_SX } from '../components/formStyles';
 import HelpTip from '../components/HelpTip';
 import PageHeaderBar from '../components/PageHeaderBar';
-import { RADIUS, FONT, TOUCH_TARGET } from '../theme';
+import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 
 const CONNECTION_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
 const DEFAULT_ERROR_MESSAGE = 'No se pudo enviar el correo de restablecimiento. Inténtalo de nuevo más tarde.';
@@ -60,10 +60,10 @@ export function OwnPasswordResetPage() {
       />
 
       <PageContainer component="main" sx={{ alignItems: 'center', pt: { md: 6 } }}>
-        <Paper elevation={0} sx={{ ...CARD_SX, width: '100%', maxWidth: 560, p: { xs: 3, sm: 5 }, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, textAlign: 'center' }}>
+        <Paper elevation={0} sx={{ ...CARD_SX, width: '100%', maxWidth: rem(560), p: { xs: 3, sm: 5 }, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, textAlign: 'center' }}>
           <Box
             aria-hidden
-            sx={{ width: 58, height: 58, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: sent ? 'success.light' : 'secondary.light', color: sent ? 'success.main' : 'secondary.main' }}
+            sx={{ width: rem(58), height: rem(58), borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: sent ? 'success.light' : 'secondary.light', color: sent ? 'success.main' : 'secondary.main' }}
           >
             {sent ? <MarkEmailReadOutlinedIcon sx={{ fontSize: FONT.h1 }} /> : <LockResetOutlinedIcon sx={{ fontSize: FONT.h1 }} />}
           </Box>

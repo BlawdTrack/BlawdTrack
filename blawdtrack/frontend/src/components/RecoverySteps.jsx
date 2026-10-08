@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 // Indicador de pasos del flujo de recuperación de contraseña (bloque
 // `resetSteps` de assets/mockup-sprint1.html). El paso actual llega por prop
@@ -23,10 +23,10 @@ export function RecoverySteps({ current }) {
         listStyle: 'none',
         m: 0,
         px: { xs: '16px', sm: '28px' },
-        py: '14.5px',
+        py: '1.1154rem',
         borderBottom: '1px solid', borderColor: 'neutral.border',
         display: 'flex',
-        gap: '8px',
+        gap: '0.6154rem',
         flexWrap: 'nowrap',
       }}
     >
@@ -43,8 +43,8 @@ export function RecoverySteps({ current }) {
               flex: { xs: isCurrent ? '1 1 auto' : '0 0 auto', sm: '1 1 180px' },
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              p: '8px 9.5px',
+              gap: '0.6154rem',
+              p: '0.6154rem 0.7308rem',
               borderRadius: RADIUS.sm,
               bgcolor: isCurrent ? 'neutral.surface' : 'transparent',
             }}
@@ -52,9 +52,9 @@ export function RecoverySteps({ current }) {
             <Box
               component="span"
               sx={{
-                width: 20,
-                height: 20,
-                flex: '0 0 20px',
+                width: rem(20),
+                height: rem(20),
+                flex: `0 0 ${rem(20)}`,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',

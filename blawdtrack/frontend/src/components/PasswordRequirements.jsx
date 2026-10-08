@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { evaluatePasswordRules } from '../utils/passwordRules';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 // Checklist "Requisitos" (bloque r3 del mockup). Las reglas 1-3 se evalúan en
 // vivo con lo que el usuario escribe. La regla 4 (distinta de las últimas 3
@@ -29,15 +29,15 @@ function Rule({ label, state, note }) {
   return (
     <Box
       component="li"
-      sx={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: FONT.xs, lineHeight: 1.35, color }}
+      sx={{ display: 'flex', alignItems: 'center', gap: '0.5385rem', fontSize: FONT.xs, lineHeight: 1.35, color }}
     >
       <Box
         component="span"
         aria-hidden
         sx={{
-          width: 15,
-          height: 15,
-          flex: '0 0 15px',
+          width: rem(15),
+          height: rem(15),
+          flex: `0 0 ${rem(15)}`,
           borderRadius: '50%',
           bgcolor: state === 'ok' ? OK_COLOR : 'transparent',
           border: '1.5px solid',
@@ -71,10 +71,10 @@ export function PasswordRequirements({ password, historyRejected = false }) {
       sx={{
         bgcolor: 'neutral.surface',
         borderRadius: RADIUS.sm,
-        p: '12px 13px',
+        p: '0.9231rem 1rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '7px',
+        gap: '0.5385rem',
       }}
     >
       <Typography
@@ -86,7 +86,7 @@ export function PasswordRequirements({ password, historyRejected = false }) {
       <Box
         component="ul"
         aria-labelledby="password-requirements-title"
-        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '7px' }}
+        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '0.5385rem' }}
       >
         <Rule label="Mínimo 8 caracteres" state={results.length ? 'ok' : 'pending'} />
         <Rule label="Al menos una letra" state={results.letter ? 'ok' : 'pending'} />

@@ -10,7 +10,7 @@ import {
   Alert,
 } from '@mui/material';
 import { getInitials } from '../utils/getInitials';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 /**
  * Diálogo de confirmación para eliminar un administrador (HU-008).
@@ -39,19 +39,19 @@ const DeleteAdminModal = ({
       onClose={!isSubmitting ? onClose : undefined}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 }, maxWidth: 480 } }}
+      PaperProps={{ sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 }, maxWidth: rem(480) } }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
         <Box
           sx={{
-            width: 28,
-            height: 28,
+            width: rem(28),
+            height: rem(28),
             borderRadius: '50%',
             bgcolor: 'error.light',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            flex: '0 0 28px',
+            flex: `0 0 ${rem(28)}`,
           }}
         >
           <Box sx={{ width: '3px', height: '14px', bgcolor: 'error.main', borderRadius: '2px' }} />
@@ -66,13 +66,13 @@ const DeleteAdminModal = ({
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: '9.5px',
-            p: '11px 13px',
+            gap: '0.7308rem',
+            p: '0.8462rem 1rem',
             bgcolor: 'neutral.surface',
             borderRadius: RADIUS.sm,
           }}
         >
-          <Avatar sx={{ width: 30, height: 30, bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: FONT.xs, flex: '0 0 30px' }}>
+          <Avatar sx={{ width: rem(30), height: rem(30), bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: FONT.xs, flex: `0 0 ${rem(30)}` }}>
             {getInitials(adminData.name)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>

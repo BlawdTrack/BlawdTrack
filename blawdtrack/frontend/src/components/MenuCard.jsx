@@ -1,7 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
-import { CARD_PATTERN_SX, FONT, RADIUS, rem } from '../theme';
+import { CARD_PATTERN_SX, FONT, RADIUS, rem, fontPx } from '../theme';
 
 // Tarjeta alta y centrada (menús de módulo): icono en cuadro arriba, texto al centro, flecha abajo.
 const CARD_VARIANT_SX = {
@@ -9,7 +9,7 @@ const CARD_VARIANT_SX = {
   justifyContent: { xs: 'flex-start', md: 'center' },
   textAlign: { xs: 'left', md: 'center' },
   gap: { xs: 2, md: 2.5 },
-  minHeight: { xs: 77, md: 208 },
+  minHeight: { xs: rem(77), md: rem(208) },
   p: { xs: 2.5, md: 4 },
   borderRadius: RADIUS.lg,
 };
@@ -22,7 +22,7 @@ const ROW_VARIANT_SX = {
   justifyContent: 'flex-start',
   textAlign: 'left',
   gap: 2.5,
-  minHeight: { xs: 68, md: 72 },
+  minHeight: { xs: rem(68), md: rem(72) },
   px: 3,
   py: 2.5,
   borderRadius: RADIUS.md,
@@ -32,34 +32,34 @@ const ROW_VARIANT_SX = {
 // en naranja oscuro porque el naranja pleno sobre ese fondo no llega al 3:1 que se pide a un icono.
 const ICON_BOX_SX = {
   card: {
-    flex: { xs: '0 0 40px', md: '0 0 58px' },
-    width: { xs: 40, md: 58 },
-    height: { xs: 40, md: 58 },
+    flex: { xs: `0 0 ${rem(40)}`, md: `0 0 ${rem(58)}` },
+    width: { xs: rem(40), md: rem(58) },
+    height: { xs: rem(40), md: rem(58) },
     borderRadius: { xs: RADIUS.sm, md: RADIUS.md },
     bgcolor: 'secondary.light',
     color: 'secondary.main',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    '& svg': { fontSize: { xs: rem(19), md: rem(29) } },
+    '& svg': { fontSize: { xs: fontPx(19), md: fontPx(29) } },
   },
   row: {
     flex: '0 0 auto',
-    width: { xs: 36, md: 40 },
-    height: { xs: 36, md: 40 },
+    width: { xs: rem(36), md: rem(40) },
+    height: { xs: rem(36), md: rem(40) },
     borderRadius: RADIUS.sm,
     bgcolor: 'secondary.light',
     color: 'secondary.text',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    '& svg': { fontSize: { xs: rem(20), md: rem(22) } },
+    '& svg': { fontSize: { xs: fontPx(20), md: fontPx(22) } },
   },
 };
 
 const TITLE_SX = {
   card: { fontWeight: 600, fontSize: { xs: FONT.md, md: FONT.xl }, color: 'primary.main' },
-  row: { fontWeight: 600, fontSize: rem(16), color: 'primary.main' },
+  row: { fontWeight: 600, fontSize: fontPx(16), color: 'primary.main' },
 };
 
 const DESCRIPTION_SX = {
@@ -81,8 +81,8 @@ const DESCRIPTION_SX = {
 const ARROW_SX = {
   card: {
     flex: '0 0 auto',
-    width: 30,
-    height: 30,
+    width: rem(30),
+    height: rem(30),
     borderRadius: '50%',
     bgcolor: 'neutral.surface',
     color: 'primary.main',
@@ -94,8 +94,8 @@ const ARROW_SX = {
   },
   row: {
     flex: '0 0 auto',
-    width: 34,
-    height: 34,
+    width: rem(34),
+    height: rem(34),
     borderRadius: '50%',
     bgcolor: 'neutral.surface',
     color: 'primary.main',

@@ -5,7 +5,7 @@ import SaveOutlined from '@mui/icons-material/SaveOutlined';
 import HelpTip from './HelpTip';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/roleAccess';
-import { FONT } from '../theme';
+import { FONT, rem } from '../theme';
 
 /**
  * Panel derecho de "Roles y permisos": los permisos del rol del usuario con un interruptor cada uno. Los
@@ -21,7 +21,7 @@ export default function PermissionMatrixPanel({
     <Paper elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <Box sx={{ p: 2.5, borderBottom: '1px solid', borderColor: 'neutral.border', display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-          <Avatar sx={{ width: 38, height: 38, bgcolor: '#12322B', fontWeight: 700 }}>{getInitials(user.fullName)}</Avatar>
+          <Avatar sx={{ width: rem(38), height: rem(38), bgcolor: '#12322B', fontWeight: 700 }}>{getInitials(user.fullName)}</Avatar>
           <Box sx={{ minWidth: 0 }}>
             <Typography component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>
               {user.fullName}
@@ -75,7 +75,7 @@ export default function PermissionMatrixPanel({
               return (
                 <Box
                   key={permission.code}
-                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, minHeight: 56, borderTop: '1px solid', borderColor: 'neutral.surface', opacity: editable ? 1 : 0.75 }}
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, minHeight: rem(56), borderTop: '1px solid', borderColor: 'neutral.surface', opacity: editable ? 1 : 0.75 }}
                 >
                   <Typography sx={{ fontSize: FONT.md }}>{permission.description}</Typography>
                   <Switch

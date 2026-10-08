@@ -3,7 +3,7 @@ import { TimeWheelField } from './TimeWheelField';
 import { WeightWheelField } from './WeightWheelField';
 import StatusMessage from './StatusMessage';
 import { INPUT_SX, LABEL_SX } from './formStyles';
-import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
+import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 
 const FIELD_GRID_SX = {
   display: 'grid',
@@ -13,12 +13,12 @@ const FIELD_GRID_SX = {
 };
 
 const SWITCH_SX = {
-  width: 46,
-  height: 27,
+  width: rem(46),
+  height: rem(27),
   padding: 0,
-  flex: '0 0 46px',
+  flex: `0 0 ${rem(46)}`,
   '& .MuiSwitch-switchBase': {
-    padding: '2.5px',
+    padding: '0.1923rem',
     '&.Mui-checked': {
       transform: 'translateX(19px)',
       '& + .MuiSwitch-track': { backgroundColor: 'success.main', opacity: 1 },
@@ -26,7 +26,7 @@ const SWITCH_SX = {
     '&.Mui-disabled': { opacity: 0.55 },
     '&.Mui-disabled + .MuiSwitch-track': { opacity: 0.55 },
   },
-  '& .MuiSwitch-thumb': { width: 21, height: 21, boxShadow: 2 },
+  '& .MuiSwitch-thumb': { width: rem(21), height: rem(21), boxShadow: 2 },
   '& .MuiSwitch-track': { borderRadius: RADIUS.md, backgroundColor: 'neutral.borderStrong', opacity: 1 },
 };
 
@@ -156,15 +156,15 @@ export default function CourierEditForm({ editor, onDiscard }) {
           sx={{
             bgcolor: 'neutral.surface',
             borderRadius: RADIUS.sm,
-            p: '13px 14.5px',
+            p: '1rem 1.1154rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '11px',
+            gap: '0.8462rem',
             flexWrap: 'wrap',
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2.5px', minWidth: 0 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.1923rem', minWidth: 0 }}>
             <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: '#1F2421' }}>Estado de acceso</Typography>
             <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.4 }}>
               {isActive

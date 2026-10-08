@@ -13,7 +13,7 @@ import {
 import { useDeactivateMessenger } from '../hooks/useDeactivateMessenger';
 import { getInitials } from '../utils/getInitials';
 import { DEACTIVATION_CONDITION, DEACTIVATION_REASSIGN, DEACTIVATION_REACTIVATE } from '../config/deactivationRules';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 /**
  * Diálogo de confirmación para desactivar a un mensajero (HU-005). Llama a `useDeactivateMessenger`; un
@@ -52,20 +52,20 @@ export const DeactivateMessengerModal = ({
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 }, maxWidth: 480 },
+        sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 }, maxWidth: rem(480) },
       }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
         <Box
           sx={{
-            width: 28,
-            height: 28,
+            width: rem(28),
+            height: rem(28),
             borderRadius: '50%',
             bgcolor: 'error.light',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            flex: '0 0 28px',
+            flex: `0 0 ${rem(28)}`,
           }}
         >
           <Box sx={{ width: '3px', height: '14px', bgcolor: 'error.main', borderRadius: '2px' }} />
@@ -80,13 +80,13 @@ export const DeactivateMessengerModal = ({
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: '9.5px',
-            p: '11px 13px',
+            gap: '0.7308rem',
+            p: '0.8462rem 1rem',
             bgcolor: 'neutral.surface',
             borderRadius: RADIUS.sm,
           }}
         >
-          <Avatar sx={{ width: 30, height: 30, bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: FONT.xs, flex: '0 0 30px' }}>
+          <Avatar sx={{ width: rem(30), height: rem(30), bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: FONT.xs, flex: `0 0 ${rem(30)}` }}>
             {getInitials(courier.fullName)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
@@ -104,8 +104,8 @@ export const DeactivateMessengerModal = ({
           asignaciones. Su historial de entregas se conserva. {DEACTIVATION_REACTIVATE}
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 1.25, p: '9.5px 11px', bgcolor: 'warning.light', border: '1px solid', borderColor: 'warning.border', borderRadius: RADIUS.sm }}>
-          <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: 'warning.main', mt: '5px', flex: '0 0 7px' }} />
+        <Box sx={{ display: 'flex', gap: 1.25, p: '0.7308rem 0.8462rem', bgcolor: 'warning.light', border: '1px solid', borderColor: 'warning.border', borderRadius: RADIUS.sm }}>
+          <Box sx={{ width: rem(7), height: rem(7), borderRadius: '50%', bgcolor: 'warning.main', mt: '0.3846rem', flex: `0 0 ${rem(7)}` }} />
           <Typography sx={{ fontSize: FONT.sm, color: 'warning.text', lineHeight: 1.5 }}>
             {DEACTIVATION_CONDITION} {DEACTIVATION_REASSIGN}
           </Typography>

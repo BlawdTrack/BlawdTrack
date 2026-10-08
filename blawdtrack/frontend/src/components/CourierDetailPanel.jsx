@@ -9,7 +9,7 @@ import TabPanel from './TabPanel';
 import { CARD_SX } from './formStyles';
 import { getInitials } from '../utils/getInitials';
 import { getCourierDocument, getCourierName, recordsLabel } from '../utils/courierEdit';
-import { RADIUS, FONT } from '../theme';
+import { RADIUS, FONT, rem } from '../theme';
 
 const OUTLINE_BUTTON_SX = { color: 'primary.main', fontWeight: 600, border: '1.5px solid', borderColor: 'neutral.borderStrong' };
 
@@ -39,7 +39,7 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
             Mostrar flota
           </Button>
         )}
-        <Avatar sx={{ width: 38, height: 38, bgcolor: 'primary.main', color: 'common.white', fontWeight: 700 }}>
+        <Avatar sx={{ width: rem(38), height: rem(38), bgcolor: 'primary.main', color: 'common.white', fontWeight: 700 }}>
           {getInitials(getCourierName(courier))}
         </Avatar>
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -67,7 +67,7 @@ export default function CourierDetailPanel({ editor, onBack, onDiscard, listOpen
       </TabPanel>
 
       <TabPanel id="historial" active={activeTab === 'historial'}>
-        <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', gap: '0.6154rem' }}>
           <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' }}>
             Historial de modificaciones
           </Typography>

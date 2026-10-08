@@ -11,7 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
 import { INLINE_LABEL_SX, LINK_BUTTON_SX } from '../components/formStyles';
-import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
+import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 import BrandLogo from '../components/BrandLogo';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -97,12 +97,12 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             <br />
             siempre a la vista.
           </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.75)', maxWidth: 290 }}>
+          <Typography sx={{ color: 'rgba(255,255,255,0.75)', maxWidth: rem(290) }}>
             Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar.
           </Typography>
         </Box>
 
-        <Box sx={{ width: 38, height: 4, borderRadius: 2, bgcolor: 'secondary.main' }} />
+        <Box sx={{ width: rem(38), height: 4, borderRadius: 2, bgcolor: 'secondary.main' }} />
       </Box>
 
       <Box
@@ -127,7 +127,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           noValidate
           sx={{
             width: '100%',
-            maxWidth: 340,
+            maxWidth: rem(340),
             ...CARD_PATTERN_SX,
             border: '1px solid', borderColor: 'neutral.border',
             borderRadius: RADIUS.md,
@@ -148,7 +148,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
 
           {error && <StatusMessage severity={error.severity} message={error.message} />}
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
             <Typography component="label" htmlFor="login-email" sx={INLINE_LABEL_SX}>
               Correo electrónico
             </Typography>
@@ -168,7 +168,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             />
           </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
             <Typography component="label" htmlFor="login-password" sx={INLINE_LABEL_SX}>
               Contraseña
             </Typography>
@@ -202,14 +202,14 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             variant="contained"
             size="large"
             disabled={loading}
-            sx={{ fontWeight: 'bold', fontSize: FONT.md, minHeight: TOUCH_TARGET, display: 'flex', gap: '8px' }}
+            sx={{ fontWeight: 'bold', fontSize: FONT.md, minHeight: TOUCH_TARGET, display: 'flex', gap: '0.6154rem' }}
           >
             {loading ? (
               <CircularProgress size={22} sx={{ color: 'inherit' }} />
             ) : (
               <>
                 <span>Iniciar sesión</span>
-                <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: 'secondary.main' }} />
+                <Box sx={{ width: rem(14), height: rem(14), borderRadius: '50%', bgcolor: 'secondary.main' }} />
               </>
             )}
           </Button>
@@ -217,7 +217,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           {/* 'success.main' es el mismo verde de éxito que usa StatusMessage.jsx;
               el theme no define theme.palette.success, así que se repite el
               valor fijo en vez de inventar un token nuevo. */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6.5px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
             <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'success.main', flexShrink: 0 }} />
             <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
               Conexión a internet requerida · contraseñas encriptadas

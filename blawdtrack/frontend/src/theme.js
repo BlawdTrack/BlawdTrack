@@ -15,24 +15,33 @@ const CREAM = '#FAF8F5';
 export const RADIUS = { sm: '10px', md: '16px', lg: '20px' };
 
 /**
- * Escala de la aplicación (0,8 de la anterior). La raíz tipográfica pasa de 16 a 13 px y todo lo escrito en rem
- * escala con ella; `rem(px)` convierte un tamaño en píxeles a rem sobre esa raíz, así el tamaño sigue las
- * preferencias de fuente del navegador. Mínimos que no bajan: texto de 12 px (`FONT.xs`) y áreas táctiles de 44 px.
+ * Escala de la aplicación, fluida. La raíz tipográfica (el `font-size` del `html`) se calcula con el tamaño de la
+ * ventana: es 13 px en una ventana de unos 1920 × 950 px y baja en proporción cuando la ventana es más chica o el
+ * zoom del navegador es mayor (con el zoom al 100 % en una pantalla chica la ventana mide menos píxeles CSS), con
+ * un piso de 9 px y un techo de 14 px. Todo lo que está en rem (espaciado, anchos, alturas, tipografía) la sigue,
+ * así el contenido se adapta y cabe sin hacer scroll.
+ *
+ * `rem(px)` convierte un tamaño pensado para la raíz de 13 px (`ROOT_FONT_PX`) a rem. Mínimos que no bajan, aunque
+ * la raíz sea chica: texto de 12 px (`fontPx` y `FONT`) y áreas táctiles de 44 px (`TOUCH_TARGET`).
  */
 export const ROOT_FONT_PX = 13;
+export const ROOT_FONT_FLUID = 'clamp(9px, min(0.677vw, 1.368vh), 14px)';
 export const rem = (px) => `${Number((px / ROOT_FONT_PX).toFixed(4))}rem`;
+
+/** Tamaño de texto fluido pero nunca menor a 12 px. */
+export const fontPx = (px) => `max(12px, ${rem(px)})`;
 
 /** Escala tipográfica: etiquetas, texto secundario, texto base, subtítulos, títulos de sección y de pantalla, portada. */
 export const FONT = {
-  xs: rem(12),
-  sm: rem(12.5),
-  md: rem(13),
-  lg: rem(14.5),
-  xl: rem(16.5),
-  h3: rem(19),
-  h2: rem(26),
-  h1: rem(29),
-  hero: rem(45),
+  xs: fontPx(12),
+  sm: fontPx(12.5),
+  md: fontPx(13),
+  lg: fontPx(14.5),
+  xl: fontPx(16.5),
+  h3: fontPx(19),
+  h2: fontPx(26),
+  h1: fontPx(29),
+  hero: fontPx(45),
 };
 
 /** Alto mínimo de campos y botones: área táctil (ley de Fitts). No se reduce con la escala. */
@@ -141,8 +150,9 @@ export const theme = createTheme({
     },
   },
   shape: { borderRadius: 10 },
-  // Base de espaciado: 6,4 px (antes 8 px), así que todos los `p`, `m` y `gap` numéricos escalan 0,8.
-  spacing: 6.4,
+  // Base de espaciado: 6,4 px con la raíz de 13 px (0,4923 rem), así que todos los `p`, `m` y `gap` numéricos
+  // siguen a la raíz fluida.
+  spacing: (factor) => `${Number((factor * 0.4923).toFixed(4))}rem`,
   shadows: SHADOWS,
   // Escala tipográfica única de la aplicación: 12 (etiquetas y ayudas) · 14 (texto secundario) ·
   // 16 (texto base) · 18 (títulos de sección) · 24 (título de pantalla) · 32 (portadas).
@@ -162,7 +172,7 @@ export const theme = createTheme({
   },
   components: {
     MuiCssBaseline: {
-      styleOverrides: { html: { fontSize: `${(ROOT_FONT_PX / 16) * 100}%` }, body: PAGE_PATTERN_SX },
+      styleOverrides: { html: { fontSize: ROOT_FONT_FLUID }, body: PAGE_PATTERN_SX },
     },
     MuiDialog: {
       styleOverrides: { paper: { ...CARD_PATTERN_SX, borderRadius: RADIUS.lg } },

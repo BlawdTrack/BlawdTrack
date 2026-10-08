@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress } from '@mui/material';
-import { RADIUS, FONT, TOUCH_TARGET } from '../theme';
+import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 
 /**
  * Botones al pie de un formulario de creación: el principal (con un punto naranja, como el resto de la
@@ -23,7 +23,7 @@ export default function FormActions({ submitLabel, submittingLabel, isSubmitting
         ) : (
           <>
             {submitLabel}
-            <Box component="span" sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#FF6C0E' }} />
+            <Box component="span" sx={{ width: rem(12), height: rem(12), borderRadius: '50%', backgroundColor: '#FF6C0E' }} />
           </>
         )}
       </Button>

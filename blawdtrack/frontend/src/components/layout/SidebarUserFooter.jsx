@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import { RADIUS, FONT } from '../../theme';
+import { RADIUS, FONT, rem } from '../../theme';
 
 /**
  * Pie de la barra lateral: iniciales, nombre, correo y rol del usuario, y el botón de cerrar sesión.
@@ -12,8 +12,8 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
   const avatar = (
     <Box
       sx={{
-        width: 26,
-        height: 26,
+        width: rem(26),
+        height: rem(26),
         borderRadius: '50%',
         backgroundColor: '#FF6C0E',
         color: '#12322B',
@@ -22,7 +22,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        flex: '0 0 26px',
+        flex: `0 0 ${rem(26)}`,
       }}
     >
       {email.charAt(0).toUpperCase()}
@@ -67,13 +67,13 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
   }
 
   return (
-    <Box sx={{ mt: 'auto', p: '13px 14.5px 14.5px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+    <Box sx={{ mt: 'auto', p: '1rem 1.1154rem 1.1154rem', borderTop: '1px solid rgba(255,255,255,.08)' }}>
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
           gap: 1.25,
-          p: '8px 9.5px',
+          p: '0.6154rem 0.7308rem',
           mb: 1.25,
           borderRadius: RADIUS.sm,
           backgroundColor: 'rgba(255,255,255,.05)',
