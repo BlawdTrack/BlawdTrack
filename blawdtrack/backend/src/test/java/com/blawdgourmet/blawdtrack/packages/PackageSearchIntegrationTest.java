@@ -66,12 +66,16 @@ class PackageSearchIntegrationTest {
     }
 
     @Test
-    void salesAdminAndSuperUserCanSearch() throws Exception {
-        for (String role : new String[] {RoleName.SALES_ADMIN, RoleName.SUPER_USER}) {
-            mvc.perform(get(SEARCH_URL).header("Authorization", bearer(role)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.totalElements").value(2));
-        }
+    void salesAdminCanSearch() throws Exception {
+        mvc.perform(get(SEARCH_URL).header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
+    @Test
+    void superUserIsForbidden() throws Exception {
+        mvc.perform(get(SEARCH_URL).header("Authorization", bearer(RoleName.SUPER_USER)))
+                .andExpect(status().isForbidden());
     }
 
     @Test

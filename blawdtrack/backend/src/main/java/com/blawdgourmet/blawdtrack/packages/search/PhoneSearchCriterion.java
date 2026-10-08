@@ -10,7 +10,11 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 
 @Component
-public class PhoneSearchCriterion implements PackageSearchCriterion {
+public class PhoneSearchCriterion extends AbstractTextFieldSearchCriterion {
+
+    public PhoneSearchCriterion() {
+        super(PackageSearchFields.PHONE);
+    }
 
     @Override
     public Specification<DeliveryPackage> toSpecification(PackageSearchTerm term) {
@@ -19,7 +23,7 @@ public class PhoneSearchCriterion implements PackageSearchCriterion {
                 return builder.conjunction();
             }
 
-            Expression<String> phone = builder.lower(root.get("phone"));
+            Expression<String> phone = builder.lower(root.get(PackageSearchFields.PHONE));
             Predicate formattedPhone = builder.like(
                     phone, term.likePattern(), PackageSearchTermNormalizer.ESCAPE_CHARACTER);
             if (!term.hasDigitsPattern()) {

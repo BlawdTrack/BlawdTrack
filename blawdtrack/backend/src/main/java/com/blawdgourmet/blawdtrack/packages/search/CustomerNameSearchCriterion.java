@@ -1,23 +1,11 @@
 package com.blawdgourmet.blawdtrack.packages.search;
 
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
-
-import jakarta.persistence.criteria.Expression;
-
 @Component
-public class CustomerNameSearchCriterion implements PackageSearchCriterion {
+public class CustomerNameSearchCriterion extends AbstractTextFieldSearchCriterion {
 
-    @Override
-    public Specification<DeliveryPackage> toSpecification(PackageSearchTerm term) {
-        return (root, query, builder) -> {
-            if (term == null || term.likePattern() == null) {
-                return builder.conjunction();
-            }
-            Expression<String> field = builder.lower(root.get("customerName"));
-            return builder.like(field, term.likePattern(), PackageSearchTermNormalizer.ESCAPE_CHARACTER);
-        };
+    public CustomerNameSearchCriterion() {
+        super(PackageSearchFields.CUSTOMER_NAME);
     }
 }

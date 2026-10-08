@@ -20,13 +20,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PackageSearchController {
 
-    private static final String SEARCH_ROLES = "hasAnyRole('" + RoleName.SALES_ADMIN
-            + "','" + RoleName.SUPER_USER + "')";
+    private static final String SEARCH_ROLE = "hasRole('" + RoleName.SALES_ADMIN + "')";
 
     private final PackageSearchService searchService;
 
     @GetMapping("/search")
-    @PreAuthorize(SEARCH_ROLES)
+    @PreAuthorize(SEARCH_ROLE)
     public ResponseEntity<PageResponse<PackageSearchResponse>> search(
             @RequestParam(name = "term", required = false) String term,
             @RequestParam(name = "page", required = false) String page,
