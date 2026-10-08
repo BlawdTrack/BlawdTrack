@@ -1,6 +1,6 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { CARD_PATTERN_SX, RADIUS } from '../theme';
 
 /**
@@ -93,7 +93,7 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
             transition: 'background-color .15s ease, color .15s ease',
           }}
         >
-          <ArrowForwardIcon fontSize="small" />
+          <ArrowForwardOutlinedIcon fontSize="small" />
         </Box>
       )}
     </Box>

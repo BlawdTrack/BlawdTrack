@@ -1,6 +1,6 @@
 import { Alert, Avatar, Box, Button, CircularProgress, Paper, Switch, Typography } from '@mui/material';
 import LockOutlined from '@mui/icons-material/LockOutlined';
-import RestartAltRounded from '@mui/icons-material/RestartAltRounded';
+import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import SaveOutlined from '@mui/icons-material/SaveOutlined';
 import HelpTip from './HelpTip';
 import { CARD_SX } from './formStyles';
@@ -35,7 +35,7 @@ export default function PermissionMatrixPanel({
           <Button onClick={onDiscard} disabled={saving} sx={{ color: 'text.secondary', fontWeight: 600 }}>
             Descartar
           </Button>
-          <Button variant="outlined" startIcon={<RestartAltRounded />} onClick={onReset} disabled={!canReset || saving}>
+          <Button variant="outlined" startIcon={<RestartAltOutlinedIcon />} onClick={onReset} disabled={!canReset || saving}>
             Restablecer predeterminados
           </Button>
           <Button

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { IconButton, InputAdornment, TextField } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
 /**
  * Campo de contraseña con botón para mostrarla u ocultarla (el usuario controla qué ve y puede revisar
@@ -27,7 +27,7 @@ export default function PasswordField({ visibilityLabel = 'contraseña', slotPro
                 onClick={() => setVisible((current) => !current)}
                 aria-label={`${visible ? 'Ocultar' : 'Mostrar'} ${visibilityLabel}`}
               >
-                {visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                {visible ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
               </IconButton>
             </InputAdornment>
           ),

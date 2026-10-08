@@ -1,6 +1,6 @@
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
-import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenOutlinedIcon from '@mui/icons-material/MenuOpenOutlined';
+import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import logo from '../../assets/Logo.png';
 import { RADIUS } from '../../theme';
 
@@ -62,7 +62,7 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
               '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },
             }}
           >
-            {collapsed ? <MenuIcon /> : <MenuOpenIcon />}
+            {collapsed ? <MenuOutlinedIcon /> : <MenuOpenOutlinedIcon />}
           </IconButton>
         </Tooltip>
       )}

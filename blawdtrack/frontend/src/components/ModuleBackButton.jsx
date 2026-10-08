@@ -1,6 +1,6 @@
 import { Link as RouterLink, useInRouterContext, useLocation } from 'react-router-dom';
 import { IconButton, Tooltip } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import { getBackTarget } from '../config/navigation';
 
 function BackArrow({ size }) {
@@ -26,7 +26,7 @@ function BackArrow({ size }) {
           '&:hover': { bgcolor: 'neutral.surface' },
         }}
       >
-        <ArrowBackIcon sx={{ fontSize: size > 44 ? 28 : 24 }} />
+        <ArrowBackOutlinedIcon sx={{ fontSize: size > 44 ? 28 : 24 }} />
       </IconButton>
     </Tooltip>
   );

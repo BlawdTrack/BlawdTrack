@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { RADIUS } from '../../theme';
 
 /**
@@ -59,7 +59,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
               '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },
             }}
           >
-            <LogoutIcon fontSize="small" />
+            <LogoutOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
@@ -92,7 +92,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
       <Button
         fullWidth
         onClick={onLogout}
-        startIcon={<LogoutIcon fontSize="small" />}
+        startIcon={<LogoutOutlinedIcon fontSize="small" />}
         sx={{
           color: 'rgba(255,255,255,.85)',
           fontSize: 14,

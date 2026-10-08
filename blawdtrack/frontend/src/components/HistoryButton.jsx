@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import HistoryIcon from '@mui/icons-material/History';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import { RADIUS } from '../theme';
 
 /**
@@ -15,7 +15,7 @@ export default function HistoryButton({ label, onClick, active = false }) {
         variant={active ? 'contained' : 'outlined'}
         disableElevation
         onClick={onClick}
-        startIcon={<HistoryIcon />}
+        startIcon={<HistoryOutlinedIcon />}
         sx={{ minHeight: 44, fontWeight: 600, borderRadius: RADIUS.sm, ...(!active && { color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong' }) }}
       >
         {label}

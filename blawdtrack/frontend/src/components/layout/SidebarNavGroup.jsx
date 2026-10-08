@@ -11,7 +11,7 @@ import {
   Popper,
   Typography,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
 import SidebarNavItem from './SidebarNavItem';
 import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from './navIcons';
 import { RADIUS } from '../../theme';
@@ -160,7 +160,7 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
             />
           )}
         </Box>
-        <ExpandMoreIcon
+        <ExpandMoreOutlinedIcon
           sx={{ fontSize: 18, transition: 'transform .2s ease', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
         />
       </Box>

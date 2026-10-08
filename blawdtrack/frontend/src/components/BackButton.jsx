@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 
 /**
  * Botón "Volver" de los paneles (con borde y flecha): regresa a lo anterior dentro de la misma pantalla.
@@ -10,7 +10,7 @@ export default function BackButton({ onClick, children = 'Volver', sx }) {
   return (
     <Button
       onClick={onClick}
-      startIcon={<ArrowBackIcon />}
+      startIcon={<ArrowBackOutlinedIcon />}
       sx={{ color: 'primary.main', fontWeight: 600, border: '1.5px solid', borderColor: 'neutral.borderStrong', ...sx }}
     >
       {children}

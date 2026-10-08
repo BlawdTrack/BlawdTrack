@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
 import DocumentSearch from './DocumentSearch';
 import HistoryButton from './HistoryButton';
 import StatusChip from './StatusChip';
@@ -78,7 +78,7 @@ export default function CourierFleetPanel({
                 aria-label="Ocultar la flota de mensajeros"
                 sx={{ display: { xs: 'none', md: 'inline-flex' }, width: 44, height: 44, my: -1, color: 'primary.main' }}
               >
-                <ChevronLeftIcon />
+                <ChevronLeftOutlinedIcon />
               </IconButton>
             </Tooltip>
           )}

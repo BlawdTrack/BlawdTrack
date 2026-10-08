@@ -1,5 +1,5 @@
 import { Box, Button, MenuItem, TextField } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { DOCUMENT_PLACEHOLDERS, DOCUMENT_TYPE_OPTIONS } from '../config/documentTypes';
 import { INPUT_SX } from './formStyles';
 import { RADIUS } from '../theme';
@@ -47,7 +47,7 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
       variant="contained"
       disableElevation
       onClick={search.search}
-      startIcon={stacked ? <SearchIcon /> : undefined}
+      startIcon={stacked ? <SearchOutlinedIcon /> : undefined}
       sx={{ flex: stacked ? 1 : { xs: '1 1 100%', sm: '0 0 auto' }, px: stacked ? undefined : 3.5, minHeight: stacked ? 44 : 52, fontWeight: 600, borderRadius: RADIUS.sm }}
     >
       Buscar

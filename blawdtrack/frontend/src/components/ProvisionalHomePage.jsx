@@ -1,7 +1,7 @@
 import { Box, Button, Chip, Typography } from '@mui/material';
 import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import ConstructionOutlinedIcon from '@mui/icons-material/ConstructionOutlined';
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
@@ -75,7 +75,7 @@ export function ProvisionalHomePage({ title, description }) {
         </Box>
         <Button
           onClick={handleLogout}
-          startIcon={<LogoutIcon fontSize="small" />}
+          startIcon={<LogoutOutlinedIcon fontSize="small" />}
           sx={{
             color: 'rgba(255,255,255,.9)',
             minHeight: 44,
