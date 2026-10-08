@@ -3,7 +3,10 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AdminRegistrationPage } from './AdminRegistrationPage';
 import { registerAdministrator } from '../services/AdminService';
-import { renderWithProviders } from '../test-utils';
+import { Routes, Route } from 'react-router-dom';
+import { renderWithProviders, superUser } from '../test-utils';
+import ModuleMenuPage from './ModuleMenuPage';
+import { ROUTES } from '../config/routes';
 
 vi.mock('../services/AdminService', () => ({ registerAdministrator: vi.fn() }));
 
@@ -24,17 +27,24 @@ describe('AdminRegistrationPage', () => {
     registerAdministrator.mockReset();
   });
 
-  it('shows a success message and clears the form on success', async () => {
+  it('returns to the admins module menu with a success notice that names the email', async () => {
     registerAdministrator.mockResolvedValue({ correoElectronico: 'ana@blawdgourmet.com' });
     const user = userEvent.setup();
-    renderWithProviders(<AdminRegistrationPage />);
+    renderWithProviders(
+      <Routes>
+        <Route path={ROUTES.ADMIN_CREATE} element={<AdminRegistrationPage />} />
+        <Route path={ROUTES.MODULE_ADMINS} element={<ModuleMenuPage groupId="admins" />} />
+      </Routes>,
+      { route: ROUTES.ADMIN_CREATE, user: superUser }
+    );
 
     await fillForm(user);
     await submit(user);
 
-    const status = await screen.findByRole('status');
-    expect(status).toHaveTextContent('ana@blawdgourmet.com');
-    expect(screen.getByLabelText(/nombre completo/i)).toHaveValue('');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Administradores' })).toBeInTheDocument();
+    const notice = await screen.findByRole('status');
+    expect(notice).toHaveTextContent('Administrador registrado correctamente');
+    expect(notice).toHaveTextContent('ana@blawdgourmet.com');
     expect(registerAdministrator).toHaveBeenCalledWith({
       documentType: 'CEDULA',
       documentNumber: '1-1204-0388',
@@ -43,6 +53,19 @@ describe('AdminRegistrationPage', () => {
       correoElectronico: 'ana@blawdgourmet.com',
       contrasenaInicial: 'Clave1234'
     });
+  });
+
+  it('lets the user reveal the initial password and shows only the rules that apply to it', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AdminRegistrationPage />);
+
+    const password = screen.getByLabelText(/contraseña inicial/i);
+    expect(password).toHaveAttribute('type', 'password');
+    await user.click(screen.getByRole('button', { name: /mostrar contraseña/i }));
+    expect(password).toHaveAttribute('type', 'text');
+
+    expect(screen.getByText('Mínimo 8 caracteres')).toBeInTheDocument();
+    expect(screen.queryByText(/últimas 3 contraseñas/i)).not.toBeInTheDocument();
   });
 
   it('blocks the submit and shows inline errors when required fields are empty', async () => {
