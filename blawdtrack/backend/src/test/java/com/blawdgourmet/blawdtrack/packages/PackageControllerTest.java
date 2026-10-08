@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
@@ -47,6 +51,7 @@ class PackageControllerTest {
     @Autowired private RoleRepository roles;
     @Autowired private CourierRepository couriers;
     @Autowired private DeliveryPackageRepository packages;
+    @Autowired private AuditLogRepository auditLogs;
     @Autowired private JwtService jwt;
 
     private User adminVentas;
