@@ -18,14 +18,14 @@ export const RADIUS = { sm: '10px', md: '16px', lg: '20px' };
  * Escala de la aplicación, fluida. La raíz tipográfica (el `font-size` del `html`) se calcula con el tamaño de la
  * ventana: es 13 px en una ventana de unos 1920 × 950 px y baja en proporción cuando la ventana es más chica o el
  * zoom del navegador es mayor (con el zoom al 100 % en una pantalla chica la ventana mide menos píxeles CSS), con
- * un piso de 9 px y un techo de 14 px. Todo lo que está en rem (espaciado, anchos, alturas, tipografía) la sigue,
+ * un piso de 9 px y un techo de 13 px. Todo lo que está en rem (espaciado, anchos, alturas, tipografía) la sigue,
  * así el contenido se adapta y cabe sin hacer scroll.
  *
  * `rem(px)` convierte un tamaño pensado para la raíz de 13 px (`ROOT_FONT_PX`) a rem. Mínimos que no bajan, aunque
  * la raíz sea chica: texto de 12 px (`fontPx` y `FONT`) y áreas táctiles de 44 px (`TOUCH_TARGET`).
  */
 export const ROOT_FONT_PX = 13;
-export const ROOT_FONT_FLUID = 'clamp(9px, min(0.677vw, 1.368vh), 14px)';
+export const ROOT_FONT_FLUID = 'clamp(9px, min(0.677vw, 1.368vh), 13px)';
 export const rem = (px) => `${Number((px / ROOT_FONT_PX).toFixed(4))}rem`;
 
 /** Tamaño de texto fluido pero nunca menor a 12 px. */

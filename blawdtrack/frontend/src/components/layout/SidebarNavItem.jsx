@@ -9,6 +9,8 @@ function ItemContent({ label, active, disabled, Icon }) {
       sx={{
         position: 'relative',
         minHeight: 44,
+        // Con mouse (puntero fino) la fila es más baja; con pantalla táctil se queda en 44 px.
+        '@media (pointer: fine)': { minHeight: 36 },
         px: 1.75,
         ml: '0.1923rem',
         borderRadius: RADIUS.sm,

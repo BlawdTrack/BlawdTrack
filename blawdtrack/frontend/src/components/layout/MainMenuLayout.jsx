@@ -9,8 +9,9 @@ import SidebarContent from './SidebarContent';
 import MobileBottomNav from './MobileBottomNav';
 import { rem } from '../../theme';
 
-const SIDEBAR_WIDTH = rem(220);
-const SIDEBAR_COLLAPSED_WIDTH = rem(62);
+// La barra no baja de 208 px aunque la raíz sea chica: el texto de las etiquetas no baja de 12 px.
+const SIDEBAR_WIDTH = `max(208px, ${rem(220)})`;
+const SIDEBAR_COLLAPSED_WIDTH = `max(64px, ${rem(62)})`;
 const COLLAPSED_STORAGE_KEY = 'blawdtrack.sidebarCollapsed';
 
 // El navegador puede bloquear el almacenamiento (modo privado); en ese caso la barra arranca expandida.

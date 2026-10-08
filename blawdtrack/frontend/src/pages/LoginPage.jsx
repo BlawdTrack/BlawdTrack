@@ -89,7 +89,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           borderColor: 'secondary.main',
         }}
       >
-        <BrandLogo variant="stackedCream" width={150} />
+        <BrandLogo variant="stacked" onDark width={150} />
 
         <Box>
           <Typography variant="h4" component="p" sx={{ lineHeight: 1.25, mb: 2 }}>

@@ -55,7 +55,7 @@ export function ProvisionalHomePage({ title, description }) {
           gap: 2,
         }}
       >
-        <BrandLogo variant="horizontalCream" width={108} />
+        <BrandLogo variant="horizontal" onDark width={108} />
         <Button
           onClick={handleLogout}
           startIcon={<LogoutOutlinedIcon fontSize="small" />}
@@ -63,6 +63,8 @@ export function ProvisionalHomePage({ title, description }) {
             color: 'rgba(255,255,255,.9)',
             minHeight: 44,
             border: '1px solid rgba(255,255,255,.25)',
+            // Sobre la cabecera verde el botón es transparente (el tema da fondo blanco a los botones de texto).
+            bgcolor: 'transparent',
             '&:hover': { bgcolor: 'rgba(255,255,255,.08)' },
           }}
         >

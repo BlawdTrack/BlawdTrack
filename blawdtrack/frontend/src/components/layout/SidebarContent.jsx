@@ -15,7 +15,8 @@ export default function SidebarContent({ groups, user, roleLabel, onLogout, coll
 
   return (
     <Box
-      sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', backgroundColor: '#1A3C34' }}
+      // Alto fijo: el encabezado y el pie siempre se ven; solo la lista de opciones se desplaza si no cabe.
+      sx={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#1A3C34' }}
     >
       <SidebarBrand collapsed={collapsed} onToggleCollapsed={onToggleCollapsed} />
       <Box
@@ -25,6 +26,8 @@ export default function SidebarContent({ groups, user, roleLabel, onLogout, coll
           display: 'flex',
           flexDirection: 'column',
           gap: collapsed ? 1 : 2.25,
+          flex: '1 1 auto',
+          minHeight: 0,
           overflowY: 'auto',
         }}
       >

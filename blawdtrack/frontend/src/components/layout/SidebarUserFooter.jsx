@@ -101,6 +101,9 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
           borderRadius: RADIUS.sm,
           border: '1px solid rgba(255,255,255,.14)',
           minHeight: 44,
+          '@media (pointer: fine)': { minHeight: 40 },
+          // Sobre el verde de la barra el botón es transparente (el tema da fondo blanco a los botones de texto).
+          backgroundColor: 'transparent',
           '&:hover': { backgroundColor: 'rgba(255,255,255,.08)', borderColor: 'rgba(255,255,255,.14)' },
           '&.Mui-focusVisible': { outline: '2px solid #FF6C0E' },
         }}
