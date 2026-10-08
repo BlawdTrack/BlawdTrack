@@ -110,7 +110,9 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
 
         <Box>
           <Typography variant="h4" component="p" sx={{ lineHeight: 1.25, mb: 2 }}>
-            Cada entrega, siempre a la vista.
+            Cada entrega,
+            <br />
+            siempre a la vista.
           </Typography>
           <Typography sx={{ color: 'rgba(255,255,255,0.75)', maxWidth: 360 }}>
             Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar.
