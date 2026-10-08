@@ -8,9 +8,10 @@ import { ROLE_LABELS } from '../config/roles';
 import { getPasswordResetRoute } from '../utils/roleRoutes';
 import logo from '../assets/Logo.png';
 import PageContainer from './PageContainer';
+import { CARD_PATTERN_SX } from '../theme';
 
 const CARD_SX = {
-  bgcolor: 'background.paper',
+  ...CARD_PATTERN_SX,
   border: '1px solid #E4DED7',
   borderRadius: '16px',
   p: { xs: 2.5, sm: 3 },
@@ -38,7 +39,7 @@ export function ProvisionalHomePage({ title, description }) {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: '100vh' }}>
       <Box
         component="header"
         sx={{

@@ -14,6 +14,7 @@ import { composeSchedule } from '../utils/courierSchedule';
 import { StatusMessage } from '../components/StatusMessage';
 import PageHeaderBar from '../components/PageHeaderBar';
 import { LABEL_SX, INPUT_SX } from '../components/formStyles';
+import { CARD_PATTERN_SX } from '../theme';
 import PageContainer from '../components/PageContainer';
 import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
 import { ROUTES } from '../config/routes';
@@ -193,7 +194,7 @@ export function CourierRegistrationPage() {
         sx={{
           borderRadius: '18px',
           border: '1px solid #E4DED7',
-          backgroundColor: '#fff',
+          ...CARD_PATTERN_SX,
           boxShadow: '0 12px 30px rgba(26,60,52,.06)',
           p: { xs: 2.5, md: 4 },
           textAlign: 'left'

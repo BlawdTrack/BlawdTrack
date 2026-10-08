@@ -1,5 +1,6 @@
 // Estilos compartidos de los formularios de gestión, para que todos los campos (incluidas las ruedas de
 // hora y de peso) midan y se vean igual.
+import { CARD_PATTERN_SX } from '../theme';
 
 /** Etiqueta de un campo: pequeña, en mayúsculas y siempre visible sobre el campo. */
 export const LABEL_SX = {
@@ -26,6 +27,6 @@ export const INPUT_SX = {
 export const CARD_SX = {
   borderRadius: '18px',
   border: '1px solid #E4DED7',
-  bgcolor: '#fff',
+  ...CARD_PATTERN_SX,
   boxShadow: '0 12px 30px rgba(26,60,52,.06)',
 };

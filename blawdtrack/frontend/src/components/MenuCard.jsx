@@ -1,6 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { CARD_PATTERN_SX } from '../theme';
 
 /**
  * Tarjeta de los menús (principal y de cada módulo): icono, título y descripción corta. Toda la tarjeta
@@ -25,7 +26,7 @@ export default function MenuCard({ to = null, icon: Icon, title, description }) 
         gap: { xs: 2, md: 2.5 },
         minHeight: { xs: 96, md: 260 },
         p: { xs: 2.5, md: 4 },
-        bgcolor: 'background.paper',
+        ...CARD_PATTERN_SX,
         border: '1px solid #E4DED7',
         borderRadius: '20px',
         color: 'text.primary',

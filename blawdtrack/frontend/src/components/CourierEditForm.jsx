@@ -3,6 +3,7 @@ import { TimeWheelField } from './TimeWheelField';
 import { WeightWheelField } from './WeightWheelField';
 import StatusMessage from './StatusMessage';
 import { INPUT_SX, LABEL_SX } from './formStyles';
+import { CARD_PATTERN_SX } from '../theme';
 
 const FIELD_GRID_SX = {
   display: 'grid',
@@ -188,7 +189,7 @@ export default function CourierEditForm({ editor, onDiscard }) {
         {updateError && <StatusMessage severity="error" message={updateError} />}
       </Box>
 
-      <Box sx={{ px: 3, py: 2, borderTop: '1px solid #E4DED7', bgcolor: '#fff', display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+      <Box sx={{ px: 3, py: 2, borderTop: '1px solid #E4DED7', ...CARD_PATTERN_SX, display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Button
           type="submit"
           variant="contained"

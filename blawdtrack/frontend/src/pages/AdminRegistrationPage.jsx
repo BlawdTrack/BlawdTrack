@@ -13,6 +13,7 @@ import PageHeaderBar from '../components/PageHeaderBar';
 import PageContainer from '../components/PageContainer';
 import { ROUTES } from '../config/routes';
 import { LABEL_SX, INPUT_SX } from '../components/formStyles';
+import { CARD_PATTERN_SX } from '../theme';
 import FormActions from '../components/FormActions';
 import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
 import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
@@ -148,7 +149,7 @@ export function AdminRegistrationPage() {
         sx={{
           borderRadius: '18px',
           border: '1px solid #E4DED7',
-          backgroundColor: '#fff',
+          ...CARD_PATTERN_SX,
           boxShadow: '0 12px 30px rgba(26,60,52,.06)',
           p: { xs: 2, sm: 3.5 },
           textAlign: 'left'

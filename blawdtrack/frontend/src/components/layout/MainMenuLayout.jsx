@@ -51,7 +51,7 @@ export default function MainMenuLayout() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#FAF8F5' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Box
         component="aside"
         sx={{

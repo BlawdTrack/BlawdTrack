@@ -11,6 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
 import { INLINE_LABEL_SX } from '../components/formStyles';
+import { CARD_PATTERN_SX } from '../theme';
 import blawdtrackLogo from '../assets/Logo.png';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,7 +74,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: 'background.default' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex' }}>
       {/* Panel de marca: solo en escritorio, para no quitarle espacio al formulario en móvil. */}
       <Box
         sx={{
@@ -157,7 +158,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           sx={{
             width: '100%',
             maxWidth: 420,
-            bgcolor: 'background.paper',
+            ...CARD_PATTERN_SX,
             border: '1px solid #E4DED7',
             borderRadius: '16px',
             p: { xs: 3, sm: 4.5 },

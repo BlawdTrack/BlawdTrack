@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { NAV_GROUP_ICONS } from './navIcons';
+import { CARD_PATTERN_SX } from '../../theme';
 
 // Naranja más oscuro que el de la marca: el de marca sobre blanco no llega a 4.5:1 en texto pequeño.
 const ACTIVE_COLOR = '#C25100';
@@ -27,7 +28,7 @@ export default function MobileBottomNav({ groups }) {
         right: 0,
         bottom: 0,
         zIndex: 10,
-        backgroundColor: '#fff',
+        ...CARD_PATTERN_SX,
         borderTop: '1px solid #E4DED7',
       }}
     >

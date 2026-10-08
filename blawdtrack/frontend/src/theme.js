@@ -1,4 +1,26 @@
 import { createTheme } from '@mui/material/styles';
+import patternUrl from './assets/background_T.png';
+
+// Velos sobre el patrón: lo dejan como una textura de fondo y el texto conserva el contraste AA.
+const PAGE_VEIL = 'linear-gradient(rgba(250,248,245,0.72), rgba(250,248,245,0.72))';
+const CARD_VEIL = 'linear-gradient(rgba(255,255,255,0.94), rgba(255,255,255,0.94))';
+
+/** Fondo de pantalla: el patrón ilustrado, suave, sobre el crema de marca. */
+export const PAGE_PATTERN_SX = {
+  backgroundColor: '#FAF8F5',
+  backgroundImage: `${PAGE_VEIL}, url(${patternUrl})`,
+  backgroundSize: 'auto, 520px',
+  backgroundRepeat: 'no-repeat, repeat',
+};
+
+/** Superficie blanca (tarjetas, formularios, diálogos y barras) con el patrón suavizado. No se usa en botones. */
+export const CARD_PATTERN_SX = {
+  backgroundColor: '#fff',
+  backgroundImage: `${CARD_VEIL}, url(${patternUrl})`,
+  backgroundSize: 'auto, 420px',
+  backgroundRepeat: 'no-repeat, repeat',
+};
+
 // Paleta y tipografía alineadas al mockup de diseño (Inter + Poppins, verde/naranja BlawdTrack).
 /** Tema de MUI de la aplicación (paleta verde/naranja de BlawdTrack; fuentes Inter y Poppins). */
 export const theme = createTheme({
@@ -38,6 +60,12 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: { body: PAGE_PATTERN_SX },
+    },
+    MuiDialog: {
+      styleOverrides: { paper: CARD_PATTERN_SX },
+    },
     // Los placeholders de MUI son demasiado claros (2.7:1); este gris cumple el 4.5:1 del nivel AA.
     MuiInputBase: {
       styleOverrides: {
@@ -51,6 +79,18 @@ export const theme = createTheme({
           borderRadius: '10px',
           minHeight: 44,
           padding: '8px 20px',
+        },
+        // Los botones nunca son transparentes: sin relleno, el patrón de fondo se vería a través.
+        outlined: {
+          backgroundColor: '#fff',
+          '&:hover': { backgroundColor: '#F1ECE7' },
+        },
+        text: {
+          backgroundColor: '#fff',
+          '&:hover': { backgroundColor: '#F1ECE7' },
+        },
+        contained: {
+          '&.Mui-disabled': { backgroundColor: '#E4DED7', color: '#6B6560' },
         },
         sizeLarge: {
           minHeight: 48,

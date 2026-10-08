@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { CARD_PATTERN_SX } from '../theme';
 import blawdtrackLogo from '../assets/Logo.png';
 
 /**
@@ -15,7 +16,6 @@ export default function AuthCardLayout({ children }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: 'background.default',
         px: { xs: 2, sm: 4 },
         py: 4,
       }}
@@ -43,7 +43,7 @@ export default function AuthCardLayout({ children }) {
         sx={{
           width: '100%',
           maxWidth: 560,
-          bgcolor: 'background.paper',
+          ...CARD_PATTERN_SX,
           border: '1px solid #E4DED7',
           borderRadius: '16px',
           overflow: 'hidden',
