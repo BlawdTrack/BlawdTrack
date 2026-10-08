@@ -40,10 +40,11 @@ const STATUS = {
 // sirve como máscara. Se tiñe sin tocar el archivo con dos modos de mezcla: el verde de marca en modo `color` sobre
 // el PNG (el blanco sigue blanco y el gris pasa a verde claro) y la capa entera en `multiply` sobre el fondo (el
 // blanco no altera el crema ni el blanco de la tarjeta; solo el dibujo lo oscurece, ya verdoso). La opacidad
-// regula cuánto se ve: 50 % en el fondo de pantalla y 30 % dentro de las tarjetas, donde hay texto y campos.
+// regula cuánto se ve: 15 % en el fondo de pantalla y 0 % dentro de las tarjetas, que son blanco sólido porque
+// llevan texto y campos.
 const PATTERN_TINT = '#1A3C34';
-const PAGE_PATTERN_OPACITY = 0.5;
-const CARD_PATTERN_OPACITY = 0.3;
+const PAGE_PATTERN_OPACITY = 0.15;
+const CARD_PATTERN_OPACITY = 0;
 
 const patternLayer = (opacity, size) => ({
   content: '""',
@@ -68,15 +69,18 @@ export const PAGE_PATTERN_SX = {
 };
 
 /**
- * Superficie blanca (tarjetas, formularios, diálogos y barras) con el patrón teñido muy suave. No se usa en
- * botones. Define `position: relative`: quien la use con otra posición (fija, pegajosa) debe poner este objeto
- * antes de su propio `position`.
+ * Superficie blanca (tarjetas, formularios, diálogos y barras). Con `CARD_PATTERN_OPACITY` mayor que 0 lleva el
+ * patrón teñido dentro; con 0 es blanco sólido y no se crea ninguna capa. No se usa en botones. Si hay patrón,
+ * define `position: relative`: quien la use con otra posición (fija, pegajosa) debe poner este objeto antes de su
+ * propio `position`.
  */
 export const CARD_PATTERN_SX = {
   backgroundColor: WHITE,
-  position: 'relative',
-  isolation: 'isolate',
-  '&::before': patternLayer(CARD_PATTERN_OPACITY, 420),
+  ...(CARD_PATTERN_OPACITY > 0 && {
+    position: 'relative',
+    isolation: 'isolate',
+    '&::before': patternLayer(CARD_PATTERN_OPACITY, 420),
+  }),
 };
 
 // Paleta y tipografía alineadas al mockup de diseño (Inter + Poppins, verde/naranja BlawdTrack).

@@ -51,12 +51,14 @@ export default function MainMenuPage() {
             bgcolor: 'secondary.main',
           },
           px: { xs: 3, md: 6 },
-          py: { xs: 4, md: 6 },
+          // La franja naranja ocupa los 6 px de arriba, así que el relleno superior es un poco mayor.
+          pt: 2.75,
+          pb: 2,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           textAlign: 'center',
-          gap: 1.5,
+          gap: 1,
         }}
       >
         <Typography
@@ -76,7 +78,7 @@ export default function MainMenuPage() {
         </Typography>
         <Chip
           label={ROLE_LABELS[user.role] ?? user.role}
-          sx={{ mt: 1, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: 14, height: 32, px: 1 }}
+          sx={{ mt: 0.5, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: 14, height: 32, px: 1 }}
         />
       </Box>
 
@@ -96,7 +98,7 @@ export default function MainMenuPage() {
           <Box
             sx={{
               display: 'grid',
-              gap: { xs: 2, md: 3 },
+              gap: 2,
               gridTemplateColumns: '1fr',
             }}
           >
