@@ -38,7 +38,7 @@ export const NAVIGATION_GROUPS = [
   },
   {
     id: 'admins',
-    title: 'Administradores',
+    title: 'Gestión de administradores',
     shortTitle: 'Admins',
     path: ROUTES.MODULE_ADMINS,
     description: 'Da de alta a quienes gestionan las ventas o quítales el acceso.',

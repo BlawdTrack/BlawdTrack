@@ -53,7 +53,7 @@ describe('MainMenuPage', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
     expect(screen.getByRole('link', { name: /Gestión de mensajeros/ })).toHaveAttribute('href', ROUTES.MODULE_COURIERS);
-    expect(screen.getByRole('link', { name: /Administradores/ })).toHaveAttribute('href', ROUTES.MODULE_ADMINS);
+    expect(screen.getByRole('link', { name: /Gestión de administradores/ })).toHaveAttribute('href', ROUTES.MODULE_ADMINS);
     expect(screen.getByRole('link', { name: /Seguridad y acceso/ })).toHaveAttribute('href', ROUTES.MODULE_SECURITY);
   });
 });

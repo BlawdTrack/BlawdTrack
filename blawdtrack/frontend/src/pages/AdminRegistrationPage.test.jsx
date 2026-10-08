@@ -40,7 +40,7 @@ describe('AdminRegistrationPage', () => {
     await fillForm(user);
     await submit(user);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Administradores' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Gestión de administradores' })).toBeInTheDocument();
     const notice = await screen.findByRole('status');
     expect(notice).toHaveTextContent('Administrador creado correctamente');
     expect(notice).toHaveTextContent('contraseña temporal');

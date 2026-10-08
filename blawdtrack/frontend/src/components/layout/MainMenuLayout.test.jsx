@@ -28,7 +28,7 @@ describe('MainMenuLayout sidebar', () => {
   it('renders the four module titles from the mockup', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
-    ['Gestión de mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((title) =>
+    ['Gestión de mensajeros', 'Gestión de administradores', 'Seguridad y acceso'].forEach((title) =>
       expect(bar.getByRole('button', { name: title })).toBeInTheDocument()
     );
     expect(bar.queryByRole('button', { name: 'Roles y permisos' })).not.toBeInTheDocument();
@@ -81,7 +81,7 @@ describe('MainMenuLayout sidebar', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
     await openGroup(user, 'Gestión de mensajeros');
-    await openGroup(user, 'Administradores');
+    await openGroup(user, 'Gestión de administradores');
     await openGroup(user, 'Seguridad y acceso');
 
     await user.click(bar.getByRole('link', { name: 'Actualizar mensajero' }));
@@ -129,7 +129,7 @@ describe('MainMenuLayout sidebar', () => {
 
       const bar = within(sidebar());
       expect(bar.queryByText('Blawd Gourmet')).not.toBeInTheDocument();
-      ['Gestión de mensajeros', 'Administradores', 'Seguridad y acceso'].forEach((name) =>
+      ['Gestión de mensajeros', 'Gestión de administradores', 'Seguridad y acceso'].forEach((name) =>
         expect(bar.getByRole('button', { name })).toBeInTheDocument()
       );
       expect(bar.queryByRole('link', { name: 'Crear mensajero' })).not.toBeInTheDocument();
@@ -193,8 +193,8 @@ describe('MainMenuLayout sidebar', () => {
         fireEvent.mouseMove(trigger('Gestión de mensajeros'), { clientX: 40, clientY: 100 });
         await screen.findByRole('menuitem', { name: 'Crear mensajero' });
 
-        fireEvent.mouseMove(trigger('Administradores'), { clientX: 45, clientY: 150 });
-        fireEvent.mouseEnter(trigger('Administradores'));
+        fireEvent.mouseMove(trigger('Gestión de administradores'), { clientX: 45, clientY: 150 });
+        fireEvent.mouseEnter(trigger('Gestión de administradores'));
 
         expect(await screen.findByRole('menuitem', { name: 'Crear administrador' })).toBeInTheDocument();
         expect(screen.queryByRole('menuitem', { name: 'Crear mensajero' })).not.toBeInTheDocument();
@@ -210,9 +210,9 @@ describe('MainMenuLayout sidebar', () => {
         await screen.findByRole('menuitem', { name: 'Crear mensajero' });
 
         // Pasa por encima de "Administradores" yendo en diagonal hacia el menú de Mensajeros.
-        fireEvent.mouseMove(trigger('Administradores'), { clientX: 70, clientY: 150 });
-        fireEvent.mouseEnter(trigger('Administradores'));
-        fireEvent.mouseLeave(trigger('Administradores'));
+        fireEvent.mouseMove(trigger('Gestión de administradores'), { clientX: 70, clientY: 150 });
+        fireEvent.mouseEnter(trigger('Gestión de administradores'));
+        fireEvent.mouseLeave(trigger('Gestión de administradores'));
         const menu = screen.getByRole('menuitem', { name: 'Desactivar mensajero' });
         fireEvent.mouseEnter(menu.closest('[class*="MuiPopper"]').firstElementChild);
 
