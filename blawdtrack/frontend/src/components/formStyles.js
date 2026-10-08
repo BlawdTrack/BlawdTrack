@@ -30,3 +30,6 @@ export const CARD_SX = {
   ...CARD_PATTERN_SX,
   boxShadow: '0 12px 30px rgba(26,60,52,.06)',
 };
+
+/** Hace que un campo ocupe toda la fila del formulario de dos columnas (en móvil ya es una sola). */
+export const FULL_ROW_SX = { gridColumn: { md: 'span 2' } };

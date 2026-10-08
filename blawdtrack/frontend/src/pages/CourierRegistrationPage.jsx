@@ -1,31 +1,15 @@
-import { useState } from 'react';
-import {
-  Paper,
-  Box,
-  Typography,
-  TextField,
-  MenuItem,
-} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useCourier } from '../hooks/useCourier';
+import { useRegistrationForm } from '../hooks/useRegistrationForm';
 import { validateCourierForm } from '../utils/courierFormValidation';
 import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
 import { composeSchedule } from '../utils/courierSchedule';
-import { StatusMessage } from '../components/StatusMessage';
-import PageHeaderBar from '../components/PageHeaderBar';
-import { LABEL_SX, INPUT_SX } from '../components/formStyles';
-import { CARD_PATTERN_SX } from '../theme';
-import PageContainer from '../components/PageContainer';
-import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
+import FormField, { FieldShell } from '../components/FormField';
+import DocumentFields from '../components/DocumentFields';
+import RegistrationFormPage from '../components/RegistrationFormPage';
+import { FULL_ROW_SX } from '../components/formStyles';
 import { ROUTES } from '../config/routes';
-import FormActions from '../components/FormActions';
-import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
-import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
-import { useFormLeave } from '../hooks/useFormLeave';
-import { isFormDirty } from '../utils/forms';
-
-// The form is a single column on phones and two columns from tablets up; wide fields span both.
-const FULL_ROW_SX = { gridColumn: { md: 'span 2' } };
 
 const INITIAL_FORM_DATA = {
   documentType: 'CEDULA',
@@ -80,6 +64,9 @@ function buildCourierPayload(formData) {
   return payload;
 }
 
+const buildCourierNotice = (outcome) =>
+  `Mensajero creado correctamente. Se envió un correo a ${outcome.email} con la contraseña temporal; deberá cambiarla en su primer ingreso.`;
+
 /**
  * Pantalla "Crear mensajero" (HU-003), exclusiva del Super Usuario. Valida el formulario en el cliente
  * (`validateCourierForm`), arma el cuerpo de `POST /api/v1/couriers` y muestra los errores del backend
@@ -87,224 +74,71 @@ function buildCourierPayload(formData) {
  * crear el mensajero vuelve al menú de gestión de mensajeros con un aviso de éxito.
  */
 export function CourierRegistrationPage() {
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-  // Con datos escritos, salir (menú, otra pantalla, cerrar la pestaña) o descartar pide confirmación.
-  const form = useFormLeave({ isDirty: isFormDirty(formData, INITIAL_FORM_DATA), discardTo: ROUTES.MODULE_COURIERS });
-  const {
-    isSubmitting,
-    fieldErrors,
-    globalMessage,
-    severity,
-    register,
-    setValidationErrors,
-    setFieldError,
-    clearFieldError
-  } = useCourier();
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    const isSchedule = name === 'scheduleStart' || name === 'scheduleEnd';
-    const next = { ...formData, [name]: value };
-    if (isSchedule) {
-      next.schedule = composeSchedule(next.scheduleStart, next.scheduleEnd);
-    }
-    setFormData(next);
-    clearFieldError(isSchedule ? 'schedule' : name);
-    // Wheel pickers have no "blur": flag an inverted range as soon as both hours are set.
-    if (isSchedule && next.scheduleStart && next.scheduleEnd) {
-      const message = validateCourierForm(next).schedule;
-      if (message) setFieldError('schedule', message);
-    }
-  };
-
-  // Validate a text field when the user leaves it, but only once it has content
-  // (an empty required field is reported on submit, not while tabbing through).
-  const handleBlur = (event) => {
-    const { name, value } = event.target;
-    if (!value.trim()) return;
-    const message = validateCourierForm(formData)[name];
-    if (message) setFieldError(name, message);
-  };
-
-  const focusFirstError = (errors) => {
-    const firstField = FIELD_ORDER.find((name) => errors[name]);
-    // Every input has id === field name, so the DOM lookup is enough.
-    if (firstField) document.getElementById(firstField)?.focus();
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (isSubmitting) return;
-
-    const clientErrors = validateCourierForm(formData);
-    if (Object.keys(clientErrors).length > 0) {
-      setValidationErrors(clientErrors);
-      focusFirstError(clientErrors);
-      return;
-    }
-
-    const outcome = await register(buildCourierPayload(formData));
-    if (outcome?.ok) {
-      // Todo salió bien: se avisa en el menú del módulo, a donde se regresa de inmediato.
-      form.leave(ROUTES.MODULE_COURIERS, {
-        state: {
-          notice: {
-            severity: 'success',
-            message: `Mensajero creado correctamente. Se envió un correo a ${outcome.email} con la contraseña temporal; deberá cambiarla en su primer ingreso.`
-          }
-        }
-      });
-    } else if (outcome) {
-      focusFirstError(outcome.fieldErrors);
-    }
-  };
-
-  // Props shared by every input: value, change handler, inline error and
-  // accessibility wiring (MUI links helperText through aria-describedby).
-  const fieldProps = (name) => ({
-    id: name,
-    name,
-    value: formData[name],
-    onChange: handleChange,
-    onBlur: handleBlur,
-    error: Boolean(fieldErrors[name]),
-    helperText: fieldErrors[name] || undefined,
-    fullWidth: true,
-    sx: INPUT_SX
+  const registration = useCourier();
+  const { formData, form, setField, handleSubmit, fieldProps } = useRegistrationForm({
+    initialData: INITIAL_FORM_DATA,
+    validate: validateCourierForm,
+    fieldOrder: FIELD_ORDER,
+    discardTo: ROUTES.MODULE_COURIERS,
+    registration,
+    buildPayload: buildCourierPayload,
+    buildNotice: buildCourierNotice
   });
+  const { fieldErrors, isSubmitting, globalMessage, severity } = registration;
 
-  const renderField = (name, label, extra, span2 = false) => (
-    <Box sx={span2 ? FULL_ROW_SX : undefined}>
-      <Typography variant="caption" component="label" htmlFor={name} sx={LABEL_SX}>
-        {label}
-      </Typography>
-      <TextField {...fieldProps(name)} {...extra} />
-    </Box>
-  );
+  // Wheel pickers have no "blur": an inverted range is flagged as soon as both hours are set.
+  const setScheduleHour = (name) => (value) =>
+    setField(name, value, {
+      derive: (next) => ({ ...next, schedule: composeSchedule(next.scheduleStart, next.scheduleEnd) }),
+      errorKey: 'schedule',
+      validateWhen: (next) => Boolean(next.scheduleStart && next.scheduleEnd)
+    });
 
   return (
-    <>
-      <PageHeaderBar
-        title="Crear mensajero"
-        description="Registra a un nuevo mensajero con su horario y la capacidad de carga que puede transportar."
-      />
-      <PageContainer>
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: '18px',
-          border: '1px solid #E4DED7',
-          ...CARD_PATTERN_SX,
-          boxShadow: '0 12px 30px rgba(26,60,52,.06)',
-          p: { xs: 2.5, md: 4 },
-          textAlign: 'left'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 2.5, md: 3 } }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: '10px',
-              backgroundColor: '#F1ECE7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '3px solid #1A3C34' }} />
-          </Box>
-          <Typography component="h2" sx={{ fontSize: 18, fontWeight: 600, m: 0, color: '#1A3C34' }}>
-            Datos del nuevo mensajero
-          </Typography>
-        </Box>
-
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {globalMessage && <StatusMessage severity={severity} message={globalMessage} />}
-
-          <Box
-            sx={{
-              display: 'grid',
-              gap: { xs: 2, md: '24px 32px' },
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
-              alignItems: 'start'
-            }}
-          >
-            {renderField('fullName', 'NOMBRE COMPLETO', { required: true, placeholder: 'Ej. Ana Lucía Bermúdez' }, true)}
-            {renderField('email', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' })}
-            {renderField('phone', 'TELÉFONO (OPCIONAL)', { type: 'tel', placeholder: '8888-8888' })}
-            <Box>
-              <Typography variant="caption" component="label" htmlFor="documentType" sx={LABEL_SX}>
-                TIPO DE DOCUMENTO
-              </Typography>
-              <TextField {...fieldProps('documentType')} select required>
-                {DOCUMENT_TYPE_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-            {renderField('documentNumber', 'NÚMERO DE DOCUMENTO', { required: true, placeholder: DOCUMENT_PLACEHOLDERS[formData.documentType] })}
-            <Box>
-              <Typography variant="caption" component="label" htmlFor="maxPackageWeightKg" sx={LABEL_SX}>
-                CAPACIDAD MÁXIMA DE CARGA (KG)
-              </Typography>
-              <WeightWheelField
-                id="maxPackageWeightKg"
-                label="Capacidad máxima de carga"
-                value={formData.maxPackageWeightKg}
-                error={Boolean(fieldErrors.maxPackageWeightKg)}
-                onChange={(v) => handleChange({ target: { name: 'maxPackageWeightKg', value: v } })}
-              />
-              {fieldErrors.maxPackageWeightKg && (
-                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
-                  {fieldErrors.maxPackageWeightKg}
-                </Typography>
-              )}
-            </Box>
-            <Box>
-              <Typography variant="caption" component="label" htmlFor="schedule" sx={LABEL_SX}>
-                HORARIO
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <TimeWheelField
-                  id="schedule"
-                  label="Hora de entrada"
-                  value={formData.scheduleStart}
-                  error={Boolean(fieldErrors.schedule)}
-                  onChange={(v) => handleChange({ target: { name: 'scheduleStart', value: v } })}
-                />
-                <Typography component="span" sx={{ color: '#6B6560', fontSize: 16 }}>a</Typography>
-                <TimeWheelField
-                  id="scheduleEnd"
-                  label="Hora de salida"
-                  value={formData.scheduleEnd}
-                  error={Boolean(fieldErrors.schedule)}
-                  onChange={(v) => handleChange({ target: { name: 'scheduleEnd', value: v } })}
-                />
-              </Box>
-              {fieldErrors.schedule && (
-                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
-                  {fieldErrors.schedule}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-
-          <FormActions
-            submitLabel="Registrar mensajero"
-            submittingLabel="Registrando…"
-            isSubmitting={isSubmitting}
-            onDiscard={form.discard}
+    <RegistrationFormPage
+      title="Crear mensajero"
+      description="Registra a un nuevo mensajero con su horario y la capacidad de carga que puede transportar."
+      onSubmit={handleSubmit}
+      form={form}
+      isSubmitting={isSubmitting}
+      submitLabel="Registrar mensajero"
+      submittingLabel="Registrando…"
+      globalMessage={globalMessage}
+      severity={severity}
+    >
+      <FormField {...fieldProps('fullName')} label="Nombre completo" required placeholder="Ej. Ana Lucía Bermúdez" sx={FULL_ROW_SX} />
+      <FormField {...fieldProps('email')} label="Correo electrónico" required type="email" placeholder="nombre@blawdgourmet.com" />
+      <FormField {...fieldProps('phone')} label="Teléfono (opcional)" type="tel" placeholder="8888-8888" />
+      <DocumentFields field={fieldProps} documentType={formData.documentType} />
+      <FieldShell name="maxPackageWeightKg" label="Capacidad máxima de carga (kg)" errorText={fieldErrors.maxPackageWeightKg}>
+        <WeightWheelField
+          id="maxPackageWeightKg"
+          label="Capacidad máxima de carga"
+          value={formData.maxPackageWeightKg}
+          error={Boolean(fieldErrors.maxPackageWeightKg)}
+          onChange={(value) => setField('maxPackageWeightKg', value)}
+        />
+      </FieldShell>
+      <FieldShell name="schedule" label="Horario" errorText={fieldErrors.schedule}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <TimeWheelField
+            id="schedule"
+            label="Hora de entrada"
+            value={formData.scheduleStart}
+            error={Boolean(fieldErrors.schedule)}
+            onChange={setScheduleHour('scheduleStart')}
+          />
+          <Typography component="span" sx={{ color: '#6B6560', fontSize: 16 }}>a</Typography>
+          <TimeWheelField
+            id="scheduleEnd"
+            label="Hora de salida"
+            value={formData.scheduleEnd}
+            error={Boolean(fieldErrors.schedule)}
+            onChange={setScheduleHour('scheduleEnd')}
           />
         </Box>
-      </Paper>
-      </PageContainer>
-
-      <UnsavedChangesGuard when={form.shouldBlock} />
-      <ConfirmLeaveDialog {...form.dialogProps} />
-    </>
+      </FieldShell>
+    </RegistrationFormPage>
   );
 }
 
