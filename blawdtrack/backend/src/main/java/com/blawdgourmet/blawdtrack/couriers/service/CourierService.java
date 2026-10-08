@@ -15,6 +15,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierDeactivationEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierGeneralHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;

@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.couriers.service;
 
 import com.blawdgourmet.blawdtrack.auth.service.EmailService;
+import com.blawdgourmet.blawdtrack.auth.service.SmtpFailureDiagnostic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;

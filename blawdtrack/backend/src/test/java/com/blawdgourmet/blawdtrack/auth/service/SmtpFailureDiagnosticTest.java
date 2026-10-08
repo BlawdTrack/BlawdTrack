@@ -1,4 +1,4 @@
-package com.blawdgourmet.blawdtrack.couriers.service;
+package com.blawdgourmet.blawdtrack.auth.service;
 
 import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.MessagingException;

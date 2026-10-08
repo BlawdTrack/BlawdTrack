@@ -1,4 +1,4 @@
-package com.blawdgourmet.blawdtrack.couriers.service;
+package com.blawdgourmet.blawdtrack.auth.service;
 
 import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.MessagingException;
@@ -15,10 +15,10 @@ import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
 
 /** Solo devuelve etiquetas y códigos; nunca mensajes del proveedor o credenciales. */
-final class SmtpFailureDiagnostic {
+public final class SmtpFailureDiagnostic {
     private static final Pattern STATUS = Pattern.compile("^\\s*([245]\\d{2})(?:[ -]|$)");
 
-    static String describe(Throwable failure) {
+    public static String describe(Throwable failure) {
         var pending = new ArrayDeque<Throwable>();
         var visited = Collections.newSetFromMap(new IdentityHashMap<Throwable, Boolean>());
         pending.add(failure);

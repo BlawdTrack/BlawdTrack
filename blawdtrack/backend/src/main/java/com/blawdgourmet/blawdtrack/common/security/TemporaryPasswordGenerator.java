@@ -1,10 +1,10 @@
-package com.blawdgourmet.blawdtrack.couriers.service;
+package com.blawdgourmet.blawdtrack.common.security;
 
 import java.security.SecureRandom;
 import org.springframework.stereotype.Component;
 
 /**
- * Genera la contraseña temporal de un mensajero recién registrado (HU-003).
+ * Genera la contraseña temporal de una cuenta recién registrada (mensajeros HU-003 y administradores HU-006).
  * Usa {@link SecureRandom}, tiene 20 caracteres y garantiza al menos una mayúscula, una minúscula,
  * un dígito y un símbolo, mezclados al azar.
  */
