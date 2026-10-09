@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.ProviderManager;
@@ -89,6 +90,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
                         // La carga se autoriza por el permiso funcional; el endpoint previo de
                         // comparacion conserva su restriccion al Administrador de Ventas.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/packages/import")
+                        .hasRole(RoleName.SALES_ADMIN)
                         .requestMatchers("/api/v1/packages/import/**")
                         .hasAuthority(PermissionCode.PACKAGE_IMPORT)
                         .requestMatchers("/api/v1/packages/**").hasRole(RoleName.SALES_ADMIN)
