@@ -127,7 +127,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           noValidate
           sx={{
             width: '100%',
-            maxWidth: rem(340),
+            maxWidth: rem(420),
             ...CARD_PATTERN_SX,
             border: '1px solid', borderColor: 'neutral.border',
             borderRadius: RADIUS.md,
@@ -190,7 +190,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               type="button"
               onClick={() => onForgotPassword?.()}
               underline="hover"
-              sx={{ ...LINK_BUTTON_SX, alignSelf: 'flex-end', mr: -1, color: 'primary.main', fontWeight: 600, fontSize: FONT.sm }}
+              sx={{ ...LINK_BUTTON_SX, alignSelf: 'center', color: 'primary.main', fontWeight: 600, fontSize: FONT.sm }}
             >
               ¿Olvidaste tu contraseña?
             </Link>
