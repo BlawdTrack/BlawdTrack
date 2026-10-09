@@ -28,8 +28,8 @@ export default function MainMenuPage() {
   return (
     <PageContainer
       sx={{
-        // Ancho máximo del menú principal: 1100 px.
-        maxWidth: rem(1100),
+        // Banner y módulos ocupan casi todo el ancho disponible para no dejar espacio muerto a los lados.
+        maxWidth: rem(1500),
         minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },
         justifyContent: 'center',
         gap: { xs: 4, md: 6 },
@@ -90,11 +90,11 @@ export default function MainMenuPage() {
             id="quick-access-title"
             variant="h4"
             component="h2"
-            sx={{ color: 'primary.main', fontSize: { xs: fontPx(22.5), md: FONT.h2 } }}
+            sx={{ color: 'primary.main', fontWeight: 700, fontSize: { xs: fontPx(28), md: fontPx(40) } }}
           >
             {getGreeting()}
           </Typography>
-          <Typography sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: 0.5, mb: { xs: 3, md: 4 } }}>
+          <Typography sx={{ fontSize: { xs: fontPx(17), md: fontPx(21) }, fontWeight: 500, color: 'text.primary', mt: 0.5, mb: { xs: 3, md: 4 } }}>
             ¿Qué deseas hacer hoy?
           </Typography>
           <Box
@@ -110,7 +110,6 @@ export default function MainMenuPage() {
                 to={group.path}
                 icon={NAV_GROUP_ICONS[group.id]}
                 title={group.title}
-                description={group.description}
                 variant="row"
               />
             ))}

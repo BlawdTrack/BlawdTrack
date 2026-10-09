@@ -27,8 +27,15 @@ export default function ModuleMenuPage({ groupId }) {
     <>
       <PageHeaderBar title={group.title} description={group.description} />
 
-      <PageContainer>
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+      <PageContainer wide>
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 2,
+            // Una columna en móvil y, desde escritorio, una columna por función (hasta tres) para que queden lado a lado.
+            gridTemplateColumns: { xs: '1fr', md: `repeat(${Math.min(group.items.length, 3)}, 1fr)` },
+          }}
+        >
           {group.items.map((item) => (
             <MenuCard
               key={item.id}

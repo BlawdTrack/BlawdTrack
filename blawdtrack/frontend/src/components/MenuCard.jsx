@@ -14,15 +14,14 @@ const CARD_VARIANT_SX = {
   borderRadius: RADIUS.lg,
 };
 
-// Fila ancha (menú principal): icono en cuadro a la izquierda, texto alineado a la izquierda y un círculo con la
-// flecha a la derecha. Alto mínimo de 72 px (68 px en móvil), unos 20 px de relleno lateral y 16 px entre el
-// icono y el texto.
+// Fila ancha (menú principal): icono en cuadro a la izquierda, junto al título (sin leyenda), y un círculo con la
+// flecha a la derecha. Alto mínimo de 88 px (72 px en móvil).
 const ROW_VARIANT_SX = {
   flexDirection: 'row',
   justifyContent: 'flex-start',
   textAlign: 'left',
   gap: 2.5,
-  minHeight: { xs: rem(68), md: rem(72) },
+  minHeight: { xs: rem(72), md: rem(88) },
   px: 3,
   py: 2.5,
   borderRadius: RADIUS.md,
@@ -45,21 +44,21 @@ const ICON_BOX_SX = {
   },
   row: {
     flex: '0 0 auto',
-    width: { xs: rem(36), md: rem(40) },
-    height: { xs: rem(36), md: rem(40) },
+    width: { xs: rem(40), md: rem(54) },
+    height: { xs: rem(40), md: rem(54) },
     borderRadius: RADIUS.sm,
     bgcolor: 'secondary.light',
     color: 'secondary.text',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    '& svg': { fontSize: { xs: fontPx(20), md: fontPx(22) } },
+    '& svg': { fontSize: { xs: fontPx(22), md: fontPx(30) } },
   },
 };
 
 const TITLE_SX = {
   card: { fontWeight: 600, fontSize: { xs: FONT.md, md: FONT.xl }, color: 'primary.main' },
-  row: { fontWeight: 600, fontSize: fontPx(16), color: 'primary.main' },
+  row: { fontWeight: 700, fontSize: { xs: fontPx(18), md: fontPx(24) }, color: 'primary.main' },
 };
 
 const DESCRIPTION_SX = {
@@ -94,8 +93,8 @@ const ARROW_SX = {
   },
   row: {
     flex: '0 0 auto',
-    width: rem(34),
-    height: rem(34),
+    width: rem(40),
+    height: rem(40),
     borderRadius: '50%',
     bgcolor: 'neutral.surface',
     color: 'primary.main',
