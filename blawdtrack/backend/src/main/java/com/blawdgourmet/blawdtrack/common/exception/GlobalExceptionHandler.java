@@ -9,11 +9,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
 import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
+import com.blawdgourmet.blawdtrack.packages.exception.InvalidPackageUploadException;
+import com.blawdgourmet.blawdtrack.packages.parser.PackageFileParsingException;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.RolePermissionException;
 import com.blawdgourmet.blawdtrack.users.service.UserNotFoundException;
@@ -158,6 +161,29 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler({InvalidPackageUploadException.class, PackageFileParsingException.class})
+    public ResponseEntity<ApiError> manejarArchivoDePaquetesInvalido(RuntimeException ex) {
+        ApiError error = ApiError.builder()
+                .code("INVALID_PACKAGE_FILE")
+                .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiError> manejarParteMultipartAusente(
+            MissingServletRequestPartException ex) {
+        ApiError error = ApiError.builder()
+                .code("INVALID_PACKAGE_FILE")
+                .message("Debe adjuntar el archivo en la parte multipart 'file'")
+                .status(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(Exception.class)
