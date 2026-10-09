@@ -40,10 +40,12 @@ describe('MainMenuLayout sidebar', () => {
     expect(document.body.textContent).not.toMatch(/HU-?\d+/i);
   });
 
-  it('shows the brand logo and name', () => {
+  it('shows the brand logo with the collapse button next to it and no "Blawd Gourmet" caption', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
-    expect(within(sidebar()).getByAltText('BlawdTrack')).toBeInTheDocument();
-    expect(within(sidebar()).getByText('Blawd Gourmet')).toBeInTheDocument();
+    const bar = within(sidebar());
+    expect(bar.getByAltText('BlawdTrack')).toBeInTheDocument();
+    expect(bar.getByRole('button', { name: 'Colapsar menú' })).toBeInTheDocument();
+    expect(bar.queryByText('Blawd Gourmet')).not.toBeInTheDocument();
   });
 
   it('shows the logged user: name, role and the first letter of the email', () => {
@@ -145,7 +147,7 @@ describe('MainMenuLayout sidebar', () => {
       await user.keyboard('{Escape}');
 
       await user.click(bar.getByRole('button', { name: 'Expandir menú' }));
-      expect(within(sidebar()).getByText('Blawd Gourmet')).toBeInTheDocument();
+      expect(within(sidebar()).getByRole('button', { name: 'Colapsar menú' })).toBeInTheDocument();
       expect(localStorage.getItem('blawdtrack.sidebarCollapsed')).toBe('false');
     });
 

@@ -20,6 +20,17 @@ const VARIANTS = {
   stacked: { src: logoStacked, canvas: 500, box: { x: 56, y: 99, w: 378, h: 245 }, minWidth: 95, exact: false },
   horizontal: { src: logoHorizontal, canvas: 1024, box: { x: 129, y: 400, w: 765, h: 204 }, minWidth: 45, exact: false, jpg: true },
   isologo: { src: logoStacked, canvas: 500, box: { x: 172, y: 99, w: 145, h: 173 }, minWidth: 30, exact: true },
+  //  - horizontalShort: como horizontal, pero sin la "B" del texto: la B del logo hace de primera letra y se lee
+  //                     "B" + "lawdTrack". `cut` es la franja (en px del archivo) que se quita, la "B" del texto.
+  horizontalShort: {
+    src: logoHorizontal,
+    canvas: 1024,
+    box: { x: 129, y: 400, w: 765, h: 204 },
+    minWidth: 45,
+    exact: false,
+    jpg: true,
+    cut: { x: 316, w: 70 },
+  },
 };
 
 // Colores de marca para la versión sobre fondo oscuro, como valores 0–1 de una matriz de color:
@@ -63,23 +74,33 @@ function OnDarkFilters({ id }) {
  */
 export default function BrandLogo({ variant = 'stacked', width, onDark = false, sx }) {
   const filterId = `logo${useId().replace(/[^A-Za-z0-9]/g, '')}`;
-  const { src, canvas, box, minWidth, exact, jpg } = VARIANTS[variant];
+  const { src, canvas, box, minWidth, exact, jpg, cut } = VARIANTS[variant];
+  const cutW = cut?.w ?? 0;
   const pad = box.h * CLEAR_SPACE;
-  const total = { w: box.w + pad * 2, h: box.h + pad * 2 };
-  const factor = total.w / box.w;
+  const total = { w: box.w - cutW + pad * 2, h: box.h + pad * 2 };
+  const factor = total.w / (box.w - cutW);
   const logoWidth = Math.max(width ?? minWidth, minWidth);
-  // Zona del archivo que se muestra: solo el logo (con `exact`) o el logo más su resguardo.
+  // Zona del archivo que se muestra: solo el logo (con `exact`) o el logo más su resguardo. Si hay `cut`, ese
+  // tramo se quita y lo que queda a su derecha se recorre a la izquierda; `w` ya no lo incluye.
   const crop = exact ? box : { x: box.x - pad, y: box.y - pad, w: total.w, h: total.h };
 
-  const imageStyle = {
+  const imageStyle = (shift = 0) => ({
     position: 'absolute',
     display: 'block',
     width: `${(canvas / crop.w) * 100}%`,
     height: 'auto',
-    left: `${(-crop.x / crop.w) * 100}%`,
+    left: `${(-(crop.x + shift) / crop.w) * 100}%`,
     top: `${(-crop.y / crop.h) * 100}%`,
     maxWidth: 'none',
-  };
+  });
+  // Con `cut`, la imagen se dibuja en dos mitades: la izquierda hasta la franja y la derecha desde su final.
+  const cutAt = cut ? ((cut.x - crop.x) / crop.w) * 100 : 100;
+  const pieces = cut
+    ? [
+        { style: imageStyle(), clip: `inset(0 ${100 - cutAt}% 0 0)` },
+        { style: imageStyle(cutW), clip: `inset(0 0 0 ${cutAt}%)` },
+      ]
+    : [{ style: imageStyle() }];
 
   return (
     <Box
@@ -95,15 +116,20 @@ export default function BrandLogo({ variant = 'stacked', width, onDark = false, 
     >
       {onDark && <OnDarkFilters id={filterId} />}
       <Box sx={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: `${crop.w} / ${crop.h}` }}>
-        <img
-          src={src}
-          alt="BlawdTrack"
-          draggable={false}
-          style={{ ...imageStyle, ...(onDark && { filter: `url(#${filterId}-ink-${jpg ? 'jpg' : 'png'})` }) }}
-        />
-        {onDark && (
-          <img src={src} alt="" aria-hidden="true" draggable={false} style={{ ...imageStyle, filter: `url(#${filterId}-orange)` }} />
-        )}
+        {pieces.map(({ style, clip }, i) => (
+          <Box key={i} sx={{ position: 'absolute', inset: 0, clipPath: clip }}>
+            <img
+              src={src}
+              alt={i === 0 ? 'BlawdTrack' : ''}
+              aria-hidden={i === 0 ? undefined : 'true'}
+              draggable={false}
+              style={{ ...style, ...(onDark && { filter: `url(#${filterId}-ink-${jpg ? 'jpg' : 'png'})` }) }}
+            />
+            {onDark && (
+              <img src={src} alt="" aria-hidden="true" draggable={false} style={{ ...style, filter: `url(#${filterId}-orange)` }} />
+            )}
+          </Box>
+        ))}
       </Box>
     </Box>
   );
