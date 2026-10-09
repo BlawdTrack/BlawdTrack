@@ -6,7 +6,7 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "adminEmail", "value": "alicia@blawdgourmet.com" },
+    { "key": "adminEmail", "value": "superadmin@blawdgourmet.com" },
     { "key": "adminPassword", "value": "" },
     { "key": "adminToken", "value": "" },
     { "key": "courierRoleId", "value": "" },

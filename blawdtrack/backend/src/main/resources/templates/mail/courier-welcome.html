@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Bienvenido a BlawdTrack</title>
+  <style>
+    @media only screen and (max-width: 640px) {
+      .email-shell { width: 100% !important; }
+      .content-cell { padding: 32px 24px !important; }
+      .header-cell { padding: 24px !important; }
+      .title { font-size: 30px !important; line-height: 36px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#101511;font-family:Arial,Helvetica,sans-serif;color:#edf7f2;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+    Tu cuenta de mensajero está lista. Encontrá aquí tus credenciales temporales.
+  </div>
+
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+         style="width:100%;background-color:#101511;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table role="presentation" width="620" cellspacing="0" cellpadding="0" border="0"
+               class="email-shell"
+               style="width:620px;max-width:620px;border-collapse:separate;border-spacing:0;background-color:#292c29;border:1px solid #414a44;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.28);">
+          <tr>
+            <td class="header-cell"
+                style="padding:28px 38px 26px;background-color:#d6f3e9;border-bottom:4px solid #b79858;">
+              <div style="font-size:25px;line-height:30px;font-weight:700;letter-spacing:-.5px;color:#26332e;">
+                Blawd<span style="color:#a98742;">Track</span>
+              </div>
+              <div style="margin-top:8px;font-size:10px;line-height:14px;letter-spacing:3px;text-transform:uppercase;color:#52645d;">
+                Notificaciones de tu cuenta
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="content-cell" style="padding:40px 38px 34px;background-color:#292c29;">
+              <div style="font-size:11px;line-height:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#b9cec5;">
+                Cuenta creada
+              </div>
+              <h1 class="title" style="margin:12px 0 18px;font-size:36px;line-height:42px;font-weight:700;letter-spacing:-1px;color:#d8f4ea;">
+                Todo listo para comenzar.
+              </h1>
+              <p style="margin:0 0 12px;font-size:16px;line-height:25px;color:#e5ece8;">
+                Hola <strong style="color:#ffffff;">{{fullName}}</strong>,
+              </p>
+              <p style="margin:0 0 28px;font-size:15px;line-height:24px;color:#bec8c3;">
+                Tu cuenta de mensajero en BlawdTrack está lista. Usá estas credenciales para iniciar sesión.
+              </p>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                     style="width:100%;border-collapse:separate;border-spacing:0;background-color:#333833;border:1px solid #4a544d;border-radius:10px;">
+                <tr>
+                  <td style="padding:18px 20px;border-bottom:1px solid #4a544d;">
+                    <div style="font-size:10px;line-height:14px;font-weight:700;letter-spacing:1.7px;text-transform:uppercase;color:#9fb2aa;">
+                      Correo de acceso
+                    </div>
+                    <div style="margin-top:7px;font-size:16px;line-height:22px;font-weight:700;color:#d8f4ea;word-break:break-word;">
+                      {{recipient}}
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:18px 20px;">
+                    <div style="font-size:10px;line-height:14px;font-weight:700;letter-spacing:1.7px;text-transform:uppercase;color:#9fb2aa;">
+                      Contraseña temporal
+                    </div>
+                    <div style="margin-top:7px;font-family:'Courier New',Courier,monospace;font-size:17px;line-height:23px;font-weight:700;letter-spacing:.4px;color:#f1d89f;word-break:break-all;">
+                      {{temporaryPassword}}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                     style="width:100%;margin-top:24px;border-collapse:separate;border-spacing:0;background-color:#22332d;border-left:4px solid #a98b4c;border-radius:8px;">
+                <tr>
+                  <td style="padding:16px 18px;">
+                    <div style="font-size:13px;line-height:20px;color:#d4e4dd;">
+                      <strong style="color:#ffffff;">Protegé tu cuenta.</strong><br>
+                      Guardá estas credenciales en un lugar seguro y no las compartás con otras personas.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="height:1px;margin:30px 0 20px;background-color:#414743;"></div>
+              <p style="margin:0;font-size:12px;line-height:19px;color:#8f9b95;">
+                Este es un mensaje automático de BlawdTrack. Si no esperabas la creación de esta cuenta, contactá al administrador del sistema.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

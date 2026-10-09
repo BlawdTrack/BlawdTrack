@@ -1,0 +1,47 @@
+import axiosClient from '../api/axiosClient';
+
+// El endpoint real de HU-002 (POST /api/v1/auth/password-reset/request) ya
+// está disponible, así que no se usa un mock.
+/**
+ * Pide el correo de recuperación: `POST /api/v1/auth/password-reset/request`. Siempre responde el mismo
+ * mensaje neutro, exista o no el correo.
+ * @param {string} email
+ * @returns {Promise<{ message: string }>}
+ */
+export const requestPasswordReset = async (email) => {
+  const response = await axiosClient.post('/v1/auth/password-reset/request', { email });
+  return response.data;
+};
+
+/**
+ * Envía el enlace de restablecimiento al correo de la propia cuenta con la sesión iniciada:
+ * `POST /api/v1/auth/password-reset/request-own`. No lleva correo: el backend usa el de la sesión, así
+ * que solo se puede pedir para uno mismo. Responde 503 `CORREO_NO_ENVIADO` si el correo no pudo salir.
+ * @returns {Promise<{ message: string }>}
+ */
+export const requestOwnPasswordReset = async () => {
+  const response = await axiosClient.post('/v1/auth/password-reset/request-own');
+  return response.data;
+};
+
+// T05 (HU-002, #66). CONTRATO PENDIENTE DE CONFIRMAR con el equipo de
+// backend: se leyó del código del backend en develop
+// (PasswordResetController.confirmPasswordReset y PasswordResetServiceImpl,
+// carpeta blawdtrack/), no se ha validado con ellos:
+//
+//   POST /v1/auth/password-reset/confirm   { token, newPassword }
+//   200  { message }
+//   400  { code: 'TOKEN_INVALIDO' }          token inexistente, usado o vencido
+//   400  { code: 'CONTRASENA_REUTILIZADA' }  igual a la actual o a las últimas 2
+//   400  { code: 'VALIDATION_ERROR' }        newPassword sin 8+ caracteres con
+//                                            letras y números, o token vacío
+/**
+ * Confirma el restablecimiento con el token del correo.
+ * @param {string} token Token recibido por correo.
+ * @param {string} newPassword Nueva contraseña (8+ caracteres con letras y números).
+ * @returns {Promise<{ message: string }>}
+ */
+export const confirmPasswordReset = async (token, newPassword) => {
+  const response = await axiosClient.post('/v1/auth/password-reset/confirm', { token, newPassword });
+  return response.data;
+};

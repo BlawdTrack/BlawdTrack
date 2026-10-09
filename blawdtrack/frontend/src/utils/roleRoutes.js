@@ -1,0 +1,53 @@
+import { ROUTES } from '../config/routes';
+
+// Roles de negocio tal como los devuelve el backend (strings en español, no
+// los nombres de RoleName.java). Se usan para declarar qué roles pueden entrar
+// a cada grupo de rutas (prop allowedRoles de ProtectedRoute).
+export const ROLES = {
+  SUPER_USUARIO: 'SUPER_USUARIO',
+  ADMIN_VENTAS: 'ADMIN_VENTAS',
+  MENSAJERO: 'MENSAJERO',
+};
+
+// Mapa de rol de negocio -> ruta de inicio (T12). El inicio de cada rol debe
+// estar dentro del grupo de rutas que ese rol puede ver (ver App.jsx); si no,
+// ProtectedRoute lo mandaría a un inicio al que no puede entrar.
+export const ROLE_HOME_ROUTES = {
+  [ROLES.SUPER_USUARIO]: ROUTES.MAIN_MENU,
+  [ROLES.ADMIN_VENTAS]: ROUTES.SALES_HOME,
+  [ROLES.MENSAJERO]: ROUTES.COURIER_HOME,
+};
+
+// Mapa de rol -> pantalla donde restablece su propia contraseña con la sesión iniciada.
+export const ROLE_PASSWORD_RESET_ROUTES = {
+  [ROLES.SUPER_USUARIO]: ROUTES.PASSWORD_RESET_OWN,
+  [ROLES.ADMIN_VENTAS]: ROUTES.SALES_PASSWORD_RESET,
+  [ROLES.MENSAJERO]: ROUTES.COURIER_PASSWORD_RESET,
+};
+
+/**
+ * Pantalla para restablecer la propia contraseña de un rol.
+ * @param {string} role Rol de negocio.
+ * @returns {string|null} La ruta, o `null` si el rol es desconocido o ausente.
+ */
+export function getPasswordResetRoute(role) {
+  return Object.hasOwn(ROLE_PASSWORD_RESET_ROUTES, role) ? ROLE_PASSWORD_RESET_ROUTES[role] : null;
+}
+
+/**
+ * Ruta de inicio de un rol. `Object.hasOwn` evita que claves heredadas del prototipo ("constructor",
+ * "toString"...) pasen como roles válidos.
+ * @param {string} role Rol de negocio (por ejemplo `SUPER_USUARIO`).
+ * @returns {string|null} La ruta, o `null` si el rol es desconocido o ausente.
+ */
+export function getHomeRoute(role) {
+  return Object.hasOwn(ROLE_HOME_ROUTES, role) ? ROLE_HOME_ROUTES[role] : null;
+}
+
+// Error que se muestra en el login cuando el backend responde con un rol
+// que el frontend no reconoce (no esta en ROLE_HOME_ROUTES).
+export const UNKNOWN_ROLE_ERROR = {
+  message:
+    'Tu cuenta no tiene un rol válido asignado en el sistema. Contacta a un administrador de BlawdTrack.',
+  severity: 'error',
+};

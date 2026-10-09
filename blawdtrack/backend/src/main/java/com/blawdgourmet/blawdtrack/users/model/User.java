@@ -1,0 +1,140 @@
+package com.blawdgourmet.blawdtrack.users.model;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * Cuenta de cualquier persona que entra al sistema: Super Usuario, administrador de ventas o mensajero.
+ * <ul>
+ *   <li>El documento se identifica por {@code documentType} + {@code documentNumber} (único en conjunto).
+ *       {@code documentId} es la columna heredada {@code cedula}, que se mantiene sincronizada.</li>
+ *   <li>{@code status} solo se cambia con {@link #changeStatus(UserStatus)}, que además sube
+ *       {@code tokenVersion} para invalidar las sesiones ya emitidas.</li>
+ *   <li>{@code lastLoginAt} es la fecha del último inicio de sesión exitoso.</li>
+ * </ul>
+ */
+@Entity
+@Table(name = "usuarios",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_usuarios_tipo_documento_numero_documento",
+                columnNames = {"tipo_documento", "numero_documento"}
+        ))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_documento", length = 20)
+    private DocumentType documentType;
+
+    @Column(name = "numero_documento", length = 50)
+    private String documentNumber;
+
+    // La unicidad real la garantiza uq_usuarios_tipo_documento_numero_documento
+    // (tipo_documento, numero_documento); ver V11__eliminar_restriccion_unica_cedula.sql.
+    @Deprecated
+    @Column(name = "cedula", nullable = false, length = 20)
+    private String documentId;
+
+    @PrePersist
+    @PreUpdate
+    void syncLegacyDocumentFields() {
+        if (documentType != null && documentNumber != null && (documentId == null || documentId.isBlank())) {
+            documentId = documentNumber;
+        }
+        if (documentType == null && documentId != null) {
+            documentType = DocumentType.CEDULA;
+        }
+        if (documentNumber == null && documentId != null) {
+            documentNumber = documentId;
+        }
+        if (documentId == null && documentNumber != null) {
+            documentId = documentNumber;
+        }
+    }
+
+    @Column(name = "nombre_completo", nullable = false, length = 120)
+    private String fullName;
+
+    @Column(name = "correo", nullable = false, unique = true, length = 120)
+    private String email;
+
+    @Column(name = "contrasena_hash", nullable = false)
+    private String passwordHash;
+
+    @Column(name = "telefono", unique = true, length = 20)
+    private String phone;
+
+    @Column(name = "fecha_ultimo_inicio_sesion")
+    private LocalDateTime lastLoginAt;
+
+    @Setter(AccessLevel.NONE)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false, length = 20)
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name = "token_version", nullable = false)
+    @Builder.Default
+    private int tokenVersion = 0;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol_id", nullable = false)
+    private Role role;
+
+    /** {@code true} si la cuenta está activa (puede iniciar sesión). */
+    public boolean isActive() {
+        return this.status == UserStatus.ACTIVE;
+    }
+
+    /**
+     * Cambia el estado de acceso. Si el estado realmente cambia sube {@code tokenVersion}, por lo que los
+     * JWT emitidos antes dejan de ser válidos en su siguiente solicitud. Repetir el estado no hace nada.
+     */
+    public void changeStatus(UserStatus newStatus) {
+        if (this.status == newStatus) {
+            return;
+        }
+        this.status = newStatus;
+        closeSessions();
+    }
+
+    /** Reemplaza el hash y sube {@code tokenVersion}, cerrando las sesiones abiertas con la contraseña anterior. */
+    public void changePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+        closeSessions();
+    }
+
+    /** Invalida los JWT emitidos y limpia el último inicio de sesión para que no figure con sesión abierta. */
+    private void closeSessions() {
+        this.tokenVersion++;
+        this.lastLoginAt = null;
+    }
+}
