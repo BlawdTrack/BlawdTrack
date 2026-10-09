@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-/** Acumula y valida las filas que pertenecen al mismo paquete de Zoho. */
+/** Acumula las filas que pertenecen al mismo paquete de Zoho. */
 final class PackageAccumulator {
 
     private final String shipmentNumber;
@@ -26,8 +26,8 @@ final class PackageAccumulator {
 
     static PackageAccumulator from(String shipmentNumber, TableRow row) {
         PackageAccumulator accumulator = new PackageAccumulator(shipmentNumber);
-        accumulator.orderNumber = required(row, ZohoColumn.ORDER_NUMBER);
-        accumulator.customerName = required(row, ZohoColumn.CUSTOMER_NAME);
+        accumulator.orderNumber = row.first(ZohoColumn.ORDER_NUMBER);
+        accumulator.customerName = row.first(ZohoColumn.CUSTOMER_NAME);
         accumulator.address = addressFrom(row);
         accumulator.phone = cleanPhone(firstNonBlank(
                 row.first(ZohoColumn.SHIPPING_PHONE), row.first(ZohoColumn.BILLING_PHONE)));
@@ -56,14 +56,6 @@ final class PackageAccumulator {
     ImportedPackage toImportedPackage() {
         return new ImportedPackage(shipmentNumber, orderNumber, customerName,
                 blankToNull(address), blankToNull(phone), blankToNull(schedule), items);
-    }
-
-    private static String required(TableRow row, ZohoColumn column) {
-        String value = row.first(column);
-        if (value.isBlank()) {
-            throw row.error("El campo " + column.label() + " es obligatorio");
-        }
-        return value;
     }
 
     private static String mergeField(

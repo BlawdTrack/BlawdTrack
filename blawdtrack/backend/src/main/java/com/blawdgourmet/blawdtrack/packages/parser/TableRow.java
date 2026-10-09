@@ -31,6 +31,10 @@ final class TableRow {
                 .toList();
     }
 
+    long number() {
+        return number;
+    }
+
     PackageFileParsingException error(String message) {
         return new PackageFileParsingException("Fila " + number + ": " + message);
     }

@@ -10,7 +10,9 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * Valida y agrupa las filas de Zoho por número de envío (HU010, task 263).
+ * Agrupa las filas de Zoho por número de envío (HU010, task 263).
+ * Los campos obligatorios vacíos se conservan para que la task 264 clasifique
+ * cada registro sin interrumpir el resto del archivo.
  */
 @Component
 final class ZohoPackageGrouper {
@@ -19,10 +21,12 @@ final class ZohoPackageGrouper {
         ZohoColumn.validateRequiredHeaders(table.headers());
         Map<String, PackageAccumulator> packages = new LinkedHashMap<>();
         for (TableRow row : table.rows()) {
-            String shipmentNumber = ShipmentNumberNormalizer.normalize(
-                    required(row, ZohoColumn.SHIPMENT_NUMBER));
+            String shipmentNumber = normalizeShipmentNumber(row.first(ZohoColumn.SHIPMENT_NUMBER));
+            String groupingKey = shipmentNumber == null
+                    ? "__missing_shipment_row_" + row.number()
+                    : shipmentNumber;
             PackageAccumulator accumulator = packages.computeIfAbsent(
-                    shipmentNumber, ignored -> PackageAccumulator.from(shipmentNumber, row));
+                    groupingKey, ignored -> PackageAccumulator.from(shipmentNumber, row));
             accumulator.merge(row);
             accumulator.addItem(itemFrom(row));
         }
@@ -65,12 +69,8 @@ final class ZohoPackageGrouper {
         }
     }
 
-    private static String required(TableRow row, ZohoColumn column) {
-        String value = row.first(column);
-        if (value.isBlank()) {
-            throw row.error("El campo " + column.label() + " es obligatorio");
-        }
-        return value;
+    private static String normalizeShipmentNumber(String value) {
+        return value == null || value.isBlank() ? null : ShipmentNumberNormalizer.normalize(value);
     }
 
     private static String blankToNull(String value) {
