@@ -40,10 +40,17 @@ describe('DuplicateDetectionPage', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('no ofrece ningún botón ni dato de ejemplo: solo muestra lo que le entrega la importación', () => {
+  it('no ofrece ningún botón ni dato de ejemplo: solo un enlace a la importación', () => {
     renderPage();
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ir a importar paquetes' })).toHaveAttribute('href', ROUTES.PACKAGE_IMPORT);
+  });
+
+  it('con una previsualización ya no muestra el enlace a la importación', () => {
+    renderPage({ state: { preview } });
+
+    expect(screen.queryByRole('link', { name: 'Ir a importar paquetes' })).not.toBeInTheDocument();
   });
 
   it('resalta cada duplicado de la previsualización recibida', () => {

@@ -1,9 +1,12 @@
+import { Link as RouterLink } from 'react-router-dom';
+import { Button } from '@mui/material';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import EmptyState from '../components/EmptyState';
 import PageContainer from '../components/PageContainer';
 import PageHeaderBar from '../components/PageHeaderBar';
 import DuplicateReportView from '../components/duplicates/DuplicateReportView';
 import { useDuplicatePreview } from '../hooks/useDuplicatePreview';
+import { ROUTES } from '../config/routes';
 
 /**
  * Detectar duplicados (HU-011): muestra, antes de confirmar una importación, qué paquetes del archivo ya están
@@ -29,7 +32,11 @@ export default function DuplicateDetectionPage() {
             icon={UploadFileOutlinedIcon}
             title="Sin archivo en previsualización"
             description="La detección de duplicados ocurre antes de confirmar una importación. Carga un archivo en la pantalla de importación para revisar los registros repetidos."
-          />
+          >
+            <Button component={RouterLink} to={ROUTES.PACKAGE_IMPORT} variant="contained" sx={{ mt: 1 }}>
+              Ir a importar paquetes
+            </Button>
+          </EmptyState>
         )}
       </PageContainer>
     </>

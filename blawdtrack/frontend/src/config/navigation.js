@@ -64,8 +64,15 @@ export const NAVIGATION_GROUPS = [
     title: 'Gestión de paquetes',
     shortTitle: 'Paquetes',
     path: ROUTES.MODULE_PACKAGES,
-    description: 'Revisa los paquetes del archivo importado antes de registrarlos.',
+    description: 'Importa el archivo de Zoho Inventory y revisa los paquetes antes de registrarlos.',
     items: [
+      {
+        id: 'package-import',
+        label: 'Importar paquetes',
+        description: 'Carga el archivo de Zoho Inventory (.xlsx o .csv) con los paquetes del día.',
+        path: ROUTES.PACKAGE_IMPORT,
+        roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
+      },
       {
         id: 'package-duplicates',
         label: 'Detectar duplicados',

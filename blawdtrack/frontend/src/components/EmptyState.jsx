@@ -4,10 +4,11 @@ import { RADIUS, FONT, rem } from '../theme';
 
 /**
  * Tarjeta de "todavía no hay nada seleccionado": icono, título y una línea que dice qué hacer.
- * @param {{ icon: import('react').ElementType, title: string, description: string, sx?: object }} props
- *   `sx` ajusta la tarjeta (por ejemplo, ocultarla en móvil).
+ * @param {{ icon: import('react').ElementType, title: string, description: string, sx?: object,
+ *   children?: import('react').ReactNode }} props `sx` ajusta la tarjeta (por ejemplo, ocultarla en móvil);
+ *   `children` es la acción opcional bajo el texto (un botón o un enlace).
  */
-export default function EmptyState({ icon: Icon, title, description, sx }) {
+export default function EmptyState({ icon: Icon, title, description, sx, children }) {
   return (
     <Paper
       elevation={0}
@@ -39,6 +40,7 @@ export default function EmptyState({ icon: Icon, title, description, sx }) {
       </Box>
       <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>{title}</Typography>
       <Typography sx={{ color: 'text.secondary', fontSize: FONT.md, maxWidth: rem(360) }}>{description}</Typography>
+      {children}
     </Paper>
   );
 }

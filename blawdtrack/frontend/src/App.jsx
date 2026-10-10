@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
 import DuplicateDetectionPage from './pages/DuplicateDetectionPage';
+import PackageImportPage from './pages/PackageImportPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
@@ -103,6 +104,7 @@ function App() {
             </Route>
           ))}
           <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
+          <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
           <Route path={ROUTES.PACKAGE_DUPLICATES} element={<DuplicateDetectionPage />} />
 
           <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>

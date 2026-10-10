@@ -8,9 +8,11 @@ import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlin
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 
 // Icono por item de navegación (sidebar de escritorio).
 export const NAV_ITEM_ICONS = {
+  'package-import': UploadFileOutlinedIcon,
   'package-duplicates': ContentCopyOutlinedIcon,
   'password-reset': LockResetOutlinedIcon,
   'courier-create': PersonAddAltOutlinedIcon,

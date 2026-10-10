@@ -59,6 +59,7 @@ describe('MainMenuLayout sidebar', () => {
     expect(bar.getByText('Administrador de Ventas')).toBeInTheDocument();
 
     await openGroup(user, 'Gestión de paquetes');
+    expect(bar.getByRole('link', { name: /Importar paquetes/ })).toBeInTheDocument();
     expect(bar.getByRole('link', { name: /Detectar duplicados/ })).toBeInTheDocument();
     await openGroup(user, 'Seguridad y acceso');
     expect(bar.getByRole('link', { name: /Restablecer contraseña/ })).toBeInTheDocument();
