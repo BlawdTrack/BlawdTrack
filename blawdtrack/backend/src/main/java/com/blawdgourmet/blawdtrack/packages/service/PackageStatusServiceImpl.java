@@ -89,6 +89,10 @@ public class PackageStatusServiceImpl implements PackageStatusService {
                 .usuarioAfectado(null) // El paquete no es un usuario
                 .action(actionCode)
                 .details(finalDetails)
+                .packageId(pkg.getId())
+                .shipmentNumber(pkg.getShipmentNumber())
+                .previousStatus(previousStatus != null ? previousStatus.name() : null)
+                .newStatus(newStatus != null ? newStatus.name() : null)
                 .timestamp(LocalDateTime.now())
                 .build();
 

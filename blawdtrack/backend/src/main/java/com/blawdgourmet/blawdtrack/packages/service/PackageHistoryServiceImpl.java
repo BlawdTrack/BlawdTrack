@@ -10,6 +10,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageHistoryEntry;
+import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
 
@@ -37,19 +38,16 @@ public class PackageHistoryServiceImpl implements PackageHistoryService {
     public List<PackageHistoryEntry> getHistoryByShipmentNumber(String shipmentNumber) {
         String normalizedShipmentNumber = ShipmentNumberNormalizer.normalize(shipmentNumber);
 
-        // Verificar que el paquete existe
-        packageRepository.findByShipmentNumber(normalizedShipmentNumber)
+        DeliveryPackage pkg = packageRepository.findByShipmentNumber(normalizedShipmentNumber)
                 .orElseThrow(() -> new PackageNotFoundException(shipmentNumber));
 
-        // Buscar registros de auditoría relacionados con el paquete
-        // Nota: El detalle de la auditoría contiene el número de envío
-        List<AuditLog> logs = auditLogRepository.findByActionInOrderByTimestampDesc(PACKAGE_ACTIONS);
+        List<AuditLog> logs = auditLogRepository.findByPackageIdAndActionInOrderByTimestampAscIdAsc(
+                pkg.getId(),
+                PACKAGE_ACTIONS
+        );
 
-        // Filtrar los que pertenecen a este paquete y mapear a DTO
         return logs.stream()
-                .filter(log -> log.getDetails() != null && log.getDetails().contains(normalizedShipmentNumber))
                 .map(PackageHistoryEntry::from)
-                .sorted((a, b) -> a.timestamp().compareTo(b.timestamp())) // Orden cronológico ascendente
                 .toList();
     }
 }
