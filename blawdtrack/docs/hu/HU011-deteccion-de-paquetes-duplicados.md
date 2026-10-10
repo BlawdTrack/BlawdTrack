@@ -94,9 +94,6 @@ menú lateral. Es visible para el Súper Usuario y el Administrador de Ventas.
 - **Origen de los datos:** la pantalla recibe la respuesta de `POST /api/v1/packages/import/preview`
   (`PackageImportPreviewResponse`, de la importación de HU-010) en `location.state.preview`; la pantalla de
   importación la entregará al navegar a esta ruta. `buildDuplicateReport` la convierte en el modelo de la pantalla.
-- **Solo en desarrollo:** el botón "Cargar ejemplo (solo desarrollo)" muestra la pantalla con datos de muestra
-  (`src/dev/duplicatePreviewSample.js`) hasta que exista la pantalla de importación. En producción no aparece y el
-  archivo de ejemplo no se descarga.
 
 **Administrador de Ventas en el menú lateral.** Hasta esta task el Administrador de Ventas solo tenía una pantalla
 provisional sin menú (`/ventas`). Ahora usa el mismo `MainMenuLayout` que el Súper Usuario: su inicio es el menú
@@ -128,7 +125,7 @@ de sus pantallas (`getGroupRoles`), así que el Administrador de Ventas no entra
 | Archivo | Rol |
 |---|---|
 | `pages/DuplicateDetectionPage.jsx` | Pantalla: solo compone el encabezado, el estado vacío y el resultado. |
-| `hooks/useDuplicatePreview.js` | Toma la previsualización de `location.state` y entrega el reporte; carga el ejemplo solo en desarrollo. |
+| `hooks/useDuplicatePreview.js` | Toma la previsualización de `location.state` y entrega el reporte. |
 | `utils/duplicateReport.js` | `buildDuplicateReport` y `describeDuplicate`: convierten la respuesta de previsualización en totales y filas con su nota. |
 | `components/duplicates/DuplicateReportView.jsx` | Aviso (advertencia o éxito), totales y lista. |
 | `components/duplicates/DuplicateCounters.jsx` | Los cuatro totales. |
@@ -138,7 +135,6 @@ de sus pantallas (`getGroupRoles`), así que el Administrador de Ventas no entra
 | `components/StatusMessage.jsx` | Se le añadió el `title` opcional (primera línea en negrita). |
 | `config/navigation.js`, `config/routes.js`, `components/layout/navIcons.js` | Grupo "Gestión de paquetes", ruta de la pantalla, `getGroupRoles` e iconos. |
 | `App.jsx`, `utils/roleRoutes.js` | El Administrador de Ventas entra al `MainMenuLayout`; su inicio es el menú principal. |
-| `dev/duplicatePreviewSample.js` | Datos de ejemplo, solo desarrollo. |
 
 ## Pruebas
 
@@ -160,7 +156,7 @@ Guías de ejecución y evidencias: [`HU011-Task113-pruebas.md`](../HU011-Task113
 |---|---|
 | `utils/duplicateReport.test.js` | Notas de cada causa; totales con causas excluyentes; filas con cliente y dirección opcionales; respuestas vacías o incompletas. |
 | `components/duplicates/duplicates.test.jsx` | Chip por estado; tarjeta de cifra; totales; lista resaltada con etiqueta y causa; aviso en advertencia, singular, sin nombre de archivo y en éxito sin duplicados. |
-| `pages/DuplicateDetectionPage.test.jsx` | Estado vacío; el ejemplo solo con `allowSample`; previsualización recibida por el estado de navegación; sin duplicados. |
+| `pages/DuplicateDetectionPage.test.jsx` | Estado vacío; no hay botón ni datos de ejemplo; previsualización recibida por el estado de navegación; sin duplicados. |
 | `config/navigation.test.js` | Grupo "Gestión de paquetes" para los dos roles; el Administrador de Ventas solo ve paquetes y su restablecer contraseña; `getGroupRoles`; retorno de la pantalla. |
 | `App.routes.test.jsx` | Rutas compartidas entre Súper Usuario y Administrador de Ventas; el segundo no entra a Mensajeros ni Administradores; el inicio de cada rol está en sus rutas. |
 | `components/layout/MainMenuLayout.test.jsx` | El menú lateral del Súper Usuario y del Administrador de Ventas con el grupo de paquetes. |

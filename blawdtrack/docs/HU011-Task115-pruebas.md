@@ -13,8 +13,7 @@ Verificado el 10 de octubre de 2026 con Node 22 y Vitest, desde `blawdtrack/fron
 - Pruebas nuevas de la pantalla: **36 aprobadas** en 3 archivos, sin fallos ni omisiones.
 - Pruebas de navegación y rutas actualizadas al nuevo comportamiento: aprobadas (ver la tabla).
 - Suite completa del frontend: **538 pruebas aprobadas en 47 archivos**, sin fallos.
-- `npm run build`: compila. Los datos de ejemplo quedan en un archivo aparte (605 bytes) que el bundle principal
-  no carga.
+- `npm run build`: compila.
 - `npx eslint` sobre los archivos de esta task: sin errores. El `eslint .` completo reporta un error que ya existe
   en `develop` (`'React' is defined but never used` en `src/pages/PasswordRecoveryTestPage.jsx`), ajeno a esta task.
 - Estas pruebas no necesitan el backend ni la base de datos.
@@ -23,7 +22,7 @@ Verificado el 10 de octubre de 2026 con Node 22 y Vitest, desde `blawdtrack/fron
 | --- | --- |
 | `utils/duplicateReport.test.js` (15) | Nota de cada causa ("Ya registrado en la base de datos", "Repetido N veces en el archivo"); totales con causas **excluyentes**; una fila por duplicado con cliente y dirección opcionales; respuestas nulas, vacías o incompletas. |
 | `components/duplicates/duplicates.test.jsx` (15) | Etiqueta con texto para Válido / Duplicado / Error; tarjeta de cifra; los cuatro totales; **lista resaltada** con número, etiqueta "Duplicado" y causa por fila; aviso en advertencia (singular y plural), sin nombre de archivo, y en éxito cuando no hay duplicados. |
-| `pages/DuplicateDetectionPage.test.jsx` (6) | Título y descripción; estado vacío "Sin archivo en previsualización"; el ejemplo solo con `allowSample`; previsualización recibida por el estado de navegación; archivo sin duplicados. |
+| `pages/DuplicateDetectionPage.test.jsx` (6) | Título y descripción; estado vacío "Sin archivo en previsualización"; no hay botón ni datos de ejemplo; previsualización recibida por el estado de navegación, con los duplicados resaltados; archivo sin duplicados. |
 | `config/navigation.test.js` (18) | Grupo "Gestión de paquetes" con "Detectar duplicados" para Súper Usuario y Administrador de Ventas; el Administrador de Ventas solo ve paquetes y su "Restablecer contraseña"; `getGroupRoles`; flecha de retorno de la pantalla. |
 | `App.routes.test.jsx` (116) | Las rutas compartidas entre los dos roles; el Administrador de Ventas **no** entra a Mensajeros ni a Administradores y vuelve al menú principal; el inicio de cada rol está dentro de sus rutas. |
 | `components/layout/MainMenuLayout.test.jsx` (16) | El menú lateral muestra "Detectar duplicados" al Súper Usuario y le da al Administrador de Ventas solo sus grupos. |
@@ -55,8 +54,9 @@ npm test
    administradores).
 3. En el menú lateral abre **Gestión de paquetes → Detectar duplicados**. Sin una importación en curso verás el
    estado vacío.
-4. Pulsa **Cargar ejemplo (solo desarrollo)**: aparece el aviso, los cuatro totales y los tres duplicados resaltados.
-   Ese botón solo existe en modo desarrollo.
+4. Los duplicados resaltados solo aparecen cuando la pantalla de importación (HU-010) le entrega una
+   previsualización; mientras esa pantalla no exista, el resaltado se verifica con las pruebas automáticas
+   (`npx vitest run src/components/duplicates --reporter=verbose`).
 5. Con una cuenta de Administrador de Ventas comprueba además que el menú lateral solo trae **Gestión de paquetes** y
    **Seguridad y acceso**, y que entrar por URL a `/main-menu/mensajeros` te devuelve al menú principal.
 
@@ -66,8 +66,8 @@ npm test
 | --- | --- |
 | E1 | Consola con las 36 pruebas nuevas en verde (`3 passed`, `36 passed`). |
 | E2 | Consola de la suite completa: `Test Files  47 passed (47)` y `Tests  538 passed (538)`. |
-| E3 | Pantalla **Detectar duplicados** con el ejemplo cargado: aviso en advertencia, los cuatro totales y las filas resaltadas con la etiqueta "Duplicado" y la causa. |
-| E4 | La misma pantalla en estado vacío ("Sin archivo en previsualización"). |
+| E3 | Consola de `npx vitest run src/components/duplicates --reporter=verbose`: se leen los casos del resaltado ("resalta cada duplicado con su número, la etiqueta "Duplicado" y la causa", el aviso en advertencia y los totales). |
+| E4 | Pantalla **Detectar duplicados** en el navegador, en estado vacío ("Sin archivo en previsualización"). |
 | E5 | Menú lateral de un Administrador de Ventas, con **Gestión de paquetes** abierto y sin los grupos de Mensajeros ni Administradores. |
 
 **Si tienes que priorizar:** E3 (el resaltado, que es lo que pide la task), E5 (el acceso del Administrador de

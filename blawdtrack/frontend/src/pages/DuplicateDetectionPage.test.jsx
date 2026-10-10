@@ -1,6 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { screen, within, cleanup } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import DuplicateDetectionPage from './DuplicateDetectionPage';
 import { renderWithProviders, superUser } from '../test-utils';
 import { ROUTES } from '../config/routes';
@@ -16,8 +15,8 @@ const preview = {
   ],
 };
 
-const renderPage = ({ state, allowSample = false } = {}) =>
-  renderWithProviders(<DuplicateDetectionPage allowSample={allowSample} />, {
+const renderPage = ({ state } = {}) =>
+  renderWithProviders(<DuplicateDetectionPage />, {
     route: { pathname: ROUTES.PACKAGE_DUPLICATES, state },
     user: superUser,
   });
@@ -41,21 +40,17 @@ describe('DuplicateDetectionPage', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('en producción no ofrece cargar el ejemplo', () => {
-    renderPage({ allowSample: false });
+  it('no ofrece ningún botón ni dato de ejemplo: solo muestra lo que le entrega la importación', () => {
+    renderPage();
 
-    expect(screen.queryByRole('button', { name: /Cargar ejemplo/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  it('en desarrollo carga el ejemplo y resalta los duplicados', async () => {
-    const user = userEvent.setup();
-    renderPage({ allowSample: true });
+  it('resalta cada duplicado de la previsualización recibida', () => {
+    renderPage({ state: { preview } });
 
-    await user.click(screen.getByRole('button', { name: /Cargar ejemplo/ }));
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('3 registros duplicados detectados en zoho_paquetes_octubre.xlsx');
     expect(screen.queryByText('Sin archivo en previsualización')).not.toBeInTheDocument();
-    expect(screen.getAllByText('Duplicado')).toHaveLength(3);
+    expect(screen.getAllByText('Duplicado')).toHaveLength(2);
   });
 
   it('muestra la previsualización que le entrega la pantalla de importación por el estado de navegación', () => {
