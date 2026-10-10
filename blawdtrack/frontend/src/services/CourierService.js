@@ -101,6 +101,15 @@ export const getCourierDeactivations = async () => {
   return response.data;
 };
 
+/**
+ * Historial general (`GET /api/v1/couriers/history`): los cambios de todos los mensajeros, del más reciente
+ * al más antiguo, con el mensajero afectado en cada uno.
+ */
+export const getCourierGeneralHistory = async () => {
+  const response = await axiosClient.get('/v1/couriers/history');
+  return response.data;
+};
+
 export const getCourierHistory = async (id) => {
   const response = await axiosClient.get(
     `/v1/couriers/${encodeURIComponent(id)}/history`

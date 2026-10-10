@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useCountdown } from '../hooks/useCountdown';
+import AuthStateHeader from '../components/AuthStateHeader';
+import MailWaitIndicator, { MAIL_RESEND_WAIT_SECONDS } from '../components/MailWaitIndicator';
+import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import {
-  Container,
-  Paper,
   Box,
   Typography,
   TextField,
@@ -12,6 +14,11 @@ import {
 import { requestPasswordReset } from '../services/PasswordRecoveryService';
 import { Toast } from '../components/Toast';
 import { RecoverySteps } from '../components/RecoverySteps';
+import HelpTip from '../components/HelpTip';
+import AuthCardLayout from '../components/AuthCardLayout';
+import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
+import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
+import { LINK_BUTTON_SX } from '../components/formStyles';
 
 // Mismo patrón de validación de cliente que LoginPage.jsx (T04 de HU-001):
 // `fieldErrors` por campo, correo obligatorio con trim y formato válido, y
@@ -36,14 +43,7 @@ const CONNECTION_ERROR_MESSAGE =
   'No pudimos conectar con el servidor. Revisa tu conexión a internet e intenta de nuevo.';
 const GENERIC_ERROR_MESSAGE = 'No se pudo procesar la solicitud. Intenta de nuevo en unos minutos.';
 
-const TITLE_SX = {
-  fontFamily: '"Poppins", sans-serif',
-  fontWeight: 600,
-  fontSize: 18,
-  color: 'primary.main',
-};
-
-const LINK_SX = { fontSize: 12.5, fontWeight: 600, color: 'primary.main' };
+const LINK_SX = { ...LINK_BUTTON_SX, fontSize: FONT.xs, fontWeight: 600, color: 'primary.main' };
 
 // T04 de HU-002 (#65): solicitud del enlace de restablecimiento. Es UNA
 // pantalla con dos vistas del mismo flujo (r1 y r2 del bloque `hu002` del
@@ -64,6 +64,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
   const [fieldErrors, setFieldErrors] = useState({ email: '' });
   const [loading, setLoading] = useState(false);
   const [sentEmail, setSentEmail] = useState(null);
+  const resendWait = useCountdown(MAIL_RESEND_WAIT_SECONDS);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'error' });
 
   const closeToast = () => setToast((previous) => ({ ...previous, open: false }));
@@ -75,6 +76,7 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (resendWait.running) return;
 
     const errors = validateForm({ email });
     setFieldErrors(errors);
@@ -88,6 +90,25 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
     try {
       await requestPasswordReset(submittedEmail);
       setSentEmail(submittedEmail);
+      resendWait.start();
+    } catch (err) {
+      setToast({
+        open: true,
+        message: err.response ? GENERIC_ERROR_MESSAGE : CONNECTION_ERROR_MESSAGE,
+        severity: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // "Enviar de nuevo": repite la solicitud al mismo correo, una vez pasada la espera.
+  const handleResend = async () => {
+    if (resendWait.running || loading) return;
+    setLoading(true);
+    try {
+      await requestPasswordReset(sentEmail);
+      resendWait.start();
     } catch (err) {
       setToast({
         open: true,
@@ -112,152 +133,147 @@ export function PasswordRecoveryRequestPage({ onBackToLogin }) {
       type="button"
       onClick={() => onBackToLogin?.()}
       underline="hover"
-      sx={{ ...LINK_SX, color: '#6B6560' }}
+      sx={{ ...LINK_SX, color: 'text.secondary' }}
     >
       Volver a iniciar sesión
     </Link>
   );
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-      <Container maxWidth={false}>
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: '18px',
-            overflow: 'hidden',
-            border: '1px solid #E4DED7',
-            boxShadow: '0 16px 38px rgba(26,60,52,.07)',
-          }}
-        >
-          <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />
+    <AuthCardLayout>
+      <RecoverySteps current={sentEmail ? 2 : 1} />
 
-          <RecoverySteps current={sentEmail ? 2 : 1} />
+      <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ width: '100%', maxWidth: rem(460) }}>
+          {sentEmail === null ? (
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              noValidate
+              sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            >
+              <AuthStateHeader
+                icon={LockResetOutlinedIcon}
+                title="Recuperar contraseña"
+                description="Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una nueva."
+              />
 
-          <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
-            <Box sx={{ width: '100%', maxWidth: 460 }}>
-              {sentEmail === null ? (
-                <Box
-                  component="form"
-                  onSubmit={handleSubmit}
-                  noValidate
-                  sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-                >
-                  <Typography component="h1" sx={TITLE_SX}>
-                    Solicitar enlace de restablecimiento
-                  </Typography>
-
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <Typography
-                      component="label"
-                      htmlFor="recovery-email"
-                      sx={{
-                        fontSize: 11.5,
-                        fontWeight: 700,
-                        letterSpacing: '0.5px',
-                        textTransform: 'uppercase',
-                        color: '#6B6560',
-                      }}
-                    >
-                      Correo electrónico registrado
-                    </Typography>
-                    <TextField
-                      id="recovery-email"
-                      fullWidth
-                      required
-                      name="email"
-                      type="email"
-                      placeholder="nombre@blawdgourmet.com"
-                      autoComplete="email"
-                      value={email}
-                      onChange={handleChange}
-                      disabled={loading}
-                      error={Boolean(fieldErrors.email)}
-                      helperText={fieldErrors.email}
-                      sx={{
-                        '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 15 },
-                        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
-                      }}
-                    />
-                    <Typography sx={{ fontSize: 12, color: '#9E968D' }}>
-                      Validamos que la cuenta exista y esté activa antes de enviar el correo.
-                    </Typography>
-                  </Box>
-
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    disabled={loading}
-                    sx={{ borderRadius: '10px', py: '15px', fontWeight: 600, fontSize: 15 }}
-                  >
-                    {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar enlace'}
-                  </Button>
-
-                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>{backToLoginLink}</Box>
-                </Box>
-              ) : (
-                <Box
-                  role="status"
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography
+                  component="label"
+                  htmlFor="recovery-email"
                   sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '16px',
-                    alignItems: 'center',
-                    textAlign: 'center',
+                    fontSize: FONT.xs,
+                    fontWeight: 700,
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    color: 'text.secondary',
                   }}
                 >
-                  <Box
-                    aria-hidden
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: '50%',
-                      bgcolor: '#E9F3EC',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Box sx={{ width: 22, height: 16, border: '2px solid #2F7D4F', borderRadius: '3px' }} />
-                  </Box>
+                  Correo electrónico registrado
+                </Typography>
+                <HelpTip label="¿Qué se valida al enviar el enlace?" sx={{ width: rem(32), height: rem(32), my: '0' }}>
+                  Validamos que la cuenta exista y esté activa antes de enviar el correo.
+                </HelpTip>
+                </Box>
+                <TextField
+                  id="recovery-email"
+                  fullWidth
+                  required
+                  name="email"
+                  type="email"
+                  placeholder="nombre@blawdgourmet.com"
+                  autoComplete="email"
+                  value={email}
+                  onChange={handleChange}
+                  disabled={loading}
+                  error={Boolean(fieldErrors.email)}
+                  helperText={fieldErrors.email}
+                  sx={{
+                    '& .MuiOutlinedInput-root': { borderRadius: RADIUS.sm, bgcolor: 'background.paper', fontSize: FONT.md },
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'neutral.borderStrong', borderWidth: '1.5px' },
+                  }}
+                />
+              </Box>
 
-                  <Typography component="h1" sx={TITLE_SX}>
-                    Revisa tu correo
-                  </Typography>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading}
+                sx={{ borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET, fontWeight: 600, fontSize: FONT.md }}
+              >
+                {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar enlace'}
+              </Button>
 
-                  {/* Redacción condicional a propósito: el backend no confirma si la
-                      cuenta existe o está activa, así que no se afirma un envío.
-                      Tampoco se menciona un tiempo de expiración concreto. */}
-                  <Typography sx={{ fontSize: 13.5, color: '#6B6560', lineHeight: 1.55 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>{backToLoginLink}</Box>
+            </Box>
+          ) : (
+            <Box
+              role="status"
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                alignItems: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <AuthStateHeader
+                icon={MarkEmailReadOutlinedIcon}
+                tone="success"
+                title="Revisa tu correo"
+                description={(
+                  <>
+                    {/* Redacción condicional a propósito: el backend no confirma si la cuenta existe o está
+                        activa, así que no se afirma un envío. Tampoco se menciona un tiempo de expiración. */}
                     Si{' '}
                     <Box component="strong" sx={{ color: '#1F2421', overflowWrap: 'anywhere' }}>
                       {sentEmail}
                     </Box>{' '}
                     está registrado y activo, recibirás un enlace para restablecer tu contraseña. El
                     enlace solo puede usarse una vez.
-                  </Typography>
+                  </>
+                )}
+              />
 
-                  <Link
-                    component="button"
-                    type="button"
-                    onClick={handleUseAnotherEmail}
-                    underline="always"
-                    sx={LINK_SX}
-                  >
-                    Usar otro correo
-                  </Link>
-
-                  {backToLoginLink}
-                </Box>
+              {resendWait.running && (
+                <MailWaitIndicator remaining={resendWait.remaining} total={MAIL_RESEND_WAIT_SECONDS} />
               )}
-            </Box>
-          </Box>
-        </Paper>
-      </Container>
 
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={handleResend}
+                disabled={loading || resendWait.running}
+                sx={{ borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET, fontWeight: 600, fontSize: FONT.md }}
+              >
+                {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Enviar de nuevo'}
+              </Button>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>¿No te llega el correo?</Typography>
+                <HelpTip label="¿Cuánto tarda en llegar el correo?">El correo suele llegar en menos de 2 minutos, pero puede tardar hasta 5. Si no lo ves, revisa la carpeta de correo no deseado.</HelpTip>
+              </Box>
+
+              <Link
+                component="button"
+                type="button"
+                onClick={handleUseAnotherEmail}
+                underline="always"
+                sx={LINK_SX}
+              >
+                Usar otro correo
+              </Link>
+
+              {backToLoginLink}
+            </Box>
+          )}
+        </Box>
+      </Box>
       <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={closeToast} />
-    </Box>
+    </AuthCardLayout>
   );
 }
 

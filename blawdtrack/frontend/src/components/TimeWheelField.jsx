@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { INPUT_SX } from './formStyles';
 import { Box, Button, Popover, TextField } from '@mui/material';
+import { RADIUS, FONT, rem } from '../theme';
 
 const ITEM_HEIGHT = 40;
 export const WHEEL_ITEM_HEIGHT = ITEM_HEIGHT;
@@ -166,7 +168,7 @@ export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
       sx={{
         position: 'relative',
         height: ITEM_HEIGHT * VISIBLE_ITEMS,
-        width: 64,
+        width: rem(64),
         overflow: 'hidden',
         touchAction: 'none',
         userSelect: 'none',
@@ -195,9 +197,9 @@ export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              fontSize: isSelected ? '1.25rem' : '1rem',
+              fontSize: isSelected ? FONT.xl : FONT.md,
               fontWeight: isSelected ? 700 : 400,
-              color: isSelected ? '#1A3C34' : '#9E968D'
+              color: isSelected ? '#1A3C34' : 'text.secondary'
             }}
           >
             {items[mod(k, n)]}
@@ -254,17 +256,13 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
         slotProps={{
           htmlInput: { readOnly: true, 'aria-label': label, style: { cursor: 'pointer', textAlign: 'center' } }
         }}
-        sx={{
-          backgroundColor: '#fff',
-          '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '0.9rem', '& fieldset': { borderColor: '#DCD4CA' } },
-          '& .MuiOutlinedInput-input': { py: 1.4 }
-        }}
+        sx={INPUT_SX}
       />
       <Popover
         open={Boolean(anchor)}
         anchorEl={anchor}
         onClose={() => setAnchor(null)}
-        slotProps={{ paper: { sx: { borderRadius: '14px', p: 1.5, mt: 0.5 } } }}
+        slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1.5, mt: 0.5 } } }}
       >
         <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', gap: 0.5 }}>
           <Box
@@ -275,8 +273,8 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
               right: 0,
               top: ITEM_HEIGHT * ((VISIBLE_ITEMS - 1) / 2),
               height: ITEM_HEIGHT,
-              borderRadius: '10px',
-              backgroundColor: '#F1ECE7',
+              borderRadius: RADIUS.sm,
+              backgroundColor: 'neutral.surface',
               zIndex: 0,
               pointerEvents: 'none'
             }}
@@ -294,8 +292,8 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
             mt: 1,
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: '10px',
-            color: '#fff',
+            borderRadius: RADIUS.sm,
+            color: 'common.white',
             backgroundColor: '#1A3C34',
             '&:hover': { backgroundColor: '#12322B' }
           }}

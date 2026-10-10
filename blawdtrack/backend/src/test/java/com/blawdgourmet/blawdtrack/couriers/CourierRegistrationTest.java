@@ -6,7 +6,7 @@ import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.auth.service.EmailService;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
-import com.blawdgourmet.blawdtrack.couriers.service.TemporaryPasswordGenerator;
+import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;

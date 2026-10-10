@@ -21,12 +21,12 @@ const renderNav = (route) =>
   );
 
 const tab = (label) => screen.getByText(label);
-const ORANGE = 'rgb(255, 108, 14)';
+const ORANGE = 'rgb(194, 81, 0)';
 
 describe('MobileBottomNav', () => {
-  it('renders one tab per group with the mockup labels', () => {
+  it('renders one tab per group', () => {
     renderNav(ROUTES.MAIN_MENU);
-    ['Acceso', 'Mensajeros', 'Admins', 'Permisos'].forEach((label) => expect(tab(label)).toBeInTheDocument());
+    ['Mensajeros', 'Admins', 'Acceso'].forEach((label) => expect(tab(label)).toBeInTheDocument());
   });
 
   it('highlights only the tab of the current module', () => {
@@ -38,29 +38,33 @@ describe('MobileBottomNav', () => {
 
   it('highlights nothing on the main menu', () => {
     renderNav(ROUTES.MAIN_MENU);
-    ['Acceso', 'Mensajeros', 'Admins', 'Permisos'].forEach((label) =>
+    ['Mensajeros', 'Admins', 'Acceso'].forEach((label) =>
       expect(tab(label)).not.toHaveStyle({ color: ORANGE })
     );
   });
 
-  it('navigates to the first available screen of each module', async () => {
+  it('navigates to the menu of each module', async () => {
     const user = userEvent.setup();
     renderNav(ROUTES.MAIN_MENU);
 
     await user.click(tab('Mensajeros'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.COURIER_CREATE);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_COURIERS);
 
     await user.click(tab('Admins'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.ADMIN_CREATE);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_ADMINS);
 
     await user.click(tab('Acceso'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PASSWORD_RESET_OWN);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_SECURITY);
   });
 
-  it('navigates to the roles & permissions screen', async () => {
-    const user = userEvent.setup();
-    renderNav(ROUTES.MAIN_MENU);
-    await user.click(tab('Permisos'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.ROLES_PERMISSIONS);
+  it('highlights the tab on the module menu itself', () => {
+    renderNav(ROUTES.MODULE_ADMINS);
+    expect(tab('Admins')).toHaveStyle({ color: ORANGE });
+  });
+
+  it('highlights Acceso on the roles & permissions screen, now part of Seguridad y acceso', () => {
+    renderNav(ROUTES.ROLES_PERMISSIONS);
+    expect(tab('Acceso')).toHaveStyle({ color: ORANGE });
+    expect(tab('Mensajeros')).not.toHaveStyle({ color: ORANGE });
   });
 });

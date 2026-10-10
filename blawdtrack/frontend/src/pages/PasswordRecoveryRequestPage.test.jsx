@@ -20,7 +20,7 @@ describe('PasswordRecoveryRequestPage (HU-002 T04)', () => {
 
   it('muestra el formulario de solicitud', () => {
     render(<PasswordRecoveryRequestPage />);
-    expect(screen.getByRole('heading', { name: 'Solicitar enlace de restablecimiento' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Recuperar contraseña' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Enviar enlace' })).toBeInTheDocument();
   });
 
@@ -66,6 +66,19 @@ describe('PasswordRecoveryRequestPage (HU-002 T04)', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Si ana@blawd.com está registrado y activo');
     // No afirma un envío ni un tiempo de expiración concreto.
     expect(screen.getByRole('status')).not.toHaveTextContent(/minutos|horas/i);
+  });
+
+  it('tras enviar bloquea "Enviar de nuevo" y muestra la espera con el tiempo restante', async () => {
+    requestPasswordReset.mockResolvedValue({ message: 'ok' });
+    const user = userEvent.setup();
+    render(<PasswordRecoveryRequestPage />);
+
+    await fillAndSubmit(user, 'ana@blawd.com');
+
+    expect((await screen.findByRole('button', { name: 'Enviar de nuevo' })).disabled).toBe(true);
+    expect(screen.getByText('Enviando el correo…')).toBeInTheDocument();
+    expect(screen.getByText('2:00')).toBeInTheDocument();
+    expect(requestPasswordReset).toHaveBeenCalledTimes(1);
   });
 
   it('"Usar otro correo" vuelve al formulario conservando lo escrito', async () => {

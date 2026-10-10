@@ -191,7 +191,7 @@ class AdminDeletionIntegrationTest {
         mvc.perform(post("/api/v1/admins").header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana-delete@example.test","contrasenaInicial":"Clave1234","documentType":"CEDULA","documentNumber":"123456789"}
+                                {"nombreCompleto":"Ana Admin","numeroTelefono":"88888888","correoElectronico":"ana-delete@example.test","documentType":"CEDULA","documentNumber":"123456789"}
                                 """))
                 .andExpect(status().isCreated());
         User admin = users.findByEmail("ana-delete@example.test").orElseThrow();
