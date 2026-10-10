@@ -128,7 +128,7 @@ class PackageControllerTest {
                 .header("Authorization", "Bearer " + token));
     }
 
-    private void createAuditLog(String action, String details, User actor) {
+    private void createAuditLog(String action, String details, User actor, String previousStatus, String newStatus) {
         AuditLog log = AuditLog.builder()
                 .actor(actor)
                 .usuarioAfectado(null)
@@ -136,8 +136,8 @@ class PackageControllerTest {
                 .details(details)
                 .packageId(pkg.getId())
                 .shipmentNumber(pkg.getShipmentNumber())
-                .previousStatus("PENDING")
-                .newStatus("ASSIGNED")
+                .previousStatus(previousStatus)
+                .newStatus(newStatus)
                 .timestamp(LocalDateTime.now())
                 .build();
         auditLogs.saveAndFlush(log);
@@ -242,17 +242,23 @@ class PackageControllerTest {
         createAuditLog(
                 AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de PENDING a ASSIGNED",
-                adminVentas
+                adminVentas,
+                "PENDING",
+                "ASSIGNED"
         );
         createAuditLog(
                 AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de ASSIGNED a SHIPPED",
-                adminVentas
+                adminVentas,
+                "ASSIGNED",
+                "SHIPPED"
         );
         createAuditLog(
                 AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de SHIPPED a DELIVERED",
-                adminVentas
+                adminVentas,
+                "SHIPPED",
+                "DELIVERED"
         );
 
         getPackageHistory(token(adminVentas), "ENV-2024-0001")
