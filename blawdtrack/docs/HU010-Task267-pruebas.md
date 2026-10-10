@@ -18,8 +18,8 @@ navegador valida su formato y el backend lo lee sin registrarlo.
   - *Error:* se muestra el mensaje del backend para un archivo inválido (`INVALID_PACKAGE_FILE`), o un aviso propio
     para archivo demasiado grande (413), sesión vencida, falta de permiso (403), error del servidor o falta de
     conexión. El archivo queda seleccionado para reintentar.
-  - *Éxito:* "Archivo cargado" con el nombre y los registros leídos. "Revisar duplicados" lleva a la pantalla
-    Detectar duplicados con la previsualización; "Cargar otro archivo" vuelve a empezar.
+  - *Éxito:* "Archivo cargado" con el nombre y los registros leídos. "Ver previsualización" lleva a la pantalla de previsualización (Task 268)
+    con la previsualización; "Cargar otro archivo" vuelve a empezar.
 - **Pasos de la importación:** indicador de los tres pasos del mockup (Cargar archivo, Previsualizar y validar,
   Confirmar registro). Esta task cubre el primero.
 - La pantalla "Detectar duplicados" sin archivo ahora ofrece el enlace **Ir a importar paquetes**.
