@@ -18,7 +18,7 @@ token o cuando el backend la invalida (por ejemplo, al desactivar la cuenta).
 | Login con correo y contraseña; devuelve token, datos del usuario, rol y permisos | ✅ |
 | Credenciales incorrectas → 401 con un mensaje que no revela qué dato falló | ✅ |
 | Cuenta inactiva → 401 con un mensaje propio | ⚠️ El `code` es el mismo (`AUTH_FAILED`); el frontend las distingue por el texto del mensaje |
-| Redirección por rol (Super Usuario → `/main-menu`, Ventas → `/ventas`, Mensajero → `/mensajero`) | ✅ |
+| Redirección por rol (Super Usuario y Ventas → `/main-menu`, cada uno con su menú; Mensajero → `/mensajero`) | ✅ |
 | Rutas protegidas por rol; un rol no permitido vuelve a su propio inicio | ✅ |
 | Sesión vencida o rechazada: se limpia y se avisa en el login | ✅ |
 | Cambios de estado, rol y permisos aplican en la siguiente solicitud | ✅ |

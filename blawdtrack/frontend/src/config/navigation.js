@@ -60,6 +60,22 @@ export const NAVIGATION_GROUPS = [
     ],
   },
   {
+    id: 'packages',
+    title: 'Gestión de paquetes',
+    shortTitle: 'Paquetes',
+    path: ROUTES.MODULE_PACKAGES,
+    description: 'Revisa los paquetes del archivo importado antes de registrarlos.',
+    items: [
+      {
+        id: 'package-duplicates',
+        label: 'Detectar duplicados',
+        description: 'Identifica los paquetes cuyo número de envío ya está registrado o se repite en el archivo importado.',
+        path: ROUTES.PACKAGE_DUPLICATES,
+        roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
+      },
+    ],
+  },
+  {
     id: 'security',
     title: 'Seguridad y acceso',
     shortTitle: 'Acceso',
@@ -71,7 +87,7 @@ export const NAVIGATION_GROUPS = [
         label: 'Restablecer contraseña',
         description: 'Recibe en tu correo un enlace para elegir una contraseña nueva.',
         path: ROUTES.PASSWORD_RESET_OWN,
-        roles: [ROLES.SUPER_USER],
+        roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
       },
       {
         id: 'roles-permissions',
@@ -95,6 +111,16 @@ export function getNavigationForRole(role) {
     ...group,
     items: group.items.filter((item) => item.roles.includes(role)),
   })).filter((group) => group.items.length > 0);
+}
+
+/**
+ * Roles que pueden entrar a un grupo: la unión de los roles de sus pantallas. `App.jsx` la usa para proteger el
+ * menú de cada módulo con el mismo criterio con el que se arma el menú lateral.
+ * @param {{ items: Array<{ roles: string[] }> }} group Grupo de `NAVIGATION_GROUPS`.
+ * @returns {string[]}
+ */
+export function getGroupRoles(group) {
+  return [...new Set(group.items.flatMap((item) => item.roles))];
 }
 
 const isSameOrChildPath = (pathname, path) => pathname === path || pathname.startsWith(`${path}/`);

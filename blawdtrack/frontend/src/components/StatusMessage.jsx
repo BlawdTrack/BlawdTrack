@@ -12,11 +12,11 @@ const VARIANTS = {
 };
 
 /**
- * @param {{ severity?: 'error'|'warning'|'success', message: string }} props Aviso fijo dentro de un
- *   formulario. Los errores y avisos se anuncian de forma asertiva (`role="alert"`); el éxito, de
- *   forma cortés (`role="status"`).
+ * @param {{ severity?: 'error'|'warning'|'success', message: string, title?: string }} props Aviso fijo
+ *   dentro de un formulario. Los errores y avisos se anuncian de forma asertiva (`role="alert"`); el éxito,
+ *   de forma cortés (`role="status"`). Con `title`, el aviso lleva una primera línea en negrita sobre el mensaje.
  */
-export function StatusMessage({ severity = 'error', message }) {
+export function StatusMessage({ severity = 'error', message, title }) {
   const variant = VARIANTS[severity] || VARIANTS.error;
 
   // Errors and warnings interrupt (assertive); success is announced politely.
@@ -37,7 +37,10 @@ export function StatusMessage({ severity = 'error', message }) {
       }}
     >
       <Box sx={{ width: rem(8), height: rem(8), borderRadius: '50%', bgcolor: variant.dot, mt: '0.3077rem', flexShrink: 0 }} />
-      <Typography sx={{ fontSize: FONT.sm, color: variant.text, lineHeight: 1.4 }}>{message}</Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
+        {title && <Typography sx={{ fontSize: FONT.md, fontWeight: 700, color: variant.text, lineHeight: 1.4 }}>{title}</Typography>}
+        <Typography sx={{ fontSize: FONT.sm, color: variant.text, lineHeight: 1.4 }}>{message}</Typography>
+      </Box>
     </Box>
   );
 }

@@ -6,9 +6,12 @@ import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettin
 import PersonRemoveOutlinedIcon from '@mui/icons-material/PersonRemoveOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 
 // Icono por item de navegación (sidebar de escritorio).
 export const NAV_ITEM_ICONS = {
+  'package-duplicates': ContentCopyOutlinedIcon,
   'password-reset': LockResetOutlinedIcon,
   'courier-create': PersonAddAltOutlinedIcon,
   'courier-update': EditOutlinedIcon,
@@ -23,4 +26,5 @@ export const NAV_GROUP_ICONS = {
   security: LockResetOutlinedIcon,
   couriers: LocalShippingOutlinedIcon,
   admins: AdminPanelSettingsOutlinedIcon,
+  packages: Inventory2OutlinedIcon,
 };
