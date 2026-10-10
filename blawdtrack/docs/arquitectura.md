@@ -186,7 +186,7 @@ flowchart TD
     APP --> PUB[Rutas públicas<br/>/login · /password-recovery · /recovery]
     APP --> PR[ProtectedRoute por rol]
     PR --> SU[Super Usuario<br/>MainMenuLayout + pantallas]
-    PR --> SA[Administrador de Ventas<br/>/ventas]
+    PR --> SA[Administrador de Ventas<br/>MainMenuLayout + sus pantallas]
     PR --> CO[Mensajero<br/>/mensajero]
     SU --> PG[pages / components]
     PG --> HK[hooks]

@@ -152,9 +152,9 @@ Ventas y Mensajero) puede restablecer **su propia** contraseña:
   `503 CORREO_NO_ENVIADO` y no deja ningún token guardado; a diferencia de la recuperación pública, aquí no
   hay riesgo de enumerar correos y el fallo se le informa al usuario.
 - **Frontend:** la pantalla `OwnPasswordResetPage` muestra el correo de la cuenta y un botón "Enviarme el
-  enlace", sin campo de correo. El Super Usuario entra desde el menú lateral ("Restablecer contraseña"); el
-  Administrador de Ventas y el Mensajero, desde el botón de su pantalla de inicio
-  (`/ventas/restablecer-contrasena` y `/mensajero/restablecer-contrasena`).
+  enlace", sin campo de correo. El Super Usuario y el Administrador de Ventas entran desde el menú lateral
+  ("Seguridad y acceso" → "Restablecer contraseña", `/main-menu/restablecer-contrasena`); el Mensajero, desde el
+  botón de su pantalla de inicio (`/mensajero/restablecer-contrasena`).
 - El enlace del correo lleva a `/recovery?token=...`, la misma pantalla de nueva contraseña de la
   recuperación pública, y vence a los 15 minutos.
 - **Requisito de entorno:** el correo solo sale si el backend tiene un servidor SMTP configurado
