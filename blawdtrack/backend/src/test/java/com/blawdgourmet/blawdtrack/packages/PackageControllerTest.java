@@ -119,6 +119,7 @@ class PackageControllerTest {
         pkg.addItem(item);
         pkg = packages.saveAndFlush(pkg);
 
+        // Paquete entregado con evidencia
         var itemEntregado = DeliveryPackageItem.builder()
                 .itemId("ITEM-002")
                 .name("Té verde")
@@ -233,6 +234,7 @@ class PackageControllerTest {
 
     @Test
     void adminVentasConsultaPaqueteNoEntregadoNoIncluyeEvidenciaEntrega() throws Exception {
+        // Cambiar el paquete original a estado SHIPPED (no entregado)
         pkg.setStatus(PackageStatus.SHIPPED);
         packages.saveAndFlush(pkg);
 

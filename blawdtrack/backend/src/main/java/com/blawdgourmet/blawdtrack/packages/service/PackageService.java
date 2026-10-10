@@ -74,6 +74,16 @@ public class PackageService {
             );
         }
 
+        // Incluir evidencia de entrega solo cuando el estado es ENTREGADO
+        String deliveryEvidenceUrl = null;
+        String deliverySignatureUrl = null;
+        String deliveryPhotoUrl = null;
+        if (pkg.getStatus() == PackageStatus.DELIVERED) {
+            deliveryEvidenceUrl = pkg.getDeliveryEvidenceUrl();
+            deliverySignatureUrl = pkg.getDeliverySignatureUrl();
+            deliveryPhotoUrl = pkg.getDeliveryPhotoUrl();
+        }
+
         return new PackageDetailResponse(
                 pkg.getId(),
                 pkg.getShipmentNumber(),
@@ -83,6 +93,9 @@ public class PackageService {
                 pkg.getAddress(),
                 pkg.getSchedule(),
                 pkg.getStatus(),
+                deliveryEvidenceUrl,
+                deliverySignatureUrl,
+                deliveryPhotoUrl,
                 pkg.getItems().stream()
                         .map(item -> new PackageDetailResponse.PackageItemInfo(
                                 item.getItemId(),
