@@ -167,6 +167,7 @@
                             <goal>compile</goal>
                         </goals>
                         <configuration>
+                            <proc>full</proc>
                             <annotationProcessorPaths>
                                 <path>
                                     <groupId>org.projectlombok</groupId>
@@ -183,6 +184,7 @@
                             <goal>testCompile</goal>
                         </goals>
                         <configuration>
+                            <proc>full</proc>
                             <annotationProcessorPaths>
                                 <path>
                                     <groupId>org.projectlombok</groupId>
