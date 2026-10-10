@@ -33,6 +33,21 @@ public class DeliveryPackage {
     @Column(name = "numero_envio", nullable = false, length = 50)
     private String shipmentNumber;
 
+    @Column(name = "numero_orden", length = 50)
+    private String orderNumber;
+
+    @Column(name = "nombre_cliente", length = 120)
+    private String customerName;
+
+    @Column(name = "direccion_entrega", length = 500)
+    private String address;
+
+    @Column(name = "telefono", length = 30)
+    private String phone;
+
+    @Column(name = "horario_preferencia", length = 255)
+    private String schedule;
+
     @PrePersist
     @PreUpdate
     void normalizeShipmentNumber() {
