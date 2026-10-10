@@ -14,8 +14,8 @@ import { ROUTES } from '../config/routes';
 /**
  * Importar paquetes, paso 1 (HU-010): el usuario elige el archivo de Zoho Inventory (.xlsx o .csv), el navegador
  * valida su formato y el backend lo lee sin registrarlo. Muestra los estados de la carga: cargando, error (del
- * formato o del servidor) y éxito. Con éxito entrega la previsualización a la pantalla siguiente por el estado de
- * navegación. Solo compone: la selección y la carga viven en sus hooks, el diseño en `components/import`.
+ * formato o del servidor) y éxito. Con éxito entrega la previsualización a la pantalla de previsualización (paso 2) por
+ * el estado de navegación. Solo compone: la selección y la carga viven en sus hooks, el diseño en `components/import`.
  */
 export default function PackageImportPage() {
   const navigate = useNavigate();
@@ -37,8 +37,7 @@ export default function PackageImportPage() {
     if (file && !isUploading) upload(file);
   };
 
-  // Hasta que exista la pantalla de previsualización (paso 2), la revisión de duplicados es el destino.
-  const handleContinue = () => navigate(ROUTES.PACKAGE_DUPLICATES, { state: { preview } });
+  const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview } });
 
   const alertMessage = fileError ?? errorMessage;
 
@@ -57,11 +56,11 @@ export default function PackageImportPage() {
             <StatusMessage
               severity="success"
               title="Archivo cargado"
-              message={`${preview?.fileName ?? file?.name ?? 'El archivo'}: ${preview?.totalRecords ?? 0} registros leídos. Revisa si hay duplicados antes de continuar.`}
+              message={`${preview?.fileName ?? file?.name ?? 'El archivo'}: ${preview?.totalRecords ?? 0} registros leídos. Revisa la previsualización antes de importar.`}
             />
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& a, & button': { width: { xs: '100%', sm: 'auto' } } }}>
               <Button variant="contained" onClick={handleContinue}>
-                Revisar duplicados
+                Ver previsualización
               </Button>
               <Button variant="outlined" onClick={handleDiscard}>
                 Cargar otro archivo

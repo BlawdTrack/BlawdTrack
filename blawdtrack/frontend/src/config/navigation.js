@@ -71,6 +71,8 @@ export const NAVIGATION_GROUPS = [
         label: 'Importar paquetes',
         description: 'Carga el archivo de Zoho Inventory (.xlsx o .csv) con los paquetes del día.',
         path: ROUTES.PACKAGE_IMPORT,
+        // Pantallas del mismo flujo que no son una opción del menú: la flecha de retorno también lleva al módulo.
+        relatedPaths: [ROUTES.PACKAGE_IMPORT_PREVIEW],
         roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
       },
       {
@@ -144,7 +146,9 @@ export function getBackTarget(pathname) {
   }
 
   const group = NAVIGATION_GROUPS.find((candidate) =>
-    candidate.items.some((item) => item.path && isSameOrChildPath(pathname, item.path))
+    candidate.items.some((item) =>
+      [item.path, ...(item.relatedPaths ?? [])].some((path) => path && isSameOrChildPath(pathname, path))
+    )
   );
   return group ? { to: group.path, label: group.title } : null;
 }

@@ -14,6 +14,7 @@ export const ROUTES = {
   // usuario ya logueado (mantiene la barra lateral visible). Lo usan el Súper Usuario y el Administrador de Ventas.
   PASSWORD_RESET_OWN: '/main-menu/restablecer-contrasena',
   PACKAGE_IMPORT: '/main-menu/paquetes/importar',
+  PACKAGE_IMPORT_PREVIEW: '/main-menu/paquetes/previsualizacion',
   PACKAGE_DUPLICATES: '/main-menu/paquetes/duplicados',
   COURIER_CREATE: '/main-menu/couriers/new',
   COURIER_UPDATE: '/editar-mensajero',

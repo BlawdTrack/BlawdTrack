@@ -18,6 +18,7 @@ vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición 
 vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
 vi.mock('./pages/DuplicateDetectionPage', () => ({ default: () => <div>Pantalla detectar duplicados</div> }));
 vi.mock('./pages/PackageImportPage', () => ({ default: () => <div>Pantalla importar paquetes</div> }));
+vi.mock('./pages/PackageImportPreviewPage', () => ({ default: () => <div>Pantalla previsualización</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/OwnPasswordResetPage', () => ({ default: () => <div>Pantalla restablecer mi contraseña</div> }));
 vi.mock('./pages/PasswordRecoveryRequestPage',() => ({ default: () => <div>Pantalla recuperación</div> }));
@@ -37,6 +38,7 @@ const SCREENS = {
   [ROUTES.MODULE_SECURITY]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_PACKAGES]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
+  [ROUTES.PACKAGE_IMPORT_PREVIEW]: 'Pantalla previsualización',
   [ROUTES.PACKAGE_DUPLICATES]: 'Pantalla detectar duplicados',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
@@ -59,6 +61,7 @@ const SHARED_ROUTES = [
   ROUTES.MODULE_SECURITY,
   ROUTES.PASSWORD_RESET_OWN,
   ROUTES.PACKAGE_IMPORT,
+  ROUTES.PACKAGE_IMPORT_PREVIEW,
   ROUTES.PACKAGE_DUPLICATES,
 ];
 
@@ -72,6 +75,7 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_PACKAGES,
     ROUTES.MODULE_SECURITY,
     ROUTES.PACKAGE_IMPORT,
+    ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.PACKAGE_DUPLICATES,
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_DELETE,
@@ -86,6 +90,7 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_PACKAGES,
     ROUTES.MODULE_SECURITY,
     ROUTES.PACKAGE_IMPORT,
+    ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.PACKAGE_DUPLICATES,
     ROUTES.PASSWORD_RESET_OWN,
   ],
