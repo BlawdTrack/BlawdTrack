@@ -11,8 +11,9 @@ archivo ya están registrados en la base de datos o se repiten dentro del propio
 identifican fila por fila, se cuentan y se excluyen de lo que se importa.
 
 El backend de la historia está completo y la pantalla de duplicados (Task 115) está construida y visible en el menú
-para el Súper Usuario y el Administrador de Ventas. Falta conectarla a la pantalla de importación de HU-010, que
-todavía no existe en el frontend, y que la importación use el servicio de exclusión.
+para el Súper Usuario y el Administrador de Ventas. La pantalla de carga del archivo de HU-010 (Task 267) ya le
+entrega la previsualización; falta cerrar la integración con el servidor real (Task 116, endpoints de Luis F sin
+fusionar) y que la importación use el servicio de exclusión.
 
 ## Criterios de aceptación
 
@@ -92,8 +93,9 @@ menú lateral. Es visible para el Súper Usuario y el Administrador de Ventas.
   archivo") y, si el backend los envía, el cliente y la dirección. El resaltado no depende solo del color.
 - **Sin archivo:** el estado vacío "Sin archivo en previsualización".
 - **Origen de los datos:** la pantalla recibe la respuesta de `POST /api/v1/packages/import/preview`
-  (`PackageImportPreviewResponse`, de la importación de HU-010) en `location.state.preview`; la pantalla de
-  importación la entregará al navegar a esta ruta. `buildDuplicateReport` la convierte en el modelo de la pantalla.
+  (`PackageImportPreviewResponse`, de la importación de HU-010) en `location.state.preview`. La entrega la pantalla
+  **Importar paquetes** (`/main-menu/paquetes/importar`) con su botón "Revisar duplicados"; sin ella, el estado
+  vacío ofrece el enlace "Ir a importar paquetes". `buildDuplicateReport` la convierte en el modelo de la pantalla.
 
 **Administrador de Ventas en el menú lateral.** Hasta esta task el Administrador de Ventas solo tenía una pantalla
 provisional sin menú (`/ventas`). Ahora usa el mismo `MainMenuLayout` que el Súper Usuario: su inicio es el menú
