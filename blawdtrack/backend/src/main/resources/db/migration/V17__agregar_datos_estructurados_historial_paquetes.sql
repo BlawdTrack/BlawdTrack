@@ -8,3 +8,6 @@ ALTER TABLE auditorias
 
 CREATE INDEX idx_auditorias_paquete_accion_fecha
     ON auditorias (paquete_id, accion, fecha_hora, id);
+
+CREATE INDEX idx_auditorias_numero_envio_accion_fecha
+    ON auditorias (numero_envio, accion, fecha_hora, id);

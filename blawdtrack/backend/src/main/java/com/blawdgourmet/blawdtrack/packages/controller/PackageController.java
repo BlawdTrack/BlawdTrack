@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -35,7 +37,10 @@ public class PackageController {
     }
 
     /**
-     * Obtiene el historial cronológico de eventos de un paquete.
+     * Obtiene el historial cronológico de cambios de estado de un paquete.
+     *
+     * @param shipmentNumber número de envío del paquete
+     * @return 200 con la lista de eventos ordenada cronológicamente; 404 si no existe
      */
     @GetMapping("/{shipmentNumber}/history")
     public List<PackageHistoryEntry> getPackageHistory(@PathVariable String shipmentNumber) {

@@ -13,6 +13,8 @@ import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository
 import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -24,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class PackageService {
 
     private final DeliveryPackageRepository packageRepository;
-    private final PackageHistoryService packageHistoryService;
+    private final PackageHistoryService historyService;
 
     /**
      * Obtiene el detalle completo de un paquete por su número de envío.
@@ -44,12 +46,16 @@ public class PackageService {
     }
 
     /**
-     * Obtiene el historial cronológico de una instancia de paquete.
+     * Obtiene el historial cronológico de cambios de estado de un paquete.
+     *
+     * @param shipmentNumber número de envío del paquete
+     * @return lista ordenada cronológicamente (más antiguo primero)
+     * @throws PackageNotFoundException si no existe un paquete con ese número de envío
      */
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
     public List<PackageHistoryEntry> getPackageHistory(String shipmentNumber) {
-        return packageHistoryService.getHistoryByShipmentNumber(shipmentNumber);
+        return historyService.getHistoryByShipmentNumber(shipmentNumber);
     }
 
     /**
