@@ -19,7 +19,7 @@ class ShipmentNumberComparisonServiceImplTest {
             new ShipmentNumberComparisonServiceImpl(repository);
 
     @Test
-    void clasificaEnUnaSolaConsultaDisponiblesDuplicadosDelArchivoYRegistrados() {
+    void clasificaEnUnaSolaConsultaCadaFilaDelArchivoEnSuOrdenOriginal() {
         Set<String> normalizedNumbers = new LinkedHashSet<>(
                 List.of("ENV-00953", "ENV-00956", "ENV-00958"));
         when(repository.findExistingShipmentNumbers(normalizedNumbers))
@@ -28,35 +28,50 @@ class ShipmentNumberComparisonServiceImplTest {
         var result = service.compare(List.of(
                 " env-00953 ", "ENV-00956", "env-00956", "ENV-00958"));
 
-        assertThat(result.receivedCount()).isEqualTo(4);
-        assertThat(result.distinctCount()).isEqualTo(3);
-        assertThat(result.importableShipmentNumbers()).containsExactly("ENV-00958");
-        assertThat(result.duplicates()).hasSize(2);
-        assertThat(result.duplicates().get(0).shipmentNumber()).isEqualTo("ENV-00953");
-        assertThat(result.duplicates().get(0).occurrences()).isEqualTo(1);
-        assertThat(result.duplicates().get(0).reasons())
+        assertThat(result.totalRows()).isEqualTo(4);
+        assertThat(result.validCount()).isEqualTo(1);
+        assertThat(result.duplicateCount()).isEqualTo(3);
+        assertThat(result.alreadyRegisteredCount()).isEqualTo(1);
+        assertThat(result.duplicatedInFileCount()).isEqualTo(2);
+        assertThat(result.rows()).extracting("row").containsExactly(1, 2, 3, 4);
+        assertThat(result.rows().get(0).shipmentNumber()).isEqualTo("ENV-00953");
+        assertThat(result.rows().get(0).reasons())
                 .containsExactly(DuplicateShipmentNumberReason.ALREADY_REGISTERED);
-        assertThat(result.duplicates().get(1).shipmentNumber()).isEqualTo("ENV-00956");
-        assertThat(result.duplicates().get(1).occurrences()).isEqualTo(2);
-        assertThat(result.duplicates().get(1).reasons())
-                .containsExactly(DuplicateShipmentNumberReason.DUPLICATED_IN_FILE);
+        assertThat(result.rows().get(0).repeatedInRows()).isEmpty();
+        assertThat(result.rows().get(3).reasons()).isEmpty();
         verify(repository).findExistingShipmentNumbers(normalizedNumbers);
     }
 
     @Test
-    void informaLasDosCausasCuandoElNumeroEstaRepetidoYRegistrado() {
+    void marcaTodasLasCopiasRepetidasEIndicaEnQueOtrasFilasAparecen() {
+        when(repository.findExistingShipmentNumbers(Set.of("ENV-1", "ENV-2")))
+                .thenReturn(Set.of());
+
+        var result = service.compare(List.of("ENV-1", "ENV-2", "env-1", "ENV-1"));
+
+        assertThat(result.rows().get(0).reasons())
+                .containsExactly(DuplicateShipmentNumberReason.DUPLICATED_IN_FILE);
+        assertThat(result.rows().get(0).repeatedInRows()).containsExactly(3, 4);
+        assertThat(result.rows().get(2).repeatedInRows()).containsExactly(1, 4);
+        assertThat(result.rows().get(3).repeatedInRows()).containsExactly(1, 3);
+        assertThat(result.rows().get(1).reasons()).isEmpty();
+        assertThat(result.validCount()).isEqualTo(1);
+        assertThat(result.duplicatedInFileCount()).isEqualTo(3);
+    }
+
+    @Test
+    void informaLasDosCausasPeroCuentaLaFilaUnaSolaVezComoYaRegistrada() {
         when(repository.findExistingShipmentNumbers(Set.of("ENV-00953")))
                 .thenReturn(Set.of("ENV-00953"));
 
         var result = service.compare(List.of("ENV-00953", "env-00953"));
 
-        assertThat(result.importableShipmentNumbers()).isEmpty();
-        assertThat(result.duplicates()).singleElement().satisfies(duplicate -> {
-            assertThat(duplicate.shipmentNumber()).isEqualTo("ENV-00953");
-            assertThat(duplicate.occurrences()).isEqualTo(2);
-            assertThat(duplicate.reasons()).containsExactly(
-                    DuplicateShipmentNumberReason.ALREADY_REGISTERED,
-                    DuplicateShipmentNumberReason.DUPLICATED_IN_FILE);
-        });
+        assertThat(result.rows()).allSatisfy(row -> assertThat(row.reasons()).containsExactly(
+                DuplicateShipmentNumberReason.ALREADY_REGISTERED,
+                DuplicateShipmentNumberReason.DUPLICATED_IN_FILE));
+        assertThat(result.validCount()).isZero();
+        assertThat(result.alreadyRegisteredCount()).isEqualTo(2);
+        assertThat(result.duplicatedInFileCount()).isZero();
+        assertThat(result.duplicateCount()).isEqualTo(2);
     }
 }

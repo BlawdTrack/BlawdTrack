@@ -21,8 +21,8 @@ const CARD_SX = {
 };
 
 // Pantalla de inicio mínima para roles que todavía no tienen su panel real
-// (T12). SalesHomePage y CourierHomePage la usan; cuando HU-010+/HU-022
-// construyan la pantalla definitiva, cada una se reemplaza por la real.
+// (T12). CourierHomePage la usa; cuando HU-022 construya la pantalla definitiva
+// del mensajero, se reemplaza por la real. El Administrador de Ventas ya usa el menú principal.
 /**
  * @param {{ title: string, description: string }} props Título y texto de la pantalla provisional;
  *   muestra el usuario y el rol autenticados, el acceso a restablecer la contraseña y cerrar sesión.

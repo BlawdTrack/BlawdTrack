@@ -4,15 +4,16 @@ import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 /**
  * Botones al pie de un formulario de creación: el principal (con un punto naranja, como el resto de la
  * aplicación) y "Descartar".
- * @param {{ submitLabel: string, submittingLabel: string, isSubmitting: boolean, onDiscard: Function }} props
+ * @param {{ submitLabel: string, submittingLabel: string, isSubmitting: boolean, onDiscard: Function,
+ *   submitDisabled?: boolean }} props `submitDisabled` bloquea el botón principal mientras falta algo por completar.
  */
-export default function FormActions({ submitLabel, submittingLabel, isSubmitting, onDiscard }) {
+export default function FormActions({ submitLabel, submittingLabel, isSubmitting, onDiscard, submitDisabled = false }) {
   return (
     <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
       <Button
         type="submit"
         variant="contained"
-        disabled={isSubmitting}
+        disabled={isSubmitting || submitDisabled}
         sx={{ fontWeight: 600, px: 4, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm, gap: 1.2, boxShadow: 'none' }}
       >
         {isSubmitting ? (

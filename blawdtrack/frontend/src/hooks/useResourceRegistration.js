@@ -81,6 +81,8 @@ export function useResourceRegistration(registerFn, normalizeError, onSuccess = 
     globalMessage,
     severity,
     register,
+    // Descarta el resultado anterior (éxito, errores y mensaje), por ejemplo al elegir otro archivo.
+    reset: clearFeedback,
     setValidationErrors,
     setFieldError,
     clearFieldError,
