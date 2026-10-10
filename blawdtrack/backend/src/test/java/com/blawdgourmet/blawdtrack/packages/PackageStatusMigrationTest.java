@@ -14,7 +14,7 @@ import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 
 /**
- * V15 agrega la columna "estado" a "paquetes". Se ejecuta Flyway con validación de JPA para
+ * V17 agrega la columna "estado" a "paquetes". Se ejecuta Flyway con validación de JPA para
  * comprobar que la migración y la entidad coinciden.
  */
 @SpringBootTest(properties = {
@@ -29,9 +29,9 @@ class PackageStatusMigrationTest {
     @Autowired private DeliveryPackageRepository packages;
 
     @Test
-    void laMigracionV15SeAplicaSinErrores() {
+    void laMigracionV17SeAplicaSinErrores() {
         assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM \"flyway_schema_history\" WHERE \"version\" = '15' AND \"success\" = TRUE",
+                "SELECT COUNT(*) FROM \"flyway_schema_history\" WHERE \"version\" = '17' AND \"success\" = TRUE",
                 Integer.class)).isEqualTo(1);
     }
 
