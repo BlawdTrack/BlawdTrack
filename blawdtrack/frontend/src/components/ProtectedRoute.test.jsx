@@ -104,7 +104,7 @@ describe('ProtectedRoute con allowedRoles (restricción por rol, HU-001)', () =>
           </Route>
           <Route path="/administradores" element={<div>Inicio de súper usuario</div>} />
           <Route path="/mensajero" element={<div>Inicio de mensajero</div>} />
-          <Route path="/ventas" element={<div>Inicio de ventas</div>} />
+          <Route path="/main-menu" element={<div>Inicio de ventas</div>} />
         </Routes>
       </MemoryRouter>
     );

@@ -14,14 +14,14 @@ export const ROLES = {
 // ProtectedRoute lo mandaría a un inicio al que no puede entrar.
 export const ROLE_HOME_ROUTES = {
   [ROLES.SUPER_USUARIO]: ROUTES.MAIN_MENU,
-  [ROLES.ADMIN_VENTAS]: ROUTES.SALES_HOME,
+  [ROLES.ADMIN_VENTAS]: ROUTES.MAIN_MENU,
   [ROLES.MENSAJERO]: ROUTES.COURIER_HOME,
 };
 
 // Mapa de rol -> pantalla donde restablece su propia contraseña con la sesión iniciada.
 export const ROLE_PASSWORD_RESET_ROUTES = {
   [ROLES.SUPER_USUARIO]: ROUTES.PASSWORD_RESET_OWN,
-  [ROLES.ADMIN_VENTAS]: ROUTES.SALES_PASSWORD_RESET,
+  [ROLES.ADMIN_VENTAS]: ROUTES.PASSWORD_RESET_OWN,
   [ROLES.MENSAJERO]: ROUTES.COURIER_PASSWORD_RESET,
 };
 

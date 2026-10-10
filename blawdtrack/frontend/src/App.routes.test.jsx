@@ -16,7 +16,7 @@ vi.mock('./pages/AdminRegistrationPage', () => ({ default: () => <div>Pantalla r
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
 vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
 vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
-vi.mock('./pages/SalesHomePage',() => ({ default: () => <div>Pantalla ventas</div> }));
+vi.mock('./pages/DuplicateDetectionPage', () => ({ default: () => <div>Pantalla detectar duplicados</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/OwnPasswordResetPage', () => ({ default: () => <div>Pantalla restablecer mi contraseña</div> }));
 vi.mock('./pages/PasswordRecoveryRequestPage',() => ({ default: () => <div>Pantalla recuperación</div> }));
@@ -34,20 +34,30 @@ const SCREENS = {
   [ROUTES.MODULE_COURIERS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_ADMINS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_SECURITY]: 'Pantalla menú de módulo',
+  [ROUTES.MODULE_PACKAGES]: 'Pantalla menú de módulo',
+  [ROUTES.PACKAGE_DUPLICATES]: 'Pantalla detectar duplicados',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
   [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
   [ROUTES.ROLES_PERMISSIONS]: 'Pantalla roles y permisos',
-  [ROUTES.SALES_HOME]: 'Pantalla ventas',
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
   // Cada rol restablece su propia contraseña con la sesión iniciada.
   [ROUTES.PASSWORD_RESET_OWN]: 'Pantalla restablecer mi contraseña',
-  [ROUTES.SALES_PASSWORD_RESET]: 'Pantalla restablecer mi contraseña',
   [ROUTES.COURIER_PASSWORD_RESET]: 'Pantalla restablecer mi contraseña',
   // Rutas de tu feature agregadas al formato de develop
   '/editar-mensajero': 'Pantalla edición de mensajero',
 };
+
+// Rutas que comparten el Súper Usuario y el Administrador de Ventas (ambos usan el menú lateral); el resto
+// de las rutas protegidas es de un solo rol.
+const SHARED_ROUTES = [
+  ROUTES.MAIN_MENU,
+  ROUTES.MODULE_PACKAGES,
+  ROUTES.MODULE_SECURITY,
+  ROUTES.PASSWORD_RESET_OWN,
+  ROUTES.PACKAGE_DUPLICATES,
+];
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
 const ALLOWED_ROUTES = {
@@ -56,7 +66,9 @@ const ALLOWED_ROUTES = {
     ROUTES.MAIN_MENU,
     ROUTES.MODULE_COURIERS,
     ROUTES.MODULE_ADMINS,
+    ROUTES.MODULE_PACKAGES,
     ROUTES.MODULE_SECURITY,
+    ROUTES.PACKAGE_DUPLICATES,
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_DELETE,
     ROUTES.COURIER_CREATE,
@@ -65,7 +77,13 @@ const ALLOWED_ROUTES = {
     ROUTES.PASSWORD_RESET_OWN,
     '/editar-mensajero'
   ],
-  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME, ROUTES.SALES_PASSWORD_RESET],
+  [ROLES.SALES_ADMIN]: [
+    ROUTES.MAIN_MENU,
+    ROUTES.MODULE_PACKAGES,
+    ROUTES.MODULE_SECURITY,
+    ROUTES.PACKAGE_DUPLICATES,
+    ROUTES.PASSWORD_RESET_OWN,
+  ],
   [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],
 };
 
@@ -100,13 +118,27 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     expect(Object.keys(ALLOWED_ROUTES).sort()).toEqual(Object.keys(ROLE_HOME_ROUTES).sort());
   });
 
-  it('cada ruta protegida pertenece al grupo de exactamente un rol', () => {
+  it('cada ruta protegida pertenece a un solo rol, salvo las compartidas por el Súper Usuario y el Administrador de Ventas', () => {
     for (const route of Object.keys(SCREENS)) {
       const roles = Object.entries(ALLOWED_ROUTES)
         .filter(([, routes]) => routes.includes(route))
         .map(([role]) => role);
-      expect(roles).toHaveLength(1);
+      if (SHARED_ROUTES.includes(route)) {
+        expect(roles.sort()).toEqual([ROLES.SALES_ADMIN, ROLES.SUPER_USER].sort());
+      } else {
+        expect(roles).toHaveLength(1);
+      }
     }
+  });
+
+  it('el Administrador de Ventas no entra a los módulos de mensajeros ni de administradores', () => {
+    loginAs(ROLES.SALES_ADMIN);
+    renderAt(ROUTES.MODULE_COURIERS);
+    // Vuelve a su inicio: el menú principal.
+    expect(screen.getByText('Pantalla menú principal')).toBeTruthy();
+    cleanup();
+    renderAt(ROUTES.MODULE_ADMINS);
+    expect(screen.getByText('Pantalla menú principal')).toBeTruthy();
   });
 
   describe.each(Object.values(ROLES))('con el rol %s', (role) => {
