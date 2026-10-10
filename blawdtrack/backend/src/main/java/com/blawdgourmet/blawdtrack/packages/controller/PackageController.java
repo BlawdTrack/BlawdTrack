@@ -1,7 +1,10 @@
 package com.blawdgourmet.blawdtrack.packages.controller;
 
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDetailResponse;
+import com.blawdgourmet.blawdtrack.packages.dto.PackageHistoryEntry;
 import com.blawdgourmet.blawdtrack.packages.service.PackageService;
+
+import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,5 +32,13 @@ public class PackageController {
     @GetMapping("/{shipmentNumber}")
     public PackageDetailResponse getPackageByShipmentNumber(@PathVariable String shipmentNumber) {
         return service.getPackageByShipmentNumber(shipmentNumber);
+    }
+
+    /**
+     * Obtiene el historial cronológico de eventos de un paquete.
+     */
+    @GetMapping("/{shipmentNumber}/history")
+    public List<PackageHistoryEntry> getPackageHistory(@PathVariable String shipmentNumber) {
+        return service.getPackageHistory(shipmentNumber);
     }
 }

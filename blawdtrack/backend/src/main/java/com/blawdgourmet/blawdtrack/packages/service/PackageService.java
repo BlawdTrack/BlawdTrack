@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.packages.service;
 
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDetailResponse;
+import com.blawdgourmet.blawdtrack.packages.dto.PackageHistoryEntry;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 /**
  * Casos de uso para consultar paquetes/envíos.
  * El acceso está restringido al rol ADMIN_VENTAS (administrador de ventas).
@@ -20,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class PackageService {
 
     private final DeliveryPackageRepository packageRepository;
+    private final PackageHistoryService packageHistoryService;
 
     /**
      * Obtiene el detalle completo de un paquete por su número de envío.
@@ -36,6 +40,15 @@ public class PackageService {
                 .orElseThrow(() -> new PackageNotFoundException(shipmentNumber));
 
         return mapToDetailResponse(pkg);
+    }
+
+    /**
+     * Obtiene el historial cronológico de una instancia de paquete.
+     */
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    public List<PackageHistoryEntry> getPackageHistory(String shipmentNumber) {
+        return packageHistoryService.getHistoryByShipmentNumber(shipmentNumber);
     }
 
     /**

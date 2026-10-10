@@ -18,10 +18,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
+import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackageItem;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
@@ -47,6 +52,8 @@ class PackageControllerTest {
     @Autowired private RoleRepository roles;
     @Autowired private CourierRepository couriers;
     @Autowired private DeliveryPackageRepository packages;
+    @Autowired private AuditLogRepository auditLogs;
+    @Autowired private AuditService auditService;
     @Autowired private JwtService jwt;
 
     private User adminVentas;
@@ -116,6 +123,34 @@ class PackageControllerTest {
     private ResultActions getPackage(String token, String shipmentNumber) throws Exception {
         return mvc.perform(get("/api/v1/packages/{shipmentNumber}", shipmentNumber)
                 .header("Authorization", "Bearer " + token));
+    }
+
+    private ResultActions getPackageHistory(String token, String shipmentNumber) throws Exception {
+        return mvc.perform(get("/api/v1/packages/{shipmentNumber}/history", shipmentNumber)
+                .header("Authorization", "Bearer " + token));
+    }
+
+    private void recordPackageEvent(
+            DeliveryPackage target,
+            AuditAction action,
+            String details,
+            String previousStatus,
+            String newStatus) {
+        var actor = new AuthenticatedUser(
+                adminVentas.getId(),
+                adminVentas.getDocumentType(),
+                adminVentas.getDocumentNumber(),
+                adminVentas.getFullName(),
+                adminVentas.getRole().getName(),
+                adminVentas.getEmail());
+        auditService.logPackageAction(
+                action,
+                actor,
+                target.getId(),
+                target.getShipmentNumber(),
+                details,
+                previousStatus,
+                newStatus);
     }
 
     @Test
@@ -209,5 +244,73 @@ class PackageControllerTest {
     void tokenInvalidoRetorna401() throws Exception {
         getPackage("token-invalido", "ENV-2024-0001")
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminVentasConsultaHistorialConEventosEstructuradosYEnOrdenCronologico() throws Exception {
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
+                "Rosa de la Cruz cambió el estado: PENDIENTE a ASIGNADO",
+                "PENDIENTE",
+                "ASIGNADO");
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_ASSIGNED,
+                "Rosa de la Cruz asignó el envío",
+                "PENDIENTE",
+                "ASIGNADO");
+
+        getPackageHistory(token(adminVentas), "ENV-2024-0001")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].timestamp").exists())
+                .andExpect(jsonPath("$[0].action").value("CAMBIAR_ESTADO_PAQUETE"))
+                .andExpect(jsonPath("$[0].details").value("Rosa de la Cruz cambió el estado: PENDIENTE a ASIGNADO"))
+                .andExpect(jsonPath("$[0].actorName").value("Admin Ventas Test"))
+                .andExpect(jsonPath("$[0].previousStatus").doesNotExist())
+                .andExpect(jsonPath("$[0].newStatus").doesNotExist())
+                .andExpect(jsonPath("$[1].action").value("ASIGNAR_PAQUETE"));
+
+        var storedEvents = auditLogs.findAll().stream()
+                .filter(log -> pkg.getId().equals(log.getPackageId()))
+                .toList();
+        org.assertj.core.api.Assertions.assertThat(storedEvents)
+                .extracting(AuditLog::getPreviousStatus, AuditLog::getNewStatus)
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"),
+                        org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"));
+    }
+
+    @Test
+    void historialDeEnvioNoIncluyeEventosDeUnNumeroPrefijo() throws Exception {
+        var env1 = packages.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-1").build());
+        var env10 = packages.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-10").build());
+        recordPackageEvent(env1, AuditAction.PACKAGE_STATUS_CHANGED, "Evento ENV-1", "PENDIENTE", "ASIGNADO");
+        recordPackageEvent(env10, AuditAction.PACKAGE_STATUS_CHANGED, "Evento ENV-10", "PENDIENTE", "ASIGNADO");
+
+        getPackageHistory(token(adminVentas), "ENV-1")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].details").value("Evento ENV-1"));
+    }
+
+    @Test
+    void reimportarNumeroEliminadoNoHeredaElHistorialDeLaInstanciaAnterior() throws Exception {
+        recordPackageEvent(pkg, AuditAction.PACKAGE_STATUS_CHANGED, "Historial anterior", "PENDIENTE", "ASIGNADO");
+        Long deletedPackageId = pkg.getId();
+        String shipmentNumber = pkg.getShipmentNumber();
+
+        packages.delete(pkg);
+        packages.flush();
+
+        DeliveryPackage reimported = packages.saveAndFlush(
+                DeliveryPackage.builder().shipmentNumber(shipmentNumber).build());
+        org.assertj.core.api.Assertions.assertThat(reimported.getId()).isNotEqualTo(deletedPackageId);
+
+        getPackageHistory(token(adminVentas), shipmentNumber)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 }

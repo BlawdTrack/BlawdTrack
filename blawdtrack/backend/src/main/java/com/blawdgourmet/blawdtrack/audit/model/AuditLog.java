@@ -55,6 +55,18 @@ public class AuditLog {
     @Column(name = "detalle", length = 500)
     private String details;
 
+    @Column(name = "paquete_id")
+    private Long packageId;
+
+    @Column(name = "numero_envio", length = 50)
+    private String shipmentNumber;
+
+    @Column(name = "estado_anterior", length = 30)
+    private String previousStatus;
+
+    @Column(name = "estado_nuevo", length = 30)
+    private String newStatus;
+
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime timestamp;
 }

@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.audit.service.impl;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.springframework.util.Assert;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,6 +85,36 @@ public class AuditServiceImpl implements AuditService {
                 .usuarioAfectado(affected)
                 .action(action.getCode())
                 .details(truncate(details))
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        auditLogRepository.save(auditLog);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void logPackageAction(
+            AuditAction action,
+            AuthenticatedUser actor,
+            Long packageId,
+            String shipmentNumber,
+            String details,
+            String previousStatus,
+            String newStatus) {
+        Objects.requireNonNull(action, "action must not be null");
+        Objects.requireNonNull(actor, "actor must not be null");
+        Objects.requireNonNull(packageId, "packageId must not be null");
+        Assert.hasText(shipmentNumber, "shipmentNumber must not be blank");
+
+        User actorReference = userRepository.getReferenceById(actor.id());
+        AuditLog auditLog = AuditLog.builder()
+                .actor(actorReference)
+                .action(action.getCode())
+                .details(truncate(details))
+                .packageId(packageId)
+                .shipmentNumber(shipmentNumber)
+                .previousStatus(previousStatus)
+                .newStatus(newStatus)
                 .timestamp(LocalDateTime.now())
                 .build();
 
