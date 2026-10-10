@@ -302,4 +302,62 @@ class CourierStatusTest {
         mvc.perform(get("/api/v1/couriers/deactivations").header("Authorization", "Bearer " + tokenOf(actor)))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void elHistorialGeneralJuntaLosCambiosDeTodosLosMensajerosConElMensajeroAfectado() throws Exception {
+        var otherUser = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA)
+                .documentNumber("704440449").fullName("Otro Mensajero HU004").email("otro-hu004@example.com")
+                .phone("70444049").passwordHash("unused").status(UserStatus.ACTIVE)
+                .role(roles.findByName("MENSAJERO").orElseThrow()).build());
+        var other = couriers.saveAndFlush(Courier.builder().user(otherUser).schedule("Lunes a viernes")
+                .maxPackageWeightKg(new BigDecimal("15.00")).build());
+        String superToken = superUserToken();
+        changeStatus(superToken, DEACTIVATE).andExpect(status().isOk());
+        mvc.perform(patch("/api/v1/couriers/" + other.getId() + "/status")
+                        .header("Authorization", "Bearer " + superToken)
+                        .contentType(MediaType.APPLICATION_JSON).content(DEACTIVATE))
+                .andExpect(status().isOk());
+
+        mvc.perform(get("/api/v1/couriers/history").header("Authorization", "Bearer " + superToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].courierName").value("Otro Mensajero HU004"))
+                .andExpect(jsonPath("$[0].documentNumber").value("704440449"))
+                .andExpect(jsonPath("$[0].action").value("DESACTIVAR_MENSAJERO"))
+                .andExpect(jsonPath("$[0].actorName").value("Super HU004"))
+                .andExpect(jsonPath("$[0].timestamp").isNotEmpty())
+                .andExpect(jsonPath("$[1].courierName").value(courierUser.getFullName()));
+    }
+
+    @Test
+    void elHistorialPorMensajeroSigueMostrandoSoloLosCambiosDeEseMensajero() throws Exception {
+        var otherUser = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA)
+                .documentNumber("704440450").fullName("Otro Mensajero 2 HU004").email("otro2-hu004@example.com")
+                .phone("70444050").passwordHash("unused").status(UserStatus.ACTIVE)
+                .role(roles.findByName("MENSAJERO").orElseThrow()).build());
+        var other = couriers.saveAndFlush(Courier.builder().user(otherUser).schedule("Lunes a viernes")
+                .maxPackageWeightKg(new BigDecimal("15.00")).build());
+        String superToken = superUserToken();
+        changeStatus(superToken, DEACTIVATE).andExpect(status().isOk());
+        mvc.perform(patch("/api/v1/couriers/" + other.getId() + "/status")
+                        .header("Authorization", "Bearer " + superToken)
+                        .contentType(MediaType.APPLICATION_JSON).content(DEACTIVATE))
+                .andExpect(status().isOk());
+
+        mvc.perform(get("/api/v1/couriers/" + courier.getId() + "/history")
+                        .header("Authorization", "Bearer " + superToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void elHistorialGeneralSoloLoPuedeVerElSuperUsuario() throws Exception {
+        var actor = users.saveAndFlush(User.builder().documentType(DocumentType.CEDULA)
+                .documentNumber("704440451").fullName("Admin ventas 3").email("ventas3-hu004@example.com")
+                .passwordHash("unused").status(UserStatus.ACTIVE)
+                .role(roles.findByName("ADMIN_VENTAS").orElseThrow()).build());
+
+        mvc.perform(get("/api/v1/couriers/history").header("Authorization", "Bearer " + tokenOf(actor)))
+                .andExpect(status().isForbidden());
+    }
 }

@@ -1,13 +1,17 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, ButtonBase, Typography } from '@mui/material';
 import { NAV_GROUP_ICONS } from './navIcons';
+import { CARD_PATTERN_SX, FONT } from '../../theme';
 
-const firstEnabledPath = (group) => group.items.find((item) => item.path)?.path ?? null;
-const isGroupActive = (group, pathname) => group.items.some((item) => item.path === pathname);
+// Naranja más oscuro que el de la marca: el de marca sobre blanco no llega a 4.5:1 en texto pequeño.
+const ACTIVE_COLOR = '#C25100';
+
+const isGroupActive = (group, pathname) =>
+  pathname === group.path || group.items.some((item) => item.path === pathname);
 
 /**
- * Barra de pestañas inferior para teléfonos: una pestaña por grupo de navegación, que lleva a la
- * primera pantalla disponible del grupo.
+ * Barra de pestañas inferior para teléfonos: una pestaña por grupo de navegación, que lleva al menú
+ * del módulo.
  * @param {{ groups: Array }} props Grupos de `getNavigationForRole`.
  */
 export default function MobileBottomNav({ groups }) {
@@ -19,39 +23,43 @@ export default function MobileBottomNav({ groups }) {
       component="nav"
       sx={{
         display: { xs: 'flex', md: 'none' },
+        ...CARD_PATTERN_SX,
         position: 'fixed',
         left: 0,
         right: 0,
         bottom: 0,
         zIndex: 10,
-        backgroundColor: '#fff',
-        borderTop: '1px solid #E4DED7',
+        borderTop: '1px solid', borderColor: 'neutral.border',
       }}
     >
       {groups.map((group) => {
-        const target = firstEnabledPath(group);
+        const target = group.path;
         const active = isGroupActive(group, pathname);
         const Icon = NAV_GROUP_ICONS[group.id];
         return (
-          <Box
+          <ButtonBase
             key={group.id}
             onClick={() => target && navigate(target)}
+            disabled={!target}
+            aria-current={active ? 'page' : undefined}
             sx={{
               flex: 1,
+              minHeight: 48,
               pt: 1.25,
               pb: 1.5,
+              flexDirection: 'column',
               textAlign: 'center',
-              cursor: target ? 'pointer' : 'default',
               opacity: target ? 1 : 0.5,
+              '&.Mui-focusVisible': { outline: '2px solid #FF6C0E', outlineOffset: -2 },
             }}
           >
             {Icon && (
-              <Icon sx={{ fontSize: 21, mb: 0.375, color: active ? '#FF6C0E' : '#9E968D' }} />
+              <Icon sx={{ fontSize: FONT.xl, mb: 0.375, color: active ? ACTIVE_COLOR : 'text.secondary' }} />
             )}
-            <Typography sx={{ fontSize: 10.5, fontWeight: 700, color: active ? '#FF6C0E' : '#9E968D' }}>
+            <Typography sx={{ fontSize: FONT.xs, fontWeight: 700, color: active ? ACTIVE_COLOR : 'text.secondary' }}>
               {group.shortTitle}
             </Typography>
-          </Box>
+          </ButtonBase>
         );
       })}
     </Box>

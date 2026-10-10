@@ -62,13 +62,23 @@ public class EmailService {
     }
 
     public void sendCourierWelcome(String recipient, String fullName, String temporaryPassword) {
+        sendWelcome(recipient, fullName, temporaryPassword, "de mensajero");
+    }
+
+    public void sendAdminWelcome(String recipient, String fullName, String temporaryPassword) {
+        sendWelcome(recipient, fullName, temporaryPassword, "de administrador de ventas");
+    }
+
+    /** Correo de bienvenida con la contraseña temporal; {@code accountLabel} completa "Tu cuenta ...". */
+    private void sendWelcome(String recipient, String fullName, String temporaryPassword, String accountLabel) {
         Assert.hasText(recipient, "Recipient is required");
         Assert.hasText(fullName, "Full name is required");
         Assert.hasText(temporaryPassword, "Temporary password is required");
-        String text = "Hola " + fullName + ",\n\nBienvenido a BlawdTrack. Tu cuenta de mensajero está lista."
+        String text = "Hola " + fullName + ",\n\nBienvenido a BlawdTrack. Tu cuenta " + accountLabel + " está lista."
                 + "\nCorreo de acceso: " + recipient + "\nContraseña temporal: " + temporaryPassword
                 + "\n\nGuardá estas credenciales en un lugar seguro y no las compartás.";
         String html = courierWelcomeTemplate
+                .replace("{{accountLabel}}", accountLabel)
                 .replace("{{fullName}}", HtmlUtils.htmlEscape(fullName))
                 .replace("{{recipient}}", HtmlUtils.htmlEscape(recipient))
                 .replace("{{temporaryPassword}}", HtmlUtils.htmlEscape(temporaryPassword));

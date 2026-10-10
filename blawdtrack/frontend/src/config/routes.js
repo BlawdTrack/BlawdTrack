@@ -5,6 +5,10 @@ export const ROUTES = {
   // Destino del enlace del correo de recuperación (MAIL_LINK_URL del backend).
   PASSWORD_RESET: '/recovery',
   MAIN_MENU: '/main-menu',
+  // Menú de cada módulo del Súper Usuario: lista las funciones del módulo (ver NAVIGATION_GROUPS).
+  MODULE_COURIERS: '/main-menu/mensajeros',
+  MODULE_ADMINS: '/main-menu/administradores',
+  MODULE_SECURITY: '/main-menu/seguridad',
   // Mismo flujo que PASSWORD_RECOVERY, pero dentro del menú principal para un
   // usuario ya logueado (mantiene la barra lateral visible).
   PASSWORD_RESET_OWN: '/main-menu/restablecer-contrasena',

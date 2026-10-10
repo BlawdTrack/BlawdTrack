@@ -1,14 +1,31 @@
-import { Box, Container, Paper, Typography, Button, Chip } from '@mui/material';
+import { Box, Button, Chip, Typography } from '@mui/material';
+import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
+import ConstructionOutlinedIcon from '@mui/icons-material/ConstructionOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { ROLE_LABELS } from '../config/roles';
 import { getPasswordResetRoute } from '../utils/roleRoutes';
+import BrandLogo from './BrandLogo';
+import PageContainer from './PageContainer';
+import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
+
+const CARD_SX = {
+  ...CARD_PATTERN_SX,
+  border: '1px solid', borderColor: 'neutral.border',
+  borderRadius: RADIUS.md,
+  p: { xs: 2.5, sm: 3 },
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 1.5,
+};
 
 // Pantalla de inicio mínima para roles que todavía no tienen su panel real
 // (T12). SalesHomePage y CourierHomePage la usan; cuando HU-010+/HU-022
 // construyan la pantalla definitiva, cada una se reemplaza por la real.
 /**
  * @param {{ title: string, description: string }} props Título y texto de la pantalla provisional;
- *   muestra el usuario y el rol autenticados y un botón para cerrar sesión.
+ *   muestra el usuario y el rol autenticados, el acceso a restablecer la contraseña y cerrar sesión.
  */
 export function ProvisionalHomePage({ title, description }) {
   const { user, logout } = useAuth();
@@ -22,32 +39,85 @@ export function ProvisionalHomePage({ title, description }) {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
-      <Container maxWidth="sm">
-        <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', border: '1px solid #E4DED7' }}>
-          <Chip label="Pantalla provisional" size="small" sx={{ mb: 2 }} />
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+    <Box sx={{ minHeight: '100vh' }}>
+      <Box
+        component="header"
+        sx={{
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          borderBottom: '4px solid',
+          borderColor: 'secondary.main',
+          px: { xs: 2, sm: 4 },
+          py: 1.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2,
+        }}
+      >
+        <BrandLogo variant="horizontal" onDark width={108} />
+        <Button
+          onClick={handleLogout}
+          startIcon={<LogoutOutlinedIcon fontSize="small" />}
+          sx={{
+            color: 'rgba(255,255,255,.9)',
+            minHeight: 44,
+            border: '1px solid rgba(255,255,255,.25)',
+            // Sobre la cabecera verde el botón es transparente (el tema da fondo blanco a los botones de texto).
+            bgcolor: 'transparent',
+            '&:hover': { bgcolor: 'rgba(255,255,255,.08)' },
+          }}
+        >
+          Cerrar sesión
+        </Button>
+      </Box>
+
+      <PageContainer component="main">
+        <Box sx={{ pl: 2, borderLeft: '4px solid', borderColor: 'secondary.main' }}>
+          <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>Bienvenid@, {user?.fullName}</Typography>
+          <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
             {title}
           </Typography>
-          <Typography sx={{ color: 'text.secondary', mb: 3 }}>{description}</Typography>
-          <Typography sx={{ mb: 0.5 }}>
-            <strong>Usuario:</strong> {user?.fullName}
-          </Typography>
-          <Typography sx={{ mb: 3 }}>
-            <strong>Rol:</strong> {user?.role}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-            {passwordResetRoute && (
-              <Button variant="contained" onClick={() => navigate(passwordResetRoute)}>
+          <Chip
+            label={ROLE_LABELS[user?.role] ?? user?.role}
+            size="small"
+            sx={{ mt: 1, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700 }}
+          />
+        </Box>
+
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '3fr 2fr' } }}>
+          <Box component="section" sx={CARD_SX}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <ConstructionOutlinedIcon sx={{ color: 'secondary.main' }} />
+              <Typography component="h2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                Estamos preparando tu panel
+              </Typography>
+            </Box>
+            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.6 }}>{description}</Typography>
+          </Box>
+
+          {passwordResetRoute && (
+            <Box component="section" sx={CARD_SX}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                <LockResetOutlinedIcon sx={{ color: 'secondary.main' }} />
+                <Typography component="h2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                  Tu cuenta
+                </Typography>
+              </Box>
+              <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+                Cambia tu contraseña cuando lo necesites. Te enviaremos un enlace a tu correo.
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => navigate(passwordResetRoute)}
+                sx={{ alignSelf: 'flex-start', minHeight: TOUCH_TARGET, px: 3 }}
+              >
                 Restablecer contraseña
               </Button>
-            )}
-            <Button variant="outlined" onClick={handleLogout}>
-              Cerrar sesión
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
+            </Box>
+          )}
+        </Box>
+      </PageContainer>
     </Box>
   );
 }
