@@ -1,11 +1,14 @@
 package com.blawdgourmet.blawdtrack.packages;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +27,9 @@ import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
-import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackageItem;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
@@ -38,8 +41,8 @@ import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 /**
- * Tests de autorización y respuesta para GET /api/v1/packages/{shipmentNumber}
- * (HU-013, Task 124: consulta de paquete por número de envío).
+ * Tests de autorización y respuesta para las consultas de paquetes/envíos
+ * (Task 124: detalle y Task 125: historial).
  * El endpoint es accesible solo para ADMIN_VENTAS.
  */
 @SpringBootTest
@@ -276,11 +279,38 @@ class PackageControllerTest {
         var storedEvents = auditLogs.findAll().stream()
                 .filter(log -> pkg.getId().equals(log.getPackageId()))
                 .toList();
-        org.assertj.core.api.Assertions.assertThat(storedEvents)
+        assertThat(storedEvents)
                 .extracting(AuditLog::getPreviousStatus, AuditLog::getNewStatus)
                 .containsExactly(
                         org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"),
                         org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"));
+    }
+
+    @Test
+    void eventosConLaMismaFechaSeOrdenanPorIdentificador() throws Exception {
+        LocalDateTime timestamp = LocalDateTime.of(2026, 10, 10, 12, 0);
+        AuditLog first = AuditLog.builder()
+                .actor(adminVentas)
+                .action(AuditAction.PACKAGE_STATUS_CHANGED.getCode())
+                .details("Primer evento")
+                .packageId(pkg.getId())
+                .shipmentNumber(pkg.getShipmentNumber())
+                .timestamp(timestamp)
+                .build();
+        AuditLog second = AuditLog.builder()
+                .actor(adminVentas)
+                .action(AuditAction.PACKAGE_STATUS_CHANGED.getCode())
+                .details("Segundo evento")
+                .packageId(pkg.getId())
+                .shipmentNumber(pkg.getShipmentNumber())
+                .timestamp(timestamp)
+                .build();
+        auditLogs.saveAllAndFlush(List.of(first, second));
+
+        getPackageHistory(token(adminVentas), "ENV-2024-0001")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].details").value("Primer evento"))
+                .andExpect(jsonPath("$[1].details").value("Segundo evento"));
     }
 
     @Test
@@ -312,5 +342,42 @@ class PackageControllerTest {
         getPackageHistory(token(adminVentas), shipmentNumber)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void historialDePaqueteInexistenteRetorna404() throws Exception {
+        getPackageHistory(token(adminVentas), "ENV-NO-EXISTE")
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SUPER_USUARIO", "MENSAJERO"})
+    void otrosRolesConsultandoHistorialReciben403(String role) throws Exception {
+        var otroUsuario = users.saveAndFlush(User.builder()
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("999999999")
+                .documentId("999999999")
+                .fullName("Otro Rol " + role)
+                .email("otro-" + role.toLowerCase() + "@example.com")
+                .passwordHash("unused")
+                .status(UserStatus.ACTIVE)
+                .role(roles.findByName(role).orElseThrow())
+                .build());
+
+        getPackageHistory(token(otroUsuario), "ENV-2024-0001")
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void sinTokenConsultandoHistorialRetorna401() throws Exception {
+        mvc.perform(get("/api/v1/packages/ENV-2024-0001/history"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void tokenInvalidoConsultandoHistorialRetorna401() throws Exception {
+        getPackageHistory("token-invalido", "ENV-2024-0001")
+                .andExpect(status().isUnauthorized());
     }
 }

@@ -3,10 +3,10 @@ package com.blawdgourmet.blawdtrack.audit.service.impl;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import org.springframework.util.Assert;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;

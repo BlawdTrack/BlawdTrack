@@ -1,18 +1,19 @@
 package com.blawdgourmet.blawdtrack.packages.service;
 
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDetailResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageHistoryEntry;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 /**
  * Casos de uso para consultar paquetes/envíos.
