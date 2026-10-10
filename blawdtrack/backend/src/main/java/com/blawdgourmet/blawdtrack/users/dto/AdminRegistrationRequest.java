@@ -14,7 +14,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * Payload para POST /api/v1/admins (HU-006 / CU-006 Crear administrador).
+ * Payload para POST /api/v1/admins (HU-006 / CU-006 Crear administrador). No lleva contraseña: el sistema genera
+ * una temporal y la envía por correo al nuevo administrador.
  * Los nombres de propiedad están en camelCase según el estándar P13 (DTOs/JSON).
  */
 @ValidDocument
@@ -34,13 +35,6 @@ public record AdminRegistrationRequest(
         @Size(max = 120, message = "Email address cannot exceed 120 characters.")
         String correoElectronico,
 
-        @NotBlank(message = "Initial password is required.")
-        @Pattern(
-                regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
-                message = "The password must be at least 8 characters long and combine letters and numbers."
-        )
-        String contrasenaInicial,
-
         @NotNull(message = "Document type is required.")
         DocumentType documentType,
 
@@ -59,9 +53,8 @@ public record AdminRegistrationRequest(
             String nombreCompleto,
             String numeroTelefono,
             String correoElectronico,
-            String contrasenaInicial,
             String documentNumber) {
-        this(nombreCompleto, numeroTelefono, correoElectronico, contrasenaInicial, DocumentType.CEDULA, documentNumber);
+        this(nombreCompleto, numeroTelefono, correoElectronico, DocumentType.CEDULA, documentNumber);
     }
 
     @Override

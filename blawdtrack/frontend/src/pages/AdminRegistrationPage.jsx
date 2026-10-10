@@ -1,46 +1,28 @@
-import { useState } from 'react';
-import {
-  Paper,
-  Box,
-  Typography,
-  TextField,
-  MenuItem,
-  Button,
-  CircularProgress
-} from '@mui/material';
 import { useAdminRegistration } from '../hooks/useAdminRegistration';
+import { useRegistrationForm } from '../hooks/useRegistrationForm';
 import { validateAdminForm } from '../utils/adminFormValidation';
-import { StatusMessage } from '../components/StatusMessage';
-import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
-
-// On phones the form uses 2 columns; wide fields span both.
-const SPAN_2_SX = { gridColumn: { xs: 'span 2', md: 'auto' } };
+import FormField from '../components/FormField';
+import DocumentFields from '../components/DocumentFields';
+import RegistrationFormPage from '../components/RegistrationFormPage';
+import { FULL_ROW_SX } from '../components/formStyles';
+import { ROUTES } from '../config/routes';
 
 const INITIAL_FORM_DATA = {
   documentType: 'CEDULA',
   documentNumber: '',
   nombreCompleto: '',
   numeroTelefono: '',
-  correoElectronico: '',
-  contrasenaInicial: ''
+  correoElectronico: ''
 };
 
 // Visual order of the inputs, used to focus the first one with an error.
 const FIELD_ORDER = [
   'nombreCompleto',
-  'numeroTelefono',
   'correoElectronico',
+  'numeroTelefono',
   'documentType',
-  'documentNumber',
-  'contrasenaInicial'
+  'documentNumber'
 ];
-
-const LABEL_SX = { fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px', color: '#6B6560', mb: 0.75, display: 'block' };
-const INPUT_SX = {
-  backgroundColor: '#fff',
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '0.9rem', '& fieldset': { borderColor: '#DCD4CA' } },
-  '& .MuiOutlinedInput-input': { py: 1.4 }
-};
 
 // Builds the body expected by POST /api/v1/admins (AdminRegistrationRequest).
 function buildAdminPayload(formData) {
@@ -49,192 +31,48 @@ function buildAdminPayload(formData) {
     documentNumber: formData.documentNumber.trim(),
     nombreCompleto: formData.nombreCompleto.trim(),
     numeroTelefono: formData.numeroTelefono.trim(),
-    correoElectronico: formData.correoElectronico.trim(),
-    contrasenaInicial: formData.contrasenaInicial
+    correoElectronico: formData.correoElectronico.trim()
   };
 }
 
+const buildAdminNotice = (outcome, payload) =>
+  `Administrador creado correctamente. Se envió un correo a ${payload.correoElectronico} con la contraseña temporal.`;
+
+/**
+ * Pantalla "Crear administrador" (HU-006), exclusiva del Super Usuario. Valida el formulario en el cliente
+ * (`validateAdminForm`), arma el cuerpo de `POST /api/v1/admins` y muestra los errores del backend junto a
+ * cada campo. La contraseña temporal la genera y envía por correo el backend. Al crear el administrador vuelve
+ * al menú de gestión de administradores con un aviso de éxito.
+ */
 export function AdminRegistrationPage() {
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-  const {
-    isSubmitting,
-    isSuccess,
-    registeredAdmin,
-    fieldErrors,
-    globalMessage,
-    severity,
-    register,
-    setValidationErrors,
-    setFieldError,
-    clearFieldError
-  } = useAdminRegistration();
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((previous) => ({ ...previous, [name]: value }));
-    clearFieldError(name);
-  };
-
-  // Validate a text field when the user leaves it, but only once it has content
-  // (an empty required field is reported on submit, not while tabbing through).
-  const handleBlur = (event) => {
-    const { name, value } = event.target;
-    if (!value.trim()) return;
-    const message = validateAdminForm(formData)[name];
-    if (message) setFieldError(name, message);
-  };
-
-  const focusFirstError = (errors) => {
-    const firstField = FIELD_ORDER.find((name) => errors[name]);
-    // Every input has id === field name, so the DOM lookup is enough.
-    if (firstField) document.getElementById(firstField)?.focus();
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (isSubmitting) return;
-
-    const clientErrors = validateAdminForm(formData);
-    if (Object.keys(clientErrors).length > 0) {
-      setValidationErrors(clientErrors);
-      focusFirstError(clientErrors);
-      return;
-    }
-
-    const outcome = await register(buildAdminPayload(formData));
-    if (outcome?.ok) {
-      setFormData(INITIAL_FORM_DATA);
-    } else if (outcome) {
-      focusFirstError(outcome.fieldErrors);
-    }
-  };
-
-  // Props shared by every input: value, change handler, inline error and
-  // accessibility wiring (MUI links helperText through aria-describedby).
-  const fieldProps = (name) => ({
-    id: name,
-    name,
-    value: formData[name],
-    onChange: handleChange,
-    onBlur: handleBlur,
-    error: Boolean(fieldErrors[name]),
-    helperText: fieldErrors[name] || undefined,
-    fullWidth: true,
-    sx: INPUT_SX
+  const registration = useAdminRegistration();
+  const { formData, form, handleSubmit, fieldProps } = useRegistrationForm({
+    initialData: INITIAL_FORM_DATA,
+    validate: validateAdminForm,
+    fieldOrder: FIELD_ORDER,
+    discardTo: ROUTES.MODULE_ADMINS,
+    registration,
+    buildPayload: buildAdminPayload,
+    buildNotice: buildAdminNotice
   });
 
-  const renderField = (name, label, extra, span2 = false) => (
-    <Box sx={span2 ? SPAN_2_SX : undefined}>
-      <Typography variant="caption" component="label" htmlFor={name} sx={LABEL_SX}>
-        {label}
-      </Typography>
-      <TextField {...fieldProps(name)} {...extra} />
-    </Box>
-  );
-
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#FAF8F5', py: { xs: 1.5, sm: 4 }, px: { xs: 1.5, sm: 4 } }}>
-      <Paper
-        elevation={0}
-        sx={{
-          maxWidth: 1200,
-          mx: 'auto',
-          borderRadius: '18px',
-          border: '1px solid #E4DED7',
-          backgroundColor: '#fff',
-          boxShadow: '0 12px 30px rgba(26,60,52,.06)',
-          p: { xs: 2, sm: 3.5 },
-          textAlign: 'left'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 1.5, sm: 3 } }}>
-          <Box
-            sx={{
-              width: 34,
-              height: 34,
-              borderRadius: '9px',
-              backgroundColor: '#F1ECE7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2.5px solid #1A3C34' }} />
-          </Box>
-          <Typography component="h1" sx={{ fontSize: '1.06rem', fontWeight: 600, m: 0, color: '#1A3C34' }}>
-            Datos del nuevo administrador
-          </Typography>
-        </Box>
-
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2.5 } }}>
-          {isSuccess && (
-            <StatusMessage
-              severity="success"
-              message={`Administrador registrado correctamente. ${registeredAdmin?.correoElectronico || formData.correoElectronico} ya puede iniciar sesión con la contraseña asignada.`}
-            />
-          )}
-          {globalMessage && <StatusMessage severity={severity} message={globalMessage} />}
-
-          <Box
-            sx={{
-              display: 'grid',
-              gap: { xs: '10px 12px', sm: '18px 22px' },
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-              alignItems: 'start'
-            }}
-          >
-            {renderField('nombreCompleto', 'NOMBRE COMPLETO', { required: true, placeholder: 'Ej. Ana Lucía Bermúdez' }, true)}
-            <Box>
-              <Typography variant="caption" component="label" htmlFor="documentType" sx={LABEL_SX}>
-                TIPO DE DOCUMENTO
-              </Typography>
-              <TextField {...fieldProps('documentType')} select required>
-                {DOCUMENT_TYPE_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-            {renderField('documentNumber', 'NÚMERO DE DOCUMENTO', { required: true, placeholder: DOCUMENT_PLACEHOLDERS[formData.documentType] })}
-            {renderField('numeroTelefono', 'TELÉFONO', { required: true, type: 'tel', placeholder: '8888-8888' })}
-            {renderField('correoElectronico', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' }, true)}
-            {renderField('contrasenaInicial', 'CONTRASEÑA INICIAL', { required: true, type: 'password', placeholder: 'Mínimo 8 caracteres, letras y números' }, true)}
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              sx={{
-                backgroundColor: '#1A3C34',
-                '&:hover': { backgroundColor: '#12322B' },
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 2.75,
-                py: { xs: 1.25, sm: 1.5 },
-                borderRadius: '10px',
-                gap: 1.2,
-                boxShadow: 'none'
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <CircularProgress size={18} color="inherit" />
-                  Registrando…
-                </>
-              ) : (
-                <>
-                  Registrar administrador
-                  <Box component="span" sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#FF6C0E' }} />
-                </>
-              )}
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
-    </Box>
+    <RegistrationFormPage
+      title="Crear administrador"
+      description="Registra a un nuevo administrador de ventas. Recibirá por correo una contraseña temporal para ingresar."
+      onSubmit={handleSubmit}
+      form={form}
+      isSubmitting={registration.isSubmitting}
+      submitLabel="Registrar administrador"
+      submittingLabel="Registrando…"
+      globalMessage={registration.globalMessage}
+      severity={registration.severity}
+    >
+      <FormField {...fieldProps('nombreCompleto')} label="Nombre completo" required placeholder="Ej. Ana Lucía Bermúdez" sx={FULL_ROW_SX} />
+      <FormField {...fieldProps('correoElectronico')} label="Correo electrónico" required type="email" placeholder="nombre@blawdgourmet.com" />
+      <FormField {...fieldProps('numeroTelefono')} label="Teléfono" required type="tel" placeholder="8888-8888" />
+      <DocumentFields field={fieldProps} documentType={formData.documentType} />
+    </RegistrationFormPage>
   );
 }
 

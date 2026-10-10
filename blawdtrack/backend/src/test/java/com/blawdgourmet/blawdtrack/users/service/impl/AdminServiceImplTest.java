@@ -21,14 +21,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
+import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
+import com.blawdgourmet.blawdtrack.users.service.AdminRegisteredEvent;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
@@ -51,14 +56,41 @@ class AdminServiceImplTest {
     @Mock private AuditService auditService;
     @Mock private UserRelatedRecordsCleaner relatedRecordsCleaner;
     @Mock private AuditLogRepository auditLogRepository;
+    @Mock private TemporaryPasswordGenerator temporaryPasswords;
+    @Mock private ApplicationEventPublisher events;
 
     private AdminServiceImpl service;
 
     @BeforeEach
     void setUp() {
         service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService,
-                new AdminUniquenessValidator(userRepository), auditLogRepository, relatedRecordsCleaner);
+                new AdminUniquenessValidator(userRepository), auditLogRepository, relatedRecordsCleaner,
+                temporaryPasswords, events);
         ReflectionTestUtils.setField(service, "jwtExpirationMs", 3_600_000L);
+    }
+
+    @Test
+    void registeringAdminEncodesTheGeneratedPasswordAndPublishesTheWelcomeEvent() {
+        when(roleRepository.findByName(RoleName.SALES_ADMIN))
+                .thenReturn(Optional.of(Role.builder().name(RoleName.SALES_ADMIN).build()));
+        when(temporaryPasswords.generate()).thenReturn("Temp-Pass-123!");
+        when(passwordEncoder.encode("Temp-Pass-123!")).thenReturn("hashed-password");
+        when(userRepository.saveAndFlush(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        var request = new AdminRegistrationRequest("Ana Admin", "88888888", "Ana@Example.com",
+                DocumentType.CEDULA, "123456789");
+
+        var response = service.registrarAdministrador(request, null);
+
+        ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).saveAndFlush(saved.capture());
+        assertThat(saved.getValue().getPasswordHash()).isEqualTo("hashed-password");
+        ArgumentCaptor<AdminRegisteredEvent> event = ArgumentCaptor.forClass(AdminRegisteredEvent.class);
+        verify(events).publishEvent(event.capture());
+        assertThat(event.getValue().email()).isEqualTo("ana@example.com");
+        assertThat(event.getValue().fullName()).isEqualTo("Ana Admin");
+        assertThat(event.getValue().temporaryPassword()).isEqualTo("Temp-Pass-123!");
+        assertThat(event.getValue().toString()).doesNotContain("Temp-Pass-123!");
+        assertThat(response.correoElectronico()).isEqualTo("ana@example.com");
     }
 
     @Test

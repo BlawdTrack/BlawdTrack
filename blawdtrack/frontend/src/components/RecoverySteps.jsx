@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { RADIUS, FONT, rem } from '../theme';
 
 // Indicador de pasos del flujo de recuperación de contraseña (bloque
 // `resetSteps` de assets/mockup-sprint1.html). El paso actual llega por prop
@@ -21,12 +22,12 @@ export function RecoverySteps({ current }) {
       sx={{
         listStyle: 'none',
         m: 0,
-        px: '28px',
-        py: '22px',
-        borderBottom: '1px solid #E4DED7',
+        px: { xs: '16px', sm: '28px' },
+        py: '1.1154rem',
+        borderBottom: '1px solid', borderColor: 'neutral.border',
         display: 'flex',
-        gap: '10px',
-        flexWrap: 'wrap',
+        gap: '0.6154rem',
+        flexWrap: 'nowrap',
       }}
     >
       {STEPS.map(({ number, label }) => {
@@ -39,31 +40,31 @@ export function RecoverySteps({ current }) {
             key={number}
             aria-current={isCurrent ? 'step' : undefined}
             sx={{
-              flex: '1 1 180px',
+              flex: { xs: isCurrent ? '1 1 auto' : '0 0 auto', sm: '1 1 180px' },
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              p: '10px 12px',
-              borderRadius: '10px',
-              bgcolor: isCurrent ? '#F1ECE7' : 'transparent',
+              gap: '0.6154rem',
+              p: '0.6154rem 0.7308rem',
+              borderRadius: RADIUS.sm,
+              bgcolor: isCurrent ? 'neutral.surface' : 'transparent',
             }}
           >
             <Box
               component="span"
               sx={{
-                width: 24,
-                height: 24,
-                flex: '0 0 24px',
+                width: rem(20),
+                height: rem(20),
+                flex: `0 0 ${rem(20)}`,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 12,
+                fontSize: FONT.xs,
                 fontWeight: 700,
                 // Verde de marca en el paso actual, verde de éxito en los
                 // ya completados y gris en los pendientes.
-                bgcolor: isCurrent ? 'primary.main' : isDone ? '#2F7D4F' : '#E4DED7',
-                color: isCurrent || isDone ? '#fff' : '#9E968D',
+                bgcolor: isCurrent ? 'primary.main' : isDone ? 'success.main' : 'neutral.border',
+                color: isCurrent || isDone ? 'common.white' : 'text.secondary',
               }}
             >
               {number}
@@ -71,10 +72,11 @@ export function RecoverySteps({ current }) {
             <Typography
               component="span"
               sx={{
-                fontSize: 12.5,
+                display: { xs: isCurrent ? 'inline' : 'none', sm: 'inline' },
+                fontSize: FONT.xs,
                 fontWeight: 600,
                 lineHeight: 1.3,
-                color: isCurrent ? 'primary.main' : '#9E968D',
+                color: isCurrent ? 'primary.main' : 'text.secondary',
               }}
             >
               {label}

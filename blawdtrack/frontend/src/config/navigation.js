@@ -1,58 +1,117 @@
 import { ROLES } from './roles';
 import { ROUTES } from './routes';
 
-// Declarative sidebar definition. Adding a screen means adding an entry here;
-// no layout component needs to change. `path: null` marks a screen that is
-// not implemented yet (rendered disabled).
+// Declarative navigation definition. Adding a screen means adding an entry here;
+// no layout component needs to change. Each group is a module with its own menu
+// page (`path`) that lists its screens; `path: null` on an item marks a screen
+// that is not implemented yet (rendered disabled).
 export const NAVIGATION_GROUPS = [
   {
-    id: 'security',
-    title: 'Seguridad y acceso',
-    shortTitle: 'Acceso',
+    id: 'couriers',
+    title: 'Gestión de mensajeros',
+    shortTitle: 'Mensajeros',
+    path: ROUTES.MODULE_COURIERS,
+    description: 'Registra a tu equipo de reparto, corrige sus datos o retíralo de la operación.',
     items: [
       {
-        id: 'password-reset',
-        label: 'Restablecer contraseña',
-        path: ROUTES.PASSWORD_RESET_OWN,
+        id: 'courier-create',
+        label: 'Crear mensajero',
+        description: 'Registra un mensajero con su horario y la capacidad de carga que puede transportar.',
+        path: ROUTES.COURIER_CREATE,
+        roles: [ROLES.SUPER_USER],
+      },
+      {
+        id: 'courier-update',
+        label: 'Actualizar mensajero',
+        description: 'Corrige los datos de un mensajero que ya está registrado.',
+        path: ROUTES.COURIER_UPDATE,
+        roles: [ROLES.SUPER_USER],
+      },
+      {
+        id: 'courier-deactivate',
+        label: 'Desactivar mensajero',
+        description: 'Retira de la operación a un mensajero; su registro queda en el historial.',
+        path: ROUTES.COURIER_DEACTIVATE,
         roles: [ROLES.SUPER_USER],
       },
     ],
   },
   {
-    id: 'couriers',
-    title: 'Mensajeros',
-    shortTitle: 'Mensajeros',
-    items: [
-      { id: 'courier-create', label: 'Crear mensajero', path: ROUTES.COURIER_CREATE, roles: [ROLES.SUPER_USER] },
-      { id: 'courier-update', label: 'Actualizar mensajero', path: ROUTES.COURIER_UPDATE, roles: [ROLES.SUPER_USER] },
-      { id: 'courier-deactivate', label: 'Desactivar mensajero', path: ROUTES.COURIER_DEACTIVATE, roles: [ROLES.SUPER_USER] },
-    ],
-  },
-  {
     id: 'admins',
-    title: 'Administradores',
+    title: 'Gestión de administradores',
     shortTitle: 'Admins',
+    path: ROUTES.MODULE_ADMINS,
+    description: 'Da de alta a quienes gestionan las ventas o quítales el acceso.',
     items: [
-      { id: 'admin-create', label: 'Crear administrador', path: ROUTES.ADMIN_CREATE, roles: [ROLES.SUPER_USER] },
-      { id: 'admin-delete', label: 'Eliminar administrador', path: ROUTES.ADMIN_DELETE, roles: [ROLES.SUPER_USER] },
+      {
+        id: 'admin-create',
+        label: 'Crear administrador',
+        description: 'Registra a un nuevo administrador de ventas.',
+        path: ROUTES.ADMIN_CREATE,
+        roles: [ROLES.SUPER_USER],
+      },
+      {
+        id: 'admin-delete',
+        label: 'Eliminar administrador',
+        description: 'Elimina a un administrador y consulta el historial de auditoría.',
+        path: ROUTES.ADMIN_DELETE,
+        roles: [ROLES.SUPER_USER],
+      },
     ],
   },
   {
-    id: 'permissions',
-    title: 'Roles y permisos',
-    shortTitle: 'Permisos',
-    items: [{ id: 'roles-permissions', label: 'Roles y permisos', path: ROUTES.ROLES_PERMISSIONS, roles: [ROLES.SUPER_USER] }],
+    id: 'security',
+    title: 'Seguridad y acceso',
+    shortTitle: 'Acceso',
+    path: ROUTES.MODULE_SECURITY,
+    description: 'Cambia tu contraseña y decide qué puede hacer cada persona.',
+    items: [
+      {
+        id: 'password-reset',
+        label: 'Restablecer contraseña',
+        description: 'Recibe en tu correo un enlace para elegir una contraseña nueva.',
+        path: ROUTES.PASSWORD_RESET_OWN,
+        roles: [ROLES.SUPER_USER],
+      },
+      {
+        id: 'roles-permissions',
+        label: 'Roles y permisos',
+        description: 'Ajusta qué puede hacer cada usuario dentro del sistema.',
+        path: ROUTES.ROLES_PERMISSIONS,
+        roles: [ROLES.SUPER_USER],
+      },
+    ],
   },
 ];
 
 /**
- * Menú lateral que le corresponde a un rol: los grupos con solo los ítems permitidos, sin grupos vacíos.
+ * Menú que le corresponde a un rol: los grupos con solo los ítems permitidos, sin grupos vacíos.
  * @param {string} role Rol de negocio.
- * @returns {Array<{ id: string, title: string, shortTitle: string, items: Array }>}
+ * @returns {Array<{ id: string, title: string, shortTitle: string, path: string, description: string,
+ *   items: Array }>}
  */
 export function getNavigationForRole(role) {
   return NAVIGATION_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter((item) => item.roles.includes(role)),
   })).filter((group) => group.items.length > 0);
+}
+
+const isSameOrChildPath = (pathname, path) => pathname === path || pathname.startsWith(`${path}/`);
+
+/**
+ * Pantalla a la que lleva la flecha de retorno desde `pathname`: la pantalla de una función vuelve al
+ * menú de su módulo, y el menú de un módulo vuelve al menú principal. El menú principal no tiene retorno.
+ * @param {string} pathname Ruta actual.
+ * @returns {{ to: string, label: string } | null}
+ */
+export function getBackTarget(pathname) {
+  if (NAVIGATION_GROUPS.some((group) => group.path === pathname)) {
+    return { to: ROUTES.MAIN_MENU, label: 'Menú principal' };
+  }
+
+  const group = NAVIGATION_GROUPS.find((candidate) =>
+    candidate.items.some((item) => item.path && isSameOrChildPath(pathname, item.path))
+  );
+  return group ? { to: group.path, label: group.title } : null;
 }

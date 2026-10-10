@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AdminRegistrationPage } from './AdminRegistrationPage';
 import { registerAdministrator } from '../services/AdminService';
+import { Routes, Route } from 'react-router-dom';
+import { renderWithProviders, superUser } from '../test-utils';
+import ModuleMenuPage from './ModuleMenuPage';
+import { ROUTES } from '../config/routes';
 
 vi.mock('../services/AdminService', () => ({ registerAdministrator: vi.fn() }));
 
@@ -13,7 +17,6 @@ async function fillForm(user) {
   await user.type(screen.getByLabelText(/número de documento/i), '1-1204-0388');
   await user.type(screen.getByLabelText(/teléfono/i), '8888-8888');
   await user.type(screen.getByLabelText(/correo electrónico/i), 'ana@blawdgourmet.com');
-  await user.type(screen.getByLabelText(/contraseña inicial/i), 'Clave1234');
 }
 
 const submit = (user) => user.click(screen.getByRole('button', { name: /registrar administrador/i }));
@@ -23,30 +26,44 @@ describe('AdminRegistrationPage', () => {
     registerAdministrator.mockReset();
   });
 
-  it('shows a success message and clears the form on success', async () => {
+  it('returns to the admins module menu with a success notice that names the email', async () => {
     registerAdministrator.mockResolvedValue({ correoElectronico: 'ana@blawdgourmet.com' });
     const user = userEvent.setup();
-    render(<AdminRegistrationPage />);
+    renderWithProviders(
+      <Routes>
+        <Route path={ROUTES.ADMIN_CREATE} element={<AdminRegistrationPage />} />
+        <Route path={ROUTES.MODULE_ADMINS} element={<ModuleMenuPage groupId="admins" />} />
+      </Routes>,
+      { route: ROUTES.ADMIN_CREATE, user: superUser }
+    );
 
     await fillForm(user);
     await submit(user);
 
-    const status = await screen.findByRole('status');
-    expect(status).toHaveTextContent('ana@blawdgourmet.com');
-    expect(screen.getByLabelText(/nombre completo/i)).toHaveValue('');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Gestión de administradores' })).toBeInTheDocument();
+    const notice = await screen.findByRole('status');
+    expect(notice).toHaveTextContent('Administrador creado correctamente');
+    expect(notice).toHaveTextContent('contraseña temporal');
+    expect(notice).toHaveTextContent('ana@blawdgourmet.com');
     expect(registerAdministrator).toHaveBeenCalledWith({
       documentType: 'CEDULA',
       documentNumber: '1-1204-0388',
       nombreCompleto: 'Ana Lucía Bermúdez',
       numeroTelefono: '8888-8888',
-      correoElectronico: 'ana@blawdgourmet.com',
-      contrasenaInicial: 'Clave1234'
+      correoElectronico: 'ana@blawdgourmet.com'
     });
+  });
+
+  it('does not ask for a password: the backend generates one and emails it', () => {
+    renderWithProviders(<AdminRegistrationPage />);
+
+    expect(screen.queryByLabelText(/contraseña/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/recibirá por correo una contraseña temporal/i)).toBeInTheDocument();
   });
 
   it('blocks the submit and shows inline errors when required fields are empty', async () => {
     const user = userEvent.setup();
-    render(<AdminRegistrationPage />);
+    renderWithProviders(<AdminRegistrationPage />);
 
     await submit(user);
 
@@ -59,7 +76,7 @@ describe('AdminRegistrationPage', () => {
       httpError(409, { code: 'DOCUMENTO_DUPLICADO', message: 'El documento ya está registrado' })
     );
     const user = userEvent.setup();
-    render(<AdminRegistrationPage />);
+    renderWithProviders(<AdminRegistrationPage />);
 
     await fillForm(user);
     await submit(user);
@@ -76,7 +93,7 @@ describe('AdminRegistrationPage', () => {
       httpError(409, { code: 'DUPLICATE_EMAIL', message: 'El correo ya está registrado' })
     );
     const user = userEvent.setup();
-    render(<AdminRegistrationPage />);
+    renderWithProviders(<AdminRegistrationPage />);
 
     await fillForm(user);
     await submit(user);
@@ -88,7 +105,7 @@ describe('AdminRegistrationPage', () => {
   it('shows a global alert when there is no connection', async () => {
     registerAdministrator.mockRejectedValue(new Error('Network Error'));
     const user = userEvent.setup();
-    render(<AdminRegistrationPage />);
+    renderWithProviders(<AdminRegistrationPage />);
 
     await fillForm(user);
     await submit(user);

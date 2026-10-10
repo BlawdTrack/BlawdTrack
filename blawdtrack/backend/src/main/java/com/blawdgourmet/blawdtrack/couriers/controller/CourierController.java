@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.blawdgourmet.blawdtrack.common.dto.ErrorResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierDeactivationEntry;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierGeneralHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
@@ -95,6 +96,12 @@ public class CourierController {
     @GetMapping("/deactivations")
     public List<CourierDeactivationEntry> deactivations() {
         return service.deactivations();
+    }
+
+    /** Historial general: los cambios de todos los mensajeros, con el mensajero afectado en cada uno. */
+    @GetMapping("/history")
+    public List<CourierGeneralHistoryEntry> generalHistory() {
+        return service.generalHistory();
     }
 
     @GetMapping("/{id}/history")
