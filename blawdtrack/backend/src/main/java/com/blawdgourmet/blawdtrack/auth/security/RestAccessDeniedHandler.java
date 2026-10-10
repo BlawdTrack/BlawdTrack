@@ -14,9 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
-* Responds with the unified error format (P05) when an authenticated user
-* does not have the required role (403) — this is the case for the
-* "Super User only" restriction on admin registration.
+ * Responds with the unified error format (P05) when an authenticated user
+ * does not have the role or permission required by the requested endpoint.
  */
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
@@ -27,7 +26,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
         ApiError error = ApiError.builder()
                 .code("ACCESS_DENIED")
-                .message("You do not have the required permissions (Super User role) to perform this action.")
+                .message("You do not have permission to perform this action.")
                 .status(HttpStatus.FORBIDDEN.value())
                 .build();
 
