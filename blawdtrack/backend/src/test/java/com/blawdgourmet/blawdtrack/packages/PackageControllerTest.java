@@ -134,6 +134,10 @@ class PackageControllerTest {
                 .usuarioAfectado(null)
                 .action(action)
                 .details(details)
+                .packageId(pkg.getId())
+                .shipmentNumber(pkg.getShipmentNumber())
+                .previousStatus("PENDING")
+                .newStatus("ASSIGNED")
                 .timestamp(LocalDateTime.now())
                 .build();
         auditLogs.saveAndFlush(log);
