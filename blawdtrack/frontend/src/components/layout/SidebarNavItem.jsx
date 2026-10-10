@@ -1,23 +1,26 @@
 import { NavLink } from 'react-router-dom';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { NAV_ITEM_ICONS } from './navIcons';
+import { RADIUS, FONT, rem } from '../../theme';
 
 function ItemContent({ label, active, disabled, Icon }) {
   return (
     <Box
       sx={{
         position: 'relative',
+        minHeight: 44,
+        // Con mouse (puntero fino) la fila es más baja; con pantalla táctil se queda en 44 px.
+        '@media (pointer: fine)': { minHeight: 36 },
         px: 1.75,
-        py: 1.15,
-        ml: '3px',
-        borderRadius: '8px',
+        ml: '0.1923rem',
+        borderRadius: RADIUS.sm,
         display: 'flex',
         alignItems: 'center',
-        gap: 1.25,
+        gap: 1.5,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        backgroundColor: active ? 'rgba(255,108,14,.14)' : 'transparent',
+        backgroundColor: active ? 'rgba(255,108,14,.18)' : 'transparent',
         transition: 'background-color .15s ease',
-        '&:hover': { backgroundColor: disabled ? 'transparent' : active ? 'rgba(255,108,14,.14)' : 'rgba(255,255,255,.06)' },
+        '&:hover': { backgroundColor: disabled ? 'transparent' : active ? 'rgba(255,108,14,.18)' : 'rgba(255,255,255,.08)' },
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -33,17 +36,17 @@ function ItemContent({ label, active, disabled, Icon }) {
       {Icon && (
         <Icon
           sx={{
-            fontSize: 18,
-            flex: '0 0 18px',
-            color: active ? '#FF6C0E' : disabled ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.55)',
+            fontSize: FONT.xl,
+            flex: `0 0 ${rem(17)}`,
+            color: active ? '#FF6C0E' : disabled ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.7)',
           }}
         />
       )}
       <Typography
         sx={{
-          fontSize: 13.5,
+          fontSize: FONT.sm,
           fontWeight: active ? 600 : 500,
-          color: active ? '#fff' : disabled ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.75)',
+          color: active ? 'common.white' : disabled ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.85)',
         }}
       >
         {label}
@@ -71,7 +74,7 @@ export default function SidebarNavItem({ item }) {
   }
 
   return (
-    <NavLink to={item.path} end style={{ textDecoration: 'none' }}>
+    <NavLink to={item.path} end className="sidebar-nav-link" style={{ textDecoration: 'none' }}>
       {({ isActive }) => <ItemContent label={item.label} active={isActive} disabled={false} Icon={Icon} />}
     </NavLink>
   );

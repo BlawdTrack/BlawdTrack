@@ -14,7 +14,7 @@ vi.mock('./pages/PasswordRecoveryRequestPage', () => ({ default: () => <div>pass
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>courier home screen</div> }));
 
 const protectedRoutes = [
-  [ROUTES.MAIN_MENU, 'Bienvenid@ al sistema'],
+  [ROUTES.MAIN_MENU, '¿Qué deseas hacer hoy?'],
   [ROUTES.COURIER_CREATE, 'courier registration screen'],
   [ROUTES.COURIER_DEACTIVATE, 'fleet list screen'],
   [ROUTES.ADMIN_DELETE, 'admin management screen'],

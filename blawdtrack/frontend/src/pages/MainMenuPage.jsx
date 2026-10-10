@@ -3,11 +3,22 @@ import { Box, Button, Chip, Typography } from '@mui/material';
 import { ROUTES } from '../config/routes';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
+import { getNavigationForRole } from '../config/navigation';
+import { NAV_GROUP_ICONS } from '../components/layout/navIcons';
+import MenuCard from '../components/MenuCard';
+import PageContainer from '../components/PageContainer';
+import { getGreeting } from '../utils/greeting';
+import { RADIUS, FONT, rem, TOUCH_TARGET, fontPx } from '../theme';
 
-/** Inicio del Super Usuario dentro del menú principal: saludo con su nombre, su rol y cerrar sesión. */
+/**
+ * Inicio del Super Usuario dentro del menú principal: portada con su rol (en la etiqueta), el saludo según la
+ * hora y una fila por módulo que su rol puede usar. Todo va centrado y repartido en la altura de la
+ * pantalla; en móvil se agrega el botón de cerrar sesión.
+ */
 export default function MainMenuPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const groups = getNavigationForRole(user.role);
 
   const handleLogout = () => {
     logout();
@@ -15,36 +26,103 @@ export default function MainMenuPage() {
   };
 
   return (
-    <Box
+    <PageContainer
       sx={{
-        minHeight: { xs: 'calc(100vh - 84px)', md: '100vh' },
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        // Banner y módulos ocupan casi todo el ancho disponible para no dejar espacio muerto a los lados.
+        maxWidth: rem(1500),
+        minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },
         justifyContent: 'center',
-        gap: 1.5,
-        p: 3,
-        textAlign: 'center',
+        gap: { xs: 4, md: 6 },
       }}
     >
-      <Typography sx={{ fontSize: 18, color: '#9E968D' }}>Bienvenid@ al sistema</Typography>
-      <Typography
-        component="h1"
-        sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: { xs: 40, md: 52 }, color: '#1A3C34', letterSpacing: '-0.5px' }}
+      <Box
+        sx={{
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: RADIUS.lg,
+          // Franja naranja recta en el borde superior (con borderTop se curvaba en las esquinas).
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 6,
+            bgcolor: 'secondary.main',
+          },
+          px: { xs: 3, md: 6 },
+          // La franja naranja ocupa los 6 px de arriba, así que el relleno superior es un poco mayor.
+          pt: 2.25,
+          pb: 1.75,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          gap: 1,
+        }}
       >
-        BlawdTrack
-      </Typography>
-      <Typography sx={{ fontSize: 17, color: '#4B4741' }}>Sistema de paquetería · {user.fullName}</Typography>
-      <Chip
-        label={ROLE_LABELS[user.role] ?? user.role}
-        sx={{ mt: 1, bgcolor: '#FFE8D9', color: '#FF6C0E', fontWeight: 700, px: 1 }}
-      />
+        <Typography
+          component="h1"
+          sx={{
+            fontFamily: '"Poppins", sans-serif',
+            fontWeight: 700,
+            fontSize: { xs: FONT.h1, md: FONT.hero },
+            lineHeight: 1.1,
+            letterSpacing: '-0.5px',
+          }}
+        >
+          BlawdTrack
+        </Typography>
+        <Typography sx={{ fontSize: { xs: FONT.md, md: FONT.lg }, color: 'rgba(255,255,255,0.9)' }}>
+          Sistema de paquetería
+        </Typography>
+        <Chip
+          label={ROLE_LABELS[user.role] ?? user.role}
+          sx={{ mt: 0.5, bgcolor: 'secondary.light', color: 'secondary.text', fontWeight: 700, fontSize: FONT.sm, height: rem(28), px: 1 }}
+        />
+      </Box>
+
+      {groups.length > 0 && (
+        <Box component="section" aria-labelledby="quick-access-title" sx={{ textAlign: 'center' }}>
+          <Typography
+            id="quick-access-title"
+            variant="h4"
+            component="h2"
+            sx={{ color: 'primary.main', fontWeight: 700, fontSize: { xs: fontPx(28), md: fontPx(40) } }}
+          >
+            {getGreeting()}
+          </Typography>
+          <Typography sx={{ fontSize: { xs: fontPx(17), md: fontPx(21) }, fontWeight: 500, color: 'text.primary', mt: 0.5, mb: { xs: 3, md: 4 } }}>
+            ¿Qué deseas hacer hoy?
+          </Typography>
+          <Box
+            sx={{
+              display: 'grid',
+              gap: 2,
+              gridTemplateColumns: '1fr',
+            }}
+          >
+            {groups.map((group) => (
+              <MenuCard
+                key={group.id}
+                to={group.path}
+                icon={NAV_GROUP_ICONS[group.id]}
+                title={group.title}
+                variant="row"
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
+
       <Button
         onClick={handleLogout}
-        sx={{ display: { xs: 'inline-flex', md: 'none' }, mt: 2, color: '#1A3C34' }}
+        sx={{ display: { xs: 'inline-flex', md: 'none' }, alignSelf: 'center', color: 'primary.main', minHeight: TOUCH_TARGET }}
       >
         Cerrar sesión
       </Button>
-    </Box>
+    </PageContainer>
   );
 }

@@ -15,7 +15,9 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierDeactivationEntry;
+import com.blawdgourmet.blawdtrack.couriers.dto.CourierGeneralHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierHistoryEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierResponse;
 import com.blawdgourmet.blawdtrack.couriers.dto.CreateCourierRequest;
@@ -238,6 +240,21 @@ public class CourierService {
                         user.getId(), COURIER_AUDIT_ACTIONS)
                 .stream()
                 .map(CourierHistoryEntry::from)
+                .toList();
+    }
+
+    /**
+     * Historial general: los cambios de todos los mensajeros, del más reciente al más antiguo, con el
+     * mensajero afectado. Solo se omiten los de cuentas ya eliminadas (la auditoría conserva el registro
+     * pero sin mensajero al que mostrarlo).
+     */
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public List<CourierGeneralHistoryEntry> generalHistory() {
+        return auditLogs.findByActionInOrderByTimestampDescIdDesc(COURIER_AUDIT_ACTIONS)
+                .stream()
+                .filter(log -> log.getUsuarioAfectado() != null)
+                .map(CourierGeneralHistoryEntry::from)
                 .toList();
     }
 

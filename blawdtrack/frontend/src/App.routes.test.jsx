@@ -10,6 +10,7 @@ import { ROUTES } from './config/routes';
 // Las pantallas se mockean: aquí solo importa qué pantalla queda visible según
 // el rol (varias hacen peticiones al backend al montarse).
 vi.mock('./pages/MainMenuPage', () => ({ default: () => <div>Pantalla menú principal</div> }));
+vi.mock('./pages/ModuleMenuPage', () => ({ default: () => <div>Pantalla menú de módulo</div> }));
 vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla administradores</div> }));
 vi.mock('./pages/AdminRegistrationPage', () => ({ default: () => <div>Pantalla registro de administrador</div> }));
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
@@ -30,6 +31,9 @@ vi.mock('./hooks/useAuth', () => ({ useAuth: vi.fn() }));
 // PROTEGIDA NUEVA EN App.jsx hay que sumarla aquí y en ALLOWED_ROUTES.
 const SCREENS = {
   [ROUTES.MAIN_MENU]: 'Pantalla menú principal',
+  [ROUTES.MODULE_COURIERS]: 'Pantalla menú de módulo',
+  [ROUTES.MODULE_ADMINS]: 'Pantalla menú de módulo',
+  [ROUTES.MODULE_SECURITY]: 'Pantalla menú de módulo',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
@@ -50,6 +54,9 @@ const ALLOWED_ROUTES = {
   // Ajustado a las constantes en inglés (SUPER_USER, SALES_ADMIN, COURIER) para que hagan match con App.jsx
   [ROLES.SUPER_USER]: [
     ROUTES.MAIN_MENU,
+    ROUTES.MODULE_COURIERS,
+    ROUTES.MODULE_ADMINS,
+    ROUTES.MODULE_SECURITY,
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_DELETE,
     ROUTES.COURIER_CREATE,

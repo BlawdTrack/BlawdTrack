@@ -1,6 +1,6 @@
 package com.blawdgourmet.blawdtrack.couriers;
 
-import com.blawdgourmet.blawdtrack.couriers.service.TemporaryPasswordGenerator;
+import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
