@@ -17,6 +17,9 @@ public record PackageDetailResponse(
         String address,
         String schedule,
         PackageStatus status,
+        String deliveryEvidenceUrl,
+        String deliverySignatureUrl,
+        String deliveryPhotoUrl,
         List<PackageItemInfo> items,
         AssignedCourierInfo assignedCourier
 ) {

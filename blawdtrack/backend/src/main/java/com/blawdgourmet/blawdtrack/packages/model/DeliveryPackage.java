@@ -43,6 +43,15 @@ public class DeliveryPackage {
     @Column(name = "horario_preferencia", length = 255)
     private String schedule;
 
+    @Column(name = "evidencia_entrega_url", length = 500)
+    private String deliveryEvidenceUrl;
+
+    @Column(name = "firma_entrega_url", length = 500)
+    private String deliverySignatureUrl;
+
+    @Column(name = "foto_entrega_url", length = 500)
+    private String deliveryPhotoUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mensajero_id", foreignKey = @ForeignKey(name = "fk_paquetes_mensajero_id"))
     private Courier assignedCourier;

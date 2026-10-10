@@ -58,6 +58,7 @@ class PackageControllerTest {
     private User courierUser;
     private Courier courier;
     private DeliveryPackage pkg;
+    private DeliveryPackage pkgEntregado;
 
     @BeforeEach
     void setUp() {
@@ -112,6 +113,31 @@ class PackageControllerTest {
                 .build();
         pkg.addItem(item);
         pkg = packages.saveAndFlush(pkg);
+
+        // Paquete entregado con evidencia
+        var itemEntregado = DeliveryPackageItem.builder()
+                .itemId("ITEM-002")
+                .name("Té verde")
+                .quantity(new BigDecimal("1.00"))
+                .sku("TE-001")
+                .unitPrice(new BigDecimal("800.00"))
+                .build();
+        pkgEntregado = DeliveryPackage.builder()
+                .shipmentNumber("ENV-2024-0003")
+                .orderNumber("SO-1003")
+                .customerName("Cliente Entregado")
+                .phone("66666666")
+                .address("Calle 789, San José")
+                .schedule("De 9 a 6")
+                .status(PackageStatus.DELIVERED)
+                .deliveryEvidenceUrl("https://storage.example.com/evidence/ENV-2024-0003.pdf")
+                .deliverySignatureUrl("https://storage.example.com/signatures/ENV-2024-0003.png")
+                .deliveryPhotoUrl("https://storage.example.com/photos/ENV-2024-0003.jpg")
+                .assignedCourier(courier)
+                .items(new ArrayList<>())
+                .build();
+        pkgEntregado.addItem(itemEntregado);
+        pkgEntregado = packages.saveAndFlush(pkgEntregado);
     }
 
     private String token(User user) {
@@ -164,6 +190,9 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$.weightKg").doesNotExist())
                 .andExpect(jsonPath("$.recipientSignature").doesNotExist())
                 .andExpect(jsonPath("$.createdBy").doesNotExist())
+                .andExpect(jsonPath("$.deliveryEvidenceUrl").doesNotExist())
+                .andExpect(jsonPath("$.deliverySignatureUrl").doesNotExist())
+                .andExpect(jsonPath("$.deliveryPhotoUrl").doesNotExist())
                 .andExpect(jsonPath("$.assignedCourier").exists())
                 .andExpect(jsonPath("$.assignedCourier.courierId").value(courier.getId()))
                 .andExpect(jsonPath("$.assignedCourier.fullName").value("Mensajero Test"))
@@ -173,6 +202,32 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$.assignedCourier.documentNumber").doesNotExist())
                 .andExpect(jsonPath("$.assignedCourier.status").doesNotExist())
                 .andExpect(jsonPath("$.assignedCourier.role").doesNotExist());
+    }
+
+    @Test
+    void adminVentasConsultaPaqueteEntregadoIncluyeEvidenciaEntrega() throws Exception {
+        getPackage(token(adminVentas), "ENV-2024-0003")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(pkgEntregado.getId()))
+                .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0003"))
+                .andExpect(jsonPath("$.status").value("DELIVERED"))
+                .andExpect(jsonPath("$.deliveryEvidenceUrl").value("https://storage.example.com/evidence/ENV-2024-0003.pdf"))
+                .andExpect(jsonPath("$.deliverySignatureUrl").value("https://storage.example.com/signatures/ENV-2024-0003.png"))
+                .andExpect(jsonPath("$.deliveryPhotoUrl").value("https://storage.example.com/photos/ENV-2024-0003.jpg"));
+    }
+
+    @Test
+    void adminVentasConsultaPaqueteNoEntregadoNoIncluyeEvidenciaEntrega() throws Exception {
+        // Cambiar el paquete original a estado SHIPPED (no entregado)
+        pkg.setStatus(PackageStatus.SHIPPED);
+        packages.saveAndFlush(pkg);
+
+        getPackage(token(adminVentas), "ENV-2024-0001")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SHIPPED"))
+                .andExpect(jsonPath("$.deliveryEvidenceUrl").doesNotExist())
+                .andExpect(jsonPath("$.deliverySignatureUrl").doesNotExist())
+                .andExpect(jsonPath("$.deliveryPhotoUrl").doesNotExist());
     }
 
     @Test
