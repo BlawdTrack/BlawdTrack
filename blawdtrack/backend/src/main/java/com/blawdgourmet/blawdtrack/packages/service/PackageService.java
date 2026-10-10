@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.packages.service;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDetailResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageHistoryEntry;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
+import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
