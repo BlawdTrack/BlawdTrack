@@ -19,7 +19,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDeletionResponse;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
@@ -34,24 +33,25 @@ class PackageDeletionServiceImplTest {
             7L, DocumentType.CEDULA, "1-1111-1111", "Ana Ventas", "ADMIN_VENTAS", "ana@example.test");
 
     @Mock private DeliveryPackageRepository packages;
-    @Mock private AuditService auditService;
+    @Mock private PackageDeletionAuditService deletionAudit;
 
     private PackageDeletionService service() {
-        return new PackageDeletionServiceImpl(packages, auditService);
+        return new PackageDeletionServiceImpl(packages, deletionAudit);
     }
 
     @ParameterizedTest
     @EnumSource(value = PackageStatus.class, names = {"PENDING", "ASSIGNED"})
-    void eliminaElPaqueteEnEstadoEliminableYRegistraLaAuditoriaAntes(PackageStatus status) {
+    void eliminaElPaqueteYRegistraLaAuditoriaDespuesDelBorrado(PackageStatus status) {
         DeliveryPackage pkg = paquete("ENV-001", status);
         when(packages.findByShipmentNumber("ENV-001")).thenReturn(Optional.of(pkg));
 
         PackageDeletionResponse response = service().deletePackage("ENV-001", ACTOR);
 
         assertThat(response.message()).isEqualTo("Paquete eliminado correctamente.");
-        InOrder order = inOrder(auditService, packages);
-        order.verify(auditService).registrarEliminacionPaquete(ACTOR, "ENV-001", status);
+        InOrder order = inOrder(packages, deletionAudit);
         order.verify(packages).delete(pkg);
+        order.verify(packages).flush();
+        order.verify(deletionAudit).registerDeletion(ACTOR, "ENV-001", status);
     }
 
     @Test
@@ -62,7 +62,7 @@ class PackageDeletionServiceImplTest {
         service().deletePackage("  env-002 ", ACTOR);
 
         verify(packages).findByShipmentNumber("ENV-002");
-        verify(auditService).registrarEliminacionPaquete(ACTOR, "ENV-002", PackageStatus.PENDING);
+        verify(deletionAudit).registerDeletion(ACTOR, "ENV-002", PackageStatus.PENDING);
     }
 
     @Test
@@ -73,7 +73,7 @@ class PackageDeletionServiceImplTest {
                 .isInstanceOf(PackageNotFoundException.class)
                 .hasMessage("No existe un paquete con el número de envío ENV-999.");
 
-        verifyNoInteractions(auditService);
+        verifyNoInteractions(deletionAudit);
         verify(packages, never()).delete(any());
     }
 
@@ -87,7 +87,7 @@ class PackageDeletionServiceImplTest {
                 .hasMessage("El paquete ENV-003 ya fue despachado (estado: " + status.getCode()
                         + ") y no puede eliminarse.");
 
-        verifyNoInteractions(auditService);
+        verifyNoInteractions(deletionAudit);
         verify(packages, never()).delete(any());
     }
 
@@ -100,7 +100,7 @@ class PackageDeletionServiceImplTest {
                 .isInstanceOf(PackageDeliveredException.class)
                 .hasMessage("El paquete ENV-004 ya fue entregado y no puede eliminarse.");
 
-        verifyNoInteractions(auditService);
+        verifyNoInteractions(deletionAudit);
         verify(packages, never()).delete(any());
     }
 
