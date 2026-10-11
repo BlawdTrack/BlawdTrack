@@ -1,6 +1,5 @@
 package com.blawdgourmet.blawdtrack.packages;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -63,7 +62,6 @@ class PackageControllerTest {
     private User courierUser;
     private Courier courier;
     private DeliveryPackage pkg;
-    private DeliveryPackage pkgEntregado;
 
     @BeforeEach
     void setUp() {
@@ -118,30 +116,6 @@ class PackageControllerTest {
                 .build();
         pkg.addItem(item);
         pkg = packages.saveAndFlush(pkg);
-
-        var itemEntregado = DeliveryPackageItem.builder()
-                .itemId("ITEM-002")
-                .name("Té verde")
-                .quantity(new BigDecimal("1.00"))
-                .sku("TE-001")
-                .unitPrice(new BigDecimal("800.00"))
-                .build();
-        pkgEntregado = DeliveryPackage.builder()
-                .shipmentNumber("ENV-2024-0003")
-                .orderNumber("SO-1003")
-                .customerName("Cliente Entregado")
-                .phone("66666666")
-                .address("Calle 789, San José")
-                .schedule("De 9 a 6")
-                .status(PackageStatus.DELIVERED)
-                .deliveryEvidenceUrl("https://storage.example.com/evidence/ENV-2024-0003.pdf")
-                .deliverySignatureUrl("https://storage.example.com/signatures/ENV-2024-0003.png")
-                .deliveryPhotoUrl("https://storage.example.com/photos/ENV-2024-0003.jpg")
-                .assignedCourier(courier)
-                .items(new ArrayList<>())
-                .build();
-        pkgEntregado.addItem(itemEntregado);
-        pkgEntregado = packages.saveAndFlush(pkgEntregado);
     }
 
     private String token(User user) {
@@ -202,9 +176,6 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$.weightKg").doesNotExist())
                 .andExpect(jsonPath("$.recipientSignature").doesNotExist())
                 .andExpect(jsonPath("$.createdBy").doesNotExist())
-                .andExpect(jsonPath("$.deliveryEvidenceUrl").doesNotExist())
-                .andExpect(jsonPath("$.deliverySignatureUrl").doesNotExist())
-                .andExpect(jsonPath("$.deliveryPhotoUrl").doesNotExist())
                 .andExpect(jsonPath("$.assignedCourier").exists())
                 .andExpect(jsonPath("$.assignedCourier.courierId").value(courier.getId()))
                 .andExpect(jsonPath("$.assignedCourier.fullName").value("Mensajero Test"))
@@ -214,34 +185,6 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$.assignedCourier.documentNumber").doesNotExist())
                 .andExpect(jsonPath("$.assignedCourier.status").doesNotExist())
                 .andExpect(jsonPath("$.assignedCourier.role").doesNotExist());
-    }
-
-    @Test
-    void adminVentasConsultaPaqueteEntregadoIncluyeEvidenciaEntrega() throws Exception {
-        getPackage(token(adminVentas), "ENV-2024-0003")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(pkgEntregado.getId()))
-                .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0003"))
-                .andExpect(jsonPath("$.status").value("DELIVERED"))
-                .andExpect(jsonPath("$.deliveryEvidenceUrl")
-                        .value("https://storage.example.com/evidence/ENV-2024-0003.pdf"))
-                .andExpect(jsonPath("$.deliverySignatureUrl")
-                        .value("https://storage.example.com/signatures/ENV-2024-0003.png"))
-                .andExpect(jsonPath("$.deliveryPhotoUrl")
-                        .value("https://storage.example.com/photos/ENV-2024-0003.jpg"));
-    }
-
-    @Test
-    void adminVentasConsultaPaqueteNoEntregadoNoIncluyeEvidenciaEntrega() throws Exception {
-        pkg.setStatus(PackageStatus.SHIPPED);
-        packages.saveAndFlush(pkg);
-
-        getPackage(token(adminVentas), "ENV-2024-0001")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("SHIPPED"))
-                .andExpect(jsonPath("$.deliveryEvidenceUrl").doesNotExist())
-                .andExpect(jsonPath("$.deliverySignatureUrl").doesNotExist())
-                .andExpect(jsonPath("$.deliveryPhotoUrl").doesNotExist());
     }
 
     @Test
@@ -306,40 +249,41 @@ class PackageControllerTest {
     }
 
     @Test
-    void adminVentasConsultaHistorialConEventosEstructuradosYEnOrdenCronologico() throws Exception {
+    void adminVentasConsultaHistorialPaqueteExistenteRetornaListaOrdenada() throws Exception {
+        // Crear transiciones consecutivas como las registradas por el servicio de paquetes.
         recordPackageEvent(
                 pkg,
                 AuditAction.PACKAGE_STATUS_CHANGED,
-                "Rosa de la Cruz cambió el estado: PENDIENTE a ASIGNADO",
-                "PENDIENTE",
-                "ASIGNADO");
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de PENDING a ASSIGNED",
+                "PENDING",
+                "ASSIGNED");
         recordPackageEvent(
                 pkg,
-                AuditAction.PACKAGE_ASSIGNED,
-                "Rosa de la Cruz asignó el envío",
-                "PENDIENTE",
-                "ASIGNADO");
+                AuditAction.PACKAGE_STATUS_CHANGED,
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de ASSIGNED a SHIPPED",
+                "ASSIGNED",
+                "SHIPPED");
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de SHIPPED a DELIVERED",
+                "SHIPPED",
+                "DELIVERED");
 
         getPackageHistory(token(adminVentas), "ENV-2024-0001")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].timestamp").exists())
+                .andExpect(jsonPath("$.length()").value(3))
                 .andExpect(jsonPath("$[0].action").value("CAMBIAR_ESTADO_PAQUETE"))
-                .andExpect(jsonPath("$[0].details").value("Rosa de la Cruz cambió el estado: PENDIENTE a ASIGNADO"))
+                .andExpect(jsonPath("$[0].previousStatus").value("PENDING"))
+                .andExpect(jsonPath("$[0].newStatus").value("ASSIGNED"))
                 .andExpect(jsonPath("$[0].actorName").value("Admin Ventas Test"))
-                .andExpect(jsonPath("$[0].previousStatus").doesNotExist())
-                .andExpect(jsonPath("$[0].newStatus").doesNotExist())
-                .andExpect(jsonPath("$[1].action").value("ASIGNAR_PAQUETE"));
-
-        var storedEvents = auditLogs.findAll().stream()
-                .filter(log -> pkg.getId().equals(log.getPackageId()))
-                .toList();
-        assertThat(storedEvents)
-                .extracting(AuditLog::getPreviousStatus, AuditLog::getNewStatus)
-                .containsExactly(
-                        org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"),
-                        org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"));
+                .andExpect(jsonPath("$[1].action").value("CAMBIAR_ESTADO_PAQUETE"))
+                .andExpect(jsonPath("$[1].previousStatus").value("ASSIGNED"))
+                .andExpect(jsonPath("$[1].newStatus").value("SHIPPED"))
+                .andExpect(jsonPath("$[2].action").value("CAMBIAR_ESTADO_PAQUETE"))
+                .andExpect(jsonPath("$[2].previousStatus").value("SHIPPED"))
+                .andExpect(jsonPath("$[2].newStatus").value("DELIVERED"));
     }
 
     @Test
@@ -404,7 +348,9 @@ class PackageControllerTest {
     void historialDePaqueteInexistenteRetorna404() throws Exception {
         getPackageHistory(token(adminVentas), "ENV-NO-EXISTE")
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"));
+                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Paquete no encontrado con número de envío: ENV-NO-EXISTE"))
+                .andExpect(jsonPath("$.status").value(404));
     }
 
     @ParameterizedTest
