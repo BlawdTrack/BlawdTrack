@@ -4,11 +4,9 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 
-import jakarta.persistence.criteria.Expression;
-
 /**
  * Criterio base para búsquedas textuales sobre un único campo de la entidad de paquetes.
- * Centraliza la lógica de normalización, escapado de caracteres especiales y comparación insensible a mayúsculas.
+ * Centraliza la búsqueda por prefijo; el collation de la base de datos resuelve mayúsculas y tildes.
  */
 public abstract class AbstractTextFieldSearchCriterion implements PackageSearchCriterion {
 
@@ -24,8 +22,8 @@ public abstract class AbstractTextFieldSearchCriterion implements PackageSearchC
             if (term == null || term.likePattern() == null) {
                 return builder.conjunction();
             }
-            Expression<String> field = builder.lower(root.get(fieldName));
-            return builder.like(field, term.likePattern(), PackageSearchTermNormalizer.ESCAPE_CHARACTER);
+                return builder.like(root.get(fieldName), term.likePattern(),
+                    PackageSearchTermNormalizer.ESCAPE_CHARACTER);
         };
     }
 }

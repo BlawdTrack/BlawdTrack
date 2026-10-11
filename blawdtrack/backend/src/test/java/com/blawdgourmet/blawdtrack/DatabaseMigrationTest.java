@@ -35,4 +35,24 @@ class DatabaseMigrationTest {
                 "SELECT COUNT(*) FROM \"flyway_schema_history\" WHERE \"version\" = '12' AND \"success\" = TRUE",
                 Integer.class)).isEqualTo(1);
     }
+
+    @Test
+    void v18CreaIndicesParaLosCamposDeBusquedaTextual() {
+        assertThat(jdbc.queryForObject(
+                "SELECT COUNT(*) FROM \"flyway_schema_history\" "
+                        + "WHERE \"version\" = '18' AND \"success\" = TRUE",
+                Integer.class)).isEqualTo(1);
+
+        for (String indexName : new String[] {
+                "IDX_PAQUETES_NOMBRE_CLIENTE",
+                "IDX_PAQUETES_DIRECCION_ENTREGA",
+                "IDX_PAQUETES_TELEFONO",
+                "IDX_PAQUETES_HORARIO_PREFERENCIA"
+        }) {
+            assertThat(jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.INDEXES "
+                            + "WHERE TABLE_NAME = 'PAQUETES' AND INDEX_NAME = ?",
+                    Integer.class, indexName)).isEqualTo(1);
+        }
+    }
 }
