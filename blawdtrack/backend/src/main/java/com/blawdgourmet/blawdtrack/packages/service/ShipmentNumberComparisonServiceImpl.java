@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ShipmentNumberComparisonServiceImpl implements ShipmentNumberComparisonService {
 
+    private final DeliveryPackageRepository packageRepository;
+
     @Override
     @Transactional(readOnly = true)
     public ShipmentNumberComparisonResponse compare(List<String> shipmentNumbers) {
