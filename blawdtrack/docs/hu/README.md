@@ -20,7 +20,7 @@ Un documento por historia. Todos siguen la misma estructura:
 | [HU007](HU007-edicion-de-administradores.md) | Edición de administradores | Siguiente sprint (fuera del alcance actual) | — |
 | [HU008](HU008-eliminacion-de-administradores.md) | Eliminación de administradores | ⚠️ No se puede eliminar en la práctica | `fix/hu008/criterios-aceptacion/silesky` (#22) |
 | [HU009](HU009-roles-y-permisos.md) | Roles y permisos | ⚠️ Solo por rol; la pantalla no guarda | `fix/hu009/criterios-aceptacion/silesky` (#13) |
-| [HU011](HU011-deteccion-de-paquetes-duplicados.md) | Detección de paquetes duplicados | ✅ Backend (Tasks 113 y 114) en PR; ⏳ frontend e integración con la importación (HU-010) | `feature/hu011/T01/113/silesky`, `feature/hu011/T02/114/silesky` |
+| [HU011](HU011-deteccion-de-paquetes-duplicados.md) | Detección de paquetes duplicados | ✅ Backend (Tasks 113 y 114) y pantalla de duplicados (Task 115); ⏳ conectarla a la importación de HU-010 | `feature/hu011/T01/113/silesky`, `feature/hu011/T02/114/silesky`, `feature/hu011/T03/115/silesky` |
 
 Otros documentos de apoyo en [`docs/`](..): [arquitectura](../arquitectura.md), guías de pruebas manuales
 (`HU003-Task69-pruebas.md`, `HU006-Task85-pruebas.md`) y colecciones de Postman.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { NAVIGATION_GROUPS, getNavigationForRole, getBackTarget } from './navigation';
+import { NAVIGATION_GROUPS, getNavigationForRole, getBackTarget, getGroupRoles } from './navigation';
 import { ROLES } from './roles';
 import { ROUTES } from './routes';
 
@@ -40,8 +40,20 @@ describe('navigation config', () => {
     expect(deactivate.path).toBe(ROUTES.COURIER_DEACTIVATE);
   });
 
-  it('orders the groups Mensajeros, Administradores and Seguridad y acceso', () => {
-    expect(NAVIGATION_GROUPS.map((g) => g.title)).toEqual(['Gestión de mensajeros', 'Gestión de administradores', 'Seguridad y acceso']);
+  it('orders the groups Mensajeros, Administradores, Paquetes and Seguridad y acceso', () => {
+    expect(NAVIGATION_GROUPS.map((g) => g.title)).toEqual([
+      'Gestión de mensajeros',
+      'Gestión de administradores',
+      'Gestión de paquetes',
+      'Seguridad y acceso',
+    ]);
+  });
+
+  it('puts "Detectar duplicados" in Gestión de paquetes, visible for the super user and the sales admin', () => {
+    const packages = NAVIGATION_GROUPS.find((g) => g.id === 'packages');
+    expect(packages.items.map((i) => i.label)).toEqual(['Detectar duplicados']);
+    expect(packages.items[0].path).toBe(ROUTES.PACKAGE_DUPLICATES);
+    expect(packages.items[0].roles).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]);
   });
 
   it('puts "Restablecer contraseña" and "Roles y permisos" in Seguridad y acceso', () => {
@@ -56,9 +68,14 @@ describe('getNavigationForRole', () => {
     expect(groups.map((g) => g.id)).toEqual(NAVIGATION_GROUPS.map((g) => g.id));
   });
 
+  it('gives the sales admin only the packages group and their own password reset', () => {
+    const groups = getNavigationForRole(ROLES.SALES_ADMIN);
+    expect(groups.map((g) => g.id)).toEqual(['packages', 'security']);
+    expect(groups.find((g) => g.id === 'security').items.map((i) => i.id)).toEqual(['password-reset']);
+  });
+
   it('returns nothing for roles without menu access or unknown roles', () => {
     expect(getNavigationForRole(ROLES.COURIER)).toEqual([]);
-    expect(getNavigationForRole(ROLES.SALES_ADMIN)).toEqual([]);
     expect(getNavigationForRole('NOPE')).toEqual([]);
     expect(getNavigationForRole(undefined)).toEqual([]);
   });
@@ -67,6 +84,15 @@ describe('getNavigationForRole', () => {
     const before = JSON.stringify(NAVIGATION_GROUPS);
     getNavigationForRole(ROLES.COURIER);
     expect(JSON.stringify(NAVIGATION_GROUPS)).toBe(before);
+  });
+});
+
+describe('getGroupRoles', () => {
+  it('is the union of the roles of the screens of the group, without repeats', () => {
+    const byId = Object.fromEntries(NAVIGATION_GROUPS.map((group) => [group.id, getGroupRoles(group)]));
+    expect(byId.couriers).toEqual([ROLES.SUPER_USER]);
+    expect(byId.packages).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]);
+    expect(byId.security).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]);
   });
 });
 
@@ -87,6 +113,7 @@ describe('getBackTarget', () => {
     expect(getBackTarget(ROUTES.COURIER_CREATE)).toEqual({ to: ROUTES.MODULE_COURIERS, label: 'Gestión de mensajeros' });
     expect(getBackTarget(ROUTES.ADMIN_DELETE)).toEqual({ to: ROUTES.MODULE_ADMINS, label: 'Gestión de administradores' });
     expect(getBackTarget(ROUTES.ROLES_PERMISSIONS)).toEqual({ to: ROUTES.MODULE_SECURITY, label: 'Seguridad y acceso' });
+    expect(getBackTarget(ROUTES.PACKAGE_DUPLICATES)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Gestión de paquetes' });
   });
 
   it('also covers nested paths of a function screen', () => {
