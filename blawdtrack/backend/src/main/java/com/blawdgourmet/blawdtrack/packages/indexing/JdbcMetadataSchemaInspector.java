@@ -16,9 +16,10 @@ import java.util.function.Supplier;
 @Component
 public final class JdbcMetadataSchemaInspector implements SchemaInspector {
     private final Supplier<Connection> connectionSupplier;
+    private final boolean closeConnections;
 
     public JdbcMetadataSchemaInspector(Connection connection) {
-        this(() -> connection);
+        this(() -> connection, false);
     }
 
     @Autowired
@@ -29,11 +30,16 @@ public final class JdbcMetadataSchemaInspector implements SchemaInspector {
             } catch (SQLException exception) {
                 throw new IllegalStateException("No se pudo abrir la conexión para inspeccionar el esquema.", exception);
             }
-        });
+        }, true);
     }
 
     JdbcMetadataSchemaInspector(Supplier<Connection> connectionSupplier) {
+        this(connectionSupplier, true);
+    }
+
+    private JdbcMetadataSchemaInspector(Supplier<Connection> connectionSupplier, boolean closeConnections) {
         this.connectionSupplier = Objects.requireNonNull(connectionSupplier, "connectionSupplier no puede ser nulo.");
+        this.closeConnections = closeConnections;
     }
 
     @Override
@@ -43,17 +49,20 @@ public final class JdbcMetadataSchemaInspector implements SchemaInspector {
 
         try {
             Connection connection = connectionSupplier.get();
-            try (ResultSet columns = connection.getMetaData().getColumns(null, null, null, null)) {
-                while (columns.next()) {
-                    String currentTable = columns.getString("TABLE_NAME");
-                    String currentColumn = columns.getString("COLUMN_NAME");
-                    if (currentTable != null && currentColumn != null
-                            && normalizedTable.equalsIgnoreCase(currentTable)
-                            && normalizedColumn.equalsIgnoreCase(currentColumn)) {
-                        return true;
+            try (Connection managedConnection = closeConnections ? connection : null) {
+                Connection metadataConnection = managedConnection == null ? connection : managedConnection;
+                try (ResultSet columns = metadataConnection.getMetaData().getColumns(null, null, null, null)) {
+                    while (columns.next()) {
+                        String currentTable = columns.getString("TABLE_NAME");
+                        String currentColumn = columns.getString("COLUMN_NAME");
+                        if (currentTable != null && currentColumn != null
+                                && normalizedTable.equalsIgnoreCase(currentTable)
+                                && normalizedColumn.equalsIgnoreCase(currentColumn)) {
+                            return true;
+                        }
                     }
+                    return false;
                 }
-                return false;
             }
         } catch (SQLException exception) {
             throw new IllegalStateException("No se pudo verificar si la columna existe en la tabla " + normalizedTable + ".", exception);
@@ -67,35 +76,38 @@ public final class JdbcMetadataSchemaInspector implements SchemaInspector {
 
         try {
             Connection connection = connectionSupplier.get();
-            try (ResultSet indexes = getIndexInfoForTable(connection, normalizedTable)) {
-                Map<String, Integer> firstColumnPositions = new HashMap<>();
-                Map<String, String> firstColumnsByIndex = new HashMap<>();
+            try (Connection managedConnection = closeConnections ? connection : null) {
+                Connection metadataConnection = managedConnection == null ? connection : managedConnection;
+                try (ResultSet indexes = getIndexInfoForTable(metadataConnection, normalizedTable)) {
+                    Map<String, Integer> firstColumnPositions = new HashMap<>();
+                    Map<String, String> firstColumnsByIndex = new HashMap<>();
 
-                while (indexes.next()) {
-                    String currentTable = indexes.getString("TABLE_NAME");
-                    String indexName = indexes.getString("INDEX_NAME");
-                    String indexColumnName = indexes.getString("COLUMN_NAME");
-                    if (currentTable == null || indexName == null || indexColumnName == null) {
-                        continue;
-                    }
-                    if (!normalizedTable.equalsIgnoreCase(currentTable)) {
-                        continue;
+                    while (indexes.next()) {
+                        String currentTable = indexes.getString("TABLE_NAME");
+                        String indexName = indexes.getString("INDEX_NAME");
+                        String indexColumnName = indexes.getString("COLUMN_NAME");
+                        if (currentTable == null || indexName == null || indexColumnName == null) {
+                            continue;
+                        }
+                        if (!normalizedTable.equalsIgnoreCase(currentTable)) {
+                            continue;
+                        }
+
+                        int ordinalPosition = indexes.getInt("ORDINAL_POSITION");
+                        Integer currentPosition = firstColumnPositions.get(indexName);
+                        if (currentPosition == null || ordinalPosition < currentPosition) {
+                            firstColumnPositions.put(indexName, ordinalPosition);
+                            firstColumnsByIndex.put(indexName, indexColumnName);
+                        }
                     }
 
-                    int ordinalPosition = indexes.getInt("ORDINAL_POSITION");
-                    Integer currentPosition = firstColumnPositions.get(indexName);
-                    if (currentPosition == null || ordinalPosition < currentPosition) {
-                        firstColumnPositions.put(indexName, ordinalPosition);
-                        firstColumnsByIndex.put(indexName, indexColumnName);
+                    for (String firstColumnName : firstColumnsByIndex.values()) {
+                        if (normalizedColumn.equalsIgnoreCase(firstColumnName)) {
+                            return true;
+                        }
                     }
+                    return false;
                 }
-
-                for (String firstColumnName : firstColumnsByIndex.values()) {
-                    if (normalizedColumn.equalsIgnoreCase(firstColumnName)) {
-                        return true;
-                    }
-                }
-                return false;
             }
         } catch (SQLException exception) {
             throw new IllegalStateException("No se pudo verificar si la tabla " + normalizedTable + " ya tiene un índice para la columna " + normalizedColumn + ".", exception);
