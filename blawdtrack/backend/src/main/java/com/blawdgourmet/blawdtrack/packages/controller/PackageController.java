@@ -3,6 +3,8 @@ package com.blawdgourmet.blawdtrack.packages.controller;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDetailResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageHistoryEntry;
 import com.blawdgourmet.blawdtrack.packages.service.PackageService;
+
+import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +15,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 /**
- * API de consulta de paquetes/envíos (HU-013, Task 124).
+ * API de consulta de paquetes/envíos (Task 124 y Task 125).
  * Endpoint accesible solo para administradores de ventas (ADMIN_VENTAS).
  */
 @RestController

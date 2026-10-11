@@ -40,8 +40,8 @@ import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 /**
- * Tests de autorización y respuesta para GET /api/v1/packages/{shipmentNumber}
- * (HU-013, Task 124: consulta de paquete por número de envío).
+ * Tests de autorización y respuesta para las consultas de paquetes/envíos
+ * (Task 124: detalle y Task 125: historial).
  * El endpoint es accesible solo para ADMIN_VENTAS.
  */
 @SpringBootTest
@@ -250,28 +250,25 @@ class PackageControllerTest {
 
     @Test
     void adminVentasConsultaHistorialPaqueteExistenteRetornaListaOrdenada() throws Exception {
-        // Crear registros de auditoría para el paquete (ordenados por timestamp)
+        // Crear transiciones consecutivas como las registradas por el servicio de paquetes.
         recordPackageEvent(
                 pkg,
                 AuditAction.PACKAGE_STATUS_CHANGED,
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de PENDING a ASSIGNED",
                 "PENDING",
-                "ASSIGNED"
-        );
+                "ASSIGNED");
         recordPackageEvent(
                 pkg,
                 AuditAction.PACKAGE_STATUS_CHANGED,
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de ASSIGNED a SHIPPED",
                 "ASSIGNED",
-                "SHIPPED"
-        );
+                "SHIPPED");
         recordPackageEvent(
                 pkg,
                 AuditAction.PACKAGE_STATUS_CHANGED,
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de SHIPPED a DELIVERED",
                 "SHIPPED",
-                "DELIVERED"
-        );
+                "DELIVERED");
 
         getPackageHistory(token(adminVentas), "ENV-2024-0001")
                 .andExpect(status().isOk())
@@ -287,28 +284,6 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$[2].action").value("CAMBIAR_ESTADO_PAQUETE"))
                 .andExpect(jsonPath("$[2].previousStatus").value("SHIPPED"))
                 .andExpect(jsonPath("$[2].newStatus").value("DELIVERED"));
-    }
-
-    @Test
-    void adminVentasConsultaHistorialPaqueteInexistenteRetorna404() throws Exception {
-        getPackageHistory(token(adminVentas), "ENV-NO-EXISTE")
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Paquete no encontrado con número de envío: ENV-NO-EXISTE"))
-                .andExpect(jsonPath("$.status").value(404));
-    }
-
-    @Test
-    void adminVentasConsultaHistorialPaqueteSinHistorialRetornaListaVacia() throws Exception {
-        // Crear un paquete sin historial
-        packages.saveAndFlush(DeliveryPackage.builder()
-                .shipmentNumber("ENV-2024-0002")
-                .build());
-
-        getPackageHistory(token(adminVentas), "ENV-2024-0002")
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
@@ -332,7 +307,7 @@ class PackageControllerTest {
                 .build();
         auditLogs.saveAllAndFlush(List.of(first, second));
 
-        getPackageHistory(token(adminVentas), pkg.getShipmentNumber())
+        getPackageHistory(token(adminVentas), "ENV-2024-0001")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].details").value("Primer evento"))
                 .andExpect(jsonPath("$[1].details").value("Segundo evento"));
@@ -366,6 +341,28 @@ class PackageControllerTest {
 
         getPackageHistory(token(adminVentas), shipmentNumber)
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void historialDePaqueteInexistenteRetorna404() throws Exception {
+        getPackageHistory(token(adminVentas), "ENV-NO-EXISTE")
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Paquete no encontrado con número de envío: ENV-NO-EXISTE"))
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void adminVentasConsultaHistorialPaqueteSinHistorialRetornaListaVacia() throws Exception {
+        // Crear un paquete sin historial
+        packages.saveAndFlush(DeliveryPackage.builder()
+                .shipmentNumber("ENV-2024-0002")
+                .build());
+
+        getPackageHistory(token(adminVentas), "ENV-2024-0002")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
