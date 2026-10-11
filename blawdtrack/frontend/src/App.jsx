@@ -6,7 +6,9 @@ import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
-import SalesHomePage from './pages/SalesHomePage';
+import DuplicateDetectionPage from './pages/DuplicateDetectionPage';
+import PackageImportPage from './pages/PackageImportPage';
+import PackageImportPreviewPage from './pages/PackageImportPreviewPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
@@ -19,7 +21,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 import { ROLES } from './config/roles';
 import { ROUTES } from './config/routes';
-import { NAVIGATION_GROUPS } from './config/navigation';
+import { NAVIGATION_GROUPS, getGroupRoles } from './config/navigation';
 import { getHomeRoute } from './utils/roleRoutes';
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
@@ -74,8 +76,8 @@ function NewPasswordRoute() {
 
 /**
  * Tabla de rutas de la aplicación. Públicas: login, recuperación de contraseña y `/recovery` (enlace
- * del correo). El resto va dentro de un `ProtectedRoute` por rol: el Super Usuario dentro de
- * `MainMenuLayout`, el administrador de ventas en `/ventas` y el mensajero en `/mensajero`.
+ * del correo). El resto va dentro de un `ProtectedRoute` por rol: el Super Usuario y el administrador de
+ * ventas dentro de `MainMenuLayout` (el segundo solo con sus pantallas) y el mensajero en `/mensajero`.
  */
 function App() {
   return (
@@ -92,31 +94,33 @@ function App() {
           El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
           rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
       
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
-        {/* Mantenemos el MainMenuLayout de develop para que tu pantalla tenga menú */}
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
+        {/* Súper Usuario y Administrador de Ventas comparten el menú lateral; cada uno ve solo sus grupos
+            (getNavigationForRole) y el menú de cada módulo se protege con los roles de sus pantallas. */}
         <Route element={<MainMenuLayout />}>
           <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
           {NAVIGATION_GROUPS.map((group) => (
-            <Route key={group.id} path={group.path} element={<ModuleMenuPage groupId={group.id} />} />
+            <Route key={group.id} element={<ProtectedRoute allowedRoles={getGroupRoles(group)} />}>
+              <Route path={group.path} element={<ModuleMenuPage groupId={group.id} />} />
+            </Route>
           ))}
           <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
-          <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
-          <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
-          <Route path={ROUTES.ADMIN_CREATE} element={<AdminRegistrationPage />} />
-          <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
-          <Route path={ROUTES.ROLES_PERMISSIONS} element={<RoleAccessManagement />} />
+          <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
+          <Route path={ROUTES.PACKAGE_IMPORT_PREVIEW} element={<PackageImportPreviewPage />} />
+          <Route path={ROUTES.PACKAGE_DUPLICATES} element={<DuplicateDetectionPage />} />
 
-          {/* Rutas de tu feature agregadas y adaptadas */}
-          <Route path={ROUTES.COURIER_UPDATE} element={<EditMessenger />} />
-          <Route path={`${ROUTES.COURIER_UPDATE}/:documentNumber`} element={<EditMessenger />} />
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
+            <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
+            <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
+            <Route path={ROUTES.ADMIN_CREATE} element={<AdminRegistrationPage />} />
+            <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
+            <Route path={ROUTES.ROLES_PERMISSIONS} element={<RoleAccessManagement />} />
+            <Route path={ROUTES.COURIER_UPDATE} element={<EditMessenger />} />
+            <Route path={`${ROUTES.COURIER_UPDATE}/:documentNumber`} element={<EditMessenger />} />
+          </Route>
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
-        <Route path={ROUTES.SALES_HOME} element={<SalesHomePage />} />
-        <Route path={ROUTES.SALES_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
-      </Route>
-      
       <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
         <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
         <Route path={ROUTES.COURIER_PASSWORD_RESET} element={<OwnPasswordResetPage />} />

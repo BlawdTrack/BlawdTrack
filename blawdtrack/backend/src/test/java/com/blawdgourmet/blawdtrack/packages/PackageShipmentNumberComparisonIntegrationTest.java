@@ -50,15 +50,20 @@ class PackageShipmentNumberComparisonIntegrationTest {
                                 {"shipmentNumbers":[" ENV-00953 ","ENV-00956","env-00956","ENV-00958"]}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.receivedCount").value(4))
-                .andExpect(jsonPath("$.distinctCount").value(3))
-                .andExpect(jsonPath("$.importableShipmentNumbers[0]").value("ENV-00958"))
-                .andExpect(jsonPath("$.duplicates[0].shipmentNumber").value("ENV-00953"))
-                .andExpect(jsonPath("$.duplicates[0].occurrences").value(1))
-                .andExpect(jsonPath("$.duplicates[0].reasons[0]").value("ALREADY_REGISTERED"))
-                .andExpect(jsonPath("$.duplicates[1].shipmentNumber").value("ENV-00956"))
-                .andExpect(jsonPath("$.duplicates[1].occurrences").value(2))
-                .andExpect(jsonPath("$.duplicates[1].reasons[0]").value("DUPLICATED_IN_FILE"));
+                .andExpect(jsonPath("$.totalRows").value(4))
+                .andExpect(jsonPath("$.validCount").value(1))
+                .andExpect(jsonPath("$.duplicateCount").value(3))
+                .andExpect(jsonPath("$.alreadyRegisteredCount").value(1))
+                .andExpect(jsonPath("$.duplicatedInFileCount").value(2))
+                .andExpect(jsonPath("$.rows[0].row").value(1))
+                .andExpect(jsonPath("$.rows[0].shipmentNumber").value("ENV-00953"))
+                .andExpect(jsonPath("$.rows[0].reasons[0]").value("ALREADY_REGISTERED"))
+                .andExpect(jsonPath("$.rows[1].shipmentNumber").value("ENV-00956"))
+                .andExpect(jsonPath("$.rows[1].reasons[0]").value("DUPLICATED_IN_FILE"))
+                .andExpect(jsonPath("$.rows[1].repeatedInRows[0]").value(3))
+                .andExpect(jsonPath("$.rows[2].repeatedInRows[0]").value(2))
+                .andExpect(jsonPath("$.rows[3].shipmentNumber").value("ENV-00958"))
+                .andExpect(jsonPath("$.rows[3].reasons").isEmpty());
     }
 
     @Test

@@ -25,7 +25,7 @@ const readCollapsed = () => {
 
 
 /**
- * Diseño del menú principal del Super Usuario: barra lateral en escritorio, barra de pestañas inferior
+ * Diseño del menú principal (Super Usuario y Administrador de Ventas): barra lateral en escritorio, barra de pestañas inferior
  * en el teléfono y, en el centro, la pantalla de la ruta hija (`<Outlet />`). El menú sale de
  * `getNavigationForRole` según el rol del usuario autenticado.
  */

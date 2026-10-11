@@ -1,8 +1,8 @@
 package com.blawdgourmet.blawdtrack.packages.service;
 
 import com.blawdgourmet.blawdtrack.packages.dto.DuplicateShipmentNumberReason;
-import com.blawdgourmet.blawdtrack.packages.dto.DuplicateShipmentNumberResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberComparisonResponse;
+import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberRowResult;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,33 +23,56 @@ public class ShipmentNumberComparisonServiceImpl implements ShipmentNumberCompar
     @Override
     @Transactional(readOnly = true)
     public ShipmentNumberComparisonResponse compare(List<String> shipmentNumbers) {
-        Map<String, Integer> occurrences = new LinkedHashMap<>();
-        shipmentNumbers.stream()
-                .map(this::normalize)
-                .forEach(number -> occurrences.merge(number, 1, Integer::sum));
+        List<String> normalized = shipmentNumbers.stream().map(this::normalize).toList();
 
-        Set<String> existing = packageRepository.findExistingShipmentNumbers(occurrences.keySet());
-        List<String> importable = new ArrayList<>();
-        List<DuplicateShipmentNumberResponse> duplicates = new ArrayList<>();
+        Map<String, List<Integer>> rowsByNumber = new LinkedHashMap<>();
+        for (int index = 0; index < normalized.size(); index++) {
+            rowsByNumber.computeIfAbsent(normalized.get(index), number -> new ArrayList<>())
+                    .add(index + 1);
+        }
 
-        occurrences.forEach((number, count) -> {
-            List<DuplicateShipmentNumberReason> reasons = new ArrayList<>(2);
-            if (existing.contains(number)) {
-                reasons.add(DuplicateShipmentNumberReason.ALREADY_REGISTERED);
-            }
-            if (count > 1) {
-                reasons.add(DuplicateShipmentNumberReason.DUPLICATED_IN_FILE);
-            }
+        Set<String> existing = packageRepository.findExistingShipmentNumbers(rowsByNumber.keySet());
 
-            if (reasons.isEmpty()) {
-                importable.add(number);
+        List<ShipmentNumberRowResult> rows = new ArrayList<>(normalized.size());
+        for (int index = 0; index < normalized.size(); index++) {
+            rows.add(classify(index + 1, normalized.get(index), rowsByNumber, existing));
+        }
+
+        return summarize(rows);
+    }
+
+    private ShipmentNumberRowResult classify(int row, String number,
+            Map<String, List<Integer>> rowsByNumber, Set<String> existing) {
+        List<Integer> sameNumberRows = rowsByNumber.get(number);
+        List<DuplicateShipmentNumberReason> reasons = new ArrayList<>(2);
+        if (existing.contains(number)) {
+            reasons.add(DuplicateShipmentNumberReason.ALREADY_REGISTERED);
+        }
+        if (sameNumberRows.size() > 1) {
+            reasons.add(DuplicateShipmentNumberReason.DUPLICATED_IN_FILE);
+        }
+        List<Integer> repeatedInRows = sameNumberRows.stream()
+                .filter(other -> other != row)
+                .toList();
+        return new ShipmentNumberRowResult(row, number, List.copyOf(reasons), repeatedInRows);
+    }
+
+    private ShipmentNumberComparisonResponse summarize(List<ShipmentNumberRowResult> rows) {
+        int alreadyRegistered = 0;
+        int duplicatedInFile = 0;
+        int valid = 0;
+        for (ShipmentNumberRowResult result : rows) {
+            if (result.reasons().contains(DuplicateShipmentNumberReason.ALREADY_REGISTERED)) {
+                alreadyRegistered++;
+            } else if (result.reasons().contains(DuplicateShipmentNumberReason.DUPLICATED_IN_FILE)) {
+                duplicatedInFile++;
             } else {
-                duplicates.add(new DuplicateShipmentNumberResponse(number, count, List.copyOf(reasons)));
+                valid++;
             }
-        });
-
-        return new ShipmentNumberComparisonResponse(
-                shipmentNumbers.size(), occurrences.size(), List.copyOf(importable), List.copyOf(duplicates));
+        }
+        return new ShipmentNumberComparisonResponse(rows.size(), valid,
+                alreadyRegistered + duplicatedInFile, alreadyRegistered, duplicatedInFile,
+                List.copyOf(rows));
     }
 
     private String normalize(String shipmentNumber) {
