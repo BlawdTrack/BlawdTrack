@@ -67,14 +67,22 @@ class PackageShipmentNumberComparisonIntegrationTest {
     }
 
     @Test
-    void soloAdministradorDeVentasPuedeEjecutarLaComparacion() throws Exception {
-        for (String role : new String[] {RoleName.SUPER_USER, RoleName.COURIER}) {
-            mvc.perform(post(ENDPOINT)
-                            .header("Authorization", "Bearer " + token(role))
-                            .contentType(JSON)
-                            .content("no-es-json"))
-                    .andExpect(status().isForbidden());
-        }
+    void elSuperUsuarioTambienPuedeEjecutarLaComparacion() throws Exception {
+        mvc.perform(post(ENDPOINT)
+                        .header("Authorization", "Bearer " + token(RoleName.SUPER_USER))
+                        .contentType(JSON)
+                        .content("{\"shipmentNumbers\":[\"ENV-00960\"]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.validCount").value(1));
+    }
+
+    @Test
+    void elMensajeroNoPuedeEjecutarLaComparacion() throws Exception {
+        mvc.perform(post(ENDPOINT)
+                        .header("Authorization", "Bearer " + token(RoleName.COURIER))
+                        .contentType(JSON)
+                        .content("no-es-json"))
+                .andExpect(status().isForbidden());
     }
 
     @Test

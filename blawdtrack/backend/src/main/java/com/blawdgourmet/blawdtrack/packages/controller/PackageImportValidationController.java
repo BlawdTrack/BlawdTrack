@@ -20,7 +20,7 @@ public class PackageImportValidationController {
     private final ShipmentNumberComparisonService comparisonService;
 
     @PostMapping("/shipment-numbers/compare")
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAnyRole('" + RoleName.SALES_ADMIN + "', '" + RoleName.SUPER_USER + "')")
     public ShipmentNumberComparisonResponse compareShipmentNumbers(
             @Valid @RequestBody CompareShipmentNumbersRequest request) {
         return comparisonService.compare(request.shipmentNumbers());

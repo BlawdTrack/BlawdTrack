@@ -22,7 +22,7 @@ La cobertura incluye:
 | `ShipmentNumberComparisonServiceImplTest` · marca todas las copias repetidas | Un número repetido dentro del archivo se marca en **todas** sus filas (no se importa ninguna copia) e indica en qué otras filas aparece. |
 | `ShipmentNumberComparisonServiceImplTest` · ambas causas | Una fila ya registrada y además repetida informa las dos causas, pero se cuenta una sola vez (como "ya registrada"). |
 | `PackageShipmentNumberComparisonIntegrationTest` · comparación masiva | Con la base de datos real de pruebas: filas, contadores (`totalRows`, `validCount`, `duplicateCount`, `alreadyRegisteredCount`, `duplicatedInFileCount`) y causas por fila. |
-| `PackageShipmentNumberComparisonIntegrationTest` · solo administrador de ventas | Super Usuario y Mensajero reciben **403 Forbidden**. |
+| `PackageShipmentNumberComparisonIntegrationTest` · acceso por rol | El Mensajero recibe **403 Forbidden**; el Administrador de Ventas y el Súper Usuario (desde la Task 270) pueden comparar. |
 | `PackageShipmentNumberComparisonIntegrationTest` · sin token | **401 Unauthorized** antes de validar el cuerpo. |
 | `PackageShipmentNumberComparisonIntegrationTest` · lista vacía | **400 Bad Request** con `code = VALIDATION_ERROR`. |
 
