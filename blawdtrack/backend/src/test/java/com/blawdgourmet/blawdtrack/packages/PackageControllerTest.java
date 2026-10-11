@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
+import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
 import com.blawdgourmet.blawdtrack.couriers.repository.CourierRepository;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
@@ -52,6 +55,7 @@ class PackageControllerTest {
     @Autowired private CourierRepository couriers;
     @Autowired private DeliveryPackageRepository packages;
     @Autowired private AuditLogRepository auditLogs;
+    @Autowired private AuditService auditService;
     @Autowired private JwtService jwt;
 
     private User adminVentas;
@@ -128,19 +132,27 @@ class PackageControllerTest {
                 .header("Authorization", "Bearer " + token));
     }
 
-    private void createAuditLog(String action, String details, User actor, String previousStatus, String newStatus) {
-        AuditLog log = AuditLog.builder()
-                .actor(actor)
-                .usuarioAfectado(null)
-                .action(action)
-                .details(details)
-                .packageId(pkg.getId())
-                .shipmentNumber(pkg.getShipmentNumber())
-                .previousStatus(previousStatus)
-                .newStatus(newStatus)
-                .timestamp(LocalDateTime.now())
-                .build();
-        auditLogs.saveAndFlush(log);
+    private void recordPackageEvent(
+            DeliveryPackage target,
+            AuditAction action,
+            String details,
+            String previousStatus,
+            String newStatus) {
+        var actor = new AuthenticatedUser(
+                adminVentas.getId(),
+                adminVentas.getDocumentType(),
+                adminVentas.getDocumentNumber(),
+                adminVentas.getFullName(),
+                adminVentas.getRole().getName(),
+                adminVentas.getEmail());
+        auditService.logPackageAction(
+                action,
+                actor,
+                target.getId(),
+                target.getShipmentNumber(),
+                details,
+                previousStatus,
+                newStatus);
     }
 
     @Test
@@ -239,24 +251,24 @@ class PackageControllerTest {
     @Test
     void adminVentasConsultaHistorialPaqueteExistenteRetornaListaOrdenada() throws Exception {
         // Crear registros de auditoría para el paquete (ordenados por timestamp)
-        createAuditLog(
-                AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de PENDING a ASSIGNED",
-                adminVentas,
                 "PENDING",
                 "ASSIGNED"
         );
-        createAuditLog(
-                AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de ASSIGNED a SHIPPED",
-                adminVentas,
                 "ASSIGNED",
                 "SHIPPED"
         );
-        createAuditLog(
-                AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
                 "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de SHIPPED a DELIVERED",
-                adminVentas,
                 "SHIPPED",
                 "DELIVERED"
         );
@@ -296,6 +308,64 @@ class PackageControllerTest {
         getPackageHistory(token(adminVentas), "ENV-2024-0002")
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void eventosConLaMismaFechaSeOrdenanPorIdentificador() throws Exception {
+        LocalDateTime timestamp = LocalDateTime.of(2026, 10, 10, 12, 0);
+        AuditLog first = AuditLog.builder()
+                .actor(adminVentas)
+                .action(AuditAction.PACKAGE_STATUS_CHANGED.getCode())
+                .details("Primer evento")
+                .packageId(pkg.getId())
+                .shipmentNumber(pkg.getShipmentNumber())
+                .timestamp(timestamp)
+                .build();
+        AuditLog second = AuditLog.builder()
+                .actor(adminVentas)
+                .action(AuditAction.PACKAGE_STATUS_CHANGED.getCode())
+                .details("Segundo evento")
+                .packageId(pkg.getId())
+                .shipmentNumber(pkg.getShipmentNumber())
+                .timestamp(timestamp)
+                .build();
+        auditLogs.saveAllAndFlush(List.of(first, second));
+
+        getPackageHistory(token(adminVentas), pkg.getShipmentNumber())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].details").value("Primer evento"))
+                .andExpect(jsonPath("$[1].details").value("Segundo evento"));
+    }
+
+    @Test
+    void historialDeEnvioNoIncluyeEventosDeUnNumeroPrefijo() throws Exception {
+        var env1 = packages.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-1").build());
+        var env10 = packages.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-10").build());
+        recordPackageEvent(env1, AuditAction.PACKAGE_STATUS_CHANGED, "Evento ENV-1", "PENDIENTE", "ASIGNADO");
+        recordPackageEvent(env10, AuditAction.PACKAGE_STATUS_CHANGED, "Evento ENV-10", "PENDIENTE", "ASIGNADO");
+
+        getPackageHistory(token(adminVentas), "ENV-1")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].details").value("Evento ENV-1"));
+    }
+
+    @Test
+    void reimportarNumeroEliminadoNoHeredaElHistorialDeLaInstanciaAnterior() throws Exception {
+        recordPackageEvent(pkg, AuditAction.PACKAGE_STATUS_CHANGED, "Historial anterior", "PENDIENTE", "ASIGNADO");
+        Long deletedPackageId = pkg.getId();
+        String shipmentNumber = pkg.getShipmentNumber();
+
+        packages.delete(pkg);
+        packages.flush();
+
+        DeliveryPackage reimported = packages.saveAndFlush(
+                DeliveryPackage.builder().shipmentNumber(shipmentNumber).build());
+        org.assertj.core.api.Assertions.assertThat(reimported.getId()).isNotEqualTo(deletedPackageId);
+
+        getPackageHistory(token(adminVentas), shipmentNumber)
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
