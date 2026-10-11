@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import PackageStatusChip from '../PackageStatusChip';
+import StatusRow from '../StatusRow';
 import { FONT, rem } from '../../theme';
 
 /**
@@ -29,6 +30,7 @@ export default function DuplicateRecordRow({ record }) {
         borderLeftColor: 'warning.main',
       }}
     >
+    <StatusRow tone="warning">
       <Typography component="span" sx={{ fontSize: FONT.md, fontWeight: 700, color: 'text.primary', flex: `0 0 ${rem(130)}` }}>
         {record.shipmentNumber}
       </Typography>
@@ -56,5 +58,6 @@ export default function DuplicateRecordRow({ record }) {
         </Typography>
       )}
     </Box>
+    </StatusRow>
   );
 }

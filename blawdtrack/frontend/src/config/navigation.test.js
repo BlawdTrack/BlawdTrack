@@ -115,6 +115,8 @@ describe('getBackTarget', () => {
     expect(getBackTarget(ROUTES.ROLES_PERMISSIONS)).toEqual({ to: ROUTES.MODULE_SECURITY, label: 'Seguridad y acceso' });
     expect(getBackTarget(ROUTES.PACKAGE_DUPLICATES)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Gestión de paquetes' });
     expect(getBackTarget(ROUTES.PACKAGE_IMPORT)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Gestión de paquetes' });
+    // La previsualización es del mismo flujo que la importación aunque no sea una opción del menú.
+    expect(getBackTarget(ROUTES.PACKAGE_IMPORT_PREVIEW)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Gestión de paquetes' });
   });
 
   it('also covers nested paths of a function screen', () => {

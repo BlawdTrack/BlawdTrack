@@ -128,7 +128,7 @@ describe('PackageImportPage (carga del archivo)', () => {
     expect(previewPackageImport).toHaveBeenCalledWith(file);
   });
 
-  it('con éxito informa los registros leídos y entrega la previsualización a la revisión de duplicados', async () => {
+  it('con éxito informa los registros leídos y entrega la previsualización a la pantalla de previsualización', async () => {
     previewPackageImport.mockResolvedValue(preview);
     const user = setup();
     renderPage();
@@ -139,9 +139,9 @@ describe('PackageImportPage (carga del archivo)', () => {
     expect(success).toHaveTextContent('paquetes.xlsx: 6 registros leídos');
     expect(screen.queryByLabelText('Archivo de paquetes de Zoho Inventory')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Revisar duplicados' }));
+    await user.click(screen.getByRole('button', { name: 'Ver previsualización' }));
 
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PACKAGE_DUPLICATES);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PACKAGE_IMPORT_PREVIEW);
     expect(screen.getByTestId('state')).toHaveTextContent('paquetes.xlsx');
   });
 
