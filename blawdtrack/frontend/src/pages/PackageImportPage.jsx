@@ -1,14 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Button } from '@mui/material';
-import FormActions from '../components/FormActions';
 import PageContainer from '../components/PageContainer';
 import PageHeaderBar from '../components/PageHeaderBar';
 import StatusMessage from '../components/StatusMessage';
-import FileDropzone from '../components/import/FileDropzone';
 import ImportSteps from '../components/import/ImportSteps';
-import SelectedFileCard from '../components/import/SelectedFileCard';
-import { usePackageFileSelection } from '../hooks/usePackageFileSelection';
-import { usePackageImportPreview } from '../hooks/usePackageImportPreview';
+import PackageFileUploadForm from '../components/import/PackageFileUploadForm';
+import { usePackageFileUpload } from '../hooks/usePackageFileUpload';
 import { ROUTES } from '../config/routes';
 
 /**
@@ -19,27 +16,10 @@ import { ROUTES } from '../config/routes';
  */
 export default function PackageImportPage() {
   const navigate = useNavigate();
-  const { file, error: fileError, select, clear } = usePackageFileSelection();
-  const { isUploading, isSuccess, preview, errorMessage, severity, upload, reset } = usePackageImportPreview();
-
-  const handleFile = (candidate) => {
-    reset();
-    select(candidate);
-  };
-
-  const handleDiscard = () => {
-    reset();
-    clear();
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (file && !isUploading) upload(file);
-  };
+  const upload = usePackageFileUpload();
+  const { file, isSuccess, preview, discard } = upload;
 
   const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview } });
-
-  const alertMessage = fileError ?? errorMessage;
 
   return (
     <>
@@ -62,24 +42,13 @@ export default function PackageImportPage() {
               <Button variant="contained" onClick={handleContinue}>
                 Ver previsualización
               </Button>
-              <Button variant="outlined" onClick={handleDiscard}>
+              <Button variant="outlined" onClick={discard}>
                 Cargar otro archivo
               </Button>
             </Box>
           </Box>
         ) : (
-          <Box component="form" noValidate onSubmit={handleSubmit} aria-busy={isUploading} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <FileDropzone onFile={handleFile} disabled={isUploading} />
-            {file && <SelectedFileCard file={file} onRemove={handleDiscard} disabled={isUploading} />}
-            {alertMessage && <StatusMessage severity={fileError ? 'error' : severity} message={alertMessage} />}
-            <FormActions
-              submitLabel="Cargar y validar"
-              submittingLabel="Validando archivo…"
-              isSubmitting={isUploading}
-              submitDisabled={!file}
-              onDiscard={handleDiscard}
-            />
-          </Box>
+          <PackageFileUploadForm upload={upload} />
         )}
       </PageContainer>
     </>
