@@ -330,8 +330,8 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$[0].action").value("CAMBIAR_ESTADO_PAQUETE"))
                 .andExpect(jsonPath("$[0].details").value("Rosa de la Cruz cambió el estado: PENDIENTE a ASIGNADO"))
                 .andExpect(jsonPath("$[0].actorName").value("Admin Ventas Test"))
-                .andExpect(jsonPath("$[0].previousStatus").doesNotExist())
-                .andExpect(jsonPath("$[0].newStatus").doesNotExist())
+                .andExpect(jsonPath("$[0].previousStatus").value("PENDIENTE"))
+                .andExpect(jsonPath("$[0].newStatus").value("ASIGNADO"))
                 .andExpect(jsonPath("$[1].action").value("ASIGNAR_PAQUETE"));
 
         var storedEvents = auditLogs.findAll().stream()
