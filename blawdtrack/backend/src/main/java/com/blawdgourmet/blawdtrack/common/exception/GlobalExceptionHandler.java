@@ -14,6 +14,7 @@ import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
 import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
+import com.blawdgourmet.blawdtrack.packages.service.PackageNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.RolePermissionException;
 import com.blawdgourmet.blawdtrack.users.service.UserNotFoundException;
@@ -109,6 +110,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> manejarUsuarioNoExistente(UserNotFoundException ex) {
         ApiError error = ApiError.builder()
                 .code("USUARIO_NO_EXISTENTE")
+                .message(ex.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(PackageNotFoundException.class)
+    public ResponseEntity<ApiError> manejarPaqueteNoExistente(PackageNotFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("PACKAGE_NOT_FOUND")
                 .message(ex.getMessage())
                 .status(HttpStatus.NOT_FOUND.value())
                 .build();
