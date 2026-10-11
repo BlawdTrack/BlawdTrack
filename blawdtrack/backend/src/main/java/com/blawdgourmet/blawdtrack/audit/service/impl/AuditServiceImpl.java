@@ -12,6 +12,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
+import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
@@ -63,6 +64,34 @@ public class AuditServiceImpl implements AuditService {
                 .usuarioAfectado(null)
                 .action(ACCION_ELIMINAR_ADMINISTRADOR)
                 .details(detalle)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        auditLogRepository.save(registro);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void registrarEliminacionPaquete(AuthenticatedUser actor, String shipmentNumber, PackageStatus status) {
+        Objects.requireNonNull(actor, "actor must not be null");
+        Objects.requireNonNull(shipmentNumber, "shipmentNumber must not be null");
+        Objects.requireNonNull(status, "status must not be null");
+
+        User actorReferencia = userRepository.getReferenceById(actor.id());
+
+        String detalle = "El Administrador de Ventas '%s' (documento %s) eliminó el paquete '%s' (estado: %s)."
+                .formatted(
+                        actor.nombreCompleto(),
+                        actor.documentType() + "-" + actor.documentNumber(),
+                        shipmentNumber,
+                        status.getCode()
+                );
+
+        AuditLog registro = AuditLog.builder()
+                .actor(actorReferencia)
+                .usuarioAfectado(null)
+                .action(AuditAction.PACKAGE_DELETED.getCode())
+                .details(truncate(detalle))
                 .timestamp(LocalDateTime.now())
                 .build();
 

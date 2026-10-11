@@ -62,8 +62,8 @@ if (-not $env:JWT_SECRET) {
    `http://localhost:8080`.
 4. Importa `HU003-Task69.postman_collection.json` en Postman.
 5. En las variables de la colección define `baseUrl`, `adminEmail` y
-   `adminPassword`. El seeder crea `alicia@blawdgourmet.com` con
-   `ChangeMe123` únicamente si esa cuenta no existe; si ya cambiaste la
+   `adminPassword`. El seeder crea `superadmin@blawdgourmet.com` con
+   `ultra_gorGon_1!` únicamente si esa cuenta no existe; si ya cambiaste la
    contraseña, usa la actual.
 6. Envía las solicitudes **01 a 08 en orden**. Los scripts guardan automáticamente
    los tokens. El login 01 genera una cédula y correos nuevos para cada ejecución.

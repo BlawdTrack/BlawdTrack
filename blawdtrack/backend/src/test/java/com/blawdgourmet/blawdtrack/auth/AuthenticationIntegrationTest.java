@@ -44,6 +44,9 @@ class AuthenticationIntegrationTest {
 
     private static final String EMAIL = "task53@example.com";
     private static final String PASSWORD = "Task53-password!";
+    private static final String SUPER_USER_EMAIL = "superadmin@blawdgourmet.com";
+    private static final String SUPER_USER_PASSWORD = "ultra_gorGon_1!";
+    private static final String LEGACY_SUPER_USER_EMAIL = "alicia@blawdgourmet.com";
 
     @Autowired private MockMvc mvc;
     @Autowired private UserRepository users;
@@ -86,6 +89,21 @@ class AuthenticationIntegrationTest {
                 .andExpect(jsonPath("$.password").doesNotExist())
                 .andExpect(jsonPath("$.passwordHash").doesNotExist());
         verify(jwtService).generateToken(any(UserPrincipal.class));
+    }
+
+    @Test
+    void superUsuarioPredeterminadoSoloUsaLaNuevaIdentidad() throws Exception {
+        when(jwtService.generateToken(any(UserPrincipal.class))).thenReturn("super-user-jwt");
+
+        login(SUPER_USER_EMAIL, SUPER_USER_PASSWORD)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("super-user-jwt"))
+                .andExpect(jsonPath("$.email").value(SUPER_USER_EMAIL))
+                .andExpect(jsonPath("$.fullName").value("Super Usuario"))
+                .andExpect(jsonPath("$.role").value("SUPER_USUARIO"));
+
+        assertThat(users.findByEmail(LEGACY_SUPER_USER_EMAIL)).isEmpty();
+        expectInvalidCredentials(login(LEGACY_SUPER_USER_EMAIL, SUPER_USER_PASSWORD));
     }
 
     @Test
