@@ -10,4 +10,14 @@ export function useNavigationPreview() {
   return state?.preview ?? null;
 }
 
+/**
+ * Archivo que la pantalla de carga entregó junto con la previsualización (`location.state.file`). Hace falta para
+ * confirmar la importación: el backend vuelve a leerlo para registrar los paquetes.
+ * @returns {File|null} `null` si se entró a la pantalla sin pasar por la carga (por ejemplo, al recargar la página).
+ */
+export function useNavigationFile() {
+  const { state } = useLocation();
+  return state?.file ?? null;
+}
+
 export default useNavigationPreview;

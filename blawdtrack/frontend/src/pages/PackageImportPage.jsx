@@ -37,7 +37,7 @@ export default function PackageImportPage() {
     if (file && !isUploading) upload(file);
   };
 
-  const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview } });
+  const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview, file } });
 
   const alertMessage = fileError ?? errorMessage;
 

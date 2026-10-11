@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizePackageImportError } from './packageImportErrors';
+import { normalizePackageConfirmError, normalizePackageImportError } from './packageImportErrors';
 
 const httpError = (status, data) => ({ response: { status, data } });
 
@@ -52,5 +52,18 @@ describe('normalizePackageImportError', () => {
 
   it('no inventa errores de campo', () => {
     expect(normalizePackageImportError(httpError(400, { code: 'INVALID_PACKAGE_FILE', message: 'x' })).fieldErrors).toEqual({});
+  });
+});
+
+describe('normalizePackageConfirmError', () => {
+  it('usa los textos de la confirmación para el permiso, el servidor y el error genérico', () => {
+    expect(normalizePackageConfirmError(httpError(403, {})).globalMessage).toBe('No tienes permiso para confirmar la importación de paquetes.');
+    expect(normalizePackageConfirmError(httpError(500, {})).globalMessage).toMatch(/importar los paquetes/);
+    expect(normalizePackageConfirmError(httpError(409, {})).globalMessage).toBe('No se pudo completar la importación. Intenta de nuevo.');
+  });
+
+  it('conserva el mensaje del backend cuando el archivo no es válido y el aviso de archivo grande', () => {
+    expect(normalizePackageConfirmError(httpError(400, { code: 'INVALID_PACKAGE_FILE', message: 'Archivo vacío' })).globalMessage).toBe('Archivo vacío');
+    expect(normalizePackageConfirmError(httpError(413, {})).globalMessage).toMatch(/demasiado grande/);
   });
 });
