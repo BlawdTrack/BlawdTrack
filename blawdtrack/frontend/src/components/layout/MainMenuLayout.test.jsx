@@ -34,16 +34,17 @@ describe('MainMenuLayout sidebar', () => {
     expect(bar.queryByRole('button', { name: 'Roles y permisos' })).not.toBeInTheDocument();
   });
 
-  it('shows the packages group with "Detectar duplicados" to the super user', async () => {
+  it('shows the packages group with "Importar paquetes" to the super user', async () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
     await openGroup(user, 'Gestión de paquetes');
 
-    expect(within(sidebar()).getByRole('link', { name: /Detectar duplicados/ })).toHaveAttribute(
+    expect(within(sidebar()).getByRole('link', { name: /Importar paquetes/ })).toHaveAttribute(
       'href',
-      ROUTES.PACKAGE_DUPLICATES
+      ROUTES.PACKAGE_IMPORT
     );
+    expect(within(sidebar()).queryByRole('link', { name: /Detectar duplicados/ })).not.toBeInTheDocument();
   });
 
   it('gives the sales admin the same sidebar, but only with packages and their own password reset', async () => {
@@ -60,7 +61,6 @@ describe('MainMenuLayout sidebar', () => {
 
     await openGroup(user, 'Gestión de paquetes');
     expect(bar.getByRole('link', { name: /Importar paquetes/ })).toBeInTheDocument();
-    expect(bar.getByRole('link', { name: /Detectar duplicados/ })).toBeInTheDocument();
     await openGroup(user, 'Seguridad y acceso');
     expect(bar.getByRole('link', { name: /Restablecer contraseña/ })).toBeInTheDocument();
     expect(bar.queryByRole('link', { name: /Roles y permisos/ })).not.toBeInTheDocument();

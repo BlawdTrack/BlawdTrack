@@ -6,7 +6,6 @@ import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
-import DuplicateDetectionPage from './pages/DuplicateDetectionPage';
 import PackageImportPage from './pages/PackageImportPage';
 import PackageImportPreviewPage from './pages/PackageImportPreviewPage';
 import CourierHomePage from './pages/CourierHomePage';
@@ -107,7 +106,6 @@ function App() {
           <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
           <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
           <Route path={ROUTES.PACKAGE_IMPORT_PREVIEW} element={<PackageImportPreviewPage />} />
-          <Route path={ROUTES.PACKAGE_DUPLICATES} element={<DuplicateDetectionPage />} />
 
           <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
             <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />

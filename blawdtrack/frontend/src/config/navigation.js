@@ -75,13 +75,6 @@ export const NAVIGATION_GROUPS = [
         relatedPaths: [ROUTES.PACKAGE_IMPORT_PREVIEW],
         roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
       },
-      {
-        id: 'package-duplicates',
-        label: 'Detectar duplicados',
-        description: 'Identifica los paquetes cuyo número de envío ya está registrado o se repite en el archivo importado.',
-        path: ROUTES.PACKAGE_DUPLICATES,
-        roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
-      },
     ],
   },
   {

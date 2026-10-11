@@ -1,4 +1,4 @@
-import { describeDuplicate } from './duplicateReport';
+import { countDuplicateCauses, describeDuplicate } from './duplicateReport';
 
 /** Resultado de un registro del archivo en la previsualización. */
 export const PREVIEW_STATUS = Object.freeze({
@@ -70,7 +70,7 @@ function packageRow(status, record, index, notes = []) {
  * - **Duplicados:** hoy solo traen número de envío, ocurrencias y causas; cliente y dirección son opcionales.
  * @param {object|null|undefined} preview Respuesta de previsualización.
  * @returns {{ fileName: string, counts: { read: number, valid: number, invalid: number, duplicate: number },
- *   rows: Array<object> }|null} `null` si no hay una previsualización utilizable.
+ *   duplicateCauses: { alreadyRegistered: number, duplicatedInFile: number }, rows: Array<object> }|null} `null` si no hay una previsualización utilizable.
  */
 export function buildImportPreview(preview) {
   if (!preview || typeof preview !== 'object') return null;
@@ -97,6 +97,7 @@ export function buildImportPreview(preview) {
   return {
     fileName: preview.fileName ?? '',
     counts: { read: countOf(preview.totalRecords, counts.valid + counts.invalid + counts.duplicate), ...counts },
+    duplicateCauses: countDuplicateCauses(asList(preview.duplicates)),
     rows: [...valid, ...invalid, ...duplicate],
   };
 }

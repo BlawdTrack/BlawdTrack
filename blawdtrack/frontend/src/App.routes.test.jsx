@@ -16,7 +16,6 @@ vi.mock('./pages/AdminRegistrationPage', () => ({ default: () => <div>Pantalla r
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
 vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
 vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
-vi.mock('./pages/DuplicateDetectionPage', () => ({ default: () => <div>Pantalla detectar duplicados</div> }));
 vi.mock('./pages/PackageImportPage', () => ({ default: () => <div>Pantalla importar paquetes</div> }));
 vi.mock('./pages/PackageImportPreviewPage', () => ({ default: () => <div>Pantalla previsualización</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
@@ -39,7 +38,6 @@ const SCREENS = {
   [ROUTES.MODULE_PACKAGES]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
   [ROUTES.PACKAGE_IMPORT_PREVIEW]: 'Pantalla previsualización',
-  [ROUTES.PACKAGE_DUPLICATES]: 'Pantalla detectar duplicados',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
@@ -62,7 +60,6 @@ const SHARED_ROUTES = [
   ROUTES.PASSWORD_RESET_OWN,
   ROUTES.PACKAGE_IMPORT,
   ROUTES.PACKAGE_IMPORT_PREVIEW,
-  ROUTES.PACKAGE_DUPLICATES,
 ];
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
@@ -76,7 +73,6 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_SECURITY,
     ROUTES.PACKAGE_IMPORT,
     ROUTES.PACKAGE_IMPORT_PREVIEW,
-    ROUTES.PACKAGE_DUPLICATES,
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_DELETE,
     ROUTES.COURIER_CREATE,
@@ -91,7 +87,6 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_SECURITY,
     ROUTES.PACKAGE_IMPORT,
     ROUTES.PACKAGE_IMPORT_PREVIEW,
-    ROUTES.PACKAGE_DUPLICATES,
     ROUTES.PASSWORD_RESET_OWN,
   ],
   [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],

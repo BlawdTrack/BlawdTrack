@@ -49,10 +49,10 @@ describe('navigation config', () => {
     ]);
   });
 
-  it('puts "Importar paquetes" and "Detectar duplicados" in Gestión de paquetes, visible for the super user and the sales admin', () => {
+  it('puts only "Importar paquetes" in Gestión de paquetes (duplicate detection is part of the import), visible for the super user and the sales admin', () => {
     const packages = NAVIGATION_GROUPS.find((g) => g.id === 'packages');
-    expect(packages.items.map((i) => i.label)).toEqual(['Importar paquetes', 'Detectar duplicados']);
-    expect(packages.items.map((i) => i.path)).toEqual([ROUTES.PACKAGE_IMPORT, ROUTES.PACKAGE_DUPLICATES]);
+    expect(packages.items.map((i) => i.label)).toEqual(['Importar paquetes']);
+    expect(packages.items.map((i) => i.path)).toEqual([ROUTES.PACKAGE_IMPORT]);
     packages.items.forEach((item) => expect(item.roles).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]));
   });
 
@@ -113,7 +113,6 @@ describe('getBackTarget', () => {
     expect(getBackTarget(ROUTES.COURIER_CREATE)).toEqual({ to: ROUTES.MODULE_COURIERS, label: 'Gestión de mensajeros' });
     expect(getBackTarget(ROUTES.ADMIN_DELETE)).toEqual({ to: ROUTES.MODULE_ADMINS, label: 'Gestión de administradores' });
     expect(getBackTarget(ROUTES.ROLES_PERMISSIONS)).toEqual({ to: ROUTES.MODULE_SECURITY, label: 'Seguridad y acceso' });
-    expect(getBackTarget(ROUTES.PACKAGE_DUPLICATES)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Gestión de paquetes' });
     expect(getBackTarget(ROUTES.PACKAGE_IMPORT)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Gestión de paquetes' });
     // La previsualización es del mismo flujo que la importación aunque no sea una opción del menú.
     expect(getBackTarget(ROUTES.PACKAGE_IMPORT_PREVIEW)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Gestión de paquetes' });

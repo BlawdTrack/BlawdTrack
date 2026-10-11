@@ -35,11 +35,6 @@ export default function PackageImportPreviewPage() {
           <>
             <ImportPreviewView preview={preview} />
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& a': { width: { xs: '100%', sm: 'auto' } } }}>
-              {preview.counts.duplicate > 0 && (
-                <Button component={RouterLink} to={ROUTES.PACKAGE_DUPLICATES} state={{ preview: rawPreview }} variant="contained">
-                  Ver detalle de duplicados
-                </Button>
-              )}
               <Button component={RouterLink} to={ROUTES.PACKAGE_IMPORT} variant="outlined">
                 Cargar otro archivo
               </Button>

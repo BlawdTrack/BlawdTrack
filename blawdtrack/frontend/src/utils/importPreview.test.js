@@ -62,6 +62,10 @@ describe('buildImportPreview', () => {
     });
   });
 
+  it('cuenta las causas de duplicado de forma excluyente', () => {
+    expect(buildImportPreview(preview).duplicateCauses).toEqual({ alreadyRegistered: 1, duplicatedInFile: 1 });
+  });
+
   it('agrupa las filas: válidos, luego con errores y luego duplicados', () => {
     const { rows } = buildImportPreview(preview);
 

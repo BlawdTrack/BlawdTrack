@@ -1,7 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { screen, within, cleanup } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { useLocation } from 'react-router-dom';
 import PackageImportPreviewPage from './PackageImportPreviewPage';
 import { renderWithProviders, superUser } from '../test-utils';
 import { ROUTES } from '../config/routes';
@@ -20,22 +18,9 @@ const preview = {
   duplicates: [{ shipmentNumber: 'BG-5', occurrences: 1, reasons: ['ALREADY_REGISTERED'] }],
 };
 
-function LocationProbe() {
-  const location = useLocation();
-  return (
-    <>
-      <div data-testid="path">{location.pathname}</div>
-      <div data-testid="state">{location.state?.preview?.fileName ?? ''}</div>
-    </>
-  );
-}
-
 const renderPage = (state) =>
   renderWithProviders(
-    <>
-      <PackageImportPreviewPage />
-      <LocationProbe />
-    </>,
+    <PackageImportPreviewPage />,
     { route: { pathname: ROUTES.PACKAGE_IMPORT_PREVIEW, state }, user: superUser }
   );
 
@@ -77,20 +62,11 @@ describe('PackageImportPreviewPage (paso 2 de la importación)', () => {
     expect(screen.getByRole('link', { name: 'Cargar otro archivo' })).toHaveAttribute('href', ROUTES.PACKAGE_IMPORT);
   });
 
-  it('con duplicados ofrece el detalle y entrega la misma previsualización a la pantalla de duplicados', async () => {
-    const user = userEvent.setup();
+  it('los duplicados se revisan en la misma pantalla: avisa su causa y no hay otra pantalla de duplicados', () => {
     renderPage({ preview });
 
-    await user.click(screen.getByRole('link', { name: 'Ver detalle de duplicados' }));
-
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PACKAGE_DUPLICATES);
-    expect(screen.getByTestId('state')).toHaveTextContent('paquetes.xlsx');
-  });
-
-  it('sin duplicados no ofrece el detalle de duplicados', () => {
-    renderPage({ preview: { ...preview, duplicateRecordsCount: 0, duplicates: [] } });
-
-    expect(screen.queryByRole('link', { name: 'Ver detalle de duplicados' })).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Duplicados: 1 ya registrado en la base de datos.');
+    expect(screen.queryByRole('link', { name: /duplicados/i })).not.toBeInTheDocument();
   });
 
   it('no ofrece confirmar la importación: eso es otra pantalla', () => {

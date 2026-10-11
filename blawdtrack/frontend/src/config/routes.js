@@ -15,7 +15,6 @@ export const ROUTES = {
   PASSWORD_RESET_OWN: '/main-menu/restablecer-contrasena',
   PACKAGE_IMPORT: '/main-menu/paquetes/importar',
   PACKAGE_IMPORT_PREVIEW: '/main-menu/paquetes/previsualizacion',
-  PACKAGE_DUPLICATES: '/main-menu/paquetes/duplicados',
   COURIER_CREATE: '/main-menu/couriers/new',
   COURIER_UPDATE: '/editar-mensajero',
   COURIER_DEACTIVATE: '/main-menu/couriers/deactivate',
