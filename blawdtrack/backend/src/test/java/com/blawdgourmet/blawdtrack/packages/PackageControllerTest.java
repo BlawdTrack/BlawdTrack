@@ -312,15 +312,15 @@ class PackageControllerTest {
         recordPackageEvent(
                 pkg,
                 AuditAction.PACKAGE_STATUS_CHANGED,
-                "Rosa de la Cruz cambió el estado: PENDIENTE a ASIGNADO",
-                "PENDIENTE",
-                "ASIGNADO");
+                "El usuario 'Rosa de la Cruz' cambió el estado del paquete ENV-2024-0001 de PENDIENTE a ASIGNADO.",
+                "PENDING",
+                "ASSIGNED");
         recordPackageEvent(
                 pkg,
                 AuditAction.PACKAGE_ASSIGNED,
                 "Rosa de la Cruz asignó el envío",
-                "PENDIENTE",
-                "ASIGNADO");
+                "PENDING",
+                "ASSIGNED");
 
         getPackageHistory(token(adminVentas), "ENV-2024-0001")
                 .andExpect(status().isOk())
@@ -328,11 +328,14 @@ class PackageControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].timestamp").exists())
                 .andExpect(jsonPath("$[0].action").value("CAMBIAR_ESTADO_PAQUETE"))
-                .andExpect(jsonPath("$[0].details").value("Rosa de la Cruz cambió el estado: PENDIENTE a ASIGNADO"))
+                .andExpect(jsonPath("$[0].details")
+                        .value("El usuario 'Rosa de la Cruz' cambió el estado del paquete ENV-2024-0001 de PENDIENTE a ASIGNADO."))
                 .andExpect(jsonPath("$[0].actorName").value("Admin Ventas Test"))
-                .andExpect(jsonPath("$[0].previousStatus").value("PENDIENTE"))
-                .andExpect(jsonPath("$[0].newStatus").value("ASIGNADO"))
-                .andExpect(jsonPath("$[1].action").value("ASIGNAR_PAQUETE"));
+                .andExpect(jsonPath("$[0].previousStatus").value("PENDING"))
+                .andExpect(jsonPath("$[0].newStatus").value("ASSIGNED"))
+                .andExpect(jsonPath("$[1].action").value("ASIGNAR_PAQUETE"))
+                .andExpect(jsonPath("$[1].previousStatus").value("PENDING"))
+                .andExpect(jsonPath("$[1].newStatus").value("ASSIGNED"));
 
         var storedEvents = auditLogs.findAll().stream()
                 .filter(log -> pkg.getId().equals(log.getPackageId()))
@@ -340,8 +343,40 @@ class PackageControllerTest {
         assertThat(storedEvents)
                 .extracting(AuditLog::getPreviousStatus, AuditLog::getNewStatus)
                 .containsExactly(
-                        org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"),
-                        org.assertj.core.groups.Tuple.tuple("PENDIENTE", "ASIGNADO"));
+                        org.assertj.core.groups.Tuple.tuple("PENDING", "ASSIGNED"),
+                        org.assertj.core.groups.Tuple.tuple("PENDING", "ASSIGNED"));
+    }
+
+    @Test
+    void adminVentasConsultaHistorialPaqueteExistenteRetornaListaOrdenada() throws Exception {
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de PENDIENTE a ASIGNADO.",
+                "PENDING",
+                "ASSIGNED");
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de ASIGNADO a ENVIADO.",
+                "ASSIGNED",
+                "SHIPPED");
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
+                "El usuario 'Admin Ventas Test' cambió el estado del paquete ENV-2024-0001 de ENVIADO a ENTREGADO.",
+                "SHIPPED",
+                "DELIVERED");
+
+        getPackageHistory(token(adminVentas), "ENV-2024-0001")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].previousStatus").value("PENDING"))
+                .andExpect(jsonPath("$[0].newStatus").value("ASSIGNED"))
+                .andExpect(jsonPath("$[1].previousStatus").value("ASSIGNED"))
+                .andExpect(jsonPath("$[1].newStatus").value("SHIPPED"))
+                .andExpect(jsonPath("$[2].previousStatus").value("SHIPPED"))
+                .andExpect(jsonPath("$[2].newStatus").value("DELIVERED"));
     }
 
     @Test
@@ -406,7 +441,21 @@ class PackageControllerTest {
     void historialDePaqueteInexistenteRetorna404() throws Exception {
         getPackageHistory(token(adminVentas), "ENV-NO-EXISTE")
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"));
+                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Paquete no encontrado con número de envío: ENV-NO-EXISTE"))
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void adminVentasConsultaHistorialPaqueteSinHistorialRetornaListaVacia() throws Exception {
+        packages.saveAndFlush(DeliveryPackage.builder()
+                .shipmentNumber("ENV-2024-0002")
+                .build());
+
+        getPackageHistory(token(adminVentas), "ENV-2024-0002")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @ParameterizedTest

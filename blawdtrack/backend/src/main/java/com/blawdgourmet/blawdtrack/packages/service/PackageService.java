@@ -14,8 +14,6 @@ import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository
 import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 
 /**
