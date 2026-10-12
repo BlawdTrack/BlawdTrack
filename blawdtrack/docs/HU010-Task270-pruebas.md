@@ -7,10 +7,13 @@ El módulo de importación de paquetes y sus endpoints solo los puede usar el pe
 
 ## Decisión de acceso
 
-La task habla del Administrador de Ventas. La decisión de que **también el Súper Usuario** pueda importar es de
-Genesis (el Súper Usuario debe poder usar todo el sistema); **falta registrarla en la Task 270 o en la HU-010 de
-Azure DevOps** con quién y cuándo la confirmó el equipo (Alicia). Si no se confirma, se vuelve a `hasRole(SALES_ADMIN)`
-y se quita la opción del menú del Súper Usuario. Con esa decisión el acceso a la importación es:
+La task habla del Administrador de Ventas, pero el documento de arquitectura del proyecto (sección "Control de acceso de
+los usuarios y los componentes del sistema") dice que el **Súper Usuario tiene acceso a todos los módulos del
+sistema**, y su matriz de perfiles marca al Súper Usuario en "Importación de Paquetes" y en "Gestión de Paquetes". Esa
+es la base de esta decisión. El Administrador de Ventas tiene los módulos de importación, gestión de paquetes,
+asignación y reportes; el Mensajero, solo los suyos. El mismo documento, en el caso de uso CU-010, dice "Solo
+administradores de ventas pueden importar paquetes": es una redacción más estrecha que la regla general y conviene
+aclararla con el equipo. Con la regla general, el acceso es:
 
 | Rol | Endpoints `/api/v1/packages/**` | Pantallas de importación |
 | --- | --- | --- |
@@ -23,13 +26,12 @@ Antes, el servidor solo dejaba pasar al Administrador de Ventas y el Súper Usua
 
 ## Qué cambia
 
-- **Filtro de seguridad** (`SecurityConfig`), con el alcance acotado a la importación:
-  - `/api/v1/packages/import/**` y `/api/v1/packages/shipment-numbers/**` exigen `ADMIN_VENTAS` o `SUPER_USER`
-    (`hasAnyRole`). Van declaradas **antes** de la regla general.
-  - El resto, `/api/v1/packages/**` (eliminar, detalle, historial y búsqueda de las HU-012, HU-013 y HU-014), sigue
-    siendo solo del Administrador de Ventas (`hasRole`).
-  - Las reglas se evalúan antes de leer el cuerpo de la petición, así que un mensajero recibe 403 aunque mande un
-    JSON inválido.
+- **Filtro de seguridad** (`SecurityConfig`): `/api/v1/packages/**` exige el rol `ADMIN_VENTAS` o `SUPER_USER`
+  (`hasAnyRole`), porque el Súper Usuario accede a todos los módulos, incluida la gestión de paquetes. La regla se
+  evalúa antes de leer el cuerpo de la petición, así que un mensajero recibe 403 aunque mande un JSON inválido.
+- **Cada controlador conserva su `@PreAuthorize`** como segunda barrera. Los de eliminar, detalle, historial y
+  búsqueda (HU-012, HU-013 y HU-014) hoy exigen solo `ADMIN_VENTAS`: para que el Súper Usuario los use hay que
+  ampliarlos en esas HU; este filtro ya no se lo impide.
 - **Controlador** (`PackageImportValidationController`): la comparación de números de envío usa la misma regla con
   `@PreAuthorize`, como segunda barrera a nivel de método.
 - **Frontend:** sin cambios. Las rutas de importación ya están protegidas por rol (`ProtectedRoute`) y el menú las
@@ -56,7 +58,7 @@ Verificado el 10 de octubre de 2026 con Maven, desde `blawdtrack/backend`:
 | `elMensajeroNoPuedeEjecutarLaComparacion` | El mensajero recibe **403** aunque mande un cuerpo inválido. |
 | `solicitudSinTokenDevuelveUnauthorizedAntesDeValidarElCuerpo` | Sin sesión, **401**. |
 | `laImportacionEstaAbiertaAlSuperUsuarioYCerradaAlMensajero` | En `/api/v1/packages/import/**` el Administrador de Ventas y el Súper Usuario pasan el filtro y el mensajero recibe 403. |
-| `elRestoDePaquetesSigueSiendoSoloDelAdministradorDeVentas` | En otra ruta de `/api/v1/packages/**` el Súper Usuario y el mensajero reciben 403; el Administrador de Ventas pasa el filtro. |
+| `todasLasRutasDePaquetesEstanAbiertasAlSuperUsuarioYCerradasAlMensajero` | En otra ruta de `/api/v1/packages/**` el Súper Usuario y el Administrador de Ventas pasan el filtro y el mensajero recibe 403. |
 | `administradorDeVentasRecibeErrorDeValidacionParaListaVacia` | Con permiso, el cuerpo inválido da 400 (la validación sigue después de la seguridad). |
 | `App.routes.test.jsx` (frontend) | Mensajero y persona sin sesión no ven las pantallas de importación. |
 

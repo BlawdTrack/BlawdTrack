@@ -103,15 +103,16 @@ class PackageShipmentNumberComparisonIntegrationTest {
     }
 
     @Test
-    void elRestoDePaquetesSigueSiendoSoloDelAdministradorDeVentas() throws Exception {
-        // Ruta general de paquetes (la ocupan eliminar, detalle, historial y busqueda): solo ADMIN_VENTAS.
+    void todasLasRutasDePaquetesEstanAbiertasAlSuperUsuarioYCerradasAlMensajero() throws Exception {
+        // Ruta general de paquetes (la ocupan eliminar, detalle, historial y busqueda): el Super Usuario tiene acceso
+        // a todos los modulos; el mensajero no tiene ninguno de paquetes.
         String route = "/api/v1/packages/ENV-1";
         mvc.perform(get(route).header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
-                .andExpect(status().isForbidden());
-        mvc.perform(get(route).header("Authorization", "Bearer " + token(RoleName.COURIER)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is(not(403)));
         mvc.perform(get(route).header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
                 .andExpect(status().is(not(403)));
+        mvc.perform(get(route).header("Authorization", "Bearer " + token(RoleName.COURIER)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
