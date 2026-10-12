@@ -1,5 +1,7 @@
 ALTER TABLE paquetes
-    ADD COLUMN mensajero_id BIGINT NULL,
+    ADD COLUMN mensajero_id BIGINT NULL;
+
+ALTER TABLE paquetes
     ADD CONSTRAINT fk_paquetes_mensajero_id
         FOREIGN KEY (mensajero_id) REFERENCES mensajeros(id);
 
