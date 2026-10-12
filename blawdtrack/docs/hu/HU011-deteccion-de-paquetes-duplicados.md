@@ -1,8 +1,8 @@
 # HU011 · Detección de paquetes duplicados
 
 **Ramas:** `feature/hu011/T01/113/silesky` (Task 113) y `feature/hu011/T02/114/silesky` (Task 114), fusionadas en
-`HU-011` (#101 y #102), y `feature/hu011/T03/115/silesky` (Task 115, frontend), sobre `HU-011`. `HU-011` aún no
-está fusionada en `develop`.
+`HU-011` (#101 y #102), y `feature/hu011/T03/115/silesky` (Task 115, frontend), ya en `HU-011`, y
+`feature/hu011/T04/116/silesky` (Task 116, frontend). `HU-011` aún no está fusionada en `develop`.
 
 ## Resumen
 
@@ -11,8 +11,9 @@ archivo ya están registrados en la base de datos o se repiten dentro del propio
 identifican fila por fila, se cuentan y se excluyen de lo que se importa.
 
 El backend de la historia está completo y la pantalla de duplicados (Task 115) está construida y visible en el menú
-para el Súper Usuario y el Administrador de Ventas. La pantalla de carga del archivo de HU-010 (Task 267) ya le
-entrega la previsualización; falta cerrar la integración con el servidor real (Task 116, endpoints de Luis F sin
+para el Súper Usuario y el Administrador de Ventas. La pantalla de carga de HU-010 (Task 267) ya le entrega la
+previsualización y, desde la Task 116, la propia pantalla también carga el archivo y lo envía al backend con sus
+estados de carga y error. Falta que el servidor real tenga el endpoint de previsualización (Task 265, Luis F, sin
 fusionar) y que la importación use el servicio de exclusión.
 
 ## Criterios de aceptación
@@ -150,7 +151,8 @@ de sus pantallas (`getGroupRoles`), así que el Administrador de Ventas no entra
 | `DuplicateExclusionIntegrationTest` | Excluye registrados y repetidos con la base de datos de pruebas; detecta un número registrado después de la previsualización. |
 
 Guías de ejecución y evidencias: [`HU011-Task113-pruebas.md`](../HU011-Task113-pruebas.md),
-[`HU011-Task114-pruebas.md`](../HU011-Task114-pruebas.md) y [`HU011-Task115-pruebas.md`](../HU011-Task115-pruebas.md).
+[`HU011-Task114-pruebas.md`](../HU011-Task114-pruebas.md), [`HU011-Task115-pruebas.md`](../HU011-Task115-pruebas.md) y
+[`HU011-Task116-pruebas.md`](../HU011-Task116-pruebas.md).
 
 ### Frontend
 
