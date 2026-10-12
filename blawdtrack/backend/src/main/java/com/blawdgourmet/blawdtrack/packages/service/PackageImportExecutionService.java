@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PackageImportExecutionService implements PackageImportExecutionUseCase {
 
-    private final PackageImportPreviewUseCase previewUseCase;
+    private final PackageImportPreviewService previewService;
     private final PackageBulkRegistrationUseCase bulkRegistrationUseCase;
 
     @Override
     @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
     public PackageImportExecutionResponse execute(InputStream input, String fileName) {
-        PackageImportPreviewResponse preview = previewUseCase.preview(input, fileName);
+        PackageImportPreviewResponse preview = previewService.preview(input, fileName);
         PackageBulkRegistrationResult registration =
                 bulkRegistrationUseCase.registerValidPackages(preview.validRecords());
 
