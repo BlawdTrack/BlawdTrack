@@ -57,15 +57,17 @@ class PackageSearchCriteriaTest {
     }
 
     @Test
-    void phoneCriterionFindsFormattedNumbersByPrefix() {
+    void phoneCriterionFindsFormattedNumbersByPartialDigits() {
         assertShipment(phoneCriterion, "+506");
         assertShipment(phoneCriterion, "7110", "ENV-00002");
+        assertShipment(phoneCriterion, "9999");
     }
 
     @Test
-    void searchTermsAreMatchedAsLiteralPrefixes() {
+    void searchCriteriaMatchLiteralFragmentsAndPhoneSuffixes() {
         assertShipment(customerCriterion, "50%_", "ENV-WILDCARD");
-        assertThat(search(customerCriterion, "literal")).isEmpty();
+        assertShipment(customerCriterion, "literal", "ENV-WILDCARD");
+        assertShipment(phoneCriterion, "9999");
     }
 
     @Test
@@ -102,4 +104,5 @@ class PackageSearchCriteriaTest {
         PackageSearchTerm term = normalizer.normalize(rawTerm).orElseThrow();
         return repository.findAll(criterion.toSpecification(term));
     }
+
 }

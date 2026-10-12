@@ -20,7 +20,7 @@ public class PackageSearchTermNormalizer {
         if (normalized.length() > MAX_TERM_LENGTH) {
             normalized = normalized.substring(0, MAX_TERM_LENGTH);
         }
-            normalized = normalized.toUpperCase(Locale.ROOT);
+        normalized = normalized.toUpperCase(Locale.ROOT);
 
         StringBuilder escaped = new StringBuilder(normalized.length());
         for (char character : normalized.toCharArray()) {
@@ -29,6 +29,6 @@ public class PackageSearchTermNormalizer {
             }
             escaped.append(character);
         }
-        return Optional.of(new PackageSearchTerm(escaped + "%"));
+        return Optional.of(new PackageSearchTerm("%" + escaped + "%"));
     }
 }

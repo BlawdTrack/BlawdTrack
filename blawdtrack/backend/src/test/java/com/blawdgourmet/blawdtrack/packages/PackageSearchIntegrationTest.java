@@ -45,7 +45,7 @@ class PackageSearchIntegrationTest {
         packages.deleteAll();
         packages.saveAllAndFlush(List.of(
                 DeliveryPackage.builder().shipmentNumber("ENV-00001").orderNumber("SO-001")
-                    .customerName("CLIENTE UNO")
+                    .customerName("CLIENTE UNO ROJAS")
                     .address("DEL PARQUE 100M NORTE, ESCAZU, SAN JOSE, COSTA RICA")
                     .phone("+506-8888-9999").schedule("DE 8 A 5").build(),
                 DeliveryPackage.builder().shipmentNumber("ENV-00002").orderNumber("SO-002")
@@ -85,6 +85,24 @@ class PackageSearchIntegrationTest {
                             .header("Authorization", bearer(RoleName.SALES_ADMIN)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content[0].shipmentNumber").value("ENV-00001"));
+        }
+    }
+
+    @Test
+    void matchesPartialTermsAcrossFieldsAndPhoneDigits() throws Exception {
+        String[][] searches = {
+                {"rojas", "ENV-00001"},
+                {"barv", "ENV-00002"},
+                {"9999", "ENV-00001"},
+                {"rojas parque", "ENV-00001"}
+        };
+
+        for (String[] search : searches) {
+            mvc.perform(get(SEARCH_URL).param("term", search[0])
+                            .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalElements").value(1))
+                    .andExpect(jsonPath("$.content[0].shipmentNumber").value(search[1]));
         }
     }
 
