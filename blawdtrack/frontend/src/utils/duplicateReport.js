@@ -21,17 +21,31 @@ export function describeDuplicate({ reasons = [], occurrences = 1 }) {
 }
 
 /**
- * Cuenta las causas de duplicado de la previsualización de una importación. Las causas son excluyentes, igual
- * que en el backend: un número ya registrado cuenta solo como "ya registrado", aunque además esté repetido en el
- * archivo.
- * @param {Array<{ reasons?: string[] }>} duplicates Duplicados de `PackageImportPreviewResponse`.
+ * Filas del archivo que excluye un duplicado. El backend agrupa por número de envío y `occurrences` es la cantidad
+ * de filas del archivo con ese número (todas se excluyen); si no llega, se asume una.
+ * @param {{ occurrences?: number }|null|undefined} duplicate Duplicado de `PackageImportPreviewResponse`.
+ * @returns {number}
+ */
+export function duplicateRowCount(duplicate) {
+  return Number.isInteger(duplicate?.occurrences) && duplicate.occurrences > 0 ? duplicate.occurrences : 1;
+}
+
+/**
+ * Cuenta las **filas** duplicadas por causa. Las causas son excluyentes, igual que los contadores de la comparación
+ * del backend (`alreadyRegisteredCount` y `duplicatedInFileCount`): las filas de un número ya registrado cuentan
+ * solo como "ya registrado", aunque además esté repetido en el archivo. La suma de las dos es el total de filas
+ * duplicadas (`duplicateRecordsCount`).
+ * @param {Array<{ reasons?: string[], occurrences?: number }>} duplicates Duplicados de `PackageImportPreviewResponse`.
  * @returns {{ alreadyRegistered: number, duplicatedInFile: number }}
  */
 export function countDuplicateCauses(duplicates = []) {
-  const alreadyRegistered = duplicates.filter((item) => item?.reasons?.includes(DUPLICATE_REASONS.ALREADY_REGISTERED)).length;
-  const duplicatedInFile = duplicates.filter(
-    (item) =>
-      !item?.reasons?.includes(DUPLICATE_REASONS.ALREADY_REGISTERED) && item?.reasons?.includes(DUPLICATE_REASONS.DUPLICATED_IN_FILE)
-  ).length;
-  return { alreadyRegistered, duplicatedInFile };
+  const totals = { alreadyRegistered: 0, duplicatedInFile: 0 };
+  duplicates.forEach((item) => {
+    if (item?.reasons?.includes(DUPLICATE_REASONS.ALREADY_REGISTERED)) {
+      totals.alreadyRegistered += duplicateRowCount(item);
+    } else if (item?.reasons?.includes(DUPLICATE_REASONS.DUPLICATED_IN_FILE)) {
+      totals.duplicatedInFile += duplicateRowCount(item);
+    }
+  });
+  return totals;
 }

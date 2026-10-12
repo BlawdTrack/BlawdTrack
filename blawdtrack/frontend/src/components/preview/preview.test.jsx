@@ -175,9 +175,9 @@ describe('ImportPreviewView', () => {
       { shipmentNumber: 'BG-6', occurrences: 1, reasons: ['ALREADY_REGISTERED'] },
       { shipmentNumber: 'BG-7', occurrences: 2, reasons: ['DUPLICATED_IN_FILE'] },
     ];
-    render(<ImportPreviewView preview={previewOf({ duplicates, duplicateRecordsCount: 3 })} />);
+    render(<ImportPreviewView preview={previewOf({ duplicates, duplicateRecordsCount: 4 })} />);
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Duplicados: 2 ya registrados en la base de datos y 1 repetido en el archivo.');
+    expect(screen.getByRole('alert')).toHaveTextContent('Duplicados: 2 ya registrados en la base de datos y 2 repetidos en el archivo.');
   });
 
   it('filtra la lista al elegir un grupo y vuelve a mostrar todo con "Todos"', async () => {

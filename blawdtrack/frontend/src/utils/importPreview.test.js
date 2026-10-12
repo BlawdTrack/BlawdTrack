@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import realBackendResponse from './fixtures/packageImportPreview.real.json';
 import { PREVIEW_STATUS, buildImportPreview, filterPreviewRows, formatDeliveryWindow } from './importPreview';
 
 const validRecord = {
@@ -14,10 +15,10 @@ const validRecord = {
 
 const preview = {
   fileName: 'zoho.xlsx',
-  totalRecords: 6,
+  totalRecords: 8,
   validRecordsCount: 2,
   invalidRecordsCount: 2,
-  duplicateRecordsCount: 2,
+  duplicateRecordsCount: 4,
   validRecords: [validRecord, { ...validRecord, shipmentNumber: 'BG-2', deliveryWindow: undefined }],
   invalidRecords: [
     {
@@ -58,12 +59,24 @@ describe('buildImportPreview', () => {
   it('toma el nombre del archivo y los totales que informa el backend', () => {
     expect(buildImportPreview(preview)).toMatchObject({
       fileName: 'zoho.xlsx',
-      counts: { read: 6, valid: 2, invalid: 2, duplicate: 2 },
+      counts: { read: 8, valid: 2, invalid: 2, duplicate: 4 },
     });
   });
 
-  it('cuenta las causas de duplicado de forma excluyente', () => {
-    expect(buildImportPreview(preview).duplicateCauses).toEqual({ alreadyRegistered: 1, duplicatedInFile: 1 });
+  it('cuenta las causas de duplicado por fila y de forma excluyente: las 3 copias de un repetido cuentan 3', () => {
+    const { duplicateCauses, counts } = buildImportPreview(preview);
+
+    expect(duplicateCauses).toEqual({ alreadyRegistered: 1, duplicatedInFile: 3 });
+    expect(duplicateCauses.alreadyRegistered + duplicateCauses.duplicatedInFile).toBe(counts.duplicate);
+  });
+
+  it('un número repetido 3 veces aparece 3 veces en la lista, como lo cuenta el backend, con claves distintas', () => {
+    const { rows } = buildImportPreview(preview);
+    const copies = rows.filter((row) => row.shipmentNumber === 'BG-6');
+
+    expect(copies).toHaveLength(3);
+    expect(new Set(copies.map((row) => row.key)).size).toBe(3);
+    expect(copies.every((row) => row.notes[0] === 'Repetido 3 veces en el archivo')).toBe(true);
   });
 
   it('agrupa las filas: válidos, luego con errores y luego duplicados', () => {
@@ -74,6 +87,8 @@ describe('buildImportPreview', () => {
       PREVIEW_STATUS.VALID,
       PREVIEW_STATUS.INVALID,
       PREVIEW_STATUS.INVALID,
+      PREVIEW_STATUS.DUPLICATE,
+      PREVIEW_STATUS.DUPLICATE,
       PREVIEW_STATUS.DUPLICATE,
       PREVIEW_STATUS.DUPLICATE,
     ]);
@@ -107,7 +122,7 @@ describe('buildImportPreview', () => {
 
   it('un duplicado trae la causa y el cliente y la dirección solo si llegan', () => {
     const rows = buildImportPreview(preview).rows;
-    const [registered, repeated] = rows.slice(4);
+    const [registered, repeated] = [rows[4], rows[5]];
 
     expect(registered).toMatchObject({ shipmentNumber: 'BG-5', customerName: null, address: null, notes: ['Ya registrado en la base de datos'] });
     expect(repeated).toMatchObject({ shipmentNumber: 'BG-6', customerName: 'Carla', address: 'Alajuela', notes: ['Repetido 3 veces en el archivo'] });
@@ -137,13 +152,13 @@ describe('filterPreviewRows', () => {
   const { rows } = buildImportPreview(preview);
 
   it('"all" devuelve todas las filas', () => {
-    expect(filterPreviewRows(rows, 'all')).toHaveLength(6);
+    expect(filterPreviewRows(rows, 'all')).toHaveLength(8);
   });
 
   it.each([
     [PREVIEW_STATUS.VALID, 2],
     [PREVIEW_STATUS.INVALID, 2],
-    [PREVIEW_STATUS.DUPLICATE, 2],
+    [PREVIEW_STATUS.DUPLICATE, 4],
   ])('el filtro %s deja solo sus filas (%i)', (status, expected) => {
     const filtered = filterPreviewRows(rows, status);
 
@@ -153,5 +168,45 @@ describe('filterPreviewRows', () => {
 
   it('un filtro desconocido no deja filas', () => {
     expect(filterPreviewRows(rows, 'otro')).toEqual([]);
+  });
+});
+
+// `fixtures/packageImportPreview.real.json` es la respuesta de `POST /api/v1/packages/import/preview` del backend de
+// Luis F (rama fix/HU010-task265-resolver-comentarios-pr), copiada tal cual al cargar un CSV con 4 paquetes
+// válidos, uno agrupado de 3 filas, uno sin teléfono y uno ya registrado.
+describe('buildImportPreview con la respuesta real del backend', () => {
+  const result = buildImportPreview(realBackendResponse);
+
+  it('los totales del backend suman el total de registros leídos', () => {
+    const { read, valid, invalid, duplicate } = result.counts;
+
+    expect(read).toBe(7);
+    expect(valid + invalid + duplicate).toBe(read);
+    expect(result.counts).toEqual({ read: 7, valid: 5, invalid: 1, duplicate: 1 });
+    expect(result.rows).toHaveLength(7);
+  });
+
+  it('el duplicado es el número ya registrado, contado como una fila de esa causa', () => {
+    expect(result.duplicateCauses).toEqual({ alreadyRegistered: 1, duplicatedInFile: 0 });
+    expect(result.rows.find((row) => row.status === PREVIEW_STATUS.DUPLICATE)).toMatchObject({
+      shipmentNumber: 'ENV-0900',
+      notes: ['Ya registrado en la base de datos'],
+    });
+  });
+
+  it('el registro sin teléfono trae el motivo del backend', () => {
+    expect(result.rows.find((row) => row.status === PREVIEW_STATUS.INVALID)).toMatchObject({
+      shipmentNumber: 'ENV-2005',
+      phone: null,
+      notes: ['El campo teléfono es obligatorio'],
+    });
+  });
+
+  it('hoy el backend no manda el rango de entrega: los válidos quedan "sin calcular"', () => {
+    const valid = result.rows.filter((row) => row.status === PREVIEW_STATUS.VALID);
+
+    expect(valid).toHaveLength(5);
+    expect(valid.every((row) => row.deliveryRange === null)).toBe(true);
+    expect(valid.find((row) => row.shipmentNumber === 'ENV-2004').schedule).toBe('9:00 a.m. a 4:00 p.m.');
   });
 });
