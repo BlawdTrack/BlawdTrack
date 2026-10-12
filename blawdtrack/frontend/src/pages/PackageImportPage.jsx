@@ -14,8 +14,8 @@ import { ROUTES } from '../config/routes';
 /**
  * Importar paquetes, paso 1 (HU-010): el usuario elige el archivo de Zoho Inventory (.xlsx o .csv), el navegador
  * valida su formato y el backend lo lee sin registrarlo. Muestra los estados de la carga: cargando, error (del
- * formato o del servidor) y éxito. Con éxito entrega la previsualización a la pantalla de previsualización (paso 2) por
- * el estado de navegación. Solo compone: la selección y la carga viven en sus hooks, el diseño en `components/import`.
+ * formato o del servidor) y éxito. Con éxito entrega la previsualización a la pantalla siguiente por el estado de
+ * navegación. Solo compone: la selección y la carga viven en sus hooks, el diseño en `components/import`.
  */
 export default function PackageImportPage() {
   const navigate = useNavigate();
@@ -37,9 +37,19 @@ export default function PackageImportPage() {
     if (file && !isUploading) upload(file);
   };
 
-  const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview } });
+  // Hasta que exista la pantalla de previsualización (paso 2), la revisión de duplicados es el destino.
+  const handleContinue = () => navigate(ROUTES.PACKAGE_DUPLICATES, { state: { preview } });
 
   const alertMessage = fileError ?? errorMessage;
+ * formato o del servidor) y éxito. Con éxito entrega la previsualización a la pantalla de previsualización (paso 2) por
+ * el estado de navegación. Solo compone: la selección y la carga viven en sus hooks, el diseño en `components/import`.
+ */
+export default function PackageImportPage() {
+  const navigate = useNavigate();
+  const upload = usePackageFileUpload();
+  const { file, isSuccess, preview, discard } = upload;
+
+  const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview } });
 
   return (
     <>
@@ -62,7 +72,7 @@ export default function PackageImportPage() {
               <Button variant="contained" onClick={handleContinue}>
                 Ver previsualización
               </Button>
-              <Button variant="outlined" onClick={handleDiscard}>
+              <Button variant="outlined" onClick={discard}>
                 Cargar otro archivo
               </Button>
             </Box>
@@ -80,6 +90,7 @@ export default function PackageImportPage() {
               onDiscard={handleDiscard}
             />
           </Box>
+          <PackageFileUploadForm upload={upload} />
         )}
       </PageContainer>
     </>
