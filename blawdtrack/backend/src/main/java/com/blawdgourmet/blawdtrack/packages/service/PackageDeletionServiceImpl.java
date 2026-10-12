@@ -5,7 +5,6 @@ import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDeletionResponse;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
@@ -19,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class PackageDeletionServiceImpl implements PackageDeletionService {
 
     private final DeliveryPackageRepository packages;
-    private final AuditService auditService;
+    private final PackageDeletionAuditService deletionAudit;
 
     @Override
     @Transactional
@@ -38,10 +37,11 @@ public class PackageDeletionServiceImpl implements PackageDeletionService {
                     : new PackageDispatchedException(normalizedNumber, status);
         }
 
-        // La auditoría va primero y en la misma transacción: si falla, el paquete no se elimina.
-        auditService.registrarEliminacionPaquete(actor, normalizedNumber, status);
+        // El DELETE se ejecuta primero (flush) para auditar solo un borrado que realmente ocurrió.
+        // La auditoría va en la misma transacción: si falla, se revierte el borrado.
         packages.delete(deliveryPackage);
         packages.flush();
+        deletionAudit.registerDeletion(actor, normalizedNumber, status);
 
         return new PackageDeletionResponse("Paquete eliminado correctamente.");
     }
