@@ -1,8 +1,8 @@
 # HU011 · Detección de paquetes duplicados
 
 **Ramas:** `feature/hu011/T01/113/silesky` (Task 113) y `feature/hu011/T02/114/silesky` (Task 114), fusionadas en
-`HU-011` (#101 y #102), y `feature/hu011/T03/115/silesky` (Task 115, frontend), sobre `HU-011`. `HU-011` aún no
-está fusionada en `develop`.
+`HU-011` (#101 y #102), y `feature/hu011/T03/115/silesky` (Task 115, frontend), ya en `HU-011`, y
+`feature/hu011/T04/116/silesky` (Task 116, frontend). `HU-011` aún no está fusionada en `develop`.
 
 ## Resumen
 
@@ -10,9 +10,10 @@ Antes de confirmar una importación de paquetes, el Administrador de Ventas pued
 archivo ya están registrados en la base de datos o se repiten dentro del propio archivo. Los duplicados se
 identifican fila por fila, se cuentan y se excluyen de lo que se importa.
 
-El backend de la historia está completo y la pantalla de duplicados (Task 115) está construida y visible en el menú
-para el Súper Usuario y el Administrador de Ventas. Falta conectarla a la pantalla de importación de HU-010, que
-todavía no existe en el frontend, y que la importación use el servicio de exclusión.
+El backend de la historia está completo. En el frontend la detección de duplicados **no es una pantalla aparte**: es una
+verificación del flujo de importación de paquetes. La previsualización de la importación (HU-010) resalta los
+duplicados, cuenta los válidos y los duplicados y avisa su causa (Tasks 115 y 116). Falta que el servidor real tenga
+el endpoint de previsualización (Luis F, sin fusionar) y que la importación use el servicio de exclusión.
 
 ## Criterios de aceptación
 
@@ -20,7 +21,7 @@ todavía no existe en el frontend, y que la importación use el servicio de excl
 |---|---|
 | Comparar los números de envío del archivo contra la base de datos | ✅ Task 113 |
 | Identificar números repetidos dentro del mismo archivo | ✅ Task 113 |
-| Resaltar los duplicados en la previsualización | ✅ Task 115: pantalla "Detectar duplicados" con filas resaltadas, etiqueta "Duplicado" y la causa. ⏳ Falta que la pantalla de importación (HU-010) le entregue la previsualización |
+| Resaltar los duplicados en la previsualización | ✅ Tasks 115 y 116: filas resaltadas con la etiqueta "Duplicado" y la causa, dentro de la previsualización de la importación |
 | Los duplicados no se importan | ⏳ El servicio de exclusión está listo (Task 114); la importación de HU-010 aún no lo llama |
 | La detección ocurre antes de confirmar | ✅ El endpoint sirve a la previsualización y la exclusión se vuelve a ejecutar al confirmar |
 | Solo el Administrador de Ventas ejecuta el proceso | ✅ `ADMIN_VENTAS`; otros roles reciben 403 y sin token, 401 |
@@ -81,19 +82,20 @@ confirmar, porque entre ambos pasos pueden registrarse otros paquetes. La restri
 
 ## Cómo funciona en el frontend
 
-Pantalla **Detectar duplicados** (`/main-menu/paquetes/duplicados`), dentro del grupo **Gestión de paquetes** del
-menú lateral. Es visible para el Súper Usuario y el Administrador de Ventas.
+La detección de duplicados no tiene opción propia en el menú: es parte de **Importar paquetes** (grupo **Gestión de
+paquetes**, visible para el Súper Usuario y el Administrador de Ventas). Se ve en el paso 2, la **previsualización de
+la importación** (`/main-menu/paquetes/previsualizacion`):
 
-- **Con un archivo en previsualización:** un aviso en advertencia con la cantidad de duplicados y el nombre del
-  archivo ("3 registros duplicados detectados en …"; sin duplicados, un aviso de éxito), cuatro totales (registros
-  del archivo, válidos para importar, ya existentes en la base de datos y repetidos dentro del archivo) y la lista
-  **Registros duplicados**. Cada fila va resaltada (fondo y barra lateral de advertencia) y lleva el número de
-  envío, la etiqueta **Duplicado**, la causa ("Ya registrado en la base de datos" o "Repetido N veces en el
-  archivo") y, si el backend los envía, el cliente y la dirección. El resaltado no depende solo del color.
-- **Sin archivo:** el estado vacío "Sin archivo en previsualización".
-- **Origen de los datos:** la pantalla recibe la respuesta de `POST /api/v1/packages/import/preview`
-  (`PackageImportPreviewResponse`, de la importación de HU-010) en `location.state.preview`; la pantalla de
-  importación la entregará al navegar a esta ruta. `buildDuplicateReport` la convierte en el modelo de la pantalla.
+- **Aviso:** con duplicados, una advertencia con la cantidad y el nombre del archivo ("3 duplicados en …"), que
+  explica que se excluyen y de qué tipo son ("Duplicados: 2 ya registrados en la base de datos y 1 repetido en el
+  archivo"). Sin duplicados, un aviso de éxito.
+- **Totales:** registros leídos, válidos, con errores y duplicados.
+- **Lista:** cada duplicado va resaltado (fondo y barra lateral de advertencia), con la etiqueta **Duplicado** y la
+  causa ("Ya registrado en la base de datos" o "Repetido N veces en el archivo"). El filtro "Duplicados" deja solo
+  esos registros. El resaltado no depende solo del color.
+- **Origen de los datos:** la respuesta de `POST /api/v1/packages/import/preview` (`PackageImportPreviewResponse`),
+  que la pantalla de carga entrega en `location.state.preview`. `countDuplicateCauses` cuenta las causas de forma
+  excluyente, igual que el backend.
 
 **Administrador de Ventas en el menú lateral.** Hasta esta task el Administrador de Ventas solo tenía una pantalla
 provisional sin menú (`/ventas`). Ahora usa el mismo `MainMenuLayout` que el Súper Usuario: su inicio es el menú
@@ -148,16 +150,17 @@ de sus pantallas (`getGroupRoles`), así que el Administrador de Ventas no entra
 | `DuplicateExclusionIntegrationTest` | Excluye registrados y repetidos con la base de datos de pruebas; detecta un número registrado después de la previsualización. |
 
 Guías de ejecución y evidencias: [`HU011-Task113-pruebas.md`](../HU011-Task113-pruebas.md),
-[`HU011-Task114-pruebas.md`](../HU011-Task114-pruebas.md) y [`HU011-Task115-pruebas.md`](../HU011-Task115-pruebas.md).
+[`HU011-Task114-pruebas.md`](../HU011-Task114-pruebas.md), [`HU011-Task115-pruebas.md`](../HU011-Task115-pruebas.md) y
+[`HU011-Task116-pruebas.md`](../HU011-Task116-pruebas.md).
 
 ### Frontend
 
 | Test | Qué verifica |
 |---|---|
-| `utils/duplicateReport.test.js` | Notas de cada causa; totales con causas excluyentes; filas con cliente y dirección opcionales; respuestas vacías o incompletas. |
-| `components/duplicates/duplicates.test.jsx` | Chip por estado; tarjeta de cifra; totales; lista resaltada con etiqueta y causa; aviso en advertencia, singular, sin nombre de archivo y en éxito sin duplicados. |
-| `pages/DuplicateDetectionPage.test.jsx` | Estado vacío; no hay botón ni datos de ejemplo; previsualización recibida por el estado de navegación; sin duplicados. |
-| `config/navigation.test.js` | Grupo "Gestión de paquetes" para los dos roles; el Administrador de Ventas solo ve paquetes y su restablecer contraseña; `getGroupRoles`; retorno de la pantalla. |
+| `utils/duplicateReport.test.js` | Notas de cada causa; conteo de causas excluyentes; respuestas vacías o incompletas. |
+| `components/preview/preview.test.jsx` | Aviso de la previsualización con la causa de los duplicados, totales, filtros y lista resaltada. |
+| `pages/PackageImportPreviewPage.test.jsx` | Los duplicados se revisan en la misma pantalla: aviso con la causa y sin pantalla de duplicados aparte. |
+| `config/navigation.test.js` | Grupo "Gestión de paquetes" (solo "Importar paquetes") para los dos roles; el Administrador de Ventas solo ve paquetes y su restablecer contraseña; `getGroupRoles`; retorno de la pantalla. |
 | `App.routes.test.jsx` | Rutas compartidas entre Súper Usuario y Administrador de Ventas; el segundo no entra a Mensajeros ni Administradores; el inicio de cada rol está en sus rutas. |
 | `components/layout/MainMenuLayout.test.jsx` | El menú lateral del Súper Usuario y del Administrador de Ventas con el grupo de paquetes. |
 | `utils/roleRoutes.test.js`, `components/ProtectedRoute.test.jsx`, `components/ProvisionalHomePage.test.jsx` | Se actualizaron al nuevo inicio y a la nueva ruta de restablecer contraseña del Administrador de Ventas. |

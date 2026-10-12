@@ -7,11 +7,12 @@ const TONES = {
   neutral: { border: 'neutral.border', value: 'primary.main' },
   success: { border: 'neutral.border', value: 'success.text' },
   warning: { border: 'warning.border', value: 'warning.text' },
+  error: { border: 'error.border', value: 'error.text' },
 };
 
 /**
  * Tarjeta con una cifra grande y su leyenda, para los totales de una pantalla.
- * @param {{ value: number|string, label: string, tone?: 'neutral'|'success'|'warning' }} props
+ * @param {{ value: number|string, label: string, tone?: 'neutral'|'success'|'warning'|'error' }} props
  *   Se dibuja como elemento de lista: va dentro de un `ul`.
  */
 export default function StatCard({ value, label, tone = 'neutral' }) {

@@ -6,12 +6,12 @@ import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettin
 import PersonRemoveOutlinedIcon from '@mui/icons-material/PersonRemoveOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 
 // Icono por item de navegación (sidebar de escritorio).
 export const NAV_ITEM_ICONS = {
-  'package-duplicates': ContentCopyOutlinedIcon,
+  'package-import': UploadFileOutlinedIcon,
   'password-reset': LockResetOutlinedIcon,
   'courier-create': PersonAddAltOutlinedIcon,
   'courier-update': EditOutlinedIcon,
