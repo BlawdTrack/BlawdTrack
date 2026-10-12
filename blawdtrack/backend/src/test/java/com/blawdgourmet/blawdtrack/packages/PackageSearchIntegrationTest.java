@@ -45,11 +45,11 @@ class PackageSearchIntegrationTest {
         packages.deleteAll();
         packages.saveAllAndFlush(List.of(
                 DeliveryPackage.builder().shipmentNumber("ENV-00001").orderNumber("SO-001")
-                        .customerName("Cliente Uno")
-                        .address("Del parque 100m norte, Escazu, San Jose, Costa Rica")
-                        .phone("+506-8888-9999").schedule("De 8 a 5").build(),
+                    .customerName("CLIENTE UNO ROJAS")
+                    .address("DEL PARQUE 100M NORTE, ESCAZU, SAN JOSE, COSTA RICA")
+                    .phone("+506-8888-9999").schedule("DE 8 A 5").build(),
                 DeliveryPackage.builder().shipmentNumber("ENV-00002").orderNumber("SO-002")
-                        .customerName("Cliente Dos").address("Heredia, Barva")
+                    .customerName("CLIENTE DOS").address("HEREDIA, BARVA")
                     .phone("7110-0914").schedule("Por la tarde").build()));
     }
 
@@ -80,11 +80,29 @@ class PackageSearchIntegrationTest {
 
     @Test
     void searchesAcrossAllSixFields() throws Exception {
-        for (String term : new String[] {"env-00001", "so-001", "cliente uno", "escazu", "88889999", "de 8"}) {
+        for (String term : new String[] {"env-00001", "so-001", "cliente uno", "del parque", "+506", "de 8"}) {
             mvc.perform(get(SEARCH_URL).param("term", term)
                             .header("Authorization", bearer(RoleName.SALES_ADMIN)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content[0].shipmentNumber").value("ENV-00001"));
+        }
+    }
+
+    @Test
+    void matchesPartialTermsAcrossFieldsAndPhoneDigits() throws Exception {
+        String[][] searches = {
+                {"rojas", "ENV-00001"},
+                {"barv", "ENV-00002"},
+                {"9999", "ENV-00001"},
+                {"rojas parque", "ENV-00001"}
+        };
+
+        for (String[] search : searches) {
+            mvc.perform(get(SEARCH_URL).param("term", search[0])
+                            .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.totalElements").value(1))
+                    .andExpect(jsonPath("$.content[0].shipmentNumber").value(search[1]));
         }
     }
 

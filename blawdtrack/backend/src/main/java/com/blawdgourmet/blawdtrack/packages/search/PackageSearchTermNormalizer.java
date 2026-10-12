@@ -20,7 +20,7 @@ public class PackageSearchTermNormalizer {
         if (normalized.length() > MAX_TERM_LENGTH) {
             normalized = normalized.substring(0, MAX_TERM_LENGTH);
         }
-        normalized = normalized.toLowerCase(Locale.ROOT);
+        normalized = normalized.toUpperCase(Locale.ROOT);
 
         StringBuilder escaped = new StringBuilder(normalized.length());
         for (char character : normalized.toCharArray()) {
@@ -29,15 +29,6 @@ public class PackageSearchTermNormalizer {
             }
             escaped.append(character);
         }
-
-        String digitsPattern = null;
-        if (normalized.matches("[0-9+\\- ]+")) {
-            String digits = normalized.replaceAll("[^0-9]", "");
-            if (!digits.isEmpty()) {
-                digitsPattern = "%" + digits + "%";
-            }
-        }
-
-        return Optional.of(new PackageSearchTerm("%" + escaped + "%", digitsPattern));
+        return Optional.of(new PackageSearchTerm("%" + escaped + "%"));
     }
 }

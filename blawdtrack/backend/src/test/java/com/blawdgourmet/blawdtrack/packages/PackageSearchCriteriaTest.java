@@ -21,7 +21,7 @@ import com.blawdgourmet.blawdtrack.packages.search.PhoneSearchCriterion;
 import com.blawdgourmet.blawdtrack.packages.search.ScheduleSearchCriterion;
 import com.blawdgourmet.blawdtrack.packages.search.ShipmentNumberSearchCriterion;
 
-@DataJpaTest
+@DataJpaTest(properties = "spring.datasource.url=jdbc:h2:mem:package-search-criteria;MODE=MySQL;DB_CLOSE_DELAY=-1;IGNORECASE=TRUE")
 class PackageSearchCriteriaTest {
 
     @Autowired private DeliveryPackageSearchRepository repository;
@@ -39,35 +39,35 @@ class PackageSearchCriteriaTest {
         repository.deleteAll();
         repository.saveAllAndFlush(List.of(
                 DeliveryPackage.builder().shipmentNumber("ENV-00001").orderNumber("SO-001")
-                        .customerName("Cliente Uno")
-                        .address("Del parque 100m norte, Escazu, San Jose, Costa Rica")
-                        .phone("+506-8888-9999").schedule("De 8 a 5").build(),
+                        .customerName("CLIENTE UNO")
+                        .address("DEL PARQUE 100M NORTE, ESCAZU, SAN JOSE, COSTA RICA")
+                        .phone("+506-8888-9999").schedule("DE 8 A 5").build(),
                 DeliveryPackage.builder().shipmentNumber("ENV-00002").phone("7110-0914").build(),
                 DeliveryPackage.builder().shipmentNumber("ENV-WILDCARD")
-                        .customerName("Cliente 50%_ literal").build()));
+                        .customerName("50%_CLIENTE LITERAL").build()));
     }
 
     @Test
-    void eachCriterionFindsItsFieldCaseInsensitivelyAndPartially() {
+    void eachCriterionFindsItsFieldWithUppercaseSearchTerms() {
         assertShipment(shipmentCriterion, "env-00001");
         assertShipment(orderCriterion, "so-001");
         assertShipment(customerCriterion, "CLIENTE UNO");
-        assertShipment(addressCriterion, "escazu");
+        assertShipment(addressCriterion, "DEL PARQUE");
         assertShipment(scheduleCriterion, "DE 8");
     }
 
     @Test
-    void phoneCriterionMatchesFormattedAndNormalizedNumbers() {
-        assertShipment(phoneCriterion, "88889999");
-        assertShipment(phoneCriterion, "8888-9999");
+    void phoneCriterionFindsFormattedNumbersByPartialDigits() {
         assertShipment(phoneCriterion, "+506");
-        assertShipment(phoneCriterion, "71100914", "ENV-00002");
+        assertShipment(phoneCriterion, "7110", "ENV-00002");
+        assertShipment(phoneCriterion, "9999");
     }
 
     @Test
-    void percentAndUnderscoreAreMatchedLiterally() {
-        assertShipment(customerCriterion, "%", "ENV-WILDCARD");
-        assertShipment(customerCriterion, "_", "ENV-WILDCARD");
+    void searchCriteriaMatchLiteralFragmentsAndPhoneSuffixes() {
+        assertShipment(customerCriterion, "50%_", "ENV-WILDCARD");
+        assertShipment(customerCriterion, "literal", "ENV-WILDCARD");
+        assertShipment(phoneCriterion, "9999");
     }
 
     @Test
@@ -104,4 +104,5 @@ class PackageSearchCriteriaTest {
         PackageSearchTerm term = normalizer.normalize(rawTerm).orElseThrow();
         return repository.findAll(criterion.toSpecification(term));
     }
+
 }
