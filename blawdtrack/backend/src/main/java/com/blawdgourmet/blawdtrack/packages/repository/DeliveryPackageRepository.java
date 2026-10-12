@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface DeliveryPackageRepository extends JpaRepository<DeliveryPackage, Long> {
 
-    @Query("select upper(p.shipmentNumber) from DeliveryPackage p "
-            + "where upper(p.shipmentNumber) in :shipmentNumbers")
+    @Query("select p.shipmentNumber from DeliveryPackage p "
+            + "where p.shipmentNumber in :shipmentNumbers")
     Set<String> findExistingShipmentNumbers(
             @Param("shipmentNumbers") Collection<String> shipmentNumbers);
 }
