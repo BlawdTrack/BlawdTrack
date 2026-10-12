@@ -13,6 +13,23 @@ export default function DuplicateRecordRow({ record }) {
   const hasCustomer = Boolean(record.customerName || record.address);
 
   return (
+    <Box
+      component="li"
+      sx={{
+        listStyle: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        flexWrap: 'wrap',
+        px: 3,
+        py: 1.9,
+        bgcolor: 'warning.light',
+        borderTop: '1px solid',
+        borderColor: 'warning.border',
+        borderLeft: '4px solid',
+        borderLeftColor: 'warning.main',
+      }}
+    >
     <StatusRow tone="warning">
       <Typography component="span" sx={{ fontSize: FONT.md, fontWeight: 700, color: 'text.primary', flex: `0 0 ${rem(130)}` }}>
         {record.shipmentNumber}
@@ -40,6 +57,7 @@ export default function DuplicateRecordRow({ record }) {
           {record.note}
         </Typography>
       )}
+    </Box>
     </StatusRow>
   );
 }
