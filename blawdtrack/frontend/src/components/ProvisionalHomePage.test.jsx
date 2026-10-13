@@ -22,10 +22,8 @@ const renderHome = (role) =>
 describe('ProvisionalHomePage (restablecer contraseña desde el inicio)', () => {
   afterEach(() => cleanup());
 
-  it.each([
-    ['ADMIN_VENTAS', ROUTES.SALES_PASSWORD_RESET],
-    ['MENSAJERO', ROUTES.COURIER_PASSWORD_RESET],
-  ])('el rol %s llega a restablecer su propia contraseña', async (role, expectedRoute) => {
+  // El Administrador de Ventas ya no usa esta pantalla provisional: restablece su contraseña desde el menú principal.
+  it.each([['MENSAJERO', ROUTES.COURIER_PASSWORD_RESET]])('el rol %s llega a restablecer su propia contraseña', async (role, expectedRoute) => {
     const user = userEvent.setup();
     renderHome(role);
 

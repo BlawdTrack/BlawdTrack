@@ -1,0 +1,82 @@
+{
+  "fileName": "paquetes_e2e.csv",
+  "totalRecords": 7,
+  "validRecordsCount": 5,
+  "invalidRecordsCount": 1,
+  "duplicateRecordsCount": 1,
+  "validRecords": [
+    {
+      "shipmentNumber": "ENV-2001",
+      "orderNumber": "SO-9001",
+      "customerName": "Ana Mora Vargas",
+      "address": "Moravia, San José",
+      "phone": "8712-0094",
+      "schedule": "De 9 a 4",
+      "items": []
+    },
+    {
+      "shipmentNumber": "ENV-2002",
+      "orderNumber": "SO-9002",
+      "customerName": "Beto Rojas",
+      "address": "Heredia centro",
+      "phone": "8390-7781",
+      "schedule": "De 9 a 4",
+      "items": []
+    },
+    {
+      "shipmentNumber": "ENV-2003",
+      "orderNumber": "SO-9003",
+      "customerName": "Carla Jiménez",
+      "address": "Escazú, San José",
+      "phone": "6012-4455",
+      "schedule": "De 1 a 4",
+      "items": []
+    },
+    {
+      "shipmentNumber": "ENV-2004",
+      "orderNumber": "SO-9004",
+      "customerName": "Diego Solano",
+      "address": "Alajuela",
+      "phone": "7099-1122",
+      "schedule": "9:00 a.m. a 4:00 p.m.",
+      "items": []
+    },
+    {
+      "shipmentNumber": "ENV-2006",
+      "orderNumber": "SO-9006",
+      "customerName": "Fabio León",
+      "address": "Liberia",
+      "phone": "8811-2200",
+      "schedule": "De 9 a 4",
+      "items": []
+    }
+  ],
+  "invalidRecords": [
+    {
+      "packageData": {
+        "shipmentNumber": "ENV-2005",
+        "orderNumber": "SO-9005",
+        "customerName": "Elena Cruz",
+        "address": "Cartago",
+        "phone": null,
+        "schedule": "De 9 a 4",
+        "items": []
+      },
+      "issues": [
+        {
+          "field": "phone",
+          "message": "El campo teléfono es obligatorio"
+        }
+      ]
+    }
+  ],
+  "duplicates": [
+    {
+      "shipmentNumber": "ENV-0900",
+      "occurrences": 1,
+      "reasons": [
+        "ALREADY_REGISTERED"
+      ]
+    }
+  ]
+}
