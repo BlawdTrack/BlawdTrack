@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -17,7 +17,6 @@ import {
   TableCell,
   TableContainer
 } from '@mui/material';
-import { useAuth } from '../hooks/useAuth';
 import { useCourier } from '../hooks/useCourier';
 import { listCouriers, updateCourierStatus, updateCourierPassword, getCourierHistory } from '../services/CourierService';
 import { formatHistoryEntry } from '../utils/courierHistory';
@@ -78,14 +77,11 @@ const INPUT_SX = {
  * @param {{ initialCedula?: string }} props Documento con el que se abre la pantalla ya cargada.
  */
 export function EditMessenger({ initialCedula = '' }) {
-  const { logout } = useAuth();
   const { loading: submitting, updateCourier } = useCourier();
 
   const [couriersList, setCouriersList] = useState([]);
   const [currentCourier, setCurrentCourier] = useState(null);
   const [selectedCourierId, setSelectedCourierId] = useState(null);
-  const [isLoadingCouriers, setIsLoadingCouriers] = useState(true);
-
   const [searchDocumentType, setSearchDocumentType] = useState('CEDULA');
   const [searchDocumentNumber, setSearchDocumentNumber] = useState('');
   const [appliedFilter, setAppliedFilter] = useState(null);
@@ -130,23 +126,21 @@ export function EditMessenger({ initialCedula = '' }) {
     courier.documentNumber || courier.idCard || courier.cedula || courier.id || courier.nationalId;
 
   const loadCouriersList = useCallback(async () => {
-    setIsLoadingCouriers(true);
     try {
       const data = await listCouriers();
       setCouriersList(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error al cargar la flota de mensajeros:', err);
       setCouriersList([]);
-    } finally {
-      setIsLoadingCouriers(false);
     }
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCouriersList();
   }, [loadCouriersList]);
 
-  const loadMessengerData = (courier) => {
+  const loadMessengerData = useCallback((courier) => {
     setCurrentCourier(courier);
     setSelectedCourierId(getCourierId(courier));
     const schedule = courier.schedule || courier.horario || '';
@@ -167,7 +161,7 @@ export function EditMessenger({ initialCedula = '' }) {
     setFormErrors({});
     setUpdateError(null);
     loadHistory(courier.id);
-  };
+  }, [loadHistory]);
 
   const handleRowClick = (courier) => {
     loadMessengerData(courier);
@@ -203,10 +197,11 @@ export function EditMessenger({ initialCedula = '' }) {
         normalizeId(getCourierId(m)) === normInitial
       );
       if (found) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadMessengerData(found);
       }
     }
-  }, [initialCedula, couriersList]);
+  }, [initialCedula, couriersList, loadMessengerData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -113,6 +113,7 @@ class PackageSearchIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content[0].status").value("PENDIENTE"))
                 .andExpect(jsonPath("$.totalPages").value(1));
     }
 

@@ -1,4 +1,4 @@
-import React from 'react';
+// React import intentionally omitted for the repo's ESLint config.
 import { Box } from '@mui/material';
 
 /** Logotipo de BlawdTrack (SVG "BT" sobre fondo verde de marca) que se muestra en el login. */

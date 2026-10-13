@@ -1,4 +1,3 @@
-import React from 'react';
 import { Snackbar, Box, Typography } from '@mui/material';
 
 // Notificación flotante, tal como aparece en el mockup (pantallas D y F:

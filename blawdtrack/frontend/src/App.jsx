@@ -11,6 +11,7 @@ import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
 import OwnPasswordResetPage from './pages/OwnPasswordResetPage';
 import EditMessenger from './pages/EditMessenger';
+import PackageSearchPage from './pages/PackageSearchPage';
 import RoleAccessManagement from './pages/RoleAccessManagement'; // Faltaba en tu bloque pero develop lo exige
 import { MessengerFleetList } from './components/MessengerFleetList';
 import MainMenuLayout from './components/layout/MainMenuLayout';
@@ -109,6 +110,7 @@ function App() {
 
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
         <Route path={ROUTES.SALES_HOME} element={<SalesHomePage />} />
+        <Route path={ROUTES.PACKAGE_SEARCH} element={<PackageSearchPage />} />
         <Route path={ROUTES.SALES_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
       </Route>
       

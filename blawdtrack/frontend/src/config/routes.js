@@ -16,6 +16,7 @@ export const ROUTES = {
   ROLES_PERMISSIONS: '/gestion-roles',
   // Inicios de los roles que no usan el menú principal (HU-001 T12).
   SALES_HOME: '/ventas',
+  PACKAGE_SEARCH: '/ventas/paquetes',
   COURIER_HOME: '/mensajero',
   // Restablecer la propia contraseña de esos roles (el Super Usuario usa PASSWORD_RESET_OWN).
   SALES_PASSWORD_RESET: '/ventas/restablecer-contrasena',
