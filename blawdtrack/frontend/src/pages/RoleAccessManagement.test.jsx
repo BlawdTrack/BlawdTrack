@@ -31,10 +31,11 @@ const renderPage = () => render(
 
 const search = async (number = '123456789', type) => {
   if (type) {
-    fireEvent.change(screen.getByLabelText('Tipo de documento'), { target: { value: type } });
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    fireEvent.click(screen.getByRole('option', { name: 'Pasaporte' }));
   }
-  fireEvent.change(screen.getByPlaceholderText(/Ej\./), { target: { value: number } });
-  fireEvent.click(screen.getByRole('button', { name: /Buscar usuario/ }));
+  fireEvent.change(screen.getByLabelText('Número de documento'), { target: { value: number } });
+  fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 };
 
 describe('RoleAccessManagement (HU-009 permisos por usuario)', () => {
@@ -121,5 +122,27 @@ describe('RoleAccessManagement (HU-009 permisos por usuario)', () => {
     screen.getAllByRole('switch').forEach((toggle) => expect(toggle.disabled).toBe(true));
     expect(screen.getByRole('button', { name: /Restablecer predeterminados/ }).disabled).toBe(true);
     expect(screen.getByRole('button', { name: /Aplicar cambios/ }).disabled).toBe(true);
+  });
+  it('Descartar sin cambios vuelve directo a la búsqueda', async () => {
+    renderPage();
+    await search();
+    await screen.findByText('María Solano');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar' }));
+
+    expect(await screen.findByText('Busca a un usuario')).toBeTruthy();
+    expect(screen.queryByText('María Solano')).toBeNull();
+  });
+
+  it('Descartar con cambios pide confirmación antes de volver a la búsqueda', async () => {
+    renderPage();
+    await search();
+    await screen.findByText('María Solano');
+
+    fireEvent.click(screen.getByRole('switch', { name: /Actualizar estado de paquetes/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar' }));
+
+    expect(screen.getByText('María Solano')).toBeTruthy();
+    expect(screen.getByRole('dialog')).toBeTruthy();
   });
 });

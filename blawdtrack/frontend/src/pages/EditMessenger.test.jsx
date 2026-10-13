@@ -15,7 +15,8 @@ vi.mock('../services/CourierService', () => ({
   updateCourier: vi.fn(),
   updateCourierStatus: vi.fn(),
   updateCourierPassword: vi.fn(),
-  getCourierHistory: vi.fn().mockResolvedValue([])
+  getCourierHistory: vi.fn().mockResolvedValue([]),
+  getCourierGeneralHistory: vi.fn().mockResolvedValue([])
 }));
 
 // Las ruedas de horario y capacidad son las mismas de "Crear mensajero".
@@ -55,6 +56,8 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
     inLabor: false,
     pendingPackages: 0
   };
+
+  const fleetRow = (name) => screen.getAllByRole('row').find((row) => within(row).queryByText(name));
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -178,14 +181,17 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
     await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
 
+    // Tras guardar se vuelve a "Elige un mensajero"; el historial se ve al abrir de nuevo al mensajero.
+    expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+    await user.click(fleetRow('María José Solano'));
+    await user.click(await screen.findByRole('tab', { name: /historial/i }));
+
     await waitFor(() => {
       expect(screen.getByText(/Campos modificados: Capacidad de carga/i)).toBeTruthy();
       expect(screen.getByText('Historial de modificaciones')).toBeTruthy();
     });
     CourierService.getCourierHistory.mockResolvedValue([]);
   });
-
-  const fleetRow = (name) => screen.getAllByRole('row').find((row) => within(row).queryByText(name));
 
   it('T04: La tabla de la flota marca como Inactivo al mensajero que la API devuelve inactivo', async () => {
     CourierService.listCouriers.mockResolvedValue([
@@ -264,9 +270,10 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
       expect(CourierService.updateCourierPassword).toHaveBeenCalledWith(7, 'Nueva2026x');
     });
     expect(CourierService.updateCourierStatus).not.toHaveBeenCalled();
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('••••••••').value).toBe('');
-    });
+    // Tras guardar se cierra el formulario; al reabrirlo la contraseña no está.
+    expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+    fireEvent.click(fleetRow('María José Solano'));
+    expect((await screen.findByPlaceholderText('••••••••')).value).toBe('');
   });
 
   it('HU-004: Rechaza en cliente una contraseña que no cumple las reglas y no llama al backend', async () => {
@@ -315,6 +322,232 @@ describe('EditMessenger Component (HU-Editar Mensajero: T04, T05, T06)', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText('Error de red al actualizar el mensajero.').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('flujo de edición (lista, avisos y vuelta al inicio)', () => {
+    const pedro = { ...mockCourier, id: 8, documentNumber: '2-0456-0789', fullName: 'Pedro Inactivo', email: 'pedro@example.com' };
+
+    beforeEach(() => {
+      CourierService.listCouriers.mockResolvedValue([mockCourier, pedro]);
+    });
+
+    const openCourier = async (user, name) => {
+      await waitFor(() => expect(fleetRow(name)).toBeTruthy());
+      await user.click(fleetRow(name));
+    };
+
+    it('vuelve a "Elige un mensajero" después de guardar y deja la lista a la vista', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+      expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'María José Editada' } });
+      await user.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+      expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+      expect(screen.queryByRole('button', { name: /guardar cambios/i })).toBeNull();
+      expect(fleetRow('María José Editada')).toBeTruthy();
+    });
+
+    it('"Descartar" vuelve de una vez a "Elige un mensajero" sin pedir confirmación ni guardar', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
+      await user.click(screen.getByRole('button', { name: 'Descartar' }));
+
+      expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+      expect(screen.queryByText('¿Salir sin guardar?')).toBeNull();
+      expect(screen.queryByDisplayValue('Nombre a medias')).toBeNull();
+      expect(CourierService.updateCourier).not.toHaveBeenCalled();
+    });
+
+    it('"Volver" regresa a "Elige un mensajero" sin avisos cuando no hay cambios sin guardar', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      await screen.findByDisplayValue('María José Solano');
+      await user.click(screen.getByRole('button', { name: 'Volver a la lista' }));
+
+      expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+      expect(screen.queryByText('¿Salir sin guardar?')).toBeNull();
+    });
+
+    it('"Volver" con cambios sin guardar pide confirmar y solo sale si se acepta', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
+      await user.click(screen.getByRole('button', { name: 'Volver a la lista' }));
+
+      expect(await screen.findByText('¿Salir sin guardar?')).toBeTruthy();
+      await user.click(screen.getByRole('button', { name: 'Seguir editando' }));
+      await waitFor(() => expect(screen.queryByText('¿Salir sin guardar?')).toBeNull());
+      expect(screen.getByDisplayValue('Nombre a medias')).toBeTruthy();
+
+      await user.click(screen.getByRole('button', { name: 'Volver a la lista' }));
+      await user.click(await screen.findByRole('button', { name: 'Salir sin guardar' }));
+
+      expect(await screen.findByText('Elige un mensajero')).toBeTruthy();
+      expect(CourierService.updateCourier).not.toHaveBeenCalled();
+    });
+
+    it('cambia de mensajero sin avisos cuando no hay cambios sin guardar', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      await screen.findByDisplayValue('María José Solano');
+      await user.click(fleetRow('Pedro Inactivo'));
+
+      expect(await screen.findByDisplayValue('Pedro Inactivo')).toBeTruthy();
+      expect(screen.queryByText('¿Salir sin guardar?')).toBeNull();
+    });
+
+    it('avisa antes de cambiar de mensajero con cambios sin guardar y permite seguir editando', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
+      await user.click(fleetRow('Pedro Inactivo'));
+
+      expect(await screen.findByText('¿Salir sin guardar?')).toBeTruthy();
+      await user.click(screen.getByRole('button', { name: 'Seguir editando' }));
+
+      await waitFor(() => expect(screen.queryByText('¿Salir sin guardar?')).toBeNull());
+      expect(screen.getByDisplayValue('Nombre a medias')).toBeTruthy();
+      expect(screen.queryByDisplayValue('Pedro Inactivo')).toBeNull();
+    });
+
+    it('descarta los cambios y abre al otro mensajero si se confirma salir sin guardar', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
+      await user.click(fleetRow('Pedro Inactivo'));
+      await user.click(await screen.findByRole('button', { name: 'Salir sin guardar' }));
+
+      expect(await screen.findByDisplayValue('Pedro Inactivo')).toBeTruthy();
+      expect(screen.queryByDisplayValue('Nombre a medias')).toBeNull();
+      expect(CourierService.updateCourier).not.toHaveBeenCalled();
+    });
+
+    it('avisa también antes de cerrar o recargar la pestaña con cambios sin guardar', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      const untouched = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(untouched);
+      expect(untouched.defaultPrevented).toBe(false);
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
+
+      const dirty = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(dirty);
+      expect(dirty.defaultPrevented).toBe(true);
+    });
+
+    const generalEntries = [
+      { action: 'DESACTIVAR_MENSAJERO', details: 'status', timestamp: '2026-10-02T14:39:00', actorName: 'Super Usuario', courierName: 'Pedro Inactivo', documentNumber: '2-0456-0789' },
+      { action: 'ACTUALIZAR_MENSAJERO', details: 'phone', timestamp: '2026-10-01T09:10:00', actorName: 'Super Usuario', courierName: 'María José Solano', documentNumber: '1-0345-0678' }
+    ];
+
+    it('muestra el historial general de todos los mensajeros con el mensajero de cada cambio', async () => {
+      CourierService.getCourierGeneralHistory.mockResolvedValue(generalEntries);
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+      await waitFor(() => expect(fleetRow('Pedro Inactivo')).toBeTruthy());
+
+      await user.click(screen.getByRole('button', { name: /ver historial general/i }));
+
+      expect(await screen.findByText('Historial general de mensajeros')).toBeTruthy();
+      expect(await screen.findByText('2 registros')).toBeTruthy();
+      expect(screen.getAllByText('Pedro Inactivo').length).toBeGreaterThan(1); // en la flota y en el historial
+      expect(screen.getByText('2-0456-0789')).toBeTruthy();
+      expect(screen.getByText('Campos modificados: Teléfono')).toBeTruthy();
+      expect(CourierService.getCourierGeneralHistory).toHaveBeenCalledTimes(1);
+    });
+
+    it('el historial de la pestaña de un mensajero sigue siendo solo el de ese mensajero', async () => {
+      CourierService.getCourierHistory.mockResolvedValue([
+        { action: 'ACTUALIZAR_MENSAJERO', details: 'phone', timestamp: '2026-10-01T09:10:00', actorName: 'Super Usuario' }
+      ]);
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      await user.click(await screen.findByRole('tab', { name: /historial/i }));
+
+      expect(await screen.findByText('Campos modificados: Teléfono')).toBeTruthy();
+      expect(CourierService.getCourierHistory).toHaveBeenCalledWith(7);
+      expect(CourierService.getCourierGeneralHistory).not.toHaveBeenCalled();
+      CourierService.getCourierHistory.mockResolvedValue([]);
+    });
+
+    it('volver del historial general deja el formulario con lo que se estaba editando', async () => {
+      CourierService.getCourierGeneralHistory.mockResolvedValue(generalEntries);
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      fireEvent.change(await screen.findByDisplayValue('María José Solano'), { target: { value: 'Nombre a medias' } });
+      await user.click(screen.getByRole('button', { name: /ver historial general/i }));
+      expect(await screen.findByText('Historial general de mensajeros')).toBeTruthy();
+      expect(screen.queryByText('¿Salir sin guardar?')).toBeNull();
+
+      await user.click(screen.getByRole('button', { name: /volver a/i }));
+
+      expect(await screen.findByDisplayValue('Nombre a medias')).toBeTruthy();
+      expect(screen.queryByText('Historial general de mensajeros')).toBeNull();
+    });
+
+    it('elegir un mensajero estando en el historial general abre su formulario', async () => {
+      CourierService.getCourierGeneralHistory.mockResolvedValue(generalEntries);
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+      await waitFor(() => expect(fleetRow('Pedro Inactivo')).toBeTruthy());
+
+      await user.click(screen.getByRole('button', { name: /ver historial general/i }));
+      await screen.findByText('Historial general de mensajeros');
+      await user.click(fleetRow('Pedro Inactivo'));
+
+      expect(await screen.findByDisplayValue('Pedro Inactivo')).toBeTruthy();
+      expect(screen.queryByText('Historial general de mensajeros')).toBeNull();
+    });
+
+    it('avisa y permite reintentar si no se puede cargar el historial general', async () => {
+      CourierService.getCourierGeneralHistory.mockRejectedValueOnce(new Error('sin red'));
+      CourierService.getCourierGeneralHistory.mockResolvedValueOnce(generalEntries);
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+      await waitFor(() => expect(fleetRow('Pedro Inactivo')).toBeTruthy());
+
+      await user.click(screen.getByRole('button', { name: /ver historial general/i }));
+      expect(await screen.findByText(/No se pudo cargar el historial general/)).toBeTruthy();
+
+      await user.click(screen.getByRole('button', { name: 'Reintentar' }));
+      expect(await screen.findByText('2 registros')).toBeTruthy();
+    });
+
+    it('oculta y vuelve a mostrar la flota de mensajeros', async () => {
+      const user = userEvent.setup();
+      render(<EditMessenger />);
+
+      await openCourier(user, 'María José Solano');
+      await screen.findByDisplayValue('María José Solano');
+      await user.click(screen.getByRole('button', { name: 'Ocultar la flota de mensajeros' }));
+
+      const showButton = await screen.findByRole('button', { name: /mostrar flota/i });
+      await user.click(showButton);
+      expect(await screen.findByRole('button', { name: 'Ocultar la flota de mensajeros' })).toBeTruthy();
     });
   });
 });

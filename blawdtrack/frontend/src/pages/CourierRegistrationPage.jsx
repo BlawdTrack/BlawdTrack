@@ -1,23 +1,16 @@
-import { useState } from 'react';
-import {
-  Paper,
-  Box,
-  Typography,
-  TextField,
-  MenuItem,
-  Button,
-  CircularProgress
-} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useCourier } from '../hooks/useCourier';
+import { useRegistrationForm } from '../hooks/useRegistrationForm';
 import { validateCourierForm } from '../utils/courierFormValidation';
 import { TimeWheelField } from '../components/TimeWheelField';
 import { WeightWheelField } from '../components/WeightWheelField';
 import { composeSchedule } from '../utils/courierSchedule';
-import { StatusMessage } from '../components/StatusMessage';
-import { DOCUMENT_TYPE_OPTIONS, DOCUMENT_PLACEHOLDERS } from '../config/documentTypes';
-
-// On phones the form uses 2 columns; wide fields span both.
-const SPAN_2_SX = { gridColumn: { xs: 'span 2', md: 'auto' } };
+import FormField, { FieldShell } from '../components/FormField';
+import DocumentFields from '../components/DocumentFields';
+import RegistrationFormPage from '../components/RegistrationFormPage';
+import { FULL_ROW_SX } from '../components/formStyles';
+import { ROUTES } from '../config/routes';
+import { FONT } from '../theme';
 
 const INITIAL_FORM_DATA = {
   documentType: 'CEDULA',
@@ -42,12 +35,6 @@ const FIELD_ORDER = [
   'maxPackageWeightKg'
 ];
 
-const LABEL_SX = { fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px', color: '#6B6560', mb: 0.75, display: 'block' };
-const INPUT_SX = {
-  backgroundColor: '#fff',
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: '0.9rem', '& fieldset': { borderColor: '#DCD4CA' } },
-  '& .MuiOutlinedInput-input': { py: 1.4 }
-};
 
 // Returns the weight as a number, or null when blank or not numeric.
 // Number('') is 0, so a blank value must never be coerced silently;
@@ -78,245 +65,81 @@ function buildCourierPayload(formData) {
   return payload;
 }
 
+const buildCourierNotice = (outcome) =>
+  `Mensajero creado correctamente. Se envió un correo a ${outcome.email} con la contraseña temporal; deberá cambiarla en su primer ingreso.`;
+
 /**
  * Pantalla "Crear mensajero" (HU-003), exclusiva del Super Usuario. Valida el formulario en el cliente
  * (`validateCourierForm`), arma el cuerpo de `POST /api/v1/couriers` y muestra los errores del backend
- * junto a cada campo (`normalizeCourierError`). La contraseña temporal la genera y envía el backend.
+ * junto a cada campo (`normalizeCourierError`). La contraseña temporal la genera y envía el backend. Al
+ * crear el mensajero vuelve al menú de gestión de mensajeros con un aviso de éxito.
  */
 export function CourierRegistrationPage() {
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-  const {
-    isSubmitting,
-    isSuccess,
-    registeredEmail,
-    fieldErrors,
-    globalMessage,
-    severity,
-    register,
-    setValidationErrors,
-    setFieldError,
-    clearFieldError
-  } = useCourier();
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    const isSchedule = name === 'scheduleStart' || name === 'scheduleEnd';
-    const next = { ...formData, [name]: value };
-    if (isSchedule) {
-      next.schedule = composeSchedule(next.scheduleStart, next.scheduleEnd);
-    }
-    setFormData(next);
-    clearFieldError(isSchedule ? 'schedule' : name);
-    // Wheel pickers have no "blur": flag an inverted range as soon as both hours are set.
-    if (isSchedule && next.scheduleStart && next.scheduleEnd) {
-      const message = validateCourierForm(next).schedule;
-      if (message) setFieldError('schedule', message);
-    }
-  };
-
-  // Validate a text field when the user leaves it, but only once it has content
-  // (an empty required field is reported on submit, not while tabbing through).
-  const handleBlur = (event) => {
-    const { name, value } = event.target;
-    if (!value.trim()) return;
-    const message = validateCourierForm(formData)[name];
-    if (message) setFieldError(name, message);
-  };
-
-  const focusFirstError = (errors) => {
-    const firstField = FIELD_ORDER.find((name) => errors[name]);
-    // Every input has id === field name, so the DOM lookup is enough.
-    if (firstField) document.getElementById(firstField)?.focus();
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (isSubmitting) return;
-
-    const clientErrors = validateCourierForm(formData);
-    if (Object.keys(clientErrors).length > 0) {
-      setValidationErrors(clientErrors);
-      focusFirstError(clientErrors);
-      return;
-    }
-
-    const outcome = await register(buildCourierPayload(formData));
-    if (outcome?.ok) {
-      setFormData(INITIAL_FORM_DATA);
-    } else if (outcome) {
-      focusFirstError(outcome.fieldErrors);
-    }
-  };
-
-  // Props shared by every input: value, change handler, inline error and
-  // accessibility wiring (MUI links helperText through aria-describedby).
-  const fieldProps = (name) => ({
-    id: name,
-    name,
-    value: formData[name],
-    onChange: handleChange,
-    onBlur: handleBlur,
-    error: Boolean(fieldErrors[name]),
-    helperText: fieldErrors[name] || undefined,
-    fullWidth: true,
-    sx: INPUT_SX
+  const registration = useCourier();
+  const { formData, form, setField, handleSubmit, fieldProps } = useRegistrationForm({
+    initialData: INITIAL_FORM_DATA,
+    validate: validateCourierForm,
+    fieldOrder: FIELD_ORDER,
+    discardTo: ROUTES.MODULE_COURIERS,
+    registration,
+    buildPayload: buildCourierPayload,
+    buildNotice: buildCourierNotice
   });
+  const { fieldErrors, isSubmitting, globalMessage, severity } = registration;
 
-  const renderField = (name, label, extra, span2 = false) => (
-    <Box sx={span2 ? SPAN_2_SX : undefined}>
-      <Typography variant="caption" component="label" htmlFor={name} sx={LABEL_SX}>
-        {label}
-      </Typography>
-      <TextField {...fieldProps(name)} {...extra} />
-    </Box>
-  );
+  // Wheel pickers have no "blur": an inverted range is flagged as soon as both hours are set.
+  const setScheduleHour = (name) => (value) =>
+    setField(name, value, {
+      derive: (next) => ({ ...next, schedule: composeSchedule(next.scheduleStart, next.scheduleEnd) }),
+      errorKey: 'schedule',
+      validateWhen: (next) => Boolean(next.scheduleStart && next.scheduleEnd)
+    });
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#FAF8F5', py: { xs: 1.5, sm: 4 }, px: { xs: 1.5, sm: 4 } }}>
-      <Paper
-        elevation={0}
-        sx={{
-          maxWidth: 1200,
-          mx: 'auto',
-          borderRadius: '18px',
-          border: '1px solid #E4DED7',
-          backgroundColor: '#fff',
-          boxShadow: '0 12px 30px rgba(26,60,52,.06)',
-          p: { xs: 2, sm: 3.5 },
-          textAlign: 'left'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 1.5, sm: 3 } }}>
-          <Box
-            sx={{
-              width: 34,
-              height: 34,
-              borderRadius: '9px',
-              backgroundColor: '#F1ECE7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Box sx={{ width: 16, height: 16, borderRadius: '50%', border: '2.5px solid #1A3C34' }} />
-          </Box>
-          <Typography component="h1" sx={{ fontSize: '1.06rem', fontWeight: 600, m: 0, color: '#1A3C34' }}>
-            Datos del nuevo mensajero
-          </Typography>
+    <RegistrationFormPage
+      title="Crear mensajero"
+      description="Registra a un nuevo mensajero con su horario y la capacidad de carga que puede transportar."
+      onSubmit={handleSubmit}
+      form={form}
+      isSubmitting={isSubmitting}
+      submitLabel="Registrar mensajero"
+      submittingLabel="Registrando…"
+      globalMessage={globalMessage}
+      severity={severity}
+    >
+      <FormField {...fieldProps('fullName')} label="Nombre completo" required placeholder="Ej. Ana Lucía Bermúdez" sx={FULL_ROW_SX} />
+      <FormField {...fieldProps('email')} label="Correo electrónico" required type="email" placeholder="nombre@blawdgourmet.com" />
+      <FormField {...fieldProps('phone')} label="Teléfono (opcional)" type="tel" placeholder="8888-8888" />
+      <DocumentFields field={fieldProps} documentType={formData.documentType} />
+      <FieldShell name="maxPackageWeightKg" label="Capacidad máxima de carga (kg)" errorText={fieldErrors.maxPackageWeightKg}>
+        <WeightWheelField
+          id="maxPackageWeightKg"
+          label="Capacidad máxima de carga"
+          value={formData.maxPackageWeightKg}
+          error={Boolean(fieldErrors.maxPackageWeightKg)}
+          onChange={(value) => setField('maxPackageWeightKg', value)}
+        />
+      </FieldShell>
+      <FieldShell name="schedule" label="Horario" errorText={fieldErrors.schedule}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <TimeWheelField
+            id="schedule"
+            label="Hora de entrada"
+            value={formData.scheduleStart}
+            error={Boolean(fieldErrors.schedule)}
+            onChange={setScheduleHour('scheduleStart')}
+          />
+          <Typography component="span" sx={{ color: 'text.secondary', fontSize: FONT.md }}>a</Typography>
+          <TimeWheelField
+            id="scheduleEnd"
+            label="Hora de salida"
+            value={formData.scheduleEnd}
+            error={Boolean(fieldErrors.schedule)}
+            onChange={setScheduleHour('scheduleEnd')}
+          />
         </Box>
-
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2.5 } }}>
-          {isSuccess && (
-            <StatusMessage
-              severity="success"
-              message={`Mensajero registrado correctamente. Se envió un correo a ${registeredEmail} con la contraseña temporal; deberá cambiarla en su primer ingreso.`}
-            />
-          )}
-          {globalMessage && <StatusMessage severity={severity} message={globalMessage} />}
-
-          <Box
-            sx={{
-              display: 'grid',
-              gap: { xs: '10px 12px', sm: '18px 22px' },
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-              alignItems: 'start'
-            }}
-          >
-            {renderField('fullName', 'NOMBRE COMPLETO', { required: true, placeholder: 'Ej. Ana Lucía Bermúdez' }, true)}
-            <Box>
-              <Typography variant="caption" component="label" htmlFor="documentType" sx={LABEL_SX}>
-                TIPO DE DOCUMENTO
-              </Typography>
-              <TextField {...fieldProps('documentType')} select required>
-                {DOCUMENT_TYPE_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-            {renderField('documentNumber', 'NÚMERO DE DOCUMENTO', { required: true, placeholder: DOCUMENT_PLACEHOLDERS[formData.documentType] })}
-            {renderField('phone', 'TELÉFONO (OPCIONAL)', { type: 'tel', placeholder: '8888-8888' })}
-            {renderField('email', 'CORREO ELECTRÓNICO', { required: true, type: 'email', placeholder: 'nombre@blawdgourmet.com' }, true)}
-            <Box>
-              <Typography variant="caption" component="label" htmlFor="maxPackageWeightKg" sx={LABEL_SX}>
-                CAPACIDAD MÁXIMA DE CARGA (KG)
-              </Typography>
-              <WeightWheelField
-                id="maxPackageWeightKg"
-                label="Capacidad máxima de carga"
-                value={formData.maxPackageWeightKg}
-                error={Boolean(fieldErrors.maxPackageWeightKg)}
-                onChange={(v) => handleChange({ target: { name: 'maxPackageWeightKg', value: v } })}
-              />
-              {fieldErrors.maxPackageWeightKg && (
-                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
-                  {fieldErrors.maxPackageWeightKg}
-                </Typography>
-              )}
-            </Box>
-            <Box sx={SPAN_2_SX}>
-              <Typography variant="caption" component="label" htmlFor="schedule" sx={LABEL_SX}>
-                HORARIO
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TimeWheelField
-                  id="schedule"
-                  label="Hora de entrada"
-                  value={formData.scheduleStart}
-                  error={Boolean(fieldErrors.schedule)}
-                  onChange={(v) => handleChange({ target: { name: 'scheduleStart', value: v } })}
-                />
-                <Typography component="span" sx={{ color: '#6B6560' }}>a</Typography>
-                <TimeWheelField
-                  id="scheduleEnd"
-                  label="Hora de salida"
-                  value={formData.scheduleEnd}
-                  error={Boolean(fieldErrors.schedule)}
-                  onChange={(v) => handleChange({ target: { name: 'scheduleEnd', value: v } })}
-                />
-              </Box>
-              {fieldErrors.schedule && (
-                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, mx: 1.75 }}>
-                  {fieldErrors.schedule}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              sx={{
-                backgroundColor: '#1A3C34',
-                '&:hover': { backgroundColor: '#12322B' },
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 2.75,
-                py: { xs: 1.25, sm: 1.5 },
-                borderRadius: '10px',
-                gap: 1.2,
-                boxShadow: 'none'
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <CircularProgress size={18} color="inherit" />
-                  Registrando…
-                </>
-              ) : (
-                <>
-                  Registrar mensajero
-                  <Box component="span" sx={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#FF6C0E' }} />
-                </>
-              )}
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
-    </Box>
+      </FieldShell>
+    </RegistrationFormPage>
   );
 }
 

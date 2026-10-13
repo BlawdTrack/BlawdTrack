@@ -59,17 +59,16 @@ class AdminCreationAuditTest {
         return jwt.generateToken(new UserPrincipal(user));
     }
 
-    private static String body(String documentNumber, String email, String password) {
+    private static String body(String documentNumber, String email) {
         return """
                 {
                   "nombreCompleto": "Administrador de prueba 76",
                   "numeroTelefono": "87654321",
                   "correoElectronico": "%s",
-                  "contrasenaInicial": "%s",
                   "documentType": "CEDULA",
                   "documentNumber": "%s"
                 }
-                """.formatted(email, password, documentNumber);
+                """.formatted(email, documentNumber);
     }
 
     private List<AuditLog> adminAuditRecords() {
@@ -89,7 +88,7 @@ class AdminCreationAuditTest {
         mvc.perform(post("/api/v1/admins")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body(DUPLICATE_DOC, NEW_ADMIN_EMAIL, "Clave1234")))
+                        .content(body(DUPLICATE_DOC, NEW_ADMIN_EMAIL)))
                 .andExpect(status().isCreated());
 
         var records = adminAuditRecords();
@@ -121,7 +120,7 @@ class AdminCreationAuditTest {
         mvc.perform(post("/api/v1/admins")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body(DUPLICATE_DOC, "newadmin@example.com", "Clave1234")))
+                        .content(body(DUPLICATE_DOC, "newadmin@example.com")))
                 .andExpect(status().isConflict());
 
         assertThat(auditLogs.count()).isEqualTo(before);
@@ -145,7 +144,7 @@ class AdminCreationAuditTest {
         mvc.perform(post("/api/v1/admins")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body("222222222", NEW_ADMIN_EMAIL, "Clave1234")))
+                        .content(body("222222222", NEW_ADMIN_EMAIL)))
                 .andExpect(status().isConflict());
 
         assertThat(auditLogs.count()).isEqualTo(before);
@@ -164,8 +163,7 @@ class AdminCreationAuditTest {
                                 {
                                   "nombreCompleto": "Administrador 76",
                                   "numeroTelefono": "87654321",
-                                  "correoElectronico": "admin-invalid@example.com",
-                                  "contrasenaInicial": "sinNumero",
+                                  "correoElectronico": "correo-invalido",
                                   "documentType": "CEDULA",
                                   "documentNumber": "333333333"
                                 }
@@ -185,7 +183,7 @@ class AdminCreationAuditTest {
         mvc.perform(post("/api/v1/admins")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body("444444444", "forbidden@example.com", "Clave1234")))
+                        .content(body("444444444", "forbidden@example.com")))
                 .andExpect(status().isForbidden());
 
         assertThat(auditLogs.count()).isEqualTo(before);

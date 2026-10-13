@@ -7,7 +7,7 @@ export function SalesHomePage() {
   return (
     <ProvisionalHomePage
       title="Panel de Ventas"
-      description="Pantalla provisional. Aquí irán los paquetes, asignaciones y reportes (HU-010 en adelante)."
+      description="Muy pronto podrás gestionar aquí los paquetes, las asignaciones y los reportes."
     />
   );
 }

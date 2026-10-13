@@ -14,12 +14,12 @@ const tree = (
 );
 
 describe('MainMenuPage', () => {
-  it('shows the welcome text, the logged user and the role', () => {
+  it('shows the app title and the role once, without a second welcome or the user name', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
-    expect(screen.getByText('Bienvenid@ al sistema')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'BlawdTrack' })).toBeInTheDocument();
-    expect(screen.getByText(/Alicia Admin/)).toBeInTheDocument();
-    expect(screen.getByText('Súper Usuario')).toBeInTheDocument();
+    expect(screen.getAllByText('Súper Usuario')).toHaveLength(1);
+    expect(screen.queryByText('Bienvenid@ al sistema')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Alicia Admin/)).not.toBeInTheDocument();
   });
 
   it('falls back to the raw role when it has no label', () => {
@@ -36,5 +36,24 @@ describe('MainMenuPage', () => {
 
     expect(logout).toHaveBeenCalledTimes(1);
     expect(screen.getByText('login screen')).toBeInTheDocument();
+  });
+
+  it('greets according to the time of day and asks what to do', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    expect(screen.getByRole('heading', { level: 2, name: /^(Buenos días|Buenas tardes|Buenas noches)$/ })).toBeInTheDocument();
+    expect(screen.getByText('¿Qué deseas hacer hoy?')).toBeInTheDocument();
+  });
+
+  it('does not show how many functions each module has', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    expect(screen.queryByText(/\d+ funciones?/)).not.toBeInTheDocument();
+  });
+
+  it('offers one card per module that leads to the module menu', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+
+    expect(screen.getByRole('link', { name: /Gestión de mensajeros/ })).toHaveAttribute('href', ROUTES.MODULE_COURIERS);
+    expect(screen.getByRole('link', { name: /Gestión de administradores/ })).toHaveAttribute('href', ROUTES.MODULE_ADMINS);
+    expect(screen.getByRole('link', { name: /Seguridad y acceso/ })).toHaveAttribute('href', ROUTES.MODULE_SECURITY);
   });
 });

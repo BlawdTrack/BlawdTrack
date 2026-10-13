@@ -28,7 +28,6 @@ const FIELD_MESSAGES = {
   nombreCompleto: 'Ingresa el nombre completo.',
   correoElectronico: 'Ingresa un correo electrónico válido.',
   numeroTelefono: 'El teléfono no es válido (máximo 20 caracteres).',
-  contrasenaInicial: 'La contraseña debe tener al menos 8 caracteres, combinando letras y números.',
 };
 
 // Maps a 400 body's field names (Spanish, per AdminRegistrationRequest) to

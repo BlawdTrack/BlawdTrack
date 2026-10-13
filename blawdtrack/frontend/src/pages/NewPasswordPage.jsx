@@ -1,19 +1,24 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Container,
-  Paper,
   Box,
   Typography,
-  TextField,
   Button,
   CircularProgress,
 } from '@mui/material';
 import { confirmPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
 import { RecoverySteps } from '../components/RecoverySteps';
+import AuthCardLayout from '../components/AuthCardLayout';
+import PasswordField from '../components/PasswordField';
+import { INLINE_LABEL_SX, INPUT_SX } from '../components/formStyles';
+import AuthStateHeader from '../components/AuthStateHeader';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import LinkOffOutlinedIcon from '@mui/icons-material/LinkOffOutlined';
+import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import { PasswordRequirements } from '../components/PasswordRequirements';
 import { meetsClientPasswordRules } from '../utils/passwordRules';
+import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 
 // Textos propios del frontend (no se muestra el `message` crudo del backend,
 // que viene en otro idioma). Los tres primeros son los del mockup (`savePwd`).
@@ -31,27 +36,7 @@ const MISSING_TOKEN_MESSAGE =
 const REJECTED_TOKEN_MESSAGE =
   'Este enlace no es válido o ya expiró. Solicita uno nuevo para restablecer tu contraseña.';
 
-const TITLE_SX = {
-  fontFamily: '"Poppins", sans-serif',
-  fontWeight: 600,
-  fontSize: 18,
-  color: 'primary.main',
-};
-
-const LABEL_SX = {
-  fontSize: 11.5,
-  fontWeight: 700,
-  letterSpacing: '0.5px',
-  textTransform: 'uppercase',
-  color: '#6B6560',
-};
-
-const INPUT_SX = {
-  '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff', fontSize: 15 },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCD4CA', borderWidth: '1.5px' },
-};
-
-const BUTTON_SX = { borderRadius: '10px', py: '15px', fontWeight: 600, fontSize: 15 };
+const BUTTON_SX = { borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET, fontWeight: 600, fontSize: FONT.md };
 
 // T05 de HU-002 (#66): el usuario llega desde el enlace del correo y define
 // su nueva contraseña. Vistas del mismo flujo (r3/r4 del mockup + el caso sin
@@ -143,38 +128,14 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     content = (
       <Box
         role="status"
-        sx={{ display: 'flex', flexDirection: 'column', gap: '14px', alignItems: 'center', textAlign: 'center' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}
       >
-        <Box
-          aria-hidden
-          sx={{
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            bgcolor: '#E9F3EC',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              width: 20,
-              height: 10,
-              borderLeft: '3px solid #2F7D4F',
-              borderBottom: '3px solid #2F7D4F',
-              transform: 'rotate(-45deg) translateY(-2px)',
-            }}
-          />
-        </Box>
-        <Typography component="h1" sx={TITLE_SX}>
-          Contraseña actualizada
-        </Typography>
-        {/* No se afirma que se cerraron las sesiones de otros dispositivos
-            (frase del mockup): el backend no lo hace al confirmar el cambio. */}
-        <Typography sx={{ fontSize: 13.5, color: '#6B6560', lineHeight: 1.55 }}>
-          Ya puedes iniciar sesión con tu nueva contraseña.
-        </Typography>
+        <AuthStateHeader
+          icon={CheckCircleOutlinedIcon}
+          tone="success"
+          title="Contraseña actualizada"
+          description="Ya puedes iniciar sesión con tu nueva contraseña."
+        />
         <Button
           fullWidth
           variant="contained"
@@ -187,10 +148,8 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     );
   } else if (!token || tokenRejected) {
     content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <Typography component="h1" sx={TITLE_SX}>
-          Enlace no válido
-        </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}>
+        <AuthStateHeader icon={LinkOffOutlinedIcon} tone="error" title="Enlace no válido" />
         {/* StatusMessage ya expone role="alert". */}
         <StatusMessage
           severity="error"
@@ -212,22 +171,24 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         component="form"
         onSubmit={handleSubmit}
         noValidate
-        sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}
       >
-        <Typography component="h1" sx={TITLE_SX}>
-          Crear nueva contraseña
-        </Typography>
+        <AuthStateHeader
+          icon={LockResetOutlinedIcon}
+          title="Crear nueva contraseña"
+          description="Elige una contraseña segura que no hayas usado antes."
+        />
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <Typography component="label" htmlFor="new-password" sx={LABEL_SX}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
+          <Typography component="label" htmlFor="new-password" sx={INLINE_LABEL_SX}>
             Nueva contraseña
           </Typography>
-          <TextField
+          <PasswordField
             id="new-password"
+            visibilityLabel="nueva contraseña"
             fullWidth
             required
             name="newPassword"
-            type="password"
             placeholder="••••••••"
             autoComplete="new-password"
             value={newPassword}
@@ -238,16 +199,16 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
           />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <Typography component="label" htmlFor="confirm-password" sx={LABEL_SX}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
+          <Typography component="label" htmlFor="confirm-password" sx={INLINE_LABEL_SX}>
             Confirmar contraseña
           </Typography>
-          <TextField
+          <PasswordField
             id="confirm-password"
+            visibilityLabel="confirmación de contraseña"
             fullWidth
             required
             name="confirmPassword"
-            type="password"
             placeholder="••••••••"
             autoComplete="new-password"
             value={confirmPassword}
@@ -270,27 +231,13 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-      <Container maxWidth={false}>
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: '18px',
-            overflow: 'hidden',
-            border: '1px solid #E4DED7',
-            boxShadow: '0 16px 38px rgba(26,60,52,.07)',
-          }}
-        >
-          <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />
+    <AuthCardLayout>
+      <RecoverySteps current={3} />
 
-          <RecoverySteps current={3} />
-
-          <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
-            <Box sx={{ width: '100%', maxWidth: 460 }}>{content}</Box>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+      <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ width: '100%', maxWidth: rem(460) }}>{content}</Box>
+      </Box>
+    </AuthCardLayout>
   );
 }
 
