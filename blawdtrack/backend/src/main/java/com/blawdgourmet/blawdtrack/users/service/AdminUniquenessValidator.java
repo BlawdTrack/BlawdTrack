@@ -17,6 +17,16 @@ public class AdminUniquenessValidator {
 
     private final UserRepository userRepository;
 
+    /** Valida que el correo nuevo de un administrador existente no pertenezca a otro usuario. */
+    public void validateEmailChange(Long userId, String email) {
+        if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, userId)) {
+            throw new DuplicateResourceException(
+                    "DUPLICATE_EMAIL",
+                    "The email address entered is already registered in the system."
+            );
+        }
+    }
+
     public void validateNew(DocumentType documentType, String documentNumber, String email) {
         if (documentType != null && documentNumber != null
                 && userRepository.existsByDocumentTypeAndDocumentNumber(documentType, documentNumber)) {

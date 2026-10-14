@@ -11,6 +11,7 @@ import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminSummaryResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminUpdateRequest;
 
 public interface AdminService {
 
@@ -38,6 +39,21 @@ public interface AdminService {
      *                                role is not found either).
      */
     AdminDetailResponse findAdministrator(DocumentType documentType, String documentNumber);
+
+    /**
+     * Applies the requested changes (full name, email, password and/or access status) to a "Sales Administrator"
+     * (HU-007 / T02). Changing the status or the password closes the administrator's active session at once
+     * (it raises {@code tokenVersion}), and every change leaves a trace in the audit log; the password is never logged.
+     *
+     * @param documentType   document type of the administrator to modify.
+     * @param documentNumber document number of the administrator to modify.
+     * @param request        fields to change; absent fields are left as they are.
+     * @param actor          authenticated Super User executing the change (for auditing).
+     * @return the updated profile.
+     * @throws AdminNotFoundException if no Sales Administrator matches the given document.
+     */
+    AdminDetailResponse updateAdministrator(
+            DocumentType documentType, String documentNumber, AdminUpdateRequest request, AuthenticatedUser actor);
 
     /**
      * Checks whether a "Sales Administrator" can be deleted (HU-008 / T01). An administrator is

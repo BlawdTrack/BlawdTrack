@@ -3,6 +3,7 @@ package com.blawdgourmet.blawdtrack.users.service.impl;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminSummaryResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminUpdateRequest;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -168,7 +170,12 @@ public class AdminServiceImpl implements AdminService {
     // (not in the AuditAction enum yet; that entry is written directly by
     // registrarEliminacionAdministrador instead of going through logAction).
     private static final List<String> ADMIN_AUDIT_ACTIONS = List.of(
-            AuditAction.ADMIN_CREATED.getCode(), "ELIMINAR_ADMINISTRADOR");
+            AuditAction.ADMIN_CREATED.getCode(),
+            AuditAction.ADMIN_UPDATED.getCode(),
+            AuditAction.ADMIN_ACTIVATED.getCode(),
+            AuditAction.ADMIN_DEACTIVATED.getCode(),
+            AuditAction.ADMIN_PASSWORD_CHANGED.getCode(),
+            "ELIMINAR_ADMINISTRADOR");
 
     @Override
     @Transactional(readOnly = true)
@@ -200,8 +207,10 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public AdminDetailResponse findAdministrator(DocumentType documentType, String documentNumber) {
-        User admin = findSalesAdministrator(documentType, documentNumber);
+        return toDetail(findSalesAdministrator(documentType, documentNumber));
+    }
 
+    private AdminDetailResponse toDetail(User admin) {
         return new AdminDetailResponse(
                 admin.getId(),
                 admin.getDocumentType(),
@@ -211,6 +220,56 @@ public class AdminServiceImpl implements AdminService {
                 admin.getPhone(),
                 admin.getStatus()
         );
+    }
+
+    @Override
+    @Transactional
+    public AdminDetailResponse updateAdministrator(
+            DocumentType documentType, String documentNumber, AdminUpdateRequest request, AuthenticatedUser actor) {
+        User admin = findSalesAdministrator(documentType, documentNumber);
+
+        boolean emailChanges = request.email() != null && !request.email().equalsIgnoreCase(admin.getEmail());
+        if (emailChanges) {
+            adminUniquenessValidator.validateEmailChange(admin.getId(), request.email());
+        }
+
+        List<String> profileFields = new ArrayList<>();
+        if (request.fullName() != null && !request.fullName().equals(admin.getFullName())) {
+            admin.setFullName(request.fullName());
+            profileFields.add("fullName");
+        }
+        if (emailChanges) {
+            admin.setEmail(request.email());
+            profileFields.add("email");
+        }
+
+        // Cambiar el estado o la contraseña sube tokenVersion: la sesión abierta deja de ser válida en su siguiente
+        // solicitud. Repetir el mismo estado no cambia nada ni deja rastro.
+        UserStatus previousStatus = admin.getStatus();
+        boolean statusChanges = request.status() != null && request.status() != previousStatus;
+        if (statusChanges) {
+            admin.changeStatus(request.status());
+        }
+        boolean passwordChanges = request.password() != null;
+        if (passwordChanges) {
+            admin.changePassword(passwordEncoder.encode(request.password()));
+        }
+
+        userRepository.saveAndFlush(admin);
+
+        if (!profileFields.isEmpty()) {
+            auditService.logAction(AuditAction.ADMIN_UPDATED, actor, admin, String.join(",", profileFields));
+        }
+        if (statusChanges) {
+            auditService.logAction(
+                    admin.getStatus() == UserStatus.INACTIVE ? AuditAction.ADMIN_DEACTIVATED : AuditAction.ADMIN_ACTIVATED,
+                    actor, admin, "status");
+        }
+        if (passwordChanges) {
+            auditService.logAction(AuditAction.ADMIN_PASSWORD_CHANGED, actor, admin, "password");
+        }
+
+        return toDetail(admin);
     }
 
     @Override
