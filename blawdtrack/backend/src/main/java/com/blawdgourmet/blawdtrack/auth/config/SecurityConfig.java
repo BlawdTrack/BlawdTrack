@@ -88,13 +88,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         // Permisos individuales de usuarios (HU-009): exclusivos del Super Usuario.
                         .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
-                        // La carga se autoriza por el permiso funcional; el endpoint previo de
-                        // comparacion conserva su restriccion al Administrador de Ventas.
-                        .requestMatchers(HttpMethod.POST, "/api/v1/packages/import")
-                        .hasRole(RoleName.SALES_ADMIN)
-                        .requestMatchers("/api/v1/packages/import/**")
-                        .hasAuthority(PermissionCode.PACKAGE_IMPORT)
-                        .requestMatchers("/api/v1/packages/**").hasRole(RoleName.SALES_ADMIN)
+                        // Los paquetes (importacion, validaciones previas, consulta, eliminacion...) son del
+                        // Administrador de Ventas y del Super Usuario, que tiene acceso a todos los modulos
+                        // (documento de arquitectura, "Control de acceso"). Cualquier otro rol (p. ej. el
+                        // mensajero) recibe 403. Cada controlador conserva su @PreAuthorize como segunda barrera.
+                        // Esta regla se evalua antes del binding.
+                        .requestMatchers("/api/v1/packages/**")
+                        .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
