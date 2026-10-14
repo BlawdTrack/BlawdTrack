@@ -1,26 +1,31 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button } from '@mui/material';
-import FormActions from '../components/FormActions';
 import PageContainer from '../components/PageContainer';
 import PageHeaderBar from '../components/PageHeaderBar';
-import StatusMessage from '../components/StatusMessage';
-import FileDropzone from '../components/import/FileDropzone';
 import ImportSteps from '../components/import/ImportSteps';
-import SelectedFileCard from '../components/import/SelectedFileCard';
+import ImportUploadStep from '../components/import/ImportUploadStep';
+import ImportPreviewView from '../components/preview/ImportPreviewView';
 import { usePackageFileSelection } from '../hooks/usePackageFileSelection';
 import { usePackageImportPreview } from '../hooks/usePackageImportPreview';
+import { buildImportPreview } from '../utils/importPreview';
 import { ROUTES } from '../config/routes';
+import { RADIUS } from '../theme';
 
 /**
- * Importar paquetes, paso 1 (HU-010): el usuario elige el archivo de Zoho Inventory (.xlsx o .csv), el navegador
- * valida su formato y el backend lo lee sin registrarlo. Muestra los estados de la carga: cargando, error (del
- * formato o del servidor) y éxito. Con éxito entrega la previsualización a la pantalla de previsualización (paso 2) por
- * el estado de navegación. Solo compone: la selección y la carga viven en sus hooks, el diseño en `components/import`.
+ * Importar paquetes (HU-010): una sola pantalla con los pasos de la importación. En el paso 1 el usuario elige el
+ * archivo de Zoho Inventory (.xlsx o .csv), el navegador valida su formato y el backend lo lee sin registrarlo; con
+ * éxito, la misma pantalla pasa al paso 2 y muestra los registros leídos (válidos, con errores y duplicados) antes de
+ * importar. El paso 3 ("Listo") queda en el indicador hasta que exista la confirmación. Solo compone: la selección y
+ * la carga viven en sus hooks, el modelo lo arma `buildImportPreview` y el diseño vive en `components/import` y
+ * `components/preview`.
  */
 export default function PackageImportPage() {
   const navigate = useNavigate();
   const { file, error: fileError, select, clear } = usePackageFileSelection();
-  const { isUploading, isSuccess, preview, errorMessage, severity, upload, reset } = usePackageImportPreview();
+  const { isUploading, isSuccess, preview: rawPreview, errorMessage, severity, upload, reset } = usePackageImportPreview();
+  const preview = useMemo(() => buildImportPreview(rawPreview), [rawPreview]);
+  const reviewing = isSuccess && preview;
 
   const handleFile = (candidate) => {
     reset();
@@ -32,51 +37,57 @@ export default function PackageImportPage() {
     clear();
   };
 
+  const handleCancel = () => {
+    handleDiscard();
+    navigate(ROUTES.MAIN_MENU);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (file && !isUploading) upload(file);
   };
 
-  const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview } });
-
-  const alertMessage = fileError ?? errorMessage;
-
   return (
     <>
-      <PageHeaderBar
-        title="Importar paquetes"
-      />
+      <PageHeaderBar title="Importar paquetes" />
 
       <PageContainer>
-        <ImportSteps current={1} />
+        <ImportSteps current={reviewing ? 2 : 1} />
 
-        {isSuccess ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <StatusMessage
-              severity="success"
-              title="Archivo cargado"
-              message={`${preview?.fileName ?? file?.name ?? 'El archivo'}: ${preview?.totalRecords ?? 0} registros leídos. Revisa la previsualización antes de importar.`}
-            />
-            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& a, & button': { width: { xs: '100%', sm: 'auto' } } }}>
-              <Button variant="contained" onClick={handleContinue}>
-                Ver previsualización
-              </Button>
+        {reviewing ? (
+          <>
+            <ImportPreviewView preview={preview} />
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
               <Button variant="outlined" onClick={handleDiscard}>
                 Cargar otro archivo
               </Button>
             </Box>
-          </Box>
+          </>
         ) : (
-          <Box component="form" noValidate onSubmit={handleSubmit} aria-busy={isUploading} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <FileDropzone onFile={handleFile} disabled={isUploading} />
-            {file && <SelectedFileCard file={file} onRemove={handleDiscard} disabled={isUploading} />}
-            {alertMessage && <StatusMessage severity={fileError ? 'error' : severity} message={alertMessage} />}
-            <FormActions
-              submitLabel="Cargar y validar"
-              submittingLabel="Validando archivo…"
-              isSubmitting={isUploading}
-              submitDisabled={!file}
-              onDiscard={handleDiscard}
+          <Box
+            component="form"
+            noValidate
+            onSubmit={handleSubmit}
+            aria-busy={isUploading}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2.5,
+              p: { xs: 2, md: 4 },
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'neutral.border',
+              borderRadius: RADIUS.lg,
+            }}
+          >
+            <ImportUploadStep
+              file={file}
+              alertMessage={fileError ?? errorMessage}
+              alertSeverity={fileError ? 'error' : severity}
+              isUploading={isUploading}
+              onFile={handleFile}
+              onRemove={handleDiscard}
+              onCancel={handleCancel}
             />
           </Box>
         )}

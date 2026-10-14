@@ -44,7 +44,7 @@ describe('MobileBottomNav', () => {
     );
   });
 
-  it('navigates to the menu of each module', async () => {
+  it('navigates to the menu of each module, and straight to the screen of a single-screen one', async () => {
     const user = userEvent.setup();
     renderNav(ROUTES.MAIN_MENU);
 
@@ -52,7 +52,7 @@ describe('MobileBottomNav', () => {
     expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_USERS);
 
     await user.click(tab('Importación'));
-    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_PACKAGES);
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PACKAGE_IMPORT);
 
     await user.click(tab('Ajustes'));
     expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.MODULE_SETTINGS);

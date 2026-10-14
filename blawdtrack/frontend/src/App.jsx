@@ -7,7 +7,6 @@ import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
 import PackageImportPage from './pages/PackageImportPage';
-import PackageImportPreviewPage from './pages/PackageImportPreviewPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
@@ -105,7 +104,6 @@ function App() {
           ))}
           <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
           <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
-          <Route path={ROUTES.PACKAGE_IMPORT_PREVIEW} element={<PackageImportPreviewPage />} />
 
           <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
             <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />

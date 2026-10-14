@@ -20,7 +20,8 @@ describe('getMainMenuColumns', () => {
     const modules = modulesOf(getMainMenuColumns(ROLES.SUPER_USER));
     const byTitle = Object.fromEntries(modules.map((m) => [m.title, m.path]));
 
-    expect(byTitle['Importación de paquetes']).toBe(ROUTES.MODULE_PACKAGES);
+    // El módulo de una sola pantalla enlaza directo a ella, sin menú intermedio.
+    expect(byTitle['Importación de paquetes']).toBe(ROUTES.PACKAGE_IMPORT);
     expect(byTitle['Gestión de usuarios']).toBe(ROUTES.MODULE_USERS);
     ['Gestión de paquetes', 'Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((title) =>
       expect(byTitle[title]).toBeNull()
@@ -39,7 +40,7 @@ describe('getMainMenuColumns', () => {
 
     expect(titles(columns)).toEqual([['Operación diaria']]);
     expect(modulesOf(columns).map((m) => m.title)).toEqual(['Importación de paquetes', 'Gestión de paquetes', 'Asignación y seguimiento']);
-    expect(modulesOf(columns).map((m) => m.path)).toEqual([ROUTES.MODULE_PACKAGES, null, null]);
+    expect(modulesOf(columns).map((m) => m.path)).toEqual([ROUTES.PACKAGE_IMPORT, null, null]);
   });
 
   it('is empty for roles without menu access', () => {

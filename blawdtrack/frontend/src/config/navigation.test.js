@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   NAVIGATION_GROUPS,
   NAVIGATION_MENUS,
+  isSingleScreenMenu,
   SETTINGS_MENU,
   getNavigationForRole,
   getSettingsForRole,
@@ -151,7 +152,7 @@ describe('isGroupActive', () => {
     [ROUTES.MODULE_USERS, ROUTES.MODULE_COURIERS, ROUTES.MODULE_ADMINS, ROUTES.COURIER_CREATE, ROUTES.ADMIN_DELETE].forEach((path) =>
       expect(isGroupActive(users, path)).toBe(true)
     );
-    expect(isGroupActive(users, ROUTES.MODULE_PACKAGES)).toBe(false);
+    expect(isGroupActive(users, ROUTES.PACKAGE_IMPORT)).toBe(false);
     expect(isGroupActive(users, ROUTES.MAIN_MENU)).toBe(false);
   });
 });
@@ -175,6 +176,24 @@ describe('module menus', () => {
   });
 });
 
+describe('single-screen modules', () => {
+  it('treats Importación de paquetes as a module that goes straight to its screen, with no menu page of its own', () => {
+    const packages = NAVIGATION_GROUPS.find((g) => g.id === 'packages');
+
+    expect(packages.path).toBe(ROUTES.PACKAGE_IMPORT);
+    expect(isSingleScreenMenu(packages)).toBe(true);
+    expect(NAVIGATION_MENUS.map((m) => m.id)).not.toContain('packages');
+  });
+
+  it('keeps a menu page for every module with several functions, and for settings', () => {
+    NAVIGATION_GROUPS.filter((g) => g.id !== 'packages').forEach((group) => {
+      expect(isSingleScreenMenu(group)).toBe(false);
+      expect(NAVIGATION_MENUS).toContain(group);
+    });
+    expect(NAVIGATION_MENUS).toContain(SETTINGS_MENU);
+  });
+});
+
 describe('isModuleScreen', () => {
   it('is true on every module menu and on every function screen, including nested and related paths', () => {
     NAVIGATION_MENUS.forEach((menu) => {
@@ -182,7 +201,7 @@ describe('isModuleScreen', () => {
       menu.items.forEach((item) => expect(isModuleScreen(item.path)).toBe(true));
     });
     expect(isModuleScreen(`${ROUTES.COURIER_UPDATE}/1-0345-0678`)).toBe(true);
-    expect(isModuleScreen(ROUTES.PACKAGE_IMPORT_PREVIEW)).toBe(true);
+    expect(isModuleScreen(ROUTES.PACKAGE_IMPORT)).toBe(true);
   });
 
   it('is false on the main menu and on unknown routes', () => {
@@ -198,11 +217,13 @@ describe('getParentMenu', () => {
     expect(getParentMenu(ROUTES.ADMIN_DELETE)).toEqual({ to: ROUTES.MODULE_ADMINS, label: 'Administradores' });
   });
 
-  it('sends a function of a group without submenus back to the group menu, including related screens', () => {
-    expect(getParentMenu(ROUTES.PACKAGE_IMPORT)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Importación de paquetes' });
-    expect(getParentMenu(ROUTES.PACKAGE_IMPORT_PREVIEW)).toEqual({ to: ROUTES.MODULE_PACKAGES, label: 'Importación de paquetes' });
+  it('sends a function of a group without submenus back to the group menu', () => {
     expect(getParentMenu(ROUTES.ROLES_PERMISSIONS)).toEqual({ to: ROUTES.MODULE_USERS, label: 'Gestión de usuarios' });
     expect(getParentMenu(ROUTES.PASSWORD_RESET_OWN)).toEqual({ to: ROUTES.MODULE_SETTINGS, label: 'Ajustes' });
+  });
+
+  it('has no parent on the screen of a single-screen module: there is no menu to go back to', () => {
+    expect(getParentMenu(ROUTES.PACKAGE_IMPORT)).toBeNull();
   });
 
   it('sends a submenu back to Gestión de usuarios', () => {

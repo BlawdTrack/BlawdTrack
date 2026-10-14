@@ -62,11 +62,11 @@ describe('MainMenuPage', () => {
     );
   });
 
-  it('links the implemented modules to their menu', () => {
+  it('links the implemented modules to their menu, or to their screen when they have only one', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
     expect(screen.getByRole('link', { name: /Gestión de usuarios/ })).toHaveAttribute('href', ROUTES.MODULE_USERS);
-    expect(screen.getByRole('link', { name: /Importación de paquetes/ })).toHaveAttribute('href', ROUTES.MODULE_PACKAGES);
+    expect(screen.getByRole('link', { name: /Importación de paquetes/ })).toHaveAttribute('href', ROUTES.PACKAGE_IMPORT);
     expect(screen.queryByRole('link', { name: /Seguridad y acceso/ })).not.toBeInTheDocument();
   });
 

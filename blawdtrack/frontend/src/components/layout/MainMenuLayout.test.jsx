@@ -17,6 +17,7 @@ const tree = (
       <Route path={ROUTES.ROLES_PERMISSIONS} element={<div>roles content</div>} />
       <Route path={ROUTES.ADMIN_CREATE} element={<div>create admin content</div>} />
       <Route path={ROUTES.MODULE_SETTINGS} element={<div>settings content</div>} />
+      <Route path={ROUTES.PACKAGE_IMPORT} element={<div>import content</div>} />
     </Route>
   </Routes>
 );
@@ -41,9 +42,9 @@ describe('MainMenuLayout sidebar', () => {
   it('renders the two module titles, with mensajeros and administradores inside Gestión de usuarios', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
     const bar = within(sidebar());
-    ['Gestión de usuarios', 'Importación de paquetes'].forEach((title) =>
-      expect(bar.getByRole('button', { name: title })).toBeInTheDocument()
-    );
+    expect(bar.getByRole('button', { name: 'Gestión de usuarios' })).toBeInTheDocument();
+    // Importación de paquetes es de una sola pantalla: un enlace directo, sin lista que abrir.
+    expect(bar.getByRole('link', { name: 'Importación de paquetes' })).toHaveAttribute('href', ROUTES.PACKAGE_IMPORT);
     expect(bar.queryByRole('button', { name: 'Seguridad y acceso' })).not.toBeInTheDocument();
     ['Mensajeros', 'Administradores'].forEach((title) =>
       expect(bar.queryByRole('button', { name: title })).not.toBeInTheDocument()
@@ -108,7 +109,7 @@ describe('MainMenuLayout sidebar', () => {
     await openGroup(user, 'Mensajeros');
 
     expect(bar.getByRole('button', { name: 'Gestión de usuarios' })).toHaveStyle({ color: CREAM });
-    expect(bar.getByRole('button', { name: 'Importación de paquetes' })).toHaveStyle({ color: CREAM });
+    expect(bar.getByRole('link', { name: 'Importación de paquetes' })).toHaveStyle({ color: CREAM });
     // Se mide el submenú que no se pulsó: el cursor sobre el pulsado lo pondría crema por el hover.
     expect(bar.getByRole('button', { name: 'Administradores' })).toHaveStyle({ color: GRAY });
     expect(within(bar.getByRole('link', { name: 'Crear mensajero' })).getByText('Crear mensajero')).toHaveStyle({ color: GRAY });
@@ -125,7 +126,7 @@ describe('MainMenuLayout sidebar', () => {
       'Reportes y notificaciones',
       'Operación de mensajero',
     ];
-    const items = names.map((name) => bar.getByRole('button', { name }));
+    const items = names.map((name) => bar.getByRole(name === 'Importación de paquetes' ? 'link' : 'button', { name }));
 
     items.slice(1).forEach((item, index) =>
       expect(items[index].compareDocumentPosition(item)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
@@ -159,32 +160,28 @@ describe('MainMenuLayout sidebar', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Disponible próximamente');
   });
 
-  it('shows the packages group with "Importar paquetes" to the super user', async () => {
+  it('takes the super user straight to the import screen from "Importación de paquetes", with nothing to open', async () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
-    await openGroup(user, 'Importación de paquetes');
-
-    expect(within(sidebar()).getByRole('link', { name: /Importar paquetes/ })).toHaveAttribute(
-      'href',
-      ROUTES.PACKAGE_IMPORT
-    );
+    const link = within(sidebar()).getByRole('link', { name: 'Importación de paquetes' });
+    expect(link).toHaveAttribute('href', ROUTES.PACKAGE_IMPORT);
     expect(within(sidebar()).queryByRole('link', { name: /Detectar duplicados/ })).not.toBeInTheDocument();
+    expect(within(sidebar()).queryByRole('button', { name: 'Importación de paquetes' })).not.toBeInTheDocument();
+
+    await user.click(link);
+    expect(screen.getByText('import content')).toBeInTheDocument();
   });
 
-  it('gives the sales admin the same sidebar, but only with packages and their own password reset', async () => {
-    const user = userEvent.setup();
+  it('gives the sales admin the same sidebar, but only with packages and their own password reset', () => {
     const salesAdmin = { ...superUser, id: 2, fullName: 'Vera Ventas', role: 'ADMIN_VENTAS' };
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: salesAdmin });
     const bar = within(sidebar());
 
-    expect(bar.getByRole('button', { name: 'Importación de paquetes' })).toBeInTheDocument();
+    expect(bar.getByRole('link', { name: 'Importación de paquetes' })).toHaveAttribute('href', ROUTES.PACKAGE_IMPORT);
     expect(bar.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('href', ROUTES.MODULE_SETTINGS);
     expect(bar.queryByRole('button', { name: 'Gestión de usuarios' })).not.toBeInTheDocument();
     expect(bar.getByText('Administrador de Ventas')).toBeInTheDocument();
-
-    await openGroup(user, 'Importación de paquetes');
-    expect(bar.getByRole('link', { name: /Importar paquetes/ })).toBeInTheDocument();
     expect(bar.queryByRole('link', { name: /Roles y permisos/ })).not.toBeInTheDocument();
   });
 
@@ -196,7 +193,7 @@ describe('MainMenuLayout sidebar', () => {
     const gear = bar.getByRole('link', { name: 'Ajustes' });
     expect(gear).toHaveAttribute('href', ROUTES.MODULE_SETTINGS);
     // Va después de los grupos y antes del usuario.
-    expect(bar.getByRole('button', { name: 'Importación de paquetes' }).compareDocumentPosition(gear)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(bar.getByRole('link', { name: 'Importación de paquetes' }).compareDocumentPosition(gear)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(gear.compareDocumentPosition(bar.getByRole('button', { name: /cerrar sesión/i }))).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 
     await user.click(gear);
@@ -329,9 +326,9 @@ describe('MainMenuLayout sidebar', () => {
 
       const bar = within(sidebar());
       expect(bar.queryByText('Blawd Gourmet')).not.toBeInTheDocument();
-      ['Gestión de usuarios', 'Importación de paquetes'].forEach((name) =>
-        expect(bar.getByRole('button', { name })).toBeInTheDocument()
-      );
+      expect(bar.getByRole('button', { name: 'Gestión de usuarios' })).toBeInTheDocument();
+      // El módulo de una sola pantalla es un icono que lleva directo a ella, sin menú flotante.
+      expect(bar.getByRole('link', { name: 'Importación de paquetes' })).toHaveAttribute('href', ROUTES.PACKAGE_IMPORT);
       expect(bar.queryByRole('link', { name: 'Crear mensajero' })).not.toBeInTheDocument();
       expect(bar.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument();
       expect(localStorage.getItem('blawdtrack.sidebarCollapsed')).toBe('true');
@@ -443,43 +440,6 @@ describe('MainMenuLayout sidebar', () => {
         await new Promise((resolve) => setTimeout(resolve, 450));
         expect(screen.getByRole('menuitem', { name: 'Crear mensajero' })).toBeInTheDocument();
         expect(screen.queryByRole('menuitem', { name: 'Crear administrador' })).not.toBeInTheDocument();
-      });
-
-      it('switches straight to the neighbouring group when the cursor is not heading to the open menu', async () => {
-        const user = userEvent.setup();
-        await collapse(user);
-        stubPanelRect({ left: 90, top: 100, bottom: 260 });
-
-        fireEvent.mouseEnter(trigger('Gestión de usuarios'));
-        fireEvent.mouseMove(trigger('Gestión de usuarios'), { clientX: 40, clientY: 100 });
-        await screen.findByRole('menuitem', { name: 'Mensajeros' });
-
-        fireEvent.mouseMove(trigger('Importación de paquetes'), { clientX: 45, clientY: 150 });
-        fireEvent.mouseEnter(trigger('Importación de paquetes'));
-
-        expect(await screen.findByRole('menuitem', { name: 'Importar paquetes' })).toBeInTheDocument();
-        expect(screen.queryByRole('menuitem', { name: 'Mensajeros' })).not.toBeInTheDocument();
-      });
-
-      it('does not open the neighbouring group while the cursor travels diagonally to the open menu', async () => {
-        const user = userEvent.setup();
-        await collapse(user);
-        stubPanelRect({ left: 90, top: 100, bottom: 260 });
-
-        fireEvent.mouseEnter(trigger('Gestión de usuarios'));
-        fireEvent.mouseMove(trigger('Gestión de usuarios'), { clientX: 40, clientY: 100 });
-        await screen.findByRole('menuitem', { name: 'Mensajeros' });
-
-        // Pasa por encima de "Paquetes" yendo en diagonal hacia el menú de Usuarios.
-        fireEvent.mouseMove(trigger('Importación de paquetes'), { clientX: 70, clientY: 150 });
-        fireEvent.mouseEnter(trigger('Importación de paquetes'));
-        fireEvent.mouseLeave(trigger('Importación de paquetes'));
-        const menu = screen.getByRole('menuitem', { name: 'Mensajeros' });
-        fireEvent.mouseEnter(menu.closest('[class*="MuiPopper"]').firstElementChild);
-
-        await new Promise((resolve) => setTimeout(resolve, 450));
-        expect(screen.getByRole('menuitem', { name: 'Mensajeros' })).toBeInTheDocument();
-        expect(screen.queryByRole('menuitem', { name: 'Importar paquetes' })).not.toBeInTheDocument();
       });
     });
   });

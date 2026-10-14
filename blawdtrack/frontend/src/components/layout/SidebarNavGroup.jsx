@@ -7,15 +7,16 @@ import {
   Popper,
   Typography,
 } from '@mui/material';
+import SidebarModuleLink from './SidebarModuleLink';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarToggleSection from './SidebarToggleSection';
-import { isGroupActive } from '../../config/navigation';
+import { isGroupActive, isSingleScreenMenu } from '../../config/navigation';
 import SidebarSubmenuFlyout, { FlyoutMenuItem } from './SidebarFlyoutItems';
 import { NAV_GROUP_ICONS } from './navIcons';
 import { RADIUS, FONT, rem } from '../../theme';
 
 /**
- * Un grupo del menú. Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
+ * Un grupo del menú (un módulo de una sola pantalla es un enlace directo, `SidebarModuleLink`). Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
  * y, si la pantalla actual es del grupo, lo marca con un punto naranja). Con la barra colapsada el grupo
  * es un solo icono que despliega la lista de sus pantallas en un menú flotante al pasar el cursor.
  * @param {{ group: { id: string, title: string, items: Array }, collapsed?: boolean,
@@ -26,6 +27,9 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
   const { pathname } = useLocation();
   const hasActiveItem = isGroupActive(group, pathname);
   const listId = `sidebar-group-${group.id}`;
+
+  // Un módulo de una sola pantalla no se despliega: es un enlace directo a ella.
+  if (isSingleScreenMenu(group)) return <SidebarModuleLink group={group} collapsed={collapsed} />;
 
   if (collapsed) {
     const GroupIcon = NAV_GROUP_ICONS[group.id];

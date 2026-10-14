@@ -36,9 +36,7 @@ const SCREENS = {
   [ROUTES.MODULE_COURIERS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_ADMINS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_SETTINGS]: 'Pantalla menú de módulo',
-  [ROUTES.MODULE_PACKAGES]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
-  [ROUTES.PACKAGE_IMPORT_PREVIEW]: 'Pantalla previsualización',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
@@ -56,11 +54,9 @@ const SCREENS = {
 // de las rutas protegidas es de un solo rol.
 const SHARED_ROUTES = [
   ROUTES.MAIN_MENU,
-  ROUTES.MODULE_PACKAGES,
   ROUTES.MODULE_SETTINGS,
   ROUTES.PASSWORD_RESET_OWN,
   ROUTES.PACKAGE_IMPORT,
-  ROUTES.PACKAGE_IMPORT_PREVIEW,
 ];
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
@@ -71,10 +67,8 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_USERS,
     ROUTES.MODULE_COURIERS,
     ROUTES.MODULE_ADMINS,
-    ROUTES.MODULE_PACKAGES,
     ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
-    ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_DELETE,
     ROUTES.COURIER_CREATE,
@@ -85,10 +79,8 @@ const ALLOWED_ROUTES = {
   ],
   [ROLES.SALES_ADMIN]: [
     ROUTES.MAIN_MENU,
-    ROUTES.MODULE_PACKAGES,
     ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
-    ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.PASSWORD_RESET_OWN,
   ],
   [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],

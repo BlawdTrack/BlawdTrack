@@ -10,12 +10,12 @@ const fileOf = (name, content = 'contenido') => new File([content], name);
 afterEach(() => cleanup());
 
 describe('FileDropzone', () => {
-  it('invita a arrastrar el archivo y explica los formatos y los datos que se extraen', () => {
+  it('invita a arrastrar o elegir el archivo y muestra los formatos admitidos', () => {
     render(<FileDropzone onFile={() => {}} />);
 
     expect(screen.getByText('Arrastra aquí el archivo de Zoho Inventory')).toBeInTheDocument();
-    expect(screen.getByText(/Formatos admitidos: \.xlsx y \.csv/)).toBeInTheDocument();
-    expect(screen.getByText(/número de orden/)).toBeInTheDocument();
+    expect(screen.getByText('o selecciónalo desde tu computadora.')).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Formatos admitidos' })).getAllByRole('listitem').map((chip) => chip.textContent)).toEqual(['Excel .xlsx', 'CSV']);
   });
 
   it('el selector solo ofrece .xlsx y .csv', () => {
@@ -122,7 +122,7 @@ describe('ImportSteps', () => {
     render(<ImportSteps current={1} />);
 
     const steps = within(screen.getByRole('list', { name: 'Pasos de la importación' })).getAllByRole('listitem');
-    expect(steps.map((step) => step.textContent)).toEqual(['1Cargar archivo', '2Previsualizar y validar', '3Confirmar registro']);
+    expect(steps.map((step) => step.textContent)).toEqual(['1Cargar archivos', '2Revisar datos', '3Listo']);
   });
 
   it('marca solo el paso actual con aria-current', () => {

@@ -98,7 +98,8 @@ export const NAVIGATION_GROUPS = [
     id: 'packages',
     title: 'Importación de paquetes',
     shortTitle: 'Importación',
-    path: ROUTES.MODULE_PACKAGES,
+    // Un módulo de una sola pantalla: su `path` es el de la pantalla y no tiene menú intermedio de tarjetas.
+    path: ROUTES.PACKAGE_IMPORT,
     items: [
       {
         id: 'package-import',
@@ -106,8 +107,6 @@ export const NAVIGATION_GROUPS = [
         description: 'Carga el archivo de Zoho Inventory (.xlsx o .csv) con los paquetes del día.',
         actionLabel: 'Cargar archivo',
         path: ROUTES.PACKAGE_IMPORT,
-        // Pantallas del mismo flujo que no son una opción del menú: el enlace al menú también aparece en ellas.
-        relatedPaths: [ROUTES.PACKAGE_IMPORT_PREVIEW],
         roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
       },
     ],
@@ -132,10 +131,23 @@ export const SETTINGS_MENU = {
 };
 
 /**
- * Todos los menús que tienen página propia: los grupos, los submenús de los grupos que los tienen y el de ajustes.
- * `App.jsx` registra una ruta por cada uno.
+ * Indica si un grupo es un módulo de una sola pantalla: su `path` es el de su única función, así que el módulo lleva
+ * directo a ella (sin menú de tarjetas en medio).
+ * @param {{ path: string, items: Array<{ path: string|null }> }} menu
+ * @returns {boolean}
  */
-export const NAVIGATION_MENUS = [...NAVIGATION_GROUPS.flatMap((group) => [group, ...(group.submenus ?? [])]), SETTINGS_MENU];
+export function isSingleScreenMenu(menu) {
+  return menu.items.length === 1 && menu.items[0].path === menu.path;
+}
+
+/**
+ * Todos los menús que tienen página propia (de tarjetas): los grupos, los submenús de los grupos que los tienen y el
+ * de ajustes. Los módulos de una sola pantalla no tienen menú. `App.jsx` registra una ruta por cada uno.
+ */
+export const NAVIGATION_MENUS = [
+  ...NAVIGATION_GROUPS.flatMap((group) => [group, ...(group.submenus ?? [])]),
+  SETTINGS_MENU,
+].filter((menu) => !isSingleScreenMenu(menu));
 
 /** Copia de un menú con solo los ítems permitidos al rol (y los submenús que se quedan con alguno). */
 function filterMenuByRole(menu, role) {
@@ -230,7 +242,8 @@ export function isGroupActive(group, pathname) {
 /**
  * Menú al que lleva la flecha junto al título desde `pathname`: la pantalla de una función vuelve al menú que la
  * lista (su submenú, o su grupo si no tiene) y el menú de un submenú vuelve al de su grupo. El menú de un grupo no
- * tiene flecha: para salir de ahí está el enlace al menú principal.
+ * tiene flecha: para salir de ahí está el enlace al menú principal. La pantalla de un módulo de una sola pantalla
+ * tampoco (no tiene menú al que volver).
  * @param {string} pathname Ruta actual.
  * @returns {{ to: string, label: string } | null}
  */
@@ -240,6 +253,7 @@ export function getParentMenu(pathname) {
 
   const screen = findScreen(pathname);
   if (!screen) return null;
+  if (isSingleScreenMenu(screen.group)) return null;
   const menu = screen.group.submenus?.find((submenu) => submenu.items.includes(screen.item)) ?? screen.group;
   return { to: menu.path, label: menu.title };
 }
