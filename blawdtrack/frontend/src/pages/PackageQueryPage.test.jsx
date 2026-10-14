@@ -39,7 +39,7 @@ const packageDetail = {
 const render = () => renderWithProviders(<PackageQueryPage />, { user: salesAdmin, route: '/paquetes/consulta' });
 
 const search = async (user, value) => {
-  const input = screen.getByLabelText('Número de envío');
+  const input = screen.getByRole('textbox', { name: 'Número de envío' });
   if (value) await user.type(input, value);
   await user.click(screen.getByRole('button', { name: /consultar/i }));
 };

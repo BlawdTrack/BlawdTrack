@@ -50,11 +50,11 @@ export default function PackageSearchCard({ value, onChange, onSubmit, loading =
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder="BG-2026-00123"
-          aria-label="Número de envío"
           autoComplete="off"
           disabled={loading}
           error={Boolean(error)}
           helperText={error}
+          slotProps={{ htmlInput: { 'aria-label': 'Número de envío' } }}
           sx={{ ...INPUT_SX, flex: 1, minWidth: 0 }}
         />
         <Button
