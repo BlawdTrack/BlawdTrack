@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeAdminError } from './adminErrors';
+import { normalizeAdminError, normalizeAdminUpdateError } from './adminErrors';
 
 const httpError = (status, data) => ({ response: { status, data } });
 
@@ -91,5 +91,60 @@ describe('normalizeAdminError', () => {
     const out = normalizeAdminError(httpError(404, {}));
     expect(out.kind).toBe('unknown');
     expect(out.globalMessage).toMatch(/No se pudo registrar/);
+  });
+});
+
+describe('normalizeAdminUpdateError (HU-007 · Task 95)', () => {
+  it('un 404 dice que el administrador ya no existe, en advertencia', () => {
+    const out = normalizeAdminUpdateError(httpError(404, { code: 'ADMINISTRADOR_NO_EXISTENTE', message: 'Administrador no existente' }));
+
+    expect(out.kind).toBe('notFound');
+    expect(out.severity).toBe('warning');
+    expect(out.globalMessage).toMatch(/Administrador no existente/);
+  });
+
+  it('un correo repetido (409 DUPLICATE_EMAIL) se marca en el campo correo', () => {
+    const out = normalizeAdminUpdateError(httpError(409, { code: 'DUPLICATE_EMAIL' }));
+
+    expect(out.kind).toBe('conflict');
+    expect(out.fieldErrors).toEqual({ email: 'Este correo electrónico ya está registrado.' });
+    expect(out.globalMessage).toBeNull();
+  });
+
+  it('otro conflicto muestra un mensaje general', () => {
+    expect(normalizeAdminUpdateError(httpError(409, { code: 'OTRO' })).globalMessage).toMatch(/entran en conflicto/);
+  });
+
+  it('un 400 marca los campos que conoce, con los nombres del PATCH', () => {
+    const out = normalizeAdminUpdateError(
+      httpError(400, { code: 'VALIDATION_ERROR', errores: [{ campo: 'email', mensaje: 'x' }, { campo: 'password', mensaje: 'y' }] })
+    );
+
+    expect(Object.keys(out.fieldErrors).sort()).toEqual(['email', 'password']);
+    expect(out.fieldErrors.password).toMatch(/8 caracteres/);
+    expect(out.globalMessage).toBeNull();
+  });
+
+  it('un 400 sin campos conocidos muestra el mensaje general', () => {
+    const out = normalizeAdminUpdateError(httpError(400, { code: 'VALIDATION_ERROR' }));
+
+    expect(out.fieldErrors).toEqual({});
+    expect(out.globalMessage).toMatch(/Revisa los datos/);
+  });
+
+  it.each([
+    [401, /sesión expiró/],
+    [403, /Solo el Súper Usuario puede hacerlo/],
+    [500, /error inesperado en el servidor/],
+    [418, /No se pudo actualizar el administrador/],
+  ])('un %i usa su mensaje', (status, message) => {
+    expect(normalizeAdminUpdateError(httpError(status, {})).globalMessage).toMatch(message);
+  });
+
+  it('sin respuesta del servidor habla de la conexión', () => {
+    const out = normalizeAdminUpdateError(new Error('Network Error'));
+
+    expect(out.kind).toBe('network');
+    expect(out.globalMessage).toMatch(/No pudimos conectar/);
   });
 });
