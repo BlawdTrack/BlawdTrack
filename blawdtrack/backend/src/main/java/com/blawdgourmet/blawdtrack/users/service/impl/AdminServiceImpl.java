@@ -25,6 +25,7 @@ import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDetailResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
@@ -198,12 +199,25 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     @Transactional(readOnly = true)
+    public AdminDetailResponse findAdministrator(DocumentType documentType, String documentNumber) {
+        User admin = findSalesAdministrator(documentType, documentNumber);
+
+        return new AdminDetailResponse(
+                admin.getId(),
+                admin.getDocumentType(),
+                admin.getDocumentNumber(),
+                admin.getFullName(),
+                admin.getEmail(),
+                admin.getPhone(),
+                admin.getStatus()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public AdminDeletionEligibilityResponse validateDeletionEligibility(
             DocumentType documentType, String documentNumber) {
-        User admin = userRepository.findByDocumentTypeAndDocumentNumber(documentType, documentNumber)
-                .filter(user -> user.getRole() != null
-                        && RoleName.SALES_ADMIN.equals(user.getRole().getName()))
-                .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
+        User admin = findSalesAdministrator(documentType, documentNumber);
 
         boolean hasActiveSession = hasActiveSession(admin);
         boolean eligible = true;
@@ -243,6 +257,13 @@ public class AdminServiceImpl implements AdminService {
         userRepository.flush();
 
         return new AdminDeletionResponse("Administrador eliminado correctamente.");
+    }
+
+    private User findSalesAdministrator(DocumentType documentType, String documentNumber) {
+        return userRepository.findByDocumentTypeAndDocumentNumber(documentType, documentNumber)
+                .filter(user -> user.getRole() != null
+                        && RoleName.SALES_ADMIN.equals(user.getRole().getName()))
+                .orElseThrow(() -> new AdminNotFoundException("Administrador no existente"));
     }
 
     private boolean hasActiveSession(User user) {
