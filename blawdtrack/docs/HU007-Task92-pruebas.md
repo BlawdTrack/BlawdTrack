@@ -29,14 +29,17 @@ Solo se aplican los campos que lleguen, pero debe llegar al menos uno. El docume
 
 | Cambio | Sesión del administrador | Registro en la bitácora (`GET /api/v1/admins/audit-log`) |
 | --- | --- | --- |
-| Nombre y/o correo | Sigue abierta | `ACTUALIZAR_ADMINISTRADOR`, con los campos cambiados (`fullName,email`). |
+| Nombre y/o correo | Sigue abierta | `ACTUALIZAR_ADMINISTRADOR`, con los campos cambiados en la frase ("modificó los datos (nombre, correo) del Administrador…"). |
 | Estado a `INACTIVE` | Se cierra de inmediato: sube `tokenVersion` y su token deja de servir en la siguiente solicitud. | `DESACTIVAR_ADMINISTRADOR` |
 | Estado a `ACTIVE` | Se cierra (cualquier cambio de estado) | `ACTIVAR_ADMINISTRADOR` |
 | Contraseña | Se cierra de inmediato | `CAMBIAR_CONTRASENA_ADMINISTRADOR`; la contraseña **nunca** se guarda en la bitácora. |
 | Repetir el mismo estado o los mismos datos | Sin cambios | Sin registro. |
 
 La contraseña se guarda siempre como hash. La bitácora de administradores que ya existía (creación y eliminación) ahora
-incluye también estas cuatro acciones.
+incluye también estas cuatro acciones. Como esa bitácora es general (no filtra por administrador), cada registro se redacta
+como una frase que dice quién hizo qué y a quién, por ejemplo: *"El Super Usuario 'Alicia' modificó los datos (nombre,
+correo) del Administrador de Ventas 'Ana' (CEDULA 2-0345-0987)."* Las de estado y contraseña agregan "Su sesión activa se
+cerró de inmediato." (ajuste hecho junto con la pantalla de las Tasks 93 a 95).
 
 ## Cómo está hecho
 
