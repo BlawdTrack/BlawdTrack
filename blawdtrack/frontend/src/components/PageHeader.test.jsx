@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import PageHeader from './PageHeader';
+import { renderWithProviders, superUser } from '../test-utils';
 import { ROUTES } from '../config/routes';
 
 const renderAt = (route) =>
@@ -38,6 +39,17 @@ describe('PageHeader', () => {
     await user.click(screen.getByRole('link', { name: 'Menú principal' }));
 
     expect(screen.getByText('main menu content')).toBeInTheDocument();
+  });
+
+  it('takes each role back to its own home: the courier to theirs, not to the main menu', () => {
+    renderWithProviders(
+      <Routes>
+        <Route path={ROUTES.MODULE_SETTINGS} element={<PageHeader title="Ajustes" />} />
+      </Routes>,
+      { route: ROUTES.MODULE_SETTINGS, user: { ...superUser, role: 'MENSAJERO' } }
+    );
+
+    expect(screen.getByRole('link', { name: 'Menú principal' })).toHaveAttribute('href', ROUTES.COURIER_HOME);
   });
 
   it('has no breadcrumb trail and no big "Volver" button, only the arrow', () => {

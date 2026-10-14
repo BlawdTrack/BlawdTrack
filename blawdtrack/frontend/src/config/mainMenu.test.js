@@ -64,8 +64,19 @@ describe('getMainMenuColumns', () => {
     expect(modulesOf(columns).find((m) => m.id === 'reports').description).toBe('Cambios en usuarios e historial de notificaciones. Imprime desde cada reporte.');
   });
 
-  it('is empty for roles without menu access', () => {
-    expect(getMainMenuColumns(ROLES.COURIER)).toEqual([]);
+  it('gives the courier their own day: three counts without data and two modules that are coming soon', () => {
+    const columns = getMainMenuColumns(ROLES.COURIER);
+
+    expect(columns).toHaveLength(1);
+    const [summary, day] = columns[0];
+    expect(summary.hideTitle).toBe(true);
+    expect(summary.stats.map((s) => s.label)).toEqual(['Por entregar', 'Entregados', 'No entregados']);
+    expect(day.title).toBe('Mi jornada');
+    expect(day.modules.map((m) => [m.title, m.path])).toEqual([['Mis paquetes', null], ['Costos del viaje', null]]);
+    expect(day.modules[0].description).toBe('Revisa tus paquetes asignados y actualiza su estado al entregar.');
+  });
+
+  it('is empty for roles that do not exist', () => {
     expect(getMainMenuColumns('NOPE')).toEqual([]);
   });
 });
@@ -104,7 +115,8 @@ describe('getSidebarModules', () => {
       'Asignación y seguimiento',
       'Reportes y notificaciones',
     ]);
-    expect(getSidebarModules(ROLES.COURIER)).toEqual([]);
+    expect(getSidebarModules(ROLES.COURIER).map((m) => [m.title, m.comingSoon])).toEqual([['Mis paquetes', true], ['Costos del viaje', true]]);
+    expect(getSidebarModules('NOPE')).toEqual([]);
   });
 
   it('shares one coming-soon notice', () => {

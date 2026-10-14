@@ -116,14 +116,15 @@ describe('getGroupRoles', () => {
     const byId = Object.fromEntries(NAVIGATION_GROUPS.map((group) => [group.id, getGroupRoles(group)]));
     expect(byId.users).toEqual([ROLES.SUPER_USER]);
     expect(byId.packages).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]);
-    expect(getGroupRoles(SETTINGS_MENU)).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]);
+    expect(getGroupRoles(SETTINGS_MENU)).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN, ROLES.COURIER]);
   });
 });
 
 describe('getSettingsForRole', () => {
-  it('is the settings menu for the roles of the main menu and null for the others', () => {
-    expect(getSettingsForRole(ROLES.SUPER_USER).items.map((i) => i.id)).toEqual(['password-reset']);
-    expect(getSettingsForRole(ROLES.COURIER)).toBeNull();
+  it('is the settings menu for the three roles and null for the others', () => {
+    [ROLES.SUPER_USER, ROLES.SALES_ADMIN, ROLES.COURIER].forEach((role) =>
+      expect(getSettingsForRole(role).items.map((i) => i.id)).toEqual(['password-reset'])
+    );
     expect(getSettingsForRole('NOPE')).toBeNull();
   });
 });

@@ -123,6 +123,22 @@ describe('MainMenuPage', () => {
     expect(summary.getByText('Disponible próximamente')).toBeInTheDocument();
   });
 
+  it('shows the courier their day: the banner, three counts without data and Mi jornada with two modules coming soon', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: { ...superUser, role: 'MENSAJERO' } });
+
+    expect(screen.getByText('Mensajero')).toBeInTheDocument();
+    const summary = within(screen.getByRole('region', { name: 'Resumen de hoy' }));
+    ['Por entregar', 'Entregados', 'No entregados'].forEach((label) => expect(summary.getByText(label)).toBeInTheDocument());
+    expect(summary.getAllByText('—')).toHaveLength(3);
+    // El rótulo del resumen existe para los lectores de pantalla, pero no se dibuja.
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['Resumen de hoy', 'Mi jornada']);
+    const day = within(screen.getByRole('region', { name: 'Mi jornada' }));
+    expect(day.getByRole('heading', { level: 3, name: 'Mis paquetes' })).toBeInTheDocument();
+    expect(day.getByRole('heading', { level: 3, name: 'Costos del viaje' })).toBeInTheDocument();
+    expect(day.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Gestión de usuarios' })).not.toBeInTheDocument();
+  });
+
   it('does not show the day summary to the super user', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 

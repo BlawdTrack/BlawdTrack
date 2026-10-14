@@ -1,12 +1,17 @@
+import { useContext } from 'react';
 import { Link as RouterLink, useInRouterContext, useLocation } from 'react-router-dom';
 import { Button } from '@mui/material';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { isModuleScreen } from '../config/navigation';
+import { AuthContext } from '../context/authContextInstance';
 import { ROUTES } from '../config/routes';
+import { getHomeRoute } from '../utils/roleRoutes';
 import { FONT, TOUCH_TARGET } from '../theme';
 
 function Link() {
   const { pathname } = useLocation();
+  // Sin sesión en el contexto (pantallas aisladas) se usa el menú principal; cada rol vuelve a su propio inicio.
+  const user = useContext(AuthContext)?.user;
 
   // Solo dentro de los módulos: el menú principal y las pantallas sueltas no tienen a dónde "volver".
   if (!isModuleScreen(pathname)) return null;
@@ -14,7 +19,7 @@ function Link() {
   return (
     <Button
       component={RouterLink}
-      to={ROUTES.MAIN_MENU}
+      to={(user && getHomeRoute(user.role)) || ROUTES.MAIN_MENU}
       startIcon={<HomeOutlinedIcon />}
       sx={{
         flex: '0 0 auto',

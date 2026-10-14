@@ -23,6 +23,4 @@ export const ROUTES = {
   ROLES_PERMISSIONS: '/gestion-roles',
   // Inicio del rol que no usa el menú principal (HU-001 T12). El Administrador de Ventas usa el menú principal.
   COURIER_HOME: '/mensajero',
-  // Restablecer la propia contraseña del Mensajero (los otros dos roles usan PASSWORD_RESET_OWN).
-  COURIER_PASSWORD_RESET: '/mensajero/restablecer-contrasena',
 };

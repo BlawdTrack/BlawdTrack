@@ -45,19 +45,16 @@ const SCREENS = {
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
   // Cada rol restablece su propia contraseña con la sesión iniciada.
   [ROUTES.PASSWORD_RESET_OWN]: 'Pantalla restablecer mi contraseña',
-  [ROUTES.COURIER_PASSWORD_RESET]: 'Pantalla restablecer mi contraseña',
   // Rutas de tu feature agregadas al formato de develop
   '/editar-mensajero': 'Pantalla edición de mensajero',
 };
 
 // Rutas que comparten el Súper Usuario y el Administrador de Ventas (ambos usan el menú lateral); el resto
 // de las rutas protegidas es de un solo rol.
-const SHARED_ROUTES = [
-  ROUTES.MAIN_MENU,
-  ROUTES.MODULE_SETTINGS,
-  ROUTES.PASSWORD_RESET_OWN,
-  ROUTES.PACKAGE_IMPORT,
-];
+const SHARED_ROUTES = [ROUTES.MAIN_MENU, ROUTES.PACKAGE_IMPORT];
+
+// Ajustes y restablecer la propia contraseña los usan los tres roles (el mensajero también tiene el menú lateral).
+const ALL_ROLES_ROUTES = [ROUTES.MODULE_SETTINGS, ROUTES.PASSWORD_RESET_OWN];
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
 const ALLOWED_ROUTES = {
@@ -83,7 +80,8 @@ const ALLOWED_ROUTES = {
     ROUTES.PACKAGE_IMPORT,
     ROUTES.PASSWORD_RESET_OWN,
   ],
-  [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],
+  // El mensajero usa el mismo menú lateral: su inicio, los ajustes y el restablecimiento de su contraseña.
+  [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.MODULE_SETTINGS, ROUTES.PASSWORD_RESET_OWN],
 };
 
 function loginAs(role) {
@@ -117,12 +115,14 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     expect(Object.keys(ALLOWED_ROUTES).sort()).toEqual(Object.keys(ROLE_HOME_ROUTES).sort());
   });
 
-  it('cada ruta protegida pertenece a un solo rol, salvo las compartidas por el Súper Usuario y el Administrador de Ventas', () => {
+  it('cada ruta protegida pertenece a un solo rol, salvo las compartidas por el Súper Usuario y el Administrador de Ventas, y las de ajustes, que son de los tres', () => {
     for (const route of Object.keys(SCREENS)) {
       const roles = Object.entries(ALLOWED_ROUTES)
         .filter(([, routes]) => routes.includes(route))
         .map(([role]) => role);
-      if (SHARED_ROUTES.includes(route)) {
+      if (ALL_ROLES_ROUTES.includes(route)) {
+        expect(roles.sort()).toEqual(Object.values(ROLES).sort());
+      } else if (SHARED_ROUTES.includes(route)) {
         expect(roles.sort()).toEqual([ROLES.SALES_ADMIN, ROLES.SUPER_USER].sort());
       } else {
         expect(roles).toHaveLength(1);

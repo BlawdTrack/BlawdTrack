@@ -25,6 +25,16 @@ const MODULES = {
     description: 'Cambios en usuarios e historial de notificaciones. Imprime desde cada reporte.',
     roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
   },
+  'my-packages': {
+    title: 'Mis paquetes',
+    description: 'Revisa tus paquetes asignados y actualiza su estado al entregar.',
+    roles: [ROLES.COURIER],
+  },
+  'trip-costs': {
+    title: 'Costos del viaje',
+    description: 'Registra gasolina, peajes u otros gastos de tus entregas.',
+    roles: [ROLES.COURIER],
+  },
   'courier-operation': {
     title: 'Operación de mensajero',
     description: 'Ver paquetes asignados, actualizar estado y registrar costos.',
@@ -65,7 +75,26 @@ const SALES_ADMIN_COLUMNS = [
   ],
 ];
 
-const LAYOUTS = { [ROLES.SALES_ADMIN]: SALES_ADMIN_COLUMNS };
+// El mensajero ve su propia jornada: las tres cifras de sus entregas (el título de la sección no se dibuja) y sus dos
+// módulos, que aún no existen.
+const COURIER_COLUMNS = [
+  [
+    {
+      id: 'courier-summary',
+      title: 'Resumen de hoy',
+      hideTitle: true,
+      modules: [],
+      stats: [
+        { id: 'to-deliver', label: 'Por entregar', tone: 'warning' },
+        { id: 'delivered', label: 'Entregados', tone: 'success' },
+        { id: 'not-delivered', label: 'No entregados', tone: 'error' },
+      ],
+    },
+    { id: 'my-day', title: 'Mi jornada', modules: ['my-packages', 'trip-costs'] },
+  ],
+];
+
+const LAYOUTS = { [ROLES.SALES_ADMIN]: SALES_ADMIN_COLUMNS, [ROLES.COURIER]: COURIER_COLUMNS };
 
 /**
  * Columnas del menú principal para un rol: cada sección con los módulos que el rol puede ver (y, si es el resumen del
@@ -78,8 +107,6 @@ const LAYOUTS = { [ROLES.SALES_ADMIN]: SALES_ADMIN_COLUMNS };
  */
 export function getMainMenuColumns(role) {
   const groups = getNavigationForRole(role);
-  // Un rol sin acceso al menú (el mensajero) no ve ni las cifras.
-  const hasAccess = groups.length > 0;
 
   const resolve = (entry) => {
     const { id, description: override } = typeof entry === 'string' ? { id: entry } : entry;
@@ -95,8 +122,8 @@ export function getMainMenuColumns(role) {
   return (LAYOUTS[role] ?? SUPER_USER_COLUMNS)
     .map((sections) =>
       sections
-        .map((section) => ({ id: section.id, title: section.title, modules: section.modules.map(resolve).filter(Boolean), stats: section.stats }))
-        .filter((section) => section.modules.length > 0 || (hasAccess && section.stats))
+        .map((section) => ({ id: section.id, title: section.title, modules: section.modules.map(resolve).filter(Boolean), hideTitle: section.hideTitle, stats: section.stats }))
+        .filter((section) => section.modules.length > 0 || section.stats)
     )
     .filter((sections) => sections.length > 0);
 }

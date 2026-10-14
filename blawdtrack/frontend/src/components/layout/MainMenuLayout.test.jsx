@@ -185,6 +185,25 @@ describe('MainMenuLayout sidebar', () => {
     expect(bar.queryByRole('link', { name: /Roles y permisos/ })).not.toBeInTheDocument();
   });
 
+  it('gives the courier the same sidebar with only their own modules, coming soon, and the settings gear', async () => {
+    const user = userEvent.setup();
+    const courier = { ...superUser, id: 3, fullName: 'Manuel Mensajero', role: 'MENSAJERO' };
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: courier });
+    const bar = within(sidebar());
+
+    ['Mis paquetes', 'Costos del viaje'].forEach((name) =>
+      expect(bar.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true')
+    );
+    expect(bar.queryByRole('button', { name: 'Gestión de usuarios' })).not.toBeInTheDocument();
+    expect(bar.queryByRole('link', { name: 'Importación de paquetes' })).not.toBeInTheDocument();
+    expect(bar.getByText('Mensajero')).toBeInTheDocument();
+
+    await user.hover(bar.getByRole('button', { name: 'Mis paquetes' }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Disponible próximamente');
+    await user.click(bar.getByRole('link', { name: 'Ajustes' }));
+    expect(screen.getByText('settings content')).toBeInTheDocument();
+  });
+
   it('has a settings gear at the bottom of the sidebar, above the user, that goes to the settings menu', async () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });

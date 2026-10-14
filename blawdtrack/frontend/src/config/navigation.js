@@ -125,7 +125,7 @@ export const SETTINGS_MENU = {
       description: 'Recibe en tu correo un enlace para elegir una contraseña nueva.',
       actionLabel: 'Recibir enlace',
       path: ROUTES.PASSWORD_RESET_OWN,
-      roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
+      roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN, ROLES.COURIER],
     },
   ],
 };

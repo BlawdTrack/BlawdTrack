@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { getMenuForRole } from '../config/navigation';
 import { ROUTES } from '../config/routes';
+import { getHomeRoute } from '../utils/roleRoutes';
 import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from '../components/layout/navIcons';
 import ActionCard from '../components/ActionCard';
 import PageHeaderBar from '../components/PageHeaderBar';
@@ -22,7 +23,7 @@ export default function ModuleMenuPage({ groupId }) {
   const { notice, open: noticeOpen, close: closeNotice } = useRouteNotice();
   const menu = getMenuForRole(user.role, groupId);
 
-  if (!menu) return <Navigate to={ROUTES.MAIN_MENU} replace />;
+  if (!menu) return <Navigate to={getHomeRoute(user.role) ?? ROUTES.MAIN_MENU} replace />;
 
   const itemCard = (item) => ({
     id: item.id,

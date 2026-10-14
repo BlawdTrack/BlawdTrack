@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import { evaluatePasswordRules } from '../utils/passwordRules';
 import { REDUCED_MOTION_SX } from './authStyles';
+import { VISUALLY_HIDDEN_SX } from './a11yStyles';
 import { FONT, rem } from '../theme';
 
 // Requisitos de la nueva contraseña. Las reglas de largo, letra y número se evalúan en vivo con lo que el usuario
@@ -10,15 +11,6 @@ import { FONT, rem } from '../theme';
 // rojo cuando el propio backend la rechazó (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
 const OK_COLOR = 'success.main';
 const NEUTRAL_RING = 'neutral.borderStrong';
-
-const VISUALLY_HIDDEN = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  overflow: 'hidden',
-  clip: 'rect(0 0 0 0)',
-  whiteSpace: 'nowrap',
-};
 
 function Rule({ label, met }) {
   return (
@@ -49,7 +41,7 @@ function Rule({ label, met }) {
       </Box>
       <span>
         {label}
-        <Box component="span" sx={VISUALLY_HIDDEN}>
+        <Box component="span" sx={VISUALLY_HIDDEN_SX}>
           : {met ? 'Cumplido' : 'Pendiente'}
         </Box>
       </span>
@@ -67,7 +59,7 @@ export function PasswordRequirements({ password, historyRejected = false }) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-      <Typography id="password-requirements-title" sx={VISUALLY_HIDDEN}>
+      <Typography id="password-requirements-title" sx={VISUALLY_HIDDEN_SX}>
         Requisitos de la contraseña
       </Typography>
       <Box

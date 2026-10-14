@@ -12,6 +12,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 
 // Icono por item de navegación (sidebar de escritorio).
 export const NAV_ITEM_ICONS = {
@@ -37,4 +38,6 @@ export const NAV_GROUP_ICONS = {
   'assignment-tracking': PlaceOutlinedIcon,
   reports: BarChartOutlinedIcon,
   'courier-operation': LocalShippingOutlinedIcon,
+  'my-packages': LocalShippingOutlinedIcon,
+  'trip-costs': PaidOutlinedIcon,
 };

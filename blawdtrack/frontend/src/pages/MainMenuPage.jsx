@@ -11,7 +11,7 @@ import { getGreeting } from '../utils/greeting';
 import { rem, TOUCH_TARGET } from '../theme';
 
 /**
- * Inicio del Super Usuario y del Administrador de Ventas dentro del menú principal: banner de bienvenida con su
+ * Inicio de los tres roles (Súper Usuario, Administrador de Ventas y Mensajero) dentro del menú principal: banner de bienvenida con su
  * rol, el saludo según la hora y la pregunta de qué desea hacer, y debajo los módulos del rol repartidos en
  * secciones y dos columnas (los que aún no existen salen como "Próximamente"). Todo va centrado y repartido en la
  * altura de la pantalla; en móvil se agrega el botón de cerrar sesión.
@@ -30,7 +30,8 @@ export default function MainMenuPage() {
     <PageContainer
       sx={{
         // Banner y módulos ocupan casi todo el ancho disponible para no dejar espacio muerto a los lados.
-        maxWidth: rem(1500),
+        // Una sola columna (la jornada del mensajero) va angosta, como una lista.
+        maxWidth: columns.length === 1 ? rem(720) : rem(1500),
         minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },
         justifyContent: 'center',
         gap: { xs: 4, md: 6 },

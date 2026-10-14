@@ -92,18 +92,25 @@ function App() {
           El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
           rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
       
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
-        {/* Súper Usuario y Administrador de Ventas comparten el menú lateral; cada uno ve solo sus grupos
-            (getNavigationForRole) y el menú de cada módulo se protege con los roles de sus pantallas. */}
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN, ROLES.COURIER]} />}>
+        {/* Los tres roles comparten el menú lateral; cada uno ve solo sus módulos (getSidebarModules), y cada
+            pantalla se protege con los roles que la usan. */}
         <Route element={<MainMenuLayout />}>
-          <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
+          <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
           {NAVIGATION_MENUS.map((menu) => (
             <Route key={menu.id} element={<ProtectedRoute allowedRoles={getGroupRoles(menu)} />}>
               <Route path={menu.path} element={<ModuleMenuPage groupId={menu.id} />} />
             </Route>
           ))}
-          <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
-          <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
+
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
+            <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
+            <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
+            <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
+          </Route>
 
           <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
             <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
@@ -115,11 +122,6 @@ function App() {
             <Route path={`${ROUTES.COURIER_UPDATE}/:documentNumber`} element={<EditMessenger />} />
           </Route>
         </Route>
-      </Route>
-
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
-        <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
-        <Route path={ROUTES.COURIER_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
       </Route>
     </Routes>
   );
