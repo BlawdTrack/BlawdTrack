@@ -43,7 +43,7 @@ import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 /**
  * Tests de autorización y respuesta para las consultas de paquetes/envíos
  * (Task 124: detalle y Task 125: historial).
- * El endpoint es accesible solo para ADMIN_VENTAS.
+ * El endpoint es accesible para ADMIN_VENTAS y SUPER_USUARIO.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,6 +60,7 @@ class PackageControllerTest {
     @Autowired private JwtService jwt;
 
     private User adminVentas;
+    private User superUser;
     private User courierUser;
     private Courier courier;
     private DeliveryPackage pkg;
@@ -77,6 +78,18 @@ class PackageControllerTest {
                 .passwordHash("unused")
                 .status(UserStatus.ACTIVE)
                 .role(roles.findByName("ADMIN_VENTAS").orElseThrow())
+                .build());
+
+        // Súper usuario: también puede consultar paquetes (supervisa todas las pantallas).
+        superUser = users.saveAndFlush(User.builder()
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("300000003")
+                .documentId("300000003")
+                .fullName("Super Usuario Test")
+                .email("superusuario-test@example.com")
+                .passwordHash("unused")
+                .status(UserStatus.ACTIVE)
+                .role(roles.findByName("SUPER_USUARIO").orElseThrow())
                 .build());
 
         // Mensajero asignado al paquete
@@ -278,7 +291,7 @@ class PackageControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"SUPER_USUARIO", "MENSAJERO"})
+    @ValueSource(strings = {"MENSAJERO"})
     void otrosRolesReciben403(String role) throws Exception {
         var otroUsuario = users.saveAndFlush(User.builder()
                 .documentType(DocumentType.CEDULA)
@@ -293,6 +306,15 @@ class PackageControllerTest {
 
         getPackage(token(otroUsuario), "ENV-2024-0001")
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void superUsuarioConsultaPaqueteExistenteRetornaDetalleCompleto() throws Exception {
+        getPackage(token(superUser), "ENV-2024-0001")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.shipmentNumber").value("ENV-2024-0001"))
+                .andExpect(jsonPath("$.status").value("ASSIGNED"))
+                .andExpect(jsonPath("$.customerName").value("Cliente Prueba"));
     }
 
     @Test

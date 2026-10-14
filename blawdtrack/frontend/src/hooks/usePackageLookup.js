@@ -37,6 +37,9 @@ export function usePackageLookup() {
   const [pkg, setPkg] = useState(null);
   const [message, setMessage] = useState(null);
   const [fieldError, setFieldError] = useState(null);
+  // Si el problema puede resolverse reintentando la misma consulta (red, 5xx),
+  // la pantalla ofrece un botón "Reintentar"; un 403 o un "no encontrado" no.
+  const [retryable, setRetryable] = useState(false);
   // Ref, no estado: se consulta de forma síncrona para bloquear el doble envío
   // (doble clic o Enter repetido) antes de que React vuelva a renderizar.
   const inFlight = useRef(false);
@@ -46,6 +49,7 @@ export function usePackageLookup() {
     setPkg(null);
     setMessage(null);
     setFieldError(null);
+    setRetryable(false);
   }, []);
 
   const lookup = useCallback(async (rawShipmentNumber) => {
@@ -57,6 +61,7 @@ export function usePackageLookup() {
       setState(PACKAGE_LOOKUP_STATE.IDLE);
       setPkg(null);
       setMessage(null);
+      setRetryable(false);
       return;
     }
 
@@ -64,6 +69,7 @@ export function usePackageLookup() {
     setFieldError(null);
     setPkg(null);
     setMessage(null);
+    setRetryable(false);
     setState(PACKAGE_LOOKUP_STATE.LOADING);
 
     try {
