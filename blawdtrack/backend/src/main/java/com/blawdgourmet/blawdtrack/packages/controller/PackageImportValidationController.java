@@ -8,6 +8,7 @@ import com.blawdgourmet.blawdtrack.packages.exception.InvalidPackageUploadExcept
 import com.blawdgourmet.blawdtrack.packages.service.PackageImportPreviewService;
 import com.blawdgourmet.blawdtrack.packages.service.PackageImportExecutionUseCase;
 import com.blawdgourmet.blawdtrack.packages.service.ShipmentNumberComparisonService;
+import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class PackageImportValidationController {
     @PostMapping(
             value = "/import/preview",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAuthority('" + PermissionCode.PACKAGE_IMPORT + "')")
     public PackageImportPreviewResponse previewImport(
             @RequestPart("file") MultipartFile file) {
         requireFile(file);
@@ -57,7 +58,7 @@ public class PackageImportValidationController {
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAuthority('" + PermissionCode.PACKAGE_IMPORT + "')")
     public PackageImportExecutionResponse importPackages(
             @RequestPart("file") MultipartFile file) {
         requireFile(file);

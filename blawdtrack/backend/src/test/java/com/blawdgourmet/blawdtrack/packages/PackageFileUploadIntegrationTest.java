@@ -84,11 +84,13 @@ class PackageFileUploadIntegrationTest {
     }
 
     @Test
-    void superUsuarioNoPuedePrevisualizarImportaciones() throws Exception {
+    void superUsuarioPuedePrevisualizarPorSuPermisoDeImportacion() throws Exception {
         mvc.perform(multipart(ENDPOINT)
                         .file(file("paquetes.csv", "text/csv", VALID_CSV))
                         .header("Authorization", bearer(RoleName.SUPER_USER)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalRecords").value(1))
+                .andExpect(jsonPath("$.validRecordsCount").value(1));
     }
 
     @Test

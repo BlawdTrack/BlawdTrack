@@ -81,13 +81,17 @@ class PackageBulkRegistrationIntegrationTest {
     }
 
     @Test
-    void superUsuarioNoPuedeEjecutarRegistroMasivo() throws Exception {
+    void superUsuarioPuedeEjecutarRegistroMasivoPorSuPermisoDeImportacion() throws Exception {
         mvc.perform(multipart(ENDPOINT)
                         .file(file(CSV))
                         .header("Authorization", bearer(RoleName.SUPER_USER)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalRecords").value(4))
+                .andExpect(jsonPath("$.registeredRecordsCount").value(3))
+                .andExpect(jsonPath("$.invalidRecordsCount").value(1))
+                .andExpect(jsonPath("$.duplicateRecordsCount").value(0));
 
-        assertThat(packageRepository.count()).isZero();
+        assertThat(packageRepository.count()).isEqualTo(3);
     }
 
     @Test

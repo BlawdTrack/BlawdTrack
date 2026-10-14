@@ -4,6 +4,7 @@ import com.blawdgourmet.blawdtrack.auth.security.HttpsEnforcementFilter;
 import com.blawdgourmet.blawdtrack.auth.security.JwtAuthenticationFilter;
 import com.blawdgourmet.blawdtrack.auth.security.RestAccessDeniedHandler;
 import com.blawdgourmet.blawdtrack.auth.security.RestAuthenticationEntryPoint;
+import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import jakarta.servlet.DispatcherType;
 import java.util.List;
@@ -87,12 +88,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         // Permisos individuales de usuarios (HU-009): exclusivos del Super Usuario.
                         .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
-                        // HU-010: la importacion y todos los endpoints de paquetes son exclusivos
-                        // del Administrador de Ventas.
+                        // HU-010: la importacion se autoriza mediante su permiso funcional para
+                        // permitir tanto al Super Usuario como al Administrador de Ventas autorizado.
                         .requestMatchers(HttpMethod.POST, "/api/v1/packages/import")
-                        .hasRole(RoleName.SALES_ADMIN)
+                        .hasAuthority(PermissionCode.PACKAGE_IMPORT)
                         .requestMatchers("/api/v1/packages/import/**")
-                        .hasRole(RoleName.SALES_ADMIN)
+                        .hasAuthority(PermissionCode.PACKAGE_IMPORT)
                         .requestMatchers("/api/v1/packages/**").hasRole(RoleName.SALES_ADMIN)
                         .anyRequest().authenticated()
                 )
