@@ -25,7 +25,6 @@ export default function PackageImportPreviewPage() {
     <>
       <PageHeaderBar
         title="Previsualización de la importación"
-        description="Revisa los registros del archivo antes de importarlos: cuáles son válidos, cuáles tienen errores y cuáles están duplicados."
       />
 
       <PageContainer>

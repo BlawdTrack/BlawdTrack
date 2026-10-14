@@ -43,7 +43,6 @@ const AdminManagement = () => {
     <>
       <SplitScreen
         title="Eliminar administrador"
-        description="Busca al administrador por su documento y confírmalo antes de eliminarlo. Esta acción no se puede deshacer."
         columns="minmax(0, 1fr)"
       >
         {showAudit ? (

@@ -45,7 +45,6 @@ export default function PackageImportPage() {
     <>
       <PageHeaderBar
         title="Importar paquetes"
-        description="Carga el archivo de Zoho Inventory para validarlo antes de registrar los paquetes."
       />
 
       <PageContainer>

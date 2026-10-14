@@ -59,7 +59,7 @@ export function AdminRegistrationPage() {
   return (
     <RegistrationFormPage
       title="Crear administrador"
-      description="Registra a un nuevo administrador de ventas. Recibirá por correo una contraseña temporal para ingresar."
+      note="El nuevo administrador recibirá por correo una contraseña temporal para ingresar."
       onSubmit={handleSubmit}
       form={form}
       isSubmitting={registration.isSubmitting}

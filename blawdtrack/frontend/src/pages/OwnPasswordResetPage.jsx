@@ -56,7 +56,6 @@ export function OwnPasswordResetPage() {
     <>
       <PageHeaderBar
         title="Restablecer contraseña"
-        description="Te enviaremos un enlace al correo de tu cuenta para elegir una contraseña nueva."
       />
 
       <PageContainer component="main" sx={{ alignItems: 'center', pt: { md: 6 } }}>
