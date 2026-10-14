@@ -22,8 +22,7 @@ Un documento por historia. Todos siguen la misma estructura:
 | [HU009](HU009-roles-y-permisos.md) | Roles y permisos | ⚠️ Solo por rol; la pantalla no guarda | `fix/hu009/criterios-aceptacion/silesky` (#13) |
 | [HU011](HU011-deteccion-de-paquetes-duplicados.md) | Detección de paquetes duplicados | ✅ Backend (Tasks 113 y 114) y duplicados resaltados en la previsualización de la importación (Tasks 115 y 116) | `feature/hu011/T01/113/silesky`, `feature/hu011/T02/114/silesky`, `feature/hu011/T03/115/silesky`, `feature/hu011/T04/116/silesky` |
 
-Otros documentos de apoyo en [`docs/`](..): [arquitectura](../arquitectura.md), guías de pruebas manuales
-(`HU003-Task69-pruebas.md`, `HU006-Task85-pruebas.md`) y colecciones de Postman.
+Otros documentos de apoyo en [`docs/`](..): [arquitectura](../arquitectura.md) y colecciones de Postman.
 
 > El estado de la tabla describe `develop` al momento de escribir. Cuando se fusione cada PR de
 > correcciones, actualiza el documento de su historia.
