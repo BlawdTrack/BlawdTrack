@@ -22,10 +22,16 @@ async function pickTime(user, label, hour, period) {
   await user.click(screen.getByRole('button', { name: 'Listo' }));
 }
 
+// Se pega en vez de teclear: escribir ~60 teclas con userEvent re-renderiza el formulario en cada una (~6 s).
+async function pasteInto(user, label, text) {
+  await user.click(screen.getByLabelText(label));
+  await user.paste(text);
+}
+
 async function fillForm(user) {
-  await user.type(screen.getByLabelText(/nombre completo/i), 'Ana Lucía Bermúdez');
-  await user.type(screen.getByLabelText(/correo electrónico/i), 'ana@blawdgourmet.com');
-  await user.type(screen.getByLabelText(/número de documento/i), '1-1204-0388');
+  await pasteInto(user, /nombre completo/i, 'Ana Lucía Bermúdez');
+  await pasteInto(user, /correo electrónico/i, 'ana@blawdgourmet.com');
+  await pasteInto(user, /número de documento/i, '1-1204-0388');
   await pickTime(user, /hora de entrada/i, '08', 'am');
   await pickTime(user, /hora de salida/i, '04', 'pm');
   await user.click(screen.getByRole('textbox', { name: /capacidad máxima/i }));
