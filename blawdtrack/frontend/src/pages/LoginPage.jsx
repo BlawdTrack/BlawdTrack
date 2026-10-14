@@ -13,16 +13,13 @@ import PasswordField from '../components/PasswordField';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { LINK_BUTTON_SX } from '../components/formStyles';
+import { FIELD_LABEL_SX, FIELD_SX, AUTH_BUTTON_SX } from '../components/authStyles';
 import { CARD_PATTERN_SX, RADIUS, FONT, rem, fontPx } from '../theme';
 import BrandLogo from '../components/BrandLogo';
-import loginPanel from '../assets/login-panel.svg';
+import AuthBrandPanel from '../components/AuthBrandPanel';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Etiqueta de los campos: en minúsculas, en negrita y en verde oscuro, como en el diseño.
-const FIELD_LABEL_SX = { fontSize: FONT.md, fontWeight: 700, color: 'primary.main' };
-// Campos altos (56 px) y de esquinas redondeadas, más cómodos de leer y de tocar.
-const FIELD_SX = { '& .MuiOutlinedInput-root': { minHeight: 56, borderRadius: rem(14), fontSize: FONT.lg } };
 
 function validateForm(data) {
   const errors = { email: '', password: '' };
@@ -83,45 +80,17 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex' }}>
-      {/* Panel de marca: solo en escritorio, para no quitarle espacio al formulario en móvil. El arte (anillos, ruta,
-          cajas y pin) es la imagen de fondo; encima van el logo y el mensaje. */}
-      <Box
-        sx={{
-          display: { xs: 'none', md: 'flex' },
-          flex: '0 0 42%',
-          flexDirection: 'column',
-          bgcolor: 'primary.main',
-          // Entre comillas: Vite incrusta el SVG (pesa poco) como data URI, que trae paréntesis y rompería la regla.
-          backgroundImage: `url("${loginPanel}")`,
-          // El arte ocupa siempre todo el alto (con `cover` se recortaba arriba y abajo en ventanas más anchas y se
-          // perdía la punta del pin y las cajas) y se ancla a la derecha; lo que sobra a la izquierda es el mismo verde.
-          backgroundSize: 'auto 100%',
-          backgroundPosition: 'right center',
-          backgroundRepeat: 'no-repeat',
-          color: 'primary.contrastText',
-          p: 6,
-          borderRight: '4px solid',
-          borderColor: 'secondary.main',
-        }}
-      >
-        <BrandLogo variant="horizontalShort" onDark width={170} />
-
-        {/* El mensaje ocupa el espacio bajo el logo y queda centrado en él. */}
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <Typography
-            component="p"
-            sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: fontPx(48), lineHeight: 1.1, letterSpacing: '-0.5px', mb: 2.5, color: 'common.white' }}
-          >
+      <AuthBrandPanel
+        sx={{ flex: '0 0 42%' }}
+        title={
+          <>
             Cada entrega,
             <br />
             siempre <Box component="span" sx={{ color: 'secondary.main' }}>a la vista.</Box>
-          </Typography>
-          <Typography sx={{ fontSize: FONT.xl, color: 'rgba(255,255,255,0.75)', maxWidth: rem(360), lineHeight: 1.5 }}>
-            Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar.
-          </Typography>
-        </Box>
-
-      </Box>
+          </>
+        }
+        subtitle="Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar."
+      />
 
       <Box
         sx={{
@@ -226,7 +195,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             size="large"
             disabled={loading}
             endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
-            sx={{ fontWeight: 700, fontSize: FONT.lg, minHeight: 56, borderRadius: rem(16) }}
+            sx={AUTH_BUTTON_SX}
           >
             {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Iniciar sesión'}
           </Button>

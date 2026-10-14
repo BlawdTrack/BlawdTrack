@@ -1,15 +1,14 @@
 import { Box, Typography } from '@mui/material';
+import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import { evaluatePasswordRules } from '../utils/passwordRules';
-import { RADIUS, FONT, rem } from '../theme';
+import { REDUCED_MOTION_SX } from './authStyles';
+import { FONT, rem } from '../theme';
 
-// Checklist "Requisitos" (bloque r3 del mockup). Las reglas 1-3 se evalúan en
-// vivo con lo que el usuario escribe. La regla 4 (distinta de las últimas 3
-// contraseñas) se queda SIEMPRE en estado neutro: el cliente no puede saberlo.
-// Solo pasa a "no cumplida" cuando el propio backend la rechazó
-// (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
+// Requisitos de la nueva contraseña. Las reglas de largo, letra y número se evalúan en vivo con lo que el usuario
+// escribe: cada una es un círculo vacío que pasa a un check verde al cumplirse. La de "distinta de las últimas 3
+// contraseñas" no se puede validar en el cliente (no tiene el historial), así que va como una nota que solo se pone en
+// rojo cuando el propio backend la rechazó (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
 const OK_COLOR = 'success.main';
-const ERROR_COLOR = 'error.main';
-const NEUTRAL_TEXT = 'text.secondary';
 const NEUTRAL_RING = 'neutral.borderStrong';
 
 const VISUALLY_HIDDEN = {
@@ -21,38 +20,37 @@ const VISUALLY_HIDDEN = {
   whiteSpace: 'nowrap',
 };
 
-function Rule({ label, state, note }) {
-  const color = state === 'ok' ? OK_COLOR : state === 'failed' ? ERROR_COLOR : NEUTRAL_TEXT;
-  const statusText =
-    state === 'ok' ? 'Cumplido' : state === 'failed' ? 'No cumplido' : 'Pendiente';
-
+function Rule({ label, met }) {
   return (
     <Box
       component="li"
-      sx={{ display: 'flex', alignItems: 'center', gap: '0.5385rem', fontSize: FONT.xs, lineHeight: 1.35, color }}
+      sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 1.25, fontSize: FONT.lg, lineHeight: 1.35, color: met ? 'text.primary' : 'text.secondary' }}
     >
       <Box
         component="span"
         aria-hidden
         sx={{
-          width: rem(15),
-          height: rem(15),
-          flex: `0 0 ${rem(15)}`,
+          width: rem(18),
+          height: rem(18),
+          flex: `0 0 ${rem(18)}`,
           borderRadius: '50%',
-          bgcolor: state === 'ok' ? OK_COLOR : 'transparent',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: met ? OK_COLOR : 'transparent',
+          color: 'common.white',
           border: '1.5px solid',
-          borderColor: state === 'ok' ? OK_COLOR : state === 'failed' ? ERROR_COLOR : NEUTRAL_RING,
+          borderColor: met ? OK_COLOR : NEUTRAL_RING,
+          transition: 'background-color .15s ease, border-color .15s ease',
+          ...REDUCED_MOTION_SX,
         }}
-      />
+      >
+        {met && <CheckOutlinedIcon sx={{ fontSize: rem(13) }} />}
+      </Box>
       <span>
         {label}
-        {note && (
-          <Box component="span" sx={{ ml: 0.75, fontSize: FONT.xs, color: NEUTRAL_TEXT }}>
-            ({note})
-          </Box>
-        )}
         <Box component="span" sx={VISUALLY_HIDDEN}>
-          : {statusText}
+          : {met ? 'Cumplido' : 'Pendiente'}
         </Box>
       </span>
     </Box>
@@ -60,43 +58,30 @@ function Rule({ label, state, note }) {
 }
 
 /**
- * @param {{ password: string, historyRejected?: boolean }} props `historyRejected` marca la regla de
- *   "distinta de las últimas 3 contraseñas" como no cumplida cuando el backend la rechazó.
+ * Requisitos de la nueva contraseña, en vivo bajo el campo, y la nota de las últimas 3 contraseñas.
+ * @param {{ password: string, historyRejected?: boolean }} props `historyRejected` pone en rojo la nota de "distinta
+ *   de las últimas 3 contraseñas" cuando el backend la rechazó.
  */
 export function PasswordRequirements({ password, historyRejected = false }) {
   const results = evaluatePasswordRules(password);
 
   return (
-    <Box
-      sx={{
-        bgcolor: 'neutral.surface',
-        borderRadius: RADIUS.sm,
-        p: '0.9231rem 1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5385rem',
-      }}
-    >
-      <Typography
-        id="password-requirements-title"
-        sx={{ fontSize: FONT.xs, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: 'text.secondary' }}
-      >
-        Requisitos
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+      <Typography id="password-requirements-title" sx={VISUALLY_HIDDEN}>
+        Requisitos de la contraseña
       </Typography>
       <Box
         component="ul"
         aria-labelledby="password-requirements-title"
-        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '0.5385rem' }}
+        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: 1 }}
       >
-        <Rule label="Mínimo 8 caracteres" state={results.length ? 'ok' : 'pending'} />
-        <Rule label="Al menos una letra" state={results.letter ? 'ok' : 'pending'} />
-        <Rule label="Al menos un número" state={results.number ? 'ok' : 'pending'} />
-        <Rule
-          label="Distinta de las últimas 3 contraseñas"
-          state={historyRejected ? 'failed' : 'pending'}
-          note={historyRejected ? undefined : 'se verifica al guardar'}
-        />
+        <Rule label="Mínimo 8 caracteres" met={results.length} />
+        <Rule label="Al menos una letra" met={results.letter} />
+        <Rule label="Al menos un número" met={results.number} />
       </Box>
+      <Typography sx={{ fontSize: FONT.md, lineHeight: 1.45, color: historyRejected ? 'error.main' : 'text.secondary' }}>
+        También debe ser distinta de tus últimas 3 contraseñas (se verifica al guardar).
+      </Typography>
     </Box>
   );
 }
