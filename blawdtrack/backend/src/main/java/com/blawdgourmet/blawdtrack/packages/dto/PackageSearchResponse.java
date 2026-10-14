@@ -7,5 +7,6 @@ public record PackageSearchResponse(
         String customerName,
         String address,
         String phone,
-        String schedule) {
+        String schedule,
+        String status) {
 }

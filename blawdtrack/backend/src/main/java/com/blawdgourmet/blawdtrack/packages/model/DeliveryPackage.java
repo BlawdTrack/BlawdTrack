@@ -1,5 +1,7 @@
 package com.blawdgourmet.blawdtrack.packages.model;
 
+import java.util.Locale;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,7 +11,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.util.Locale;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,6 +48,10 @@ public class DeliveryPackage {
 
     @Column(name = "horario_preferencia", length = 255)
     private String schedule;
+
+    @Builder.Default
+    @Column(name = "estado", nullable = false, length = 30)
+    private String status = "PENDIENTE";
 
     @PrePersist
     @PreUpdate
