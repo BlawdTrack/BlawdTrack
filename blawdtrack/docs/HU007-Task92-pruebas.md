@@ -41,6 +41,15 @@ como una frase que dice quién hizo qué y a quién, por ejemplo: *"El Super Usu
 correo) del Administrador de Ventas 'Ana' (CEDULA 2-0345-0987)."* Las de estado y contraseña agregan "Su sesión activa se
 cerró de inmediato." (ajuste hecho junto con la pantalla de las Tasks 93 a 95).
 
+## Historial por administrador
+
+`GET /api/v1/admins/{documentType}/{documentNumber}/history` (solo Súper Usuario) devuelve los registros de **ese**
+administrador (alta, modificaciones, activaciones, desactivaciones y cambios de contraseña), del más reciente al más
+antiguo, con la misma forma que `GET /api/v1/admins/audit-log`. Un administrador inexistente da `404`. Su eliminación no
+aparece aquí (ya no hay administrador a quien preguntar): está en el historial general. La usa la pestaña *Historial*
+de la pantalla [Actualizar administrador](HU007-Task93-95-pruebas.md). Lo prueban dos casos nuevos de
+`AdminUpdateIntegrationTest` (ahora 12 pruebas).
+
 ## Cómo está hecho
 
 - `AdminController.actualizar` — nuevo `PATCH`, con `@PreAuthorize` del Súper Usuario.

@@ -13,10 +13,11 @@ y el formulario del elegido a la derecha. Se apoya en el backend de las [Task 91
 
 ## Qué hace la pantalla
 
-- **Lista y búsqueda (T03):** los administradores de ventas con su correo, documento y estado (Activo / Inactivo), y la
-  búsqueda por **tipo y número de documento** ("Buscar" / "Limpiar"). Si el documento no coincide con nadie dice
-  "Administrador no encontrado".
-- **Formulario prellenado (T03):** al pulsar **Editar**, la pantalla consulta el perfil actual al backend
+- **Lista y búsqueda (T03):** igual que la flota de mensajeros: una tabla "Administradores de ventas" con el nombre, el
+  documento y el correo de cada uno y su **estado (Activo / Inactivo)**, el contador ("2 administradores") y la búsqueda
+  por **tipo y número de documento** ("Buscar" / "Limpiar"). Si el documento no coincide con nadie dice "Administrador no
+  encontrado". Se puede ocultar la lista para darle todo el ancho al formulario.
+- **Formulario prellenado (T03):** al pulsar la fila del administrador, la pantalla consulta el perfil actual al backend
   (`GET /api/v1/admins/{tipo}/{número}`, que además confirma que existe) y muestra nombre completo, correo, nueva
   contraseña (opcional, vacía) y el interruptor de **Estado de acceso**. El documento se ve pero no se edita.
 - **Guardado (T04):** una sola llamada `PATCH /api/v1/admins/{tipo}/{número}` con **solo los campos que cambiaron**. El
@@ -26,6 +27,17 @@ y el formulario del elegido a la derecha. Se apoya en el backend de las [Task 91
 - **Validación en el navegador:** nombre requerido (máx. 120), correo con forma válida, contraseña de al menos 8
   caracteres que combine letras y números.
 - **Cambios sin guardar:** si hay cambios, al volver o al elegir a otro administrador pide confirmar.
+
+## Historial (igual que Actualizar mensajero)
+
+- **Pestaña "Historial (n)" de cada administrador:** sus cambios, del más reciente al más antiguo (alta, cambios de datos,
+  activaciones, desactivaciones y cambios de contraseña), con la fecha y la frase del backend. Usa
+  `GET /api/v1/admins/{tipo}/{número}/history`.
+- **Botón "Ver historial general":** el de todos los administradores, con una etiqueta por tipo: **Creación**,
+  **Actualización**, **Activación**, **Desactivación**, **Contraseña** y **Eliminación** (así se ve quién fue eliminado, aunque
+  ya no esté en la lista). Usa `GET /api/v1/admins/audit-log`. Si no carga, ofrece **Reintentar**; "Volver" regresa.
+- La frase de cada registro dice quién hizo qué y a quién, por ejemplo: *"El Super Usuario 'Alicia' modificó los datos
+  (nombre, correo) del Administrador de Ventas 'Ana' (CEDULA 2-0345-0987)."* La contraseña nunca se registra.
 
 ## Avisos y errores (T05)
 
@@ -42,13 +54,11 @@ y el formulario del elegido a la derecha. Se apoya en el backend de las [Task 91
 | 5xx / sin conexión | "Ocurrió un error inesperado en el servidor…" / "No pudimos conectar con el servidor…". |
 | La lista no carga | Alerta con el botón **Reintentar**. |
 
-## Historial
+## Auditoría de administradores
 
-La auditoría de administradores (pantalla *Eliminar administrador → Ver auditoría*) ahora muestra también las
-modificaciones: etiquetas **Actualización**, **Activación**, **Desactivación** y **Contraseña**. Para que se entienda a
-quién se refiere cada una (esa bitácora es general), el backend redacta el detalle como frase, por ejemplo: *"El Super
-Usuario 'Alicia' modificó los datos (nombre, correo) del Administrador de Ventas 'Ana' (CEDULA 2-0345-0987)."* Las de
-estado y contraseña agregan "Su sesión activa se cerró de inmediato." La contraseña nunca se registra.
+La auditoría de la pantalla *Eliminar administrador → Ver auditoría* también muestra ahora las modificaciones, con las
+mismas etiquetas. Para que se entienda a quién se refiere cada una (esa bitácora es general), el backend redacta el
+detalle como frase. Las de estado y contraseña agregan "Su sesión activa se cerró de inmediato."
 
 ## Cómo está hecho
 
@@ -58,32 +68,36 @@ Mismas piezas que Actualizar mensajero:
 | --- | --- |
 | `pages/EditAdmin.jsx` | `EditMessenger.jsx` (solo coordina) |
 | `hooks/useAdminEditor.js` | `useCourierEditor.js` (una llamada en lugar de tres) |
-| `components/AdminEditListPanel.jsx` | `CourierFleetPanel.jsx` |
-| `components/AdminDetailPanel.jsx`, `AdminEditForm.jsx` | `CourierDetailPanel.jsx`, `CourierEditForm.jsx` |
+| `components/AdminEditListPanel.jsx` (sobre el nuevo `AccountPickerPanel`) | `CourierFleetPanel.jsx` (ahora también sobre `AccountPickerPanel`) |
+| `components/AdminDetailPanel.jsx` (pestañas Datos / Historial), `AdminEditForm.jsx` | `CourierDetailPanel.jsx`, `CourierEditForm.jsx` |
+| `hooks/useAdminHistory.js` (por administrador y general) | `useCourierHistory.js` |
 | `utils/adminEdit.js` | `courierEdit.js` (formulario, cambios, validación) |
 | `utils/adminErrors.js` → `normalizeAdminUpdateError` | `courierErrors.js` |
 | `services/AdminService.js` → `getAdministrator`, `updateAdministrator` | `CourierService.js` |
 
-Se reutilizaron `SearchableListPanel`, `AccountRow` (con un nuevo `actionTone` para el botón verde "Editar"),
-`useDocumentSearch`, `useAdmins` (con `patch`), `SplitScreen`, `Toast`, `UnsavedChangesGuard` y `ConfirmLeaveDialog`.
+Para no copiar la lista de mensajeros, se extrajo `AccountPickerPanel` (tabla con búsqueda, estado y botón del historial) y
+`CourierFleetPanel` pasó a usarlo; `CourierGeneralHistoryPanel` acepta ahora sus textos. Se reutilizaron además
+`useDocumentSearch`, `useAdmins` (con `patch`), `HistoryList`, `SplitScreen`, `Toast`, `UnsavedChangesGuard` y
+`ConfirmLeaveDialog`.
 
 ## Resultado de las pruebas automáticas
 
 Verificado el 14 de octubre de 2026 con Node 22 y Vitest, desde `blawdtrack/frontend`:
 
-- Pruebas de estas tasks: **69 aprobadas** en 5 archivos (más las de navegación y rutas actualizadas).
-- Suite completa del frontend: **760 pruebas aprobadas en 59 archivos**, sin fallos.
+- Pruebas de estas tasks: **74 aprobadas** en 5 archivos (más las de navegación y rutas actualizadas).
+- Suite completa del frontend: **765 pruebas aprobadas en 59 archivos**, sin fallos. Las de *Actualizar mensajero* (43) siguen
+  en verde tras extraer `AccountPickerPanel`.
 - `npm run build` compila. `eslint` no reporta errores en los archivos de estas tasks (el de `PasswordRecoveryTestPage.jsx`
   ya existe en `develop`).
 - Estas pruebas simulan el servicio: no necesitan el backend ni la base de datos.
 - Backend (cambio del detalle de la bitácora): `AdminUpdateIntegrationTest` y `AdminServiceImplTest` siguen en verde;
-  las clases de administradores, auditoría y mensajeros suman **92 pruebas aprobadas**.
+  las clases de administradores, auditoría y mensajeros suman **94 pruebas aprobadas**.
 
 | Prueba | Qué demuestra |
 | --- | --- |
-| `pages/EditAdmin.test.jsx` (20) | T03: lista con estados, búsqueda por documento y "no encontrado", formulario prellenado, Descartar. T04: guarda solo lo que cambió, envía correo/contraseña/estado, bloquea el botón al guardar, valida en el navegador. T05: aviso de éxito (con la sesión cerrada), advertencia del estado, sin cambios, 404 al elegir y al guardar con recarga de la lista, correo repetido en su campo, 403/500/sin conexión, reintentar la lista. |
+| `pages/EditAdmin.test.jsx` (24) | T03: tabla con estados y contador, búsqueda por documento y "no encontrado", formulario prellenado, Descartar. T04: guarda solo lo que cambió, envía correo/contraseña/estado, bloquea el botón al guardar, valida en el navegador. T05: aviso de éxito (con la sesión cerrada), advertencia del estado, sin cambios, 404 al elegir y al guardar con recarga de la lista, correo repetido en su campo, 403/500/sin conexión, reintentar la lista. Historial: pestaña por administrador, vacío, historial general con Eliminación y reintento. |
 | `utils/adminEdit.test.js` (16) | Lectura del administrador, valores iniciales, qué cambió y si cierra la sesión, validación. |
-| `services/AdminService.test.js` (4) | `GET` y `PATCH` a la ruta correcta con el documento codificado; el error se propaga. |
+| `services/AdminService.test.js` (5) | `GET`, `PATCH` e historial a la ruta correcta con el documento codificado; el error se propaga. |
 | `utils/adminErrors.test.js` (21, 8 nuevas) | Mensajes de cada error del `PATCH`: 404, 409 en el campo correo, 400, 401, 403, 5xx, sin red. |
 | `utils/adminAudit.test.js` (8, 4 nuevas) | Etiquetas de las modificaciones en la auditoría. |
 | `config/navigation.test.js`, `App.routes.test.jsx`, `pages/ModuleMenuPage.test.jsx` | La opción "Actualizar administrador" y su ruta, solo para el Súper Usuario. |
@@ -107,18 +121,19 @@ npm test
 
 1. Inicia el backend (con esta rama o `develop` más las Tasks 91 y 92) y el frontend (`npm run dev -- --host`).
 2. Entra con el Súper Usuario → *Gestión de usuarios → Administradores → Actualizar administrador*.
-3. Busca un administrador, pulsa **Editar**, cambia el nombre y guarda: aparece el aviso verde. Cambia el estado: aparece
+3. Busca un administrador, pulsa su fila, cambia el nombre y guarda: aparece el aviso verde. Cambia el estado: aparece
    la advertencia de la sesión. Para ver el aviso de "no existente", elimina al administrador desde otra pestaña y pulsa
-   **Editar** en la lista que ya estaba abierta.
+   su fila en la lista que ya estaba abierta.
 
 ## Capturas más importantes
 
 | Evidencia | Qué demuestra y qué capturar |
 | --- | --- |
-| E1 | Consola de las pruebas de estas tasks en verde (5 archivos, 69 pruebas). |
-| E2 | Consola de la suite completa: `Test Files  59 passed (59)` y `Tests  760 passed (760)`. |
+| E1 | Consola de las pruebas de estas tasks en verde (5 archivos, 74 pruebas). |
+| E2 | Consola de la suite completa: `Test Files  59 passed (59)` y `Tests  765 passed (765)`. |
 | E3 | Consola de `EditAdmin.test.jsx --reporter=verbose`: se leen los casos de búsqueda, guardado y avisos. |
 | E4 | La pantalla en el navegador con un administrador elegido: formulario prellenado y estado de acceso. |
 | E5 | El aviso de éxito tras guardar, y la advertencia al cambiar el estado. |
+| E6 | La pestaña Historial de un administrador y el "Historial general" con las etiquetas Creación, Actualización, Desactivación y Eliminación. |
 
 **Si tienes que priorizar:** E3 y E4. Oculta correos y tokens en las capturas.

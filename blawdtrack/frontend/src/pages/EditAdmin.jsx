@@ -2,17 +2,19 @@ import { useState } from 'react';
 import PersonSearchOutlinedIcon from '@mui/icons-material/PersonSearchOutlined';
 import AdminDetailPanel from '../components/AdminDetailPanel';
 import AdminEditListPanel from '../components/AdminEditListPanel';
+import CourierGeneralHistoryPanel from '../components/CourierGeneralHistoryPanel';
 import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
 import EmptyState from '../components/EmptyState';
 import SplitScreen from '../components/SplitScreen';
 import Toast from '../components/Toast';
 import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
 import { useAdminEditor } from '../hooks/useAdminEditor';
+import { useAdminGeneralHistory } from '../hooks/useAdminHistory';
 import { useAdmins } from '../hooks/useAdmins';
 import { useConfirmLeave } from '../hooks/useConfirmLeave';
 import { useDocumentSearch } from '../hooks/useDocumentSearch';
 import { useToast } from '../hooks/useToast';
-import { getAdminDocument } from '../utils/adminEdit';
+import { getAdminDocument, getAdminName } from '../utils/adminEdit';
 import { rem } from '../theme';
 
 /**
@@ -26,15 +28,23 @@ export function EditAdmin() {
   const { toast, notify, close: closeToast } = useToast();
   const { admins, loading, error, reload, patch } = useAdmins();
   const search = useDocumentSearch(getAdminDocument);
+  const generalHistory = useAdminGeneralHistory();
 
-  // La lista se puede ocultar para darle todo el ancho al formulario (solo escritorio).
+  // La lista se puede ocultar para darle todo el ancho al formulario (solo escritorio), y el historial general
+  // reemplaza al detalle en el panel derecho mientras se ve.
   const [listOpen, setListOpen] = useState(true);
+  const [showGeneral, setShowGeneral] = useState(false);
+
+  const backToPicker = () => {
+    setListOpen(true);
+    setShowGeneral(false);
+  };
 
   const editor = useAdminEditor({
     notify,
     onSaved: (updated) => {
       patch(updated);
-      setListOpen(true);
+      backToPicker();
     },
     // El administrador ya no existe (p. ej. lo eliminaron): se vuelve a pedir la lista.
     onGone: () => reload(),
@@ -42,16 +52,27 @@ export function EditAdmin() {
   const { runOrConfirmLeave, dialogProps } = useConfirmLeave(editor.isDirty);
 
   const handleSelect = (admin) => {
-    if (admin.id === editor.admin?.id) return;
-    runOrConfirmLeave(() => editor.select(admin));
+    if (admin.id === editor.admin?.id) {
+      setShowGeneral(false);
+      return;
+    }
+    runOrConfirmLeave(() => {
+      setShowGeneral(false);
+      editor.select(admin);
+    });
   };
 
   // "Descartar" abandona la edición de una vez; "Volver" pide confirmar si hay cambios sin guardar.
   const handleDiscard = () => {
     editor.clear();
-    setListOpen(true);
+    backToPicker();
   };
   const handleBack = () => runOrConfirmLeave(handleDiscard);
+
+  const openGeneralHistory = () => {
+    setShowGeneral(true);
+    generalHistory.load();
+  };
 
   return (
     <>
@@ -64,14 +85,28 @@ export function EditAdmin() {
           totalCount={admins.length}
           loading={loading}
           errorMessage={error}
+          selectedKey={editor.admin ? getAdminDocument(editor.admin) : null}
           search={search}
           onSelect={handleSelect}
-          selecting={editor.loading}
           onRetry={reload}
-          sx={{ display: { xs: editor.admin ? 'none' : 'flex', md: listOpen ? 'flex' : 'none' } }}
+          canHide={Boolean(editor.admin)}
+          onHide={() => setListOpen(false)}
+          onOpenGeneralHistory={openGeneralHistory}
+          generalHistoryOpen={showGeneral}
+          sx={{ display: { xs: editor.admin || showGeneral ? 'none' : 'flex', md: listOpen ? 'flex' : 'none' } }}
         />
 
-        {editor.admin ? (
+        {showGeneral && (
+          <CourierGeneralHistoryPanel
+            history={generalHistory}
+            backLabel={editor.admin ? `Volver a ${getAdminName(editor.admin)}` : 'Volver'}
+            onBack={() => setShowGeneral(false)}
+            title="Historial general de administradores"
+            emptyMessage="Todavía no hay cambios registrados en ningún administrador."
+            errorMessage="No se pudo cargar el historial general. Revisa tu conexión e inténtalo de nuevo."
+          />
+        )}
+        {!showGeneral && editor.admin && (
           <AdminDetailPanel
             key={editor.admin.id}
             editor={editor}
@@ -80,11 +115,12 @@ export function EditAdmin() {
             listOpen={listOpen}
             onShowList={() => setListOpen(true)}
           />
-        ) : (
+        )}
+        {!showGeneral && !editor.admin && (
           <EmptyState
             icon={PersonSearchOutlinedIcon}
             title="Elige un administrador"
-            description="Busca un administrador por su documento, o elígelo de la lista, para editar su nombre, correo, contraseña o estado de acceso."
+            description="Selecciona un administrador de la lista para editar sus datos y ver su historial."
             sx={{ display: { xs: 'none', md: 'flex' } }}
           />
         )}

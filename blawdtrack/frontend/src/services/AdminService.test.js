@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axiosClient from '../api/axiosClient';
-import { getAdministrator, updateAdministrator } from './AdminService';
+import { getAdministrator, getAdministratorHistory, updateAdministrator } from './AdminService';
 
 vi.mock('../api/axiosClient', () => ({ default: { get: vi.fn(), patch: vi.fn() } }));
 
@@ -31,6 +31,14 @@ describe('AdminService · actualización de administradores (HU-007)', () => {
 
     await expect(updateAdministrator('CEDULA', '2-0345-0987', { fullName: 'Ana Nueva' })).resolves.toEqual(updated);
     expect(axiosClient.patch).toHaveBeenCalledWith('/v1/admins/CEDULA/2-0345-0987', { fullName: 'Ana Nueva' });
+  });
+
+  it('pide el historial de un administrador a /history con el documento codificado', async () => {
+    const entries = [{ id: 1, action: 'ACTUALIZAR_ADMINISTRADOR' }];
+    axiosClient.get.mockResolvedValue({ data: entries });
+
+    await expect(getAdministratorHistory('CEDULA', '2-0345-0987')).resolves.toEqual(entries);
+    expect(axiosClient.get).toHaveBeenCalledWith('/v1/admins/CEDULA/2-0345-0987/history');
   });
 
   it('propaga el error de axios tal cual, para que el normalizador lo interprete', async () => {

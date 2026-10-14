@@ -2,11 +2,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import EditAdmin from './EditAdmin';
-import { getAdministrator, getAdministrators, updateAdministrator } from '../services/AdminService';
+import {
+  getAdminAuditLog,
+  getAdministrator,
+  getAdministratorHistory,
+  getAdministrators,
+  updateAdministrator,
+} from '../services/AdminService';
 
 vi.mock('../services/AdminService', () => ({
   getAdministrators: vi.fn(),
   getAdministrator: vi.fn(),
+  getAdministratorHistory: vi.fn(),
+  getAdminAuditLog: vi.fn(),
   updateAdministrator: vi.fn(),
 }));
 
@@ -35,11 +43,19 @@ const profile = (overrides) => ({
 
 const httpError = (status, data = {}) => ({ response: { status, data } });
 
-// Fernanda es la primera fila de la lista; Pablo, la segunda.
-const openEditor = async (user, index = 0) => {
-  const buttons = await screen.findAllByRole('button', { name: 'Editar' });
-  await user.click(buttons[index]);
+// Elegir a alguien es pulsar su fila de la lista (como en Actualizar mensajero).
+const openEditor = async (user, name = 'Fernanda Vindas Rojas') => {
+  await user.click(await screen.findByText(name));
 };
+
+const historyEntry = (overrides) => ({
+  id: 1,
+  action: 'ACTUALIZAR_ADMINISTRADOR',
+  actorName: 'Alicia Admin',
+  details: "El Super Usuario 'Alicia Admin' modificó los datos (nombre) del Administrador de Ventas 'Fernanda' (CEDULA 2-0345-0987).",
+  timestamp: '2026-10-14T10:24:00',
+  ...overrides,
+});
 const nameField = () => screen.getByLabelText('Nombre completo');
 const emailField = () => screen.getByLabelText('Correo electrónico');
 const passwordField = () => screen.getByLabelText('Nueva contraseña (opcional)');
@@ -55,6 +71,8 @@ describe('EditAdmin (HU-007 · Tasks 93, 94 y 95)', () => {
     getAdministrators.mockResolvedValue([listed(), listed({ id: 2, name: 'Pablo Mora', email: 'pablo@blawdgourmet.com', documentNumber: '1-1111-2222', identification: '1-1111-2222', status: 'INACTIVE' })]);
     getAdministrator.mockResolvedValue(profile());
     updateAdministrator.mockResolvedValue(profile());
+    getAdministratorHistory.mockResolvedValue([]);
+    getAdminAuditLog.mockResolvedValue([]);
   });
 
   afterEach(() => cleanup());
@@ -66,9 +84,11 @@ describe('EditAdmin (HU-007 · Tasks 93, 94 y 95)', () => {
       expect(await screen.findByText('Fernanda Vindas Rojas')).toBeInTheDocument();
       expect(screen.getByText('Pablo Mora')).toBeInTheDocument();
       expect(screen.getByText('Elige un administrador')).toBeInTheDocument();
+      expect(screen.getByText('Administradores de ventas')).toBeInTheDocument();
+      expect(screen.getByText('2 administradores')).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: 'Estado' })).toBeInTheDocument();
       expect(screen.getAllByText('Activo').length).toBeGreaterThan(0);
       expect(screen.getAllByText('Inactivo').length).toBeGreaterThan(0);
-      expect(screen.getAllByRole('button', { name: 'Editar' })).toHaveLength(2);
     });
 
     it('busca por tipo y número de documento y avisa si no hay coincidencias', async () => {
@@ -90,7 +110,7 @@ describe('EditAdmin (HU-007 · Tasks 93, 94 y 95)', () => {
       expect(screen.getByText('Fernanda Vindas Rojas')).toBeInTheDocument();
     });
 
-    it('al elegir uno consulta su perfil y muestra el formulario con nombre, correo, contraseña vacía y estado', async () => {
+    it('al pulsar su fila consulta su perfil y muestra el formulario con nombre, correo, contraseña vacía y estado', async () => {
       const user = userEvent.setup();
       render(<EditAdmin />);
       await openEditor(user);
@@ -112,6 +132,68 @@ describe('EditAdmin (HU-007 · Tasks 93, 94 y 95)', () => {
 
       await user.click(screen.getByRole('button', { name: 'Descartar' }));
 
+      expect(screen.getByText('Elige un administrador')).toBeInTheDocument();
+    });
+  });
+
+  describe('Historial (igual que Actualizar mensajero)', () => {
+    it('la pestaña Historial lista los cambios de ese administrador y su cantidad', async () => {
+      getAdministratorHistory.mockResolvedValue([
+        historyEntry({ id: 2, action: 'DESACTIVAR_ADMINISTRADOR', details: 'Se desactivó. Su sesión activa se cerró de inmediato.' }),
+        historyEntry({ id: 1 }),
+      ]);
+      const user = userEvent.setup();
+      render(<EditAdmin />);
+      await openEditor(user);
+
+      await waitFor(() => expect(getAdministratorHistory).toHaveBeenCalledWith('CEDULA', '2-0345-0987'));
+      await user.click(await screen.findByRole('tab', { name: 'Historial (2)' }));
+
+      expect(screen.getByText('Historial de modificaciones')).toBeInTheDocument();
+      expect(screen.getByText(/modificó los datos \(nombre\)/)).toBeInTheDocument();
+      expect(screen.getByText(/Se desactivó\. Su sesión activa se cerró de inmediato\./)).toBeInTheDocument();
+    });
+
+    it('sin cambios registrados lo dice', async () => {
+      const user = userEvent.setup();
+      render(<EditAdmin />);
+      await openEditor(user);
+      await user.click(await screen.findByRole('tab', { name: 'Historial (0)' }));
+
+      expect(screen.getByText('Todavía no hay cambios registrados para este administrador.')).toBeInTheDocument();
+    });
+
+    it('"Ver historial general" muestra altas, cambios, estados y eliminaciones', async () => {
+      getAdminAuditLog.mockResolvedValue([
+        historyEntry({ id: 3, action: 'ELIMINAR_ADMINISTRADOR', details: 'Se eliminó al Administrador de Ventas Pablo.' }),
+        historyEntry({ id: 2, action: 'ACTIVAR_ADMINISTRADOR', details: 'Se activó al administrador.' }),
+        historyEntry({ id: 1, action: 'CREAR_ADMINISTRADOR', details: 'Se creó al administrador.' }),
+      ]);
+      const user = userEvent.setup();
+      render(<EditAdmin />);
+      await screen.findByText('Fernanda Vindas Rojas');
+
+      await user.click(screen.getByRole('button', { name: 'Ver historial general' }));
+
+      expect(await screen.findByText('Historial general de administradores')).toBeInTheDocument();
+      expect(screen.getByText('Eliminación')).toBeInTheDocument();
+      expect(screen.getByText('Activación')).toBeInTheDocument();
+      expect(screen.getByText('Creación')).toBeInTheDocument();
+      expect(screen.getByText('Se eliminó al Administrador de Ventas Pablo.')).toBeInTheDocument();
+    });
+
+    it('si el historial general no carga, ofrece reintentar y "Volver" regresa', async () => {
+      getAdminAuditLog.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce([]);
+      const user = userEvent.setup();
+      render(<EditAdmin />);
+      await screen.findByText('Fernanda Vindas Rojas');
+      await user.click(screen.getByRole('button', { name: 'Ver historial general' }));
+
+      expect(await screen.findByText(/No se pudo cargar el historial general/)).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Reintentar' }));
+      expect(await screen.findByText('Todavía no hay cambios registrados en ningún administrador.')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /Volver/ }));
       expect(screen.getByText('Elige un administrador')).toBeInTheDocument();
     });
   });

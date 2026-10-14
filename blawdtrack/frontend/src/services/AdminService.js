@@ -82,6 +82,20 @@ export const getAdministrator = async (documentType, documentNumber) => {
 };
 
 /**
+ * Historial de modificaciones de UN administrador: `GET /api/v1/admins/{documentType}/{documentNumber}/history`
+ * (creación, cambios de datos, activaciones, desactivaciones y cambios de contraseña), del más reciente al más antiguo.
+ * @param {string} documentType
+ * @param {string} documentNumber
+ * @returns {Promise<Array<{ id: number, action: string, actorName: string, details: string, timestamp: string }>>}
+ */
+export const getAdministratorHistory = async (documentType, documentNumber) => {
+  const response = await axiosClient.get(
+    `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}/history`
+  );
+  return response.data;
+};
+
+/**
  * Actualiza un administrador: `PATCH /api/v1/admins/{documentType}/{documentNumber}` (solo Súper Usuario). Solo se
  * envían los campos que cambian. Cambiar el estado o la contraseña cierra la sesión abierta del administrador.
  * @param {string} documentType

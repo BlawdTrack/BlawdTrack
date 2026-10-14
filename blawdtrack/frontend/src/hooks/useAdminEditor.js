@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getAdministrator, updateAdministrator } from '../services/AdminService';
+import { useAdminHistory } from './useAdminHistory';
 import { normalizeAdminUpdateError } from '../utils/adminErrors';
 import {
   EMPTY_ADMIN_FORM,
@@ -25,6 +26,7 @@ const SESSION_WARNING =
  *   `onGone` avisa que el administrador ya no existe (para volver a cargar la lista).
  */
 export function useAdminEditor({ notify, onSaved, onGone }) {
+  const history = useAdminHistory();
   const [admin, setAdmin] = useState(null);
   const [formData, setFormData] = useState(EMPTY_ADMIN_FORM);
   const [initialValues, setInitialValues] = useState(null);
@@ -33,14 +35,18 @@ export function useAdminEditor({ notify, onSaved, onGone }) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  /** Deja de editar: sin administrador y sin formulario. */
+  const clearHistory = history.clear;
+  const loadHistory = history.load;
+
+  /** Deja de editar: sin administrador, sin formulario y sin historial. */
   const clear = useCallback(() => {
+    clearHistory();
     setAdmin(null);
     setInitialValues(null);
     setFormData(EMPTY_ADMIN_FORM);
     setFormErrors({});
     setUpdateError(null);
-  }, []);
+  }, [clearHistory]);
 
   /**
    * Elige a un administrador de la lista: consulta su perfil actual y carga el formulario. Si ya no existe, avisa y
@@ -57,6 +63,7 @@ export function useAdminEditor({ notify, onSaved, onGone }) {
       setInitialValues(values);
       setFormErrors({});
       setUpdateError(null);
+      loadHistory(profile);
       return true;
     } catch (error) {
       const normalized = normalizeAdminUpdateError(error);
@@ -66,7 +73,7 @@ export function useAdminEditor({ notify, onSaved, onGone }) {
     } finally {
       setLoading(false);
     }
-  }, [notify, onGone]);
+  }, [notify, onGone, loadHistory]);
 
   const change = (event) => {
     const { name, value } = event.target;
@@ -128,6 +135,7 @@ export function useAdminEditor({ notify, onSaved, onGone }) {
     updateError,
     loading,
     submitting,
+    history: history.entries,
     isDirty: Boolean(admin) && isFormDirty(formData, initialValues),
     select,
     clear,
