@@ -10,11 +10,19 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
-import { INLINE_LABEL_SX, LINK_BUTTON_SX } from '../components/formStyles';
-import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { LINK_BUTTON_SX } from '../components/formStyles';
+import { CARD_PATTERN_SX, RADIUS, FONT, rem, fontPx } from '../theme';
 import BrandLogo from '../components/BrandLogo';
+import loginPanel from '../assets/login-panel.svg';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Etiqueta de los campos: en minúsculas, en negrita y en verde oscuro, como en el diseño.
+const FIELD_LABEL_SX = { fontSize: FONT.md, fontWeight: 700, color: 'primary.main' };
+// Campos altos (56 px) y de esquinas redondeadas, más cómodos de leer y de tocar.
+const FIELD_SX = { '& .MuiOutlinedInput-root': { minHeight: 56, borderRadius: rem(14), fontSize: FONT.lg } };
 
 function validateForm(data) {
   const errors = { email: '', password: '' };
@@ -75,34 +83,44 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex' }}>
-      {/* Panel de marca: solo en escritorio, para no quitarle espacio al formulario en móvil. */}
+      {/* Panel de marca: solo en escritorio, para no quitarle espacio al formulario en móvil. El arte (anillos, ruta,
+          cajas y pin) es la imagen de fondo; encima van el logo y el mensaje. */}
       <Box
         sx={{
           display: { xs: 'none', md: 'flex' },
           flex: '0 0 42%',
           flexDirection: 'column',
-          justifyContent: 'space-between',
           bgcolor: 'primary.main',
+          // Entre comillas: Vite incrusta el SVG (pesa poco) como data URI, que trae paréntesis y rompería la regla.
+          backgroundImage: `url("${loginPanel}")`,
+          // El arte ocupa siempre todo el alto (con `cover` se recortaba arriba y abajo en ventanas más anchas y se
+          // perdía la punta del pin y las cajas) y se ancla a la derecha; lo que sobra a la izquierda es el mismo verde.
+          backgroundSize: 'auto 100%',
+          backgroundPosition: 'right center',
+          backgroundRepeat: 'no-repeat',
           color: 'primary.contrastText',
           p: 6,
           borderRight: '4px solid',
           borderColor: 'secondary.main',
         }}
       >
-        <BrandLogo variant="stacked" onDark width={150} />
+        <BrandLogo variant="horizontalShort" onDark width={170} />
 
-        <Box>
-          <Typography variant="h4" component="p" sx={{ lineHeight: 1.25, mb: 2 }}>
+        {/* El mensaje ocupa el espacio bajo el logo y queda centrado en él. */}
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Typography
+            component="p"
+            sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: fontPx(48), lineHeight: 1.1, letterSpacing: '-0.5px', mb: 2.5, color: 'common.white' }}
+          >
             Cada entrega,
             <br />
-            siempre a la vista.
+            siempre <Box component="span" sx={{ color: 'secondary.main' }}>a la vista.</Box>
           </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.75)', maxWidth: rem(290) }}>
+          <Typography sx={{ fontSize: FONT.xl, color: 'rgba(255,255,255,0.75)', maxWidth: rem(360), lineHeight: 1.5 }}>
             Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar.
           </Typography>
         </Box>
 
-        <Box sx={{ width: rem(38), height: 4, borderRadius: 2, bgcolor: 'secondary.main' }} />
       </Box>
 
       <Box
@@ -127,29 +145,32 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           noValidate
           sx={{
             width: '100%',
-            maxWidth: rem(420),
+            maxWidth: rem(520),
             ...CARD_PATTERN_SX,
             border: '1px solid', borderColor: 'neutral.border',
-            borderRadius: RADIUS.md,
-            p: { xs: 3, sm: 4.5 },
+            borderRadius: RADIUS.lg,
+            p: { xs: 3, sm: 6 },
             display: 'flex',
             flexDirection: 'column',
-            gap: 3,
+            gap: 3.5,
           }}
         >
-          <Box>
-            <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography
+              component="h1"
+              sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: fontPx(36), lineHeight: 1.15, color: 'primary.main' }}
+            >
               Iniciar sesión
             </Typography>
-            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', mt: 0.75 }}>
+            <Typography sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: 1.5, lineHeight: 1.5 }}>
               Ingresa con tu correo y contraseña. El sistema te llevará al panel de tu rol.
             </Typography>
           </Box>
 
           {error && <StatusMessage severity={error.severity} message={error.message} />}
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
-            <Typography component="label" htmlFor="login-email" sx={INLINE_LABEL_SX}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography component="label" htmlFor="login-email" sx={FIELD_LABEL_SX}>
               Correo electrónico
             </Typography>
             <TextField
@@ -165,11 +186,12 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               disabled={loading}
               error={Boolean(fieldErrors.email)}
               helperText={fieldErrors.email}
+              sx={FIELD_SX}
             />
           </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
-            <Typography component="label" htmlFor="login-password" sx={INLINE_LABEL_SX}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography component="label" htmlFor="login-password" sx={FIELD_LABEL_SX}>
               Contraseña
             </Typography>
             <PasswordField
@@ -177,20 +199,21 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
               required
               id="login-password"
               name="password"
-              placeholder="••••••••"
+              placeholder="Tu contraseña"
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
               disabled={loading}
               error={Boolean(fieldErrors.password)}
               helperText={fieldErrors.password}
+              sx={FIELD_SX}
             />
             <Link
               component="button"
               type="button"
               onClick={() => onForgotPassword?.()}
               underline="hover"
-              sx={{ ...LINK_BUTTON_SX, alignSelf: 'center', color: 'primary.main', fontWeight: 600, fontSize: FONT.sm }}
+              sx={{ ...LINK_BUTTON_SX, alignSelf: 'center', mt: 0.5, color: 'secondary.text', fontWeight: 700, fontSize: FONT.md }}
             >
               ¿Olvidaste tu contraseña?
             </Link>
@@ -202,25 +225,16 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             variant="contained"
             size="large"
             disabled={loading}
-            sx={{ fontWeight: 'bold', fontSize: FONT.md, minHeight: TOUCH_TARGET, display: 'flex', gap: '0.6154rem' }}
+            endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
+            sx={{ fontWeight: 700, fontSize: FONT.lg, minHeight: 56, borderRadius: rem(16) }}
           >
-            {loading ? (
-              <CircularProgress size={22} sx={{ color: 'inherit' }} />
-            ) : (
-              <>
-                <span>Iniciar sesión</span>
-                <Box sx={{ width: rem(14), height: rem(14), borderRadius: '50%', bgcolor: 'secondary.main' }} />
-              </>
-            )}
+            {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Iniciar sesión'}
           </Button>
 
-          {/* 'success.main' es el mismo verde de éxito que usa StatusMessage.jsx;
-              el theme no define theme.palette.success, así que se repite el
-              valor fijo en vez de inventar un token nuevo. */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'success.main', flexShrink: 0 }} />
-            <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
-              Conexión a internet requerida · contraseñas encriptadas
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
+            <LockOutlinedIcon sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: '0.2rem', flexShrink: 0 }} />
+            <Typography sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.45 }}>
+              Requiere conexión a internet. Tus contraseñas se guardan encriptadas.
             </Typography>
           </Box>
         </Box>
