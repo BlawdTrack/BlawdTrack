@@ -35,12 +35,33 @@ describe('getMainMenuColumns', () => {
     modules.forEach((m) => expect(m.description).toBeTruthy());
   });
 
-  it('gives the sales admin only what they can use, in a single column', () => {
+  it('gives the sales admin their own layout: daily operation, and control with the summary of the day', () => {
     const columns = getMainMenuColumns(ROLES.SALES_ADMIN);
 
-    expect(titles(columns)).toEqual([['Operación diaria']]);
-    expect(modulesOf(columns).map((m) => m.title)).toEqual(['Importación de paquetes', 'Gestión de paquetes', 'Asignación y seguimiento']);
-    expect(modulesOf(columns).map((m) => m.path)).toEqual([ROUTES.PACKAGE_IMPORT, null, null]);
+    expect(titles(columns)).toEqual([['Operación diaria'], ['Control y consulta', 'Resumen de hoy']]);
+    expect(modulesOf(columns).map((m) => m.title)).toEqual([
+      'Importación de paquetes',
+      'Gestión de paquetes',
+      'Asignación y seguimiento',
+      'Reportes y notificaciones',
+    ]);
+    expect(modulesOf(columns).map((m) => m.path)).toEqual([ROUTES.PACKAGE_IMPORT, null, null, null]);
+  });
+
+  it('gives the sales admin the four counts of the day, with no value yet, and the reports their own description', () => {
+    const columns = getMainMenuColumns(ROLES.SALES_ADMIN);
+    const summary = columns[1][1];
+
+    expect(summary.stats.map((s) => s.label)).toEqual(['Pendientes de asignar', 'En tránsito', 'Entregados', 'No entregados']);
+    summary.stats.forEach((s) => expect(s.value).toBeUndefined());
+    expect(columns[1][0].modules[0].description).toBe('Reportes de entregas con filtros, exportación e historial de notificaciones.');
+  });
+
+  it('keeps the summary of the day out of the super user menu, and the reports with their own text there', () => {
+    const columns = getMainMenuColumns(ROLES.SUPER_USER);
+
+    expect(columns.flat().some((section) => section.stats)).toBe(false);
+    expect(modulesOf(columns).find((m) => m.id === 'reports').description).toBe('Cambios en usuarios e historial de notificaciones. Imprime desde cada reporte.');
   });
 
   it('is empty for roles without menu access', () => {
@@ -81,6 +102,7 @@ describe('getSidebarModules', () => {
       'Importación de paquetes',
       'Gestión de paquetes',
       'Asignación y seguimiento',
+      'Reportes y notificaciones',
     ]);
     expect(getSidebarModules(ROLES.COURIER)).toEqual([]);
   });

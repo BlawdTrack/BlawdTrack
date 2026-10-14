@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Routes, Route } from 'react-router-dom';
 import MainMenuPage from './MainMenuPage';
@@ -95,12 +95,37 @@ describe('MainMenuPage', () => {
     await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
   });
 
-  it('shows the sales admin only the modules of their role', () => {
+  it('shows the sales admin only the modules of their role, in the Operación diaria and Control y consulta sections', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: { ...superUser, role: 'ADMIN_VENTAS' } });
 
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
+      'Operación diaria',
+      'Control y consulta',
+      'Resumen de hoy',
+    ]);
     expect(screen.getByRole('link', { name: /Importación de paquetes/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Control y consulta' })).toContainElement(
+      screen.getByRole('heading', { level: 3, name: 'Reportes y notificaciones' })
+    );
+    expect(screen.getByText('Reportes de entregas con filtros, exportación e historial de notificaciones.')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Gestión de usuarios' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Reportes y notificaciones' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Mensajería' })).not.toBeInTheDocument();
+  });
+
+  it('shows the sales admin the four counts of the day without data until the packages module exists', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: { ...superUser, role: 'ADMIN_VENTAS' } });
+
+    const summary = within(screen.getByRole('region', { name: 'Resumen de hoy' }));
+    ['Pendientes de asignar', 'En tránsito', 'Entregados', 'No entregados'].forEach((label) =>
+      expect(summary.getByText(label)).toBeInTheDocument()
+    );
+    expect(summary.getAllByText('—')).toHaveLength(4);
+    expect(summary.getByText('Disponible próximamente')).toBeInTheDocument();
+  });
+
+  it('does not show the day summary to the super user', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+
+    expect(screen.queryByRole('region', { name: 'Resumen de hoy' })).not.toBeInTheDocument();
   });
 });
