@@ -14,9 +14,8 @@ import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { LINK_BUTTON_SX } from '../components/formStyles';
 import { FIELD_LABEL_SX, FIELD_SX, AUTH_BUTTON_SX } from '../components/authStyles';
-import { CARD_PATTERN_SX, RADIUS, FONT, rem, fontPx } from '../theme';
-import BrandLogo from '../components/BrandLogo';
-import AuthBrandPanel from '../components/AuthBrandPanel';
+import { FONT, fontPx } from '../theme';
+import AuthSplitLayout from '../components/AuthSplitLayout';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -79,136 +78,101 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex' }}>
-      <AuthBrandPanel
-        sx={{ flex: '0 0 42%' }}
-        title={
-          <>
-            Cada entrega,
-            <br />
-            siempre <Box component="span" sx={{ color: 'secondary.main' }}>a la vista.</Box>
-          </>
-        }
-        subtitle="Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar."
-      />
-
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          px: { xs: 2.5, sm: 4 },
-          py: 4,
-        }}
-      >
-        {/* En móvil el panel de marca no se ve, así que la marca va sobre el formulario. */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, mb: 2 }}>
-          <BrandLogo variant="stacked" width={104} />
+    <AuthSplitLayout
+      brandTitle={
+        <>
+          Cada entrega,
+          <br />
+          siempre <Box component="span" sx={{ color: 'secondary.main' }}>a la vista.</Box>
+        </>
+      }
+      brandSubtitle="Gestiona mensajeros, rutas y paquetes de Blawd Gourmet desde un solo lugar."
+    >
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography
+            component="h1"
+            sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: fontPx(36), lineHeight: 1.15, color: 'primary.main' }}
+          >
+            Iniciar sesión
+          </Typography>
+          <Typography sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: 1.5, lineHeight: 1.5 }}>
+            Ingresa con tu correo y contraseña. El sistema te llevará al panel de tu rol.
+          </Typography>
         </Box>
 
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          noValidate
-          sx={{
-            width: '100%',
-            maxWidth: rem(520),
-            ...CARD_PATTERN_SX,
-            border: '1px solid', borderColor: 'neutral.border',
-            borderRadius: RADIUS.lg,
-            p: { xs: 3, sm: 6 },
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3.5,
-          }}
-        >
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography
-              component="h1"
-              sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: fontPx(36), lineHeight: 1.15, color: 'primary.main' }}
-            >
-              Iniciar sesión
-            </Typography>
-            <Typography sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: 1.5, lineHeight: 1.5 }}>
-              Ingresa con tu correo y contraseña. El sistema te llevará al panel de tu rol.
-            </Typography>
-          </Box>
+        {error && <StatusMessage severity={error.severity} message={error.message} />}
 
-          {error && <StatusMessage severity={error.severity} message={error.message} />}
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography component="label" htmlFor="login-email" sx={FIELD_LABEL_SX}>
-              Correo electrónico
-            </Typography>
-            <TextField
-              fullWidth
-              required
-              id="login-email"
-              name="email"
-              type="email"
-              placeholder="nombre@blawdgourmet.com"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-              error={Boolean(fieldErrors.email)}
-              helperText={fieldErrors.email}
-              sx={FIELD_SX}
-            />
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography component="label" htmlFor="login-password" sx={FIELD_LABEL_SX}>
-              Contraseña
-            </Typography>
-            <PasswordField
-              fullWidth
-              required
-              id="login-password"
-              name="password"
-              placeholder="Tu contraseña"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-              error={Boolean(fieldErrors.password)}
-              helperText={fieldErrors.password}
-              sx={FIELD_SX}
-            />
-            <Link
-              component="button"
-              type="button"
-              onClick={() => onForgotPassword?.()}
-              underline="hover"
-              sx={{ ...LINK_BUTTON_SX, alignSelf: 'center', mt: 0.5, color: 'secondary.text', fontWeight: 700, fontSize: FONT.md }}
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </Box>
-
-          <Button
-            type="submit"
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Typography component="label" htmlFor="login-email" sx={FIELD_LABEL_SX}>
+            Correo electrónico
+          </Typography>
+          <TextField
             fullWidth
-            variant="contained"
-            size="large"
+            required
+            id="login-email"
+            name="email"
+            type="email"
+            placeholder="nombre@blawdgourmet.com"
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
             disabled={loading}
-            endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
-            sx={AUTH_BUTTON_SX}
-          >
-            {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Iniciar sesión'}
-          </Button>
+            error={Boolean(fieldErrors.email)}
+            helperText={fieldErrors.email}
+            sx={FIELD_SX}
+          />
+        </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
-            <LockOutlinedIcon sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: '0.2rem', flexShrink: 0 }} />
-            <Typography sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.45 }}>
-              Requiere conexión a internet. Tus contraseñas se guardan encriptadas.
-            </Typography>
-          </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Typography component="label" htmlFor="login-password" sx={FIELD_LABEL_SX}>
+            Contraseña
+          </Typography>
+          <PasswordField
+            fullWidth
+            required
+            id="login-password"
+            name="password"
+            placeholder="Tu contraseña"
+            autoComplete="current-password"
+            value={formData.password}
+            onChange={handleChange}
+            disabled={loading}
+            error={Boolean(fieldErrors.password)}
+            helperText={fieldErrors.password}
+            sx={FIELD_SX}
+          />
+          <Link
+            component="button"
+            type="button"
+            onClick={() => onForgotPassword?.()}
+            underline="hover"
+            sx={{ ...LINK_BUTTON_SX, alignSelf: 'center', mt: 0.5, color: 'secondary.text', fontWeight: 700, fontSize: FONT.md }}
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </Box>
+
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          size="large"
+          disabled={loading}
+          endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
+          sx={AUTH_BUTTON_SX}
+        >
+          {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Iniciar sesión'}
+        </Button>
+
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
+          <LockOutlinedIcon sx={{ fontSize: FONT.lg, color: 'text.secondary', mt: '0.2rem', flexShrink: 0 }} />
+          <Typography sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.45 }}>
+            Requiere conexión a internet. Tus contraseñas se guardan encriptadas.
+          </Typography>
         </Box>
       </Box>
-    </Box>
+    </AuthSplitLayout>
   );
 }
 

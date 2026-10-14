@@ -9,15 +9,15 @@ const TONES = {
 
 /**
  * Cabecera de cada vista de las pantallas de recuperación de contraseña: un cuadro redondeado con icono, el título y,
- * si hace falta, una línea que explica qué hacer, todo alineado a la izquierda. Mismo tamaño y orden en todas las
- * vistas del flujo.
+ * si hace falta, una línea que explica qué hacer, todo centrado como en el inicio de sesión. Mismo tamaño y orden en
+ * todas las vistas del flujo.
  * @param {{ icon: import('react').ElementType, tone?: 'accent'|'success'|'error', title: string,
  *   description?: import('react').ReactNode }} props
  */
 export default function AuthStateHeader({ icon: Icon, tone = 'accent', title, description }) {
   const { bg, fg } = TONES[tone];
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1.5, textAlign: 'left' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, textAlign: 'center' }}>
       <Box
         aria-hidden
         sx={{ width: 60, height: 60, borderRadius: '16px', bgcolor: bg, color: fg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -26,7 +26,7 @@ export default function AuthStateHeader({ icon: Icon, tone = 'accent', title, de
       </Box>
       <Typography
         component="h1"
-        sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: fontPx(34), lineHeight: 1.15, color: 'primary.main' }}
+        sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: fontPx(36), lineHeight: 1.15, color: 'primary.main' }}
       >
         {title}
       </Typography>

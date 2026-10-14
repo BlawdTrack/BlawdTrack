@@ -1,7 +1,5 @@
 import { FONT, rem } from '../theme';
 
-/** Crema liso del lado del formulario de las pantallas de acceso (cubre el patrón del fondo de la app). */
-export const AUTH_CREAM = '#FAF8F5';
 
 /** Anillo de foco visible de 3 px para enlaces y botones. */
 export const FOCUS_RING_SX = { '&:focus-visible': { outline: '3px solid #1A3C34', outlineOffset: 2 } };
