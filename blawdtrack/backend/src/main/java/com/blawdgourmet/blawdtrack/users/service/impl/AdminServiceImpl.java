@@ -210,6 +210,16 @@ public class AdminServiceImpl implements AdminService {
         return toDetail(findSalesAdministrator(documentType, documentNumber));
     }
 
+    // Frase de la bitácora de administradores, que es general (no filtra por administrador): dice quién hizo qué y a quién.
+    // Nunca incluye la contraseña.
+    private static final String SESSION_CLOSED_NOTE = " Su sesión activa se cerró de inmediato.";
+
+    private static String updateDetail(AuthenticatedUser actor, User admin, String action) {
+        return "El Super Usuario '%s' %s Administrador de Ventas '%s' (%s %s)."
+                .formatted(actor.nombreCompleto(), action, admin.getFullName(),
+                        admin.getDocumentType(), admin.getDocumentNumber());
+    }
+
     private AdminDetailResponse toDetail(User admin) {
         return new AdminDetailResponse(
                 admin.getId(),
@@ -236,11 +246,11 @@ public class AdminServiceImpl implements AdminService {
         List<String> profileFields = new ArrayList<>();
         if (request.fullName() != null && !request.fullName().equals(admin.getFullName())) {
             admin.setFullName(request.fullName());
-            profileFields.add("fullName");
+            profileFields.add("nombre");
         }
         if (emailChanges) {
             admin.setEmail(request.email());
-            profileFields.add("email");
+            profileFields.add("correo");
         }
 
         // Cambiar el estado o la contraseña sube tokenVersion: la sesión abierta deja de ser válida en su siguiente
@@ -258,15 +268,19 @@ public class AdminServiceImpl implements AdminService {
         userRepository.saveAndFlush(admin);
 
         if (!profileFields.isEmpty()) {
-            auditService.logAction(AuditAction.ADMIN_UPDATED, actor, admin, String.join(",", profileFields));
+            auditService.logAction(AuditAction.ADMIN_UPDATED, actor, admin,
+                    updateDetail(actor, admin, "modificó los datos (" + String.join(", ", profileFields) + ") del"));
         }
         if (statusChanges) {
             auditService.logAction(
                     admin.getStatus() == UserStatus.INACTIVE ? AuditAction.ADMIN_DEACTIVATED : AuditAction.ADMIN_ACTIVATED,
-                    actor, admin, "status");
+                    actor, admin,
+                    updateDetail(actor, admin, (admin.getStatus() == UserStatus.INACTIVE ? "desactivó" : "activó") + " al")
+                            + SESSION_CLOSED_NOTE);
         }
         if (passwordChanges) {
-            auditService.logAction(AuditAction.ADMIN_PASSWORD_CHANGED, actor, admin, "password");
+            auditService.logAction(AuditAction.ADMIN_PASSWORD_CHANGED, actor, admin,
+                    updateDetail(actor, admin, "cambió la contraseña del") + SESSION_CLOSED_NOTE);
         }
 
         return toDetail(admin);

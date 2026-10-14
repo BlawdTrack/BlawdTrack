@@ -65,7 +65,8 @@ class AdminUpdateIntegrationTest {
         assertThat(saved.getFullName()).isEqualTo("Ana Nueva");
         assertThat(saved.getEmail()).isEqualTo("ana.nueva@example.test");
         assertThat(saved.getTokenVersion()).isEqualTo(versionBefore);
-        assertThat(auditLog()).contains("ACTUALIZAR_ADMINISTRADOR").contains("fullName,email");
+        assertThat(auditLog()).contains("ACTUALIZAR_ADMINISTRADOR").contains("modificó los datos (nombre, correo)")
+                .contains("Ana Nueva");
     }
 
     @Test

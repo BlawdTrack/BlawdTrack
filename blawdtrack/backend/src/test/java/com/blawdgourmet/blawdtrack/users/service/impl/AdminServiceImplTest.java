@@ -32,6 +32,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.service.AdminRegisteredEvent;
@@ -60,6 +61,9 @@ class AdminServiceImplTest {
     @Mock private AuditLogRepository auditLogRepository;
     @Mock private TemporaryPasswordGenerator temporaryPasswords;
     @Mock private ApplicationEventPublisher events;
+
+    private static final AuthenticatedUser SUPER_USER_ACTOR = new AuthenticatedUser(
+            1L, DocumentType.CEDULA, "1-1111-1111", "Alicia Admin", RoleName.SUPER_USER, "alicia@example.test");
 
     private AdminServiceImpl service;
 
@@ -139,11 +143,13 @@ class AdminServiceImplTest {
             .thenReturn(Optional.of(admin));
 
         var detail = service.updateAdministrator(DocumentType.CEDULA, admin.getDocumentNumber(),
-                new AdminUpdateRequest("Ana Nueva", null, null, null), null);
+                new AdminUpdateRequest("Ana Nueva", null, null, null), SUPER_USER_ACTOR);
 
         assertThat(detail.fullName()).isEqualTo("Ana Nueva");
         assertThat(admin.getTokenVersion()).isEqualTo(versionBefore);
-        verify(auditService).logAction(AuditAction.ADMIN_UPDATED, null, admin, "fullName");
+        verify(auditService).logAction(eq(AuditAction.ADMIN_UPDATED), eq(SUPER_USER_ACTOR), eq(admin),
+                argThat(text -> text.contains("Alicia Admin") && text.contains("modificó los datos (nombre)")
+                        && text.contains("Ana Nueva")));
         verify(passwordEncoder, never()).encode(any());
     }
 
@@ -156,13 +162,15 @@ class AdminServiceImplTest {
         when(passwordEncoder.encode("NuevaClave123")).thenReturn("nuevo-hash");
 
         service.updateAdministrator(DocumentType.CEDULA, admin.getDocumentNumber(),
-                new AdminUpdateRequest(null, null, "NuevaClave123", UserStatus.INACTIVE), null);
+                new AdminUpdateRequest(null, null, "NuevaClave123", UserStatus.INACTIVE), SUPER_USER_ACTOR);
 
         assertThat(admin.getStatus()).isEqualTo(UserStatus.INACTIVE);
         assertThat(admin.getPasswordHash()).isEqualTo("nuevo-hash");
         assertThat(admin.getTokenVersion()).isGreaterThan(versionBefore);
-        verify(auditService).logAction(AuditAction.ADMIN_DEACTIVATED, null, admin, "status");
-        verify(auditService).logAction(AuditAction.ADMIN_PASSWORD_CHANGED, null, admin, "password");
+        verify(auditService).logAction(eq(AuditAction.ADMIN_DEACTIVATED), eq(SUPER_USER_ACTOR), eq(admin),
+                argThat(text -> text.contains("desactivó") && text.contains("sesión activa se cerró")));
+        verify(auditService).logAction(eq(AuditAction.ADMIN_PASSWORD_CHANGED), eq(SUPER_USER_ACTOR), eq(admin),
+                argThat(text -> text.contains("cambió la contraseña") && !text.contains("NuevaClave123")));
     }
 
     @Test
@@ -172,7 +180,7 @@ class AdminServiceImplTest {
             .thenReturn(Optional.of(admin));
 
         service.updateAdministrator(DocumentType.CEDULA, admin.getDocumentNumber(),
-                new AdminUpdateRequest(admin.getFullName(), admin.getEmail(), null, admin.getStatus()), null);
+                new AdminUpdateRequest(admin.getFullName(), admin.getEmail(), null, admin.getStatus()), SUPER_USER_ACTOR);
 
         verify(auditService, never()).logAction(any(), any(), any(), any());
     }
@@ -183,7 +191,7 @@ class AdminServiceImplTest {
             .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.updateAdministrator(DocumentType.CEDULA, "1-2345-6789",
-                new AdminUpdateRequest("X", null, null, null), null))
+                new AdminUpdateRequest("X", null, null, null), SUPER_USER_ACTOR))
                 .isInstanceOf(AdminNotFoundException.class);
     }
 
