@@ -20,6 +20,7 @@ export default function MainMenuPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const columns = getMainMenuColumns(user.role);
+  const singleColumn = columns.length === 1;
 
   const handleLogout = () => {
     logout();
@@ -30,11 +31,16 @@ export default function MainMenuPage() {
     <PageContainer
       sx={{
         // Banner y módulos ocupan casi todo el ancho disponible para no dejar espacio muerto a los lados.
-        // Una sola columna (la jornada del mensajero) va angosta, como una lista.
-        maxWidth: columns.length === 1 ? rem(720) : rem(1500),
-        minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },
-        justifyContent: 'center',
-        gap: { xs: 4, md: 6 },
+        // Una sola columna (la jornada del mensajero) va angosta, pegada arriba y con poco aire entre bloques, como una
+        // lista: centrada en la altura de la pantalla dejaba un hueco enorme arriba y abajo.
+        ...(singleColumn
+          ? { maxWidth: rem(720), pt: { xs: 2.5, md: 4.5 }, gap: 3 }
+          : {
+              maxWidth: rem(1500),
+              minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },
+              justifyContent: 'center',
+              gap: { xs: 4, md: 6 },
+            }),
       }}
     >
       <WelcomeBanner roleLabel={ROLE_LABELS[user.role] ?? user.role} greeting={getGreeting()} question="¿Qué deseas hacer hoy?" />
@@ -44,12 +50,12 @@ export default function MainMenuPage() {
           sx={{
             display: 'grid',
             alignItems: 'start',
-            gap: { xs: 4, md: 4 },
+            gap: singleColumn ? 3 : { xs: 4, md: 4 },
             gridTemplateColumns: { xs: '1fr', md: `repeat(${columns.length}, minmax(0, 1fr))` },
           }}
         >
           {columns.map((sections) => (
-            <Box key={sections[0].id} sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Box key={sections[0].id} sx={{ display: 'flex', flexDirection: 'column', gap: singleColumn ? 3 : 4 }}>
               {sections.map((section) => (
                 <MainMenuSection key={section.id} section={section} />
               ))}
