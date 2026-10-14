@@ -1,4 +1,5 @@
 import { Alert, Box, Button, Container, Typography } from '@mui/material';
+import PackageResultsTable from '../components/PackageResultsTable';
 import PackageSearchBar from '../components/PackageSearchBar';
 import { MAX_SEARCH_TERM_LENGTH } from '../config/packageSearch';
 import usePackageSearch from '../hooks/usePackageSearch';
@@ -16,7 +17,7 @@ function formatSchedule(schedule) {
 }
 
 /**
- * Pantalla de búsqueda de paquetes. T05 renderizará el listado y T06 el estado vacío.
+ * Pantalla de búsqueda de paquetes. T06 renderizará el estado vacío.
  */
 export function PackageSearchPage() {
   const { term, setTerm, results, distributionResults, isLoading, errorMessage } = usePackageSearch();
@@ -103,6 +104,8 @@ export function PackageSearchPage() {
           </Alert>
         )}
 
+        <PackageResultsTable packages={results?.content} />
+        {/* T06 agregará aquí el estado "sin resultados" */}
       </Container>
     </Box>
   );
