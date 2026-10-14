@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
-import { getNavigationForRole } from '../../config/navigation';
+import { getNavigationForRole, getSettingsForRole } from '../../config/navigation';
 import { ROLE_LABELS } from '../../config/roles';
 import { ROUTES } from '../../config/routes';
 import SidebarContent from './SidebarContent';
@@ -35,6 +35,7 @@ export default function MainMenuLayout() {
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
   const groups = getNavigationForRole(user.role);
+  const settings = getSettingsForRole(user.role);
 
   const handleLogout = () => {
     logout();
@@ -72,6 +73,7 @@ export default function MainMenuLayout() {
       >
         <SidebarContent
           groups={groups}
+          settings={settings}
           user={user}
           roleLabel={ROLE_LABELS[user.role] ?? user.role}
           onLogout={handleLogout}
@@ -84,7 +86,7 @@ export default function MainMenuLayout() {
         <Outlet />
       </Box>
 
-      <MobileBottomNav groups={groups} />
+      <MobileBottomNav groups={groups} settings={settings} />
     </Box>
   );
 }
