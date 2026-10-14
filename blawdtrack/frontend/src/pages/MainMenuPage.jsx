@@ -31,10 +31,10 @@ export default function MainMenuPage() {
     <PageContainer
       sx={{
         // Banner y módulos ocupan casi todo el ancho disponible para no dejar espacio muerto a los lados.
-        // Una sola columna (la jornada del mensajero) va angosta, pegada arriba y con poco aire entre bloques, como una
-        // lista: centrada en la altura de la pantalla dejaba un hueco enorme arriba y abajo.
+        // Una sola columna (la jornada del mensajero) va pegada arriba y con poco aire entre bloques; centrada en la altura
+        // de la pantalla dejaba un hueco enorme arriba y abajo, y más angosta, a los lados.
         ...(singleColumn
-          ? { maxWidth: rem(720), pt: { xs: 2.5, md: 4.5 }, gap: 3 }
+          ? { maxWidth: rem(1100), pt: { xs: 2.5, md: 4.5 }, gap: 3 }
           : {
               maxWidth: rem(1500),
               minHeight: { xs: 'calc(100vh - 72px)', md: '100vh' },

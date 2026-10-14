@@ -90,7 +90,8 @@ const COURIER_COLUMNS = [
         { id: 'not-delivered', label: 'No entregados', tone: 'error' },
       ],
     },
-    { id: 'my-day', title: 'Mi jornada', modules: ['my-packages', 'trip-costs'] },
+    // Las dos tarjetas van lado a lado para aprovechar el ancho.
+    { id: 'my-day', title: 'Mi jornada', modules: ['my-packages', 'trip-costs'], moduleColumns: 2 },
   ],
 ];
 
@@ -122,7 +123,7 @@ export function getMainMenuColumns(role) {
   return (LAYOUTS[role] ?? SUPER_USER_COLUMNS)
     .map((sections) =>
       sections
-        .map((section) => ({ id: section.id, title: section.title, modules: section.modules.map(resolve).filter(Boolean), hideTitle: section.hideTitle, stats: section.stats }))
+        .map((section) => ({ id: section.id, title: section.title, modules: section.modules.map(resolve).filter(Boolean), moduleColumns: section.moduleColumns, hideTitle: section.hideTitle, stats: section.stats }))
         .filter((section) => section.modules.length > 0 || section.stats)
     )
     .filter((sections) => sections.length > 0);

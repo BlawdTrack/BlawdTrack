@@ -11,7 +11,7 @@ import { FONT } from '../theme';
  * tarjetas de sus módulos. Los módulos sin ruta se muestran como "Próximamente". Una sección con `stats` (el resumen
  * del día) muestra en su lugar una cuadrícula de cifras (con `hideTitle` el rótulo solo lo leen los lectores de pantalla), con un guion largo mientras no exista de dónde leerlas.
  * @param {{ section: { id: string, title: string, modules: Array<{ id: string, title: string, description: string,
- *   path: string|null, muted: boolean }>, hideTitle?: boolean, stats?: Array<{ id: string, label: string, tone: string }> } }} props
+ *   path: string|null, muted: boolean }>, moduleColumns?: number, hideTitle?: boolean, stats?: Array<{ id: string, label: string, tone: string }> } }} props
  */
 export default function MainMenuSection({ section }) {
   const headingId = `main-menu-section-${section.id}`;
@@ -46,16 +46,26 @@ export default function MainMenuSection({ section }) {
           <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{COMING_SOON_MESSAGE}</Typography>
         </>
       )}
-      {section.modules.map((module) => (
-        <MenuCard
-          key={module.id}
-          to={module.path}
-          icon={NAV_GROUP_ICONS[module.id]}
-          title={module.title}
-          description={module.description}
-          muted={module.muted}
-        />
-      ))}
+      {section.modules.length > 0 && (
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 1.5,
+            gridTemplateColumns: { xs: '1fr', md: `repeat(${section.moduleColumns ?? 1}, minmax(0, 1fr))` },
+          }}
+        >
+          {section.modules.map((module) => (
+            <MenuCard
+              key={module.id}
+              to={module.path}
+              icon={NAV_GROUP_ICONS[module.id]}
+              title={module.title}
+              description={module.description}
+              muted={module.muted}
+            />
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }
