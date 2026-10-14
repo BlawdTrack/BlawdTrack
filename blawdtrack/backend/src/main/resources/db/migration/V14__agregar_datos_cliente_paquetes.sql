@@ -12,3 +12,5 @@ ALTER TABLE paquetes
 
 ALTER TABLE paquetes
     ADD COLUMN horario_preferencia VARCHAR(255) NULL;
+
+CREATE INDEX idx_paquetes_numero_orden ON paquetes (numero_orden);
