@@ -14,9 +14,8 @@ const tree = (
 );
 
 describe('MainMenuPage', () => {
-  it('shows the app title and the role once, without a second welcome or the user name', () => {
+  it('shows the role once in the banner, without a second welcome or the user name', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
-    expect(screen.getByRole('heading', { name: 'BlawdTrack' })).toBeInTheDocument();
     expect(screen.getAllByText('Súper Usuario')).toHaveLength(1);
     expect(screen.queryByText('Bienvenid@ al sistema')).not.toBeInTheDocument();
     expect(screen.queryByText(/Alicia Admin/)).not.toBeInTheDocument();
@@ -40,7 +39,7 @@ describe('MainMenuPage', () => {
 
   it('greets according to the time of day and asks what to do', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
-    expect(screen.getByRole('heading', { level: 2, name: /^(Buenos días|Buenas tardes|Buenas noches)$/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /^(Buenos días|Buenas tardes|Buenas noches)$/ })).toBeInTheDocument();
     expect(screen.getByText('¿Qué deseas hacer hoy?')).toBeInTheDocument();
   });
 
@@ -49,11 +48,45 @@ describe('MainMenuPage', () => {
     expect(screen.queryByText(/\d+ funciones?/)).not.toBeInTheDocument();
   });
 
-  it('offers one card per module that leads to the module menu', () => {
+  it('splits the modules into the sections Operación diaria, Administración and Mensajería', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
-    expect(screen.getByRole('link', { name: /Gestión de mensajeros/ })).toHaveAttribute('href', ROUTES.MODULE_COURIERS);
-    expect(screen.getByRole('link', { name: /Gestión de administradores/ })).toHaveAttribute('href', ROUTES.MODULE_ADMINS);
-    expect(screen.getByRole('link', { name: /Seguridad y acceso/ })).toHaveAttribute('href', ROUTES.MODULE_SECURITY);
+    ['Operación diaria', 'Administración', 'Mensajería'].forEach((name) =>
+      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument()
+    );
+    expect(screen.getByRole('region', { name: 'Operación diaria' })).toContainElement(
+      screen.getByRole('heading', { level: 3, name: 'Importación de paquetes' })
+    );
+    expect(screen.getByRole('region', { name: 'Administración' })).toContainElement(
+      screen.getByRole('heading', { level: 3, name: 'Gestión de usuarios' })
+    );
+  });
+
+  it('links the implemented modules to their menu', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+
+    expect(screen.getByRole('link', { name: /Gestión de usuarios/ })).toHaveAttribute('href', ROUTES.MODULE_USERS);
+    expect(screen.getByRole('link', { name: /Importación de paquetes/ })).toHaveAttribute('href', ROUTES.MODULE_PACKAGES);
+    expect(screen.queryByRole('link', { name: /Seguridad y acceso/ })).not.toBeInTheDocument();
+  });
+
+  it('shows the modules that are not built yet as disabled "Próximamente" cards, without a link', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+
+    ['Gestión de paquetes', 'Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((title) => {
+      const heading = screen.getByRole('heading', { level: 3, name: title });
+      expect(heading.closest('a')).toBeNull();
+      expect(heading.parentElement.closest('[aria-disabled="true"]')).not.toBeNull();
+    });
+    expect(screen.getAllByText('Próximamente')).toHaveLength(4);
+  });
+
+  it('shows the sales admin only the modules of their role', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: { ...superUser, role: 'ADMIN_VENTAS' } });
+
+    expect(screen.getByRole('link', { name: /Importación de paquetes/ })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Gestión de usuarios' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Reportes y notificaciones' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Mensajería' })).not.toBeInTheDocument();
   });
 });
