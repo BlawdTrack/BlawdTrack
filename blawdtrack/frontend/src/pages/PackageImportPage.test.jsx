@@ -17,6 +17,7 @@ function LocationProbe() {
     <>
       <div data-testid="path">{location.pathname}</div>
       <div data-testid="state">{location.state?.preview?.fileName ?? ''}</div>
+      <div data-testid="state-file">{location.state?.file?.name ?? ''}</div>
     </>
   );
 }
@@ -143,6 +144,8 @@ describe('PackageImportPage (carga del archivo)', () => {
 
     expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PACKAGE_IMPORT_PREVIEW);
     expect(screen.getByTestId('state')).toHaveTextContent('paquetes.xlsx');
+    // El archivo viaja con la previsualización: la confirmación lo vuelve a enviar al backend.
+    expect(screen.getByTestId('state-file')).toHaveTextContent('paquetes.xlsx');
   });
 
   it('"Cargar otro archivo" vuelve a la zona de carga, vacía', async () => {

@@ -37,8 +37,7 @@ export default function PackageImportPage() {
     if (file && !isUploading) upload(file);
   };
 
-  // Hasta que exista la pantalla de previsualización (paso 2), la revisión de duplicados es el destino.
-  const handleContinue = () => navigate(ROUTES.PACKAGE_DUPLICATES, { state: { preview } });
+  const handleContinue = () => navigate(ROUTES.PACKAGE_IMPORT_PREVIEW, { state: { preview, file } });
 
   const alertMessage = fileError ?? errorMessage;
  * formato o del servidor) y éxito. Con éxito entrega la previsualización a la pantalla de previsualización (paso 2) por

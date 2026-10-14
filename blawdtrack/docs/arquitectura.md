@@ -145,7 +145,7 @@ sequenceDiagram
 
 | Rol | Nombre en el sistema | Alcance |
 |---|---|---|
-| Super Usuario | `SUPER_USUARIO` | Gestiona mensajeros, administradores, roles y permisos. Sus permisos no se editan. |
+| Super Usuario | `SUPER_USUARIO` | Tiene acceso a todos los módulos del sistema (usuarios, importación y gestión de paquetes, asignación y seguimiento, reportes y notificaciones) y es el único que administra usuarios, roles y permisos. Sus permisos no se editan. |
 | Administrador de Ventas | `ADMIN_VENTAS` | Opera paquetes y reportes (a construir). Permisos editables dentro de su alcance. |
 | Mensajero | `MENSAJERO` | Consulta y actualiza sus paquetes asignados (a construir). Permisos editables dentro de su alcance. |
 

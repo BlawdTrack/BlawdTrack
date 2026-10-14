@@ -25,12 +25,12 @@ fusionar) y que la importación use el servicio de exclusión.
 | Resaltar los duplicados en la previsualización | ✅ Task 115: pantalla "Detectar duplicados" con filas resaltadas, etiqueta "Duplicado" y la causa. ⏳ Falta que la pantalla de importación (HU-010) le entregue la previsualización |
 | Los duplicados no se importan | ⏳ El servicio de exclusión está listo (Task 114); la importación de HU-010 aún no lo llama |
 | La detección ocurre antes de confirmar | ✅ El endpoint sirve a la previsualización y la exclusión se vuelve a ejecutar al confirmar |
-| Solo el Administrador de Ventas ejecuta el proceso | ✅ `ADMIN_VENTAS`; otros roles reciben 403 y sin token, 401 |
+| Solo el Administrador de Ventas (y el Súper Usuario) ejecuta el proceso | ✅ `ADMIN_VENTAS` y `SUPER_USER` (Task 270); el mensajero recibe 403 y sin token, 401 |
 | Indicar la cantidad de registros válidos y duplicados | ✅ Contadores en la respuesta |
 
 ## Cómo funciona en el backend
 
-`POST /api/v1/packages/shipment-numbers/compare`, exclusivo del Administrador de Ventas. Recibe los números de
+`POST /api/v1/packages/shipment-numbers/compare`, para el Administrador de Ventas y el Súper Usuario. Recibe los números de
 envío del archivo (máximo 1000 por solicitud, 50 caracteres cada uno, sin vacíos) y devuelve una entrada por
 fila, en el orden del archivo.
 
@@ -146,7 +146,7 @@ de sus pantallas (`getGroupRoles`), así que el Administrador de Ventas no entra
 | Test | Qué verifica |
 |---|---|
 | `ShipmentNumberComparisonServiceImplTest` | Una sola consulta a la base de datos y filas en su orden original; todas las copias de un repetido con sus `repeatedInRows`; una fila ya registrada y repetida informa ambas causas pero cuenta una vez. |
-| `PackageShipmentNumberComparisonIntegrationTest` | Comparación masiva con la base de datos de pruebas y contadores; 403 para Super Usuario y Mensajero; 401 sin token; 400 con lista vacía. |
+| `PackageShipmentNumberComparisonIntegrationTest` | Comparación masiva con la base de datos de pruebas y contadores; 403 para el Mensajero; 401 sin token; 400 con lista vacía. |
 | `DuplicateExclusionServiceImplTest` | Quedan solo las filas sin duplicados y en orden; sin duplicados se importa todo; archivo vacío no consulta la base de datos. |
 | `DuplicateExclusionIntegrationTest` | Excluye registrados y repetidos con la base de datos de pruebas; detecta un número registrado después de la previsualización. |
 
