@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { Box, Tooltip, Typography } from '@mui/material';
+import { COMING_SOON_MESSAGE } from '../../config/mainMenu';
 import { RADIUS, FONT } from '../../theme';
 
 // Gris de las opciones que cuelgan de un título de menú, y crema para el título y para la opción activa.
@@ -58,7 +59,7 @@ function ItemContent({ label, active, disabled }) {
 export default function SidebarNavItem({ item }) {
   if (!item.path) {
     return (
-      <Tooltip title="Disponible próximamente" placement="right" arrow>
+      <Tooltip title={COMING_SOON_MESSAGE} placement="right" arrow>
         <span>
           <ItemContent label={item.label} active={false} disabled />
         </span>

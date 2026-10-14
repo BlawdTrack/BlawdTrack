@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Routes, Route } from 'react-router-dom';
 import MainMenuPage from './MainMenuPage';
@@ -79,6 +79,20 @@ describe('MainMenuPage', () => {
       expect(heading.parentElement.closest('[aria-disabled="true"]')).not.toBeNull();
     });
     expect(screen.getAllByText('Próximamente')).toHaveLength(4);
+  });
+
+  it('says the module is coming soon when the cursor is over a future card', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+
+    const card = screen.getByRole('heading', { level: 3, name: 'Reportes y notificaciones' }).closest('[aria-disabled]');
+    await user.hover(card);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Disponible próximamente');
+    // Un módulo que ya existe no lleva el aviso.
+    await user.unhover(card);
+    await user.hover(screen.getByRole('link', { name: /Gestión de usuarios/ }));
+    await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
   });
 
   it('shows the sales admin only the modules of their role', () => {

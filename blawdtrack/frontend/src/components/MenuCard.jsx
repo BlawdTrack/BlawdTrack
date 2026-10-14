@@ -1,6 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, Tooltip, Typography } from '@mui/material';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import { COMING_SOON_MESSAGE } from '../config/mainMenu';
 import { CARD_PATTERN_SX, FONT, RADIUS, rem, fontPx } from '../theme';
 
 // Fila ancha del menú principal: icono en cuadro a la izquierda, junto al título, y un círculo con la flecha a la
@@ -62,15 +63,16 @@ const ARROW_SX = {
 /**
  * Fila del menú principal: icono, título y descripción corta, con un círculo con la flecha a la derecha. Toda la
  * fila es el enlace (objetivo grande, ley de Fitts) y no cambia de tamaño ni de sitio al pasar el cursor: solo el
- * borde y el círculo. Sin `to` se muestra deshabilitada con el aviso "Próximamente". Con `muted` va atenuada, con
+ * borde y el círculo. Sin `to` se muestra deshabilitada, con "Próximamente" y el aviso de que está por implementarse al pasar el cursor. Con `muted` va atenuada, con
  * borde punteado y el icono en gris (para lo que es de otra vista, como la del mensajero).
  * @param {{ to?: string|null, icon?: import('react').ElementType, title: string, description?: string,
  *   muted?: boolean }} props
  */
 export default function MenuCard({ to = null, icon: Icon, title, description, muted = false }) {
-  const linkProps = to ? { component: RouterLink, to } : { 'aria-disabled': true };
+  // Sin ruta es un bloque deshabilitado, pero enfocable para que el teclado también vea el aviso de "próximamente".
+  const linkProps = to ? { component: RouterLink, to } : { 'aria-disabled': true, tabIndex: 0 };
 
-  return (
+  const card = (
     <Box
       {...linkProps}
       sx={{
@@ -109,5 +111,13 @@ export default function MenuCard({ to = null, icon: Icon, title, description, mu
         </Box>
       )}
     </Box>
+  );
+
+  return to ? (
+    card
+  ) : (
+    <Tooltip title={COMING_SOON_MESSAGE} placement="top" arrow>
+      {card}
+    </Tooltip>
   );
 }

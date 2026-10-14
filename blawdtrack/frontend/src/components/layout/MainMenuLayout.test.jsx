@@ -114,6 +114,51 @@ describe('MainMenuLayout sidebar', () => {
     expect(within(bar.getByRole('link', { name: 'Crear mensajero' })).getByText('Crear mensajero')).toHaveStyle({ color: GRAY });
   });
 
+  it('lists in the sidebar the same modules as the main menu, in its order, with the future ones disabled', () => {
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    const bar = within(sidebar());
+    const names = [
+      'Importación de paquetes',
+      'Gestión de paquetes',
+      'Asignación y seguimiento',
+      'Gestión de usuarios',
+      'Reportes y notificaciones',
+      'Operación de mensajero',
+    ];
+    const items = names.map((name) => bar.getByRole('button', { name }));
+
+    items.slice(1).forEach((item, index) =>
+      expect(items[index].compareDocumentPosition(item)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    );
+    ['Gestión de paquetes', 'Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((name) =>
+      expect(bar.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true')
+    );
+    expect(bar.getByRole('button', { name: 'Gestión de usuarios' })).not.toHaveAttribute('aria-disabled');
+  });
+
+  it('says a future module is coming soon when the cursor is over it in the sidebar, and does not navigate', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    const bar = within(sidebar());
+
+    await user.hover(bar.getByRole('button', { name: 'Reportes y notificaciones' }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Disponible próximamente');
+
+    await user.click(bar.getByRole('button', { name: 'Reportes y notificaciones' }));
+    expect(screen.getByText('menu content')).toBeInTheDocument();
+  });
+
+  it('keeps the future modules in the collapsed sidebar, each with the coming-soon notice', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
+    await user.click(within(sidebar()).getByRole('button', { name: 'Colapsar menú' }));
+
+    const future = within(sidebar()).getByRole('button', { name: 'Asignación y seguimiento' });
+    expect(future).toHaveAttribute('aria-disabled', 'true');
+    await user.hover(future);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Disponible próximamente');
+  });
+
   it('shows the packages group with "Importar paquetes" to the super user', async () => {
     const user = userEvent.setup();
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });

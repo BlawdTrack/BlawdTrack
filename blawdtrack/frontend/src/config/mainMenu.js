@@ -87,3 +87,21 @@ export function getMainMenuColumns(role) {
       .filter((section) => section.modules.length > 0)
   ).filter((sections) => sections.length > 0);
 }
+
+/** Aviso de los módulos y pantallas que todavía no existen, en el menú principal y en el lateral. */
+export const COMING_SOON_MESSAGE = 'Disponible próximamente';
+
+/**
+ * Módulos que muestra el menú lateral para un rol: los mismos del menú principal y en su mismo orden. Los que ya
+ * existen vienen como el grupo de `getNavigationForRole` (con sus pantallas); los futuros, como
+ * `{ id, title, comingSoon: true }`, para dibujarlos deshabilitados con el aviso al pasar el cursor.
+ * @param {string} role Rol de negocio.
+ * @returns {Array<object>}
+ */
+export function getSidebarModules(role) {
+  const groups = getNavigationForRole(role);
+  return getMainMenuColumns(role)
+    .flat()
+    .flatMap((section) => section.modules)
+    .map((module) => (module.path ? groups.find((group) => group.id === module.id) : { id: module.id, title: module.title, comingSoon: true }));
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getMainMenuColumns } from './mainMenu';
+import { getMainMenuColumns, getSidebarModules, COMING_SOON_MESSAGE } from './mainMenu';
 import { ROLES } from './roles';
 import { ROUTES } from './routes';
 
@@ -45,5 +45,46 @@ describe('getMainMenuColumns', () => {
   it('is empty for roles without menu access', () => {
     expect(getMainMenuColumns(ROLES.COURIER)).toEqual([]);
     expect(getMainMenuColumns('NOPE')).toEqual([]);
+  });
+});
+
+describe('getSidebarModules', () => {
+  it('lists the same modules as the main menu, in its order, with the future ones marked as coming soon', () => {
+    const modules = getSidebarModules(ROLES.SUPER_USER);
+
+    expect(modules.map((m) => m.title)).toEqual([
+      'Importación de paquetes',
+      'Gestión de paquetes',
+      'Asignación y seguimiento',
+      'Gestión de usuarios',
+      'Reportes y notificaciones',
+      'Operación de mensajero',
+    ]);
+    expect(modules.filter((m) => m.comingSoon).map((m) => m.id)).toEqual([
+      'package-management',
+      'assignment-tracking',
+      'reports',
+      'courier-operation',
+    ]);
+  });
+
+  it('brings the real groups with their screens so the sidebar can open them', () => {
+    const [importation, , , users] = getSidebarModules(ROLES.SUPER_USER);
+
+    expect(importation.items.map((i) => i.id)).toEqual(['package-import']);
+    expect(users.submenus.map((s) => s.id)).toEqual(['couriers', 'admins']);
+  });
+
+  it('gives the sales admin only what the main menu gives them', () => {
+    expect(getSidebarModules(ROLES.SALES_ADMIN).map((m) => m.title)).toEqual([
+      'Importación de paquetes',
+      'Gestión de paquetes',
+      'Asignación y seguimiento',
+    ]);
+    expect(getSidebarModules(ROLES.COURIER)).toEqual([]);
+  });
+
+  it('shares one coming-soon notice', () => {
+    expect(COMING_SOON_MESSAGE).toBe('Disponible próximamente');
   });
 });
