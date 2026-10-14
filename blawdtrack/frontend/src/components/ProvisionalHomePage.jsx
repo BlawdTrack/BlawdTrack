@@ -24,10 +24,12 @@ const CARD_SX = {
 // (T12). SalesHomePage y CourierHomePage la usan; cuando HU-010+/HU-022
 // construyan la pantalla definitiva, cada una se reemplaza por la real.
 /**
- * @param {{ title: string, description: string }} props Título y texto de la pantalla provisional;
- *   muestra el usuario y el rol autenticados, el acceso a restablecer la contraseña y cerrar sesión.
+ * @param {{ title: string, description: string, children?: import('react').ReactNode }} props Título y
+ *   texto de la pantalla provisional; muestra el usuario y el rol autenticados, el acceso a restablecer
+ *   la contraseña y cerrar sesión. `children` permite añadir accesos propios del rol (por ejemplo, un
+ *   botón hacia una pantalla nueva) sin rehacer la pantalla provisional.
  */
-export function ProvisionalHomePage({ title, description }) {
+export function ProvisionalHomePage({ title, description, children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   // Cada rol restablece su propia contraseña desde su inicio.
@@ -117,6 +119,8 @@ export function ProvisionalHomePage({ title, description }) {
             </Box>
           )}
         </Box>
+
+        {children}
       </PageContainer>
     </Box>
   );
