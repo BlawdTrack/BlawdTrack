@@ -5,9 +5,11 @@ import PackageQueryPage from './PackageQueryPage';
 import { getPackageByShipmentNumber } from '../services/PackageService';
 import { renderWithProviders } from '../test-utils';
 
-vi.mock('../services/PackageService', () => ({
-  getPackageByShipmentNumber: vi.fn(),
-}));
+// Se conserva `normalizeShipmentNumber` real y solo se simula la llamada HTTP.
+vi.mock('../services/PackageService', async (importOriginal) => {
+  const actual = await importOriginal();
+  return { ...actual, getPackageByShipmentNumber: vi.fn() };
+});
 
 const salesAdmin = {
   id: 2,
