@@ -32,9 +32,10 @@ vi.mock('./hooks/useAuth', () => ({ useAuth: vi.fn() }));
 // PROTEGIDA NUEVA EN App.jsx hay que sumarla aquí y en ALLOWED_ROUTES.
 const SCREENS = {
   [ROUTES.MAIN_MENU]: 'Pantalla menú principal',
+  [ROUTES.MODULE_USERS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_COURIERS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_ADMINS]: 'Pantalla menú de módulo',
-  [ROUTES.MODULE_SECURITY]: 'Pantalla menú de módulo',
+  [ROUTES.MODULE_SETTINGS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_PACKAGES]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
   [ROUTES.PACKAGE_IMPORT_PREVIEW]: 'Pantalla previsualización',
@@ -56,7 +57,7 @@ const SCREENS = {
 const SHARED_ROUTES = [
   ROUTES.MAIN_MENU,
   ROUTES.MODULE_PACKAGES,
-  ROUTES.MODULE_SECURITY,
+  ROUTES.MODULE_SETTINGS,
   ROUTES.PASSWORD_RESET_OWN,
   ROUTES.PACKAGE_IMPORT,
   ROUTES.PACKAGE_IMPORT_PREVIEW,
@@ -67,10 +68,11 @@ const ALLOWED_ROUTES = {
   // Ajustado a las constantes en inglés (SUPER_USER, SALES_ADMIN, COURIER) para que hagan match con App.jsx
   [ROLES.SUPER_USER]: [
     ROUTES.MAIN_MENU,
+    ROUTES.MODULE_USERS,
     ROUTES.MODULE_COURIERS,
     ROUTES.MODULE_ADMINS,
     ROUTES.MODULE_PACKAGES,
-    ROUTES.MODULE_SECURITY,
+    ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
     ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.ADMIN_CREATE,
@@ -84,7 +86,7 @@ const ALLOWED_ROUTES = {
   [ROLES.SALES_ADMIN]: [
     ROUTES.MAIN_MENU,
     ROUTES.MODULE_PACKAGES,
-    ROUTES.MODULE_SECURITY,
+    ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
     ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.PASSWORD_RESET_OWN,
@@ -136,8 +138,11 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     }
   });
 
-  it('el Administrador de Ventas no entra a los módulos de mensajeros ni de administradores', () => {
+  it('el Administrador de Ventas no entra a Gestión de usuarios ni a sus submenús de mensajeros y administradores', () => {
     loginAs(ROLES.SALES_ADMIN);
+    renderAt(ROUTES.MODULE_USERS);
+    expect(screen.getByText('Pantalla menú principal')).toBeTruthy();
+    cleanup();
     renderAt(ROUTES.MODULE_COURIERS);
     // Vuelve a su inicio: el menú principal.
     expect(screen.getByText('Pantalla menú principal')).toBeTruthy();

@@ -8,6 +8,10 @@ import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlin
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 
 // Icono por item de navegación (sidebar de escritorio).
 export const NAV_ITEM_ICONS = {
@@ -16,15 +20,21 @@ export const NAV_ITEM_ICONS = {
   'courier-create': PersonAddAltOutlinedIcon,
   'courier-update': EditOutlinedIcon,
   'courier-deactivate': PersonOffOutlinedIcon,
-  'admin-create': AdminPanelSettingsOutlinedIcon,
+  'admin-create': PersonAddAltOutlinedIcon,
   'admin-delete': PersonRemoveOutlinedIcon,
   'roles-permissions': ManageAccountsOutlinedIcon,
 };
 
-// Icono por grupo (barra inferior móvil, un tab por grupo).
+// Icono por grupo (barra inferior móvil, un tab por grupo), por submenú (tarjetas del menú de un grupo) y por módulo
+// futuro del menú principal (tarjetas "Próximamente").
 export const NAV_GROUP_ICONS = {
-  security: LockResetOutlinedIcon,
+  users: PeopleAltOutlinedIcon,
+  settings: SettingsOutlinedIcon,
   couriers: LocalShippingOutlinedIcon,
   admins: AdminPanelSettingsOutlinedIcon,
-  packages: Inventory2OutlinedIcon,
+  packages: UploadFileOutlinedIcon,
+  'package-management': Inventory2OutlinedIcon,
+  'assignment-tracking': PlaceOutlinedIcon,
+  reports: BarChartOutlinedIcon,
+  'courier-operation': LocalShippingOutlinedIcon,
 };

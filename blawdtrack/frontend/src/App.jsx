@@ -20,7 +20,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 import { ROLES } from './config/roles';
 import { ROUTES } from './config/routes';
-import { NAVIGATION_GROUPS, getGroupRoles } from './config/navigation';
+import { NAVIGATION_MENUS, getGroupRoles } from './config/navigation';
 import { getHomeRoute } from './utils/roleRoutes';
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
@@ -98,9 +98,9 @@ function App() {
             (getNavigationForRole) y el menú de cada módulo se protege con los roles de sus pantallas. */}
         <Route element={<MainMenuLayout />}>
           <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
-          {NAVIGATION_GROUPS.map((group) => (
-            <Route key={group.id} element={<ProtectedRoute allowedRoles={getGroupRoles(group)} />}>
-              <Route path={group.path} element={<ModuleMenuPage groupId={group.id} />} />
+          {NAVIGATION_MENUS.map((menu) => (
+            <Route key={menu.id} element={<ProtectedRoute allowedRoles={getGroupRoles(menu)} />}>
+              <Route path={menu.path} element={<ModuleMenuPage groupId={menu.id} />} />
             </Route>
           ))}
           <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />

@@ -6,10 +6,11 @@ export const ROUTES = {
   PASSWORD_RESET: '/recovery',
   MAIN_MENU: '/main-menu',
   // Menú de cada módulo: lista las funciones del módulo que el rol puede usar (ver NAVIGATION_GROUPS).
+  MODULE_USERS: '/main-menu/usuarios',
   MODULE_COURIERS: '/main-menu/mensajeros',
   MODULE_ADMINS: '/main-menu/administradores',
   MODULE_PACKAGES: '/main-menu/paquetes',
-  MODULE_SECURITY: '/main-menu/seguridad',
+  MODULE_SETTINGS: '/main-menu/ajustes',
   // Mismo flujo que PASSWORD_RECOVERY, pero dentro del menú principal para un
   // usuario ya logueado (mantiene la barra lateral visible). Lo usan el Súper Usuario y el Administrador de Ventas.
   PASSWORD_RESET_OWN: '/main-menu/restablecer-contrasena',
