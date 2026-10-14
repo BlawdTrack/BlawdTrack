@@ -227,6 +227,48 @@ class AdminUpdateIntegrationTest {
         assertThat(users.findById(admin.getId()).orElseThrow().getFullName()).isEqualTo("Administrador de prueba");
     }
 
+    @Test
+    void theHistoryOfOneAdminListsOnlyItsOwnChangesNewestFirst() throws Exception {
+        User admin = save(RoleName.SALES_ADMIN, "admin-historial@example.test");
+        User other = save(RoleName.SALES_ADMIN, "admin-otro@example.test");
+        String superToken = token(RoleName.SUPER_USER);
+
+        mvc.perform(patch(PATH, admin.getDocumentType(), admin.getDocumentNumber())
+                        .header("Authorization", "Bearer " + superToken).contentType(JSON).content("{\"fullName\":\"Nombre Uno\"}"))
+                .andExpect(status().isOk());
+        mvc.perform(patch(PATH, admin.getDocumentType(), admin.getDocumentNumber())
+                        .header("Authorization", "Bearer " + superToken).contentType(JSON).content("{\"status\":\"INACTIVE\"}"))
+                .andExpect(status().isOk());
+        mvc.perform(patch(PATH, other.getDocumentType(), other.getDocumentNumber())
+                        .header("Authorization", "Bearer " + superToken).contentType(JSON).content("{\"fullName\":\"Nombre Ajeno\"}"))
+                .andExpect(status().isOk());
+
+        mvc.perform(get(PATH + "/history", admin.getDocumentType(), admin.getDocumentNumber())
+                        .header("Authorization", "Bearer " + superToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].action").value("DESACTIVAR_ADMINISTRADOR"))
+                .andExpect(jsonPath("$[1].action").value("ACTUALIZAR_ADMINISTRADOR"))
+                .andExpect(jsonPath("$[1].details").value(org.hamcrest.Matchers.containsString("Nombre Uno")));
+    }
+
+    @Test
+    void theHistoryOfAnUnknownAdminIs404AndOnlyTheSuperUserCanReadIt() throws Exception {
+        User admin = save(RoleName.SALES_ADMIN, "admin-historial-403@example.test");
+
+        mvc.perform(get(PATH + "/history", DocumentType.CEDULA, "1-2345-6780")
+                        .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ADMINISTRADOR_NO_EXISTENTE"));
+        for (String role : new String[] {RoleName.SALES_ADMIN, RoleName.COURIER}) {
+            mvc.perform(get(PATH + "/history", admin.getDocumentType(), admin.getDocumentNumber())
+                            .header("Authorization", "Bearer " + token(role)))
+                    .andExpect(status().isForbidden());
+        }
+        mvc.perform(get(PATH + "/history", admin.getDocumentType(), admin.getDocumentNumber()))
+                .andExpect(status().isUnauthorized());
+    }
+
     private String auditLog() throws Exception {
         MvcResult result = mvc.perform(get(AUDIT_PATH).header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
                 .andExpect(status().isOk())

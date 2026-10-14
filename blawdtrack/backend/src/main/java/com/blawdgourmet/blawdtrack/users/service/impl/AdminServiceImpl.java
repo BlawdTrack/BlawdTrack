@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationException;
@@ -181,14 +182,29 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public List<AdminAuditLogResponse> getAuditLog() {
         return auditLogRepository.findByActionInOrderByTimestampDesc(ADMIN_AUDIT_ACTIONS).stream()
-                .map(log -> new AdminAuditLogResponse(
-                        log.getId(),
-                        log.getAction(),
-                        log.getActor().getFullName(),
-                        log.getDetails(),
-                        log.getTimestamp()
-                ))
+                .map(AdminServiceImpl::toAuditResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminAuditLogResponse> getAdministratorHistory(DocumentType documentType, String documentNumber) {
+        User admin = findSalesAdministrator(documentType, documentNumber);
+        return auditLogRepository
+                .findByUsuarioAfectadoIdAndActionInOrderByTimestampDescIdDesc(admin.getId(), ADMIN_AUDIT_ACTIONS)
+                .stream()
+                .map(AdminServiceImpl::toAuditResponse)
+                .toList();
+    }
+
+    private static AdminAuditLogResponse toAuditResponse(AuditLog log) {
+        return new AdminAuditLogResponse(
+                log.getId(),
+                log.getAction(),
+                log.getActor().getFullName(),
+                log.getDetails(),
+                log.getTimestamp()
+        );
     }
 
     /**

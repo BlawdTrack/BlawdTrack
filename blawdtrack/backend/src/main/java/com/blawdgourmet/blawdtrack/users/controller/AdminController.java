@@ -80,6 +80,12 @@ public class AdminController {
                 document.documentType(), document.documentNumber(), request, actor));
     }
 
+    @GetMapping("/{documentType}/{documentNumber}/history")
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public ResponseEntity<List<AdminAuditLogResponse>> historial(@Valid AdminDocumentRequest request) {
+        return ResponseEntity.ok(adminService.getAdministratorHistory(request.documentType(), request.documentNumber()));
+    }
+
     @GetMapping("/{documentType}/{documentNumber}/deletion-eligibility")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<AdminDeletionEligibilityResponse> validateDeletionEligibility(
