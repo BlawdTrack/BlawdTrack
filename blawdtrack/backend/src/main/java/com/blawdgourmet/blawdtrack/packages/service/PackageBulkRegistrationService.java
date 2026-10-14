@@ -4,7 +4,7 @@ import com.blawdgourmet.blawdtrack.packages.dto.ImportedPackage;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageBulkRegistrationResult;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
-import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +21,7 @@ public class PackageBulkRegistrationService implements PackageBulkRegistrationUs
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAuthority('" + PermissionCode.PACKAGE_IMPORT + "')")
     public PackageBulkRegistrationResult registerValidPackages(List<ImportedPackage> validPackages) {
         if (validPackages == null) {
             throw new IllegalArgumentException("La lista de paquetes válidos es obligatoria");

@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
@@ -184,6 +185,18 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> manejarArchivoDemasiadoGrande(
+            MaxUploadSizeExceededException ex) {
+        ApiError error = ApiError.builder()
+                .code("PACKAGE_FILE_TOO_LARGE")
+                .message("El archivo excede el tamaño máximo permitido de 10 MB")
+                .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
     }
 
     @ExceptionHandler(Exception.class)

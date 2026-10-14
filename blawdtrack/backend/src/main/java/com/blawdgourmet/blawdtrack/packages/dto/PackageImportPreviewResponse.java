@@ -11,7 +11,7 @@ public record PackageImportPreviewResponse(
         int duplicateRecordsCount,
         List<ImportedPackage> validRecords,
         List<InvalidPackageRecord> invalidRecords,
-        List<DuplicateShipmentNumberResponse> duplicates
+        List<PackageImportDuplicateResponse> duplicates
 ) {
     public PackageImportPreviewResponse {
         validRecords = List.copyOf(validRecords);

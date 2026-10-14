@@ -88,11 +88,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         // Permisos individuales de usuarios (HU-009): exclusivos del Super Usuario.
                         .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
-                        // Los paquetes (importacion, validaciones previas, consulta, eliminacion...) son del
+                        // HU-010: la importacion se autoriza por su permiso funcional.
+                        .requestMatchers("/api/v1/packages/import", "/api/v1/packages/import/**")
+                        .hasAuthority(PermissionCode.PACKAGE_IMPORT)
+                        // El resto de los paquetes (validaciones previas, consulta, eliminacion...) es del
                         // Administrador de Ventas y del Super Usuario, que tiene acceso a todos los modulos
-                        // (documento de arquitectura, "Control de acceso"). Cualquier otro rol (p. ej. el
-                        // mensajero) recibe 403. Cada controlador conserva su @PreAuthorize como segunda barrera.
-                        // Esta regla se evalua antes del binding.
+                        // (documento de arquitectura, "Control de acceso"). Cualquier otro rol recibe 403.
                         .requestMatchers("/api/v1/packages/**")
                         .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
                         .anyRequest().authenticated()

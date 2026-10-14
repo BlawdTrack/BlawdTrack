@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.packages.service;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageBulkRegistrationResult;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportExecutionResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportPreviewResponse;
-import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PackageImportExecutionService implements PackageImportExecutionUseCase {
 
-    private final PackageImportPreviewUseCase previewUseCase;
+    private final PackageImportPreviewService previewService;
     private final PackageBulkRegistrationUseCase bulkRegistrationUseCase;
 
     @Override
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAuthority('" + PermissionCode.PACKAGE_IMPORT + "')")
     public PackageImportExecutionResponse execute(InputStream input, String fileName) {
-        PackageImportPreviewResponse preview = previewUseCase.preview(input, fileName);
+        PackageImportPreviewResponse preview = previewService.preview(input, fileName);
         PackageBulkRegistrationResult registration =
                 bulkRegistrationUseCase.registerValidPackages(preview.validRecords());
 

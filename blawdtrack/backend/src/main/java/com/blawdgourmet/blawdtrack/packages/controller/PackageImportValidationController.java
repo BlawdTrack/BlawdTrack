@@ -5,13 +5,14 @@ import com.blawdgourmet.blawdtrack.packages.dto.PackageImportPreviewResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportExecutionResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberComparisonResponse;
 import com.blawdgourmet.blawdtrack.packages.exception.InvalidPackageUploadException;
-import com.blawdgourmet.blawdtrack.packages.service.PackageImportPreviewUseCase;
+import com.blawdgourmet.blawdtrack.packages.service.PackageImportPreviewService;
 import com.blawdgourmet.blawdtrack.packages.service.PackageImportExecutionUseCase;
 import com.blawdgourmet.blawdtrack.packages.service.ShipmentNumberComparisonService;
 import com.blawdgourmet.blawdtrack.users.constant.PermissionCode;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class PackageImportValidationController {
 
     private final ShipmentNumberComparisonService comparisonService;
-    private final PackageImportPreviewUseCase importPreviewUseCase;
+    private final PackageImportPreviewService importPreviewService;
     private final PackageImportExecutionUseCase importExecutionUseCase;
 
     @PostMapping("/shipment-numbers/compare")
@@ -47,9 +48,8 @@ public class PackageImportValidationController {
     public PackageImportPreviewResponse previewImport(
             @RequestPart("file") MultipartFile file) {
         requireFile(file);
-        try {
-            return importPreviewUseCase.preview(
-                    file.getInputStream(), file.getOriginalFilename());
+        try (InputStream input = file.getInputStream()) {
+            return importPreviewService.preview(input, file.getOriginalFilename());
         } catch (IOException exception) {
             throw new InvalidPackageUploadException(
                     "No se pudo abrir el archivo recibido", exception);
@@ -58,13 +58,12 @@ public class PackageImportValidationController {
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAuthority('" + PermissionCode.PACKAGE_IMPORT + "')")
     public PackageImportExecutionResponse importPackages(
             @RequestPart("file") MultipartFile file) {
         requireFile(file);
-        try {
-            return importExecutionUseCase.execute(
-                    file.getInputStream(), file.getOriginalFilename());
+        try (InputStream input = file.getInputStream()) {
+            return importExecutionUseCase.execute(input, file.getOriginalFilename());
         } catch (IOException exception) {
             throw new InvalidPackageUploadException(
                     "No se pudo abrir el archivo recibido", exception);
