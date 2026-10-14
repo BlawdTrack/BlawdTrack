@@ -7,7 +7,6 @@ import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
 import PackageImportPage from './pages/PackageImportPage';
-import PackageImportPreviewPage from './pages/PackageImportPreviewPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
@@ -20,7 +19,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 import { ROLES } from './config/roles';
 import { ROUTES } from './config/routes';
-import { NAVIGATION_GROUPS, getGroupRoles } from './config/navigation';
+import { NAVIGATION_MENUS, getGroupRoles } from './config/navigation';
 import { getHomeRoute } from './utils/roleRoutes';
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
@@ -93,19 +92,25 @@ function App() {
           El inicio de cada rol (ROLE_HOME_ROUTES) debe estar en el grupo de ese
           rol, y App.routes.test.jsx se actualiza al agregar rutas. */}
       
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
-        {/* Súper Usuario y Administrador de Ventas comparten el menú lateral; cada uno ve solo sus grupos
-            (getNavigationForRole) y el menú de cada módulo se protege con los roles de sus pantallas. */}
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN, ROLES.COURIER]} />}>
+        {/* Los tres roles comparten el menú lateral; cada uno ve solo sus módulos (getSidebarModules), y cada
+            pantalla se protege con los roles que la usan. */}
         <Route element={<MainMenuLayout />}>
-          <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
-          {NAVIGATION_GROUPS.map((group) => (
-            <Route key={group.id} element={<ProtectedRoute allowedRoles={getGroupRoles(group)} />}>
-              <Route path={group.path} element={<ModuleMenuPage groupId={group.id} />} />
+          <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
+          {NAVIGATION_MENUS.map((menu) => (
+            <Route key={menu.id} element={<ProtectedRoute allowedRoles={getGroupRoles(menu)} />}>
+              <Route path={menu.path} element={<ModuleMenuPage groupId={menu.id} />} />
             </Route>
           ))}
-          <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
-          <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
-          <Route path={ROUTES.PACKAGE_IMPORT_PREVIEW} element={<PackageImportPreviewPage />} />
+
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
+            <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
+            <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
+            <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
+          </Route>
 
           <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER]} />}>
             <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
@@ -117,11 +122,6 @@ function App() {
             <Route path={`${ROUTES.COURIER_UPDATE}/:documentNumber`} element={<EditMessenger />} />
           </Route>
         </Route>
-      </Route>
-
-      <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
-        <Route path={ROUTES.COURIER_HOME} element={<CourierHomePage />} />
-        <Route path={ROUTES.COURIER_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
       </Route>
     </Routes>
   );

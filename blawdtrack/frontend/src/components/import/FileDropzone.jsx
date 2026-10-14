@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
-import { PACKAGE_FILE_ACCEPT, PACKAGE_FILE_FORMATS_LABEL } from '../../utils/packageFile';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import { PACKAGE_FILE_ACCEPT, PACKAGE_FILE_FORMAT_CHIPS } from '../../utils/packageFile';
 import { FONT, RADIUS, rem } from '../../theme';
 
 /**
@@ -46,11 +47,11 @@ export default function FileDropzone({ onFile, disabled = false }) {
         alignItems: 'center',
         gap: 1.5,
         textAlign: 'center',
-        p: { xs: 3, md: 4 },
+        p: { xs: 3, md: 6 },
         border: '2px dashed',
         borderColor: dragging ? 'secondary.main' : 'neutral.borderStrong',
-        borderRadius: RADIUS.md,
-        bgcolor: dragging ? 'secondary.light' : 'background.paper',
+        borderRadius: RADIUS.lg,
+        bgcolor: dragging ? 'secondary.light' : 'background.default',
         opacity: disabled ? 0.6 : 1,
         transition: 'border-color .15s ease, background-color .15s ease',
       }}
@@ -69,16 +70,32 @@ export default function FileDropzone({ onFile, disabled = false }) {
       >
         <UploadFileOutlinedIcon sx={{ fontSize: FONT.h1 }} />
       </Box>
-      <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>
+      <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.xl, color: 'primary.main' }}>
         Arrastra aquí el archivo de Zoho Inventory
       </Typography>
       <Typography sx={{ color: 'text.secondary', fontSize: FONT.md, maxWidth: rem(480) }}>
-        Formatos admitidos: {PACKAGE_FILE_FORMATS_LABEL} con el listado de paquetes del día. Se extraen número de orden,
-        número de envío, cliente, dirección, teléfono y horario de preferencia.
+        o selecciónalo desde tu computadora.
       </Typography>
-      <Button variant="outlined" disabled={disabled} onClick={() => inputRef.current?.click()}>
+      <Button
+        variant="contained"
+        disabled={disabled}
+        startIcon={<InsertDriveFileOutlinedIcon />}
+        onClick={() => inputRef.current?.click()}
+        sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm }}
+      >
         Seleccionar archivo
       </Button>
+      <Box component="ul" aria-label="Formatos admitidos" sx={{ display: 'flex', gap: 1, m: 0, p: 0, listStyle: 'none' }}>
+        {PACKAGE_FILE_FORMAT_CHIPS.map((chip) => (
+          <Box
+            key={chip}
+            component="li"
+            sx={{ px: 1.5, py: 0.25, border: '1px solid', borderColor: 'neutral.borderStrong', borderRadius: rem(999), fontSize: FONT.xs, fontWeight: 700, color: 'text.secondary' }}
+          >
+            {chip}
+          </Box>
+        ))}
+      </Box>
       <input
         ref={inputRef}
         type="file"

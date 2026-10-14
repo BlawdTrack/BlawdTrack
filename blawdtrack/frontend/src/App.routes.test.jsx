@@ -32,12 +32,11 @@ vi.mock('./hooks/useAuth', () => ({ useAuth: vi.fn() }));
 // PROTEGIDA NUEVA EN App.jsx hay que sumarla aquí y en ALLOWED_ROUTES.
 const SCREENS = {
   [ROUTES.MAIN_MENU]: 'Pantalla menú principal',
+  [ROUTES.MODULE_USERS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_COURIERS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_ADMINS]: 'Pantalla menú de módulo',
-  [ROUTES.MODULE_SECURITY]: 'Pantalla menú de módulo',
-  [ROUTES.MODULE_PACKAGES]: 'Pantalla menú de módulo',
+  [ROUTES.MODULE_SETTINGS]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
-  [ROUTES.PACKAGE_IMPORT_PREVIEW]: 'Pantalla previsualización',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
@@ -46,33 +45,27 @@ const SCREENS = {
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
   // Cada rol restablece su propia contraseña con la sesión iniciada.
   [ROUTES.PASSWORD_RESET_OWN]: 'Pantalla restablecer mi contraseña',
-  [ROUTES.COURIER_PASSWORD_RESET]: 'Pantalla restablecer mi contraseña',
   // Rutas de tu feature agregadas al formato de develop
   '/editar-mensajero': 'Pantalla edición de mensajero',
 };
 
 // Rutas que comparten el Súper Usuario y el Administrador de Ventas (ambos usan el menú lateral); el resto
 // de las rutas protegidas es de un solo rol.
-const SHARED_ROUTES = [
-  ROUTES.MAIN_MENU,
-  ROUTES.MODULE_PACKAGES,
-  ROUTES.MODULE_SECURITY,
-  ROUTES.PASSWORD_RESET_OWN,
-  ROUTES.PACKAGE_IMPORT,
-  ROUTES.PACKAGE_IMPORT_PREVIEW,
-];
+const SHARED_ROUTES = [ROUTES.MAIN_MENU, ROUTES.PACKAGE_IMPORT];
+
+// Ajustes y restablecer la propia contraseña los usan los tres roles (el mensajero también tiene el menú lateral).
+const ALL_ROLES_ROUTES = [ROUTES.MODULE_SETTINGS, ROUTES.PASSWORD_RESET_OWN];
 
 // Política acordada (HU-001): cada rol ve únicamente lo suyo.
 const ALLOWED_ROUTES = {
   // Ajustado a las constantes en inglés (SUPER_USER, SALES_ADMIN, COURIER) para que hagan match con App.jsx
   [ROLES.SUPER_USER]: [
     ROUTES.MAIN_MENU,
+    ROUTES.MODULE_USERS,
     ROUTES.MODULE_COURIERS,
     ROUTES.MODULE_ADMINS,
-    ROUTES.MODULE_PACKAGES,
-    ROUTES.MODULE_SECURITY,
+    ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
-    ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_DELETE,
     ROUTES.COURIER_CREATE,
@@ -83,13 +76,12 @@ const ALLOWED_ROUTES = {
   ],
   [ROLES.SALES_ADMIN]: [
     ROUTES.MAIN_MENU,
-    ROUTES.MODULE_PACKAGES,
-    ROUTES.MODULE_SECURITY,
+    ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
-    ROUTES.PACKAGE_IMPORT_PREVIEW,
     ROUTES.PASSWORD_RESET_OWN,
   ],
-  [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],
+  // El mensajero usa el mismo menú lateral: su inicio, los ajustes y el restablecimiento de su contraseña.
+  [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.MODULE_SETTINGS, ROUTES.PASSWORD_RESET_OWN],
 };
 
 function loginAs(role) {
@@ -123,12 +115,14 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     expect(Object.keys(ALLOWED_ROUTES).sort()).toEqual(Object.keys(ROLE_HOME_ROUTES).sort());
   });
 
-  it('cada ruta protegida pertenece a un solo rol, salvo las compartidas por el Súper Usuario y el Administrador de Ventas', () => {
+  it('cada ruta protegida pertenece a un solo rol, salvo las compartidas por el Súper Usuario y el Administrador de Ventas, y las de ajustes, que son de los tres', () => {
     for (const route of Object.keys(SCREENS)) {
       const roles = Object.entries(ALLOWED_ROUTES)
         .filter(([, routes]) => routes.includes(route))
         .map(([role]) => role);
-      if (SHARED_ROUTES.includes(route)) {
+      if (ALL_ROLES_ROUTES.includes(route)) {
+        expect(roles.sort()).toEqual(Object.values(ROLES).sort());
+      } else if (SHARED_ROUTES.includes(route)) {
         expect(roles.sort()).toEqual([ROLES.SALES_ADMIN, ROLES.SUPER_USER].sort());
       } else {
         expect(roles).toHaveLength(1);
@@ -136,8 +130,11 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
     }
   });
 
-  it('el Administrador de Ventas no entra a los módulos de mensajeros ni de administradores', () => {
+  it('el Administrador de Ventas no entra a Gestión de usuarios ni a sus submenús de mensajeros y administradores', () => {
     loginAs(ROLES.SALES_ADMIN);
+    renderAt(ROUTES.MODULE_USERS);
+    expect(screen.getByText('Pantalla menú principal')).toBeTruthy();
+    cleanup();
     renderAt(ROUTES.MODULE_COURIERS);
     // Vuelve a su inicio: el menú principal.
     expect(screen.getByText('Pantalla menú principal')).toBeTruthy();

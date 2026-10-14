@@ -1,15 +1,11 @@
-import { ProvisionalHomePage } from '../components/ProvisionalHomePage';
+import MainMenuPage from './MainMenuPage';
 
-// Inicio provisional para MENSAJERO (T12). La pantalla real llega con
-// HU-022 (paquetes asignados al mensajero).
-/** Inicio provisional del rol MENSAJERO; reutiliza `ProvisionalHomePage`. */
+/**
+ * Inicio del rol MENSAJERO: el mismo menú principal que los otros roles, con su saludo, las cifras de su jornada y
+ * sus módulos (los paquetes asignados y los costos del viaje llegan con HU-022).
+ */
 export function CourierHomePage() {
-  return (
-    <ProvisionalHomePage
-      title="Panel del Mensajero"
-      description="Muy pronto verás aquí los paquetes que tienes asignados para el día."
-    />
-  );
+  return <MainMenuPage />;
 }
 
 export default CourierHomePage;

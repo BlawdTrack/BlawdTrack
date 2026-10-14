@@ -1,13 +1,14 @@
 import { Box, Typography } from '@mui/material';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
-import { FONT, RADIUS, rem } from '../../theme';
+import { FONT, rem } from '../../theme';
 
 /** Los tres pasos de la importación, en orden. */
-const IMPORT_STEPS = ['Cargar archivo', 'Previsualizar y validar', 'Confirmar registro'];
+const IMPORT_STEPS = ['Cargar archivos', 'Revisar datos', 'Listo'];
 
 /**
- * Indicador de los tres pasos de la importación: el paso actual resaltado, los anteriores con una marca y los
- * siguientes en gris. El paso actual se anuncia a los lectores de pantalla con `aria-current`.
+ * Indicador de los tres pasos de la importación, en píldoras: el paso actual con el borde y el número en verde oscuro,
+ * los anteriores con una marca y los siguientes en gris. El paso actual se anuncia a los lectores de pantalla con
+ * `aria-current`.
  * @param {{ current: 1|2|3 }} props Número (desde 1) del paso en el que está el usuario.
  */
 export default function ImportSteps({ current }) {
@@ -30,33 +31,36 @@ export default function ImportSteps({ current }) {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1,
-              px: 1.5,
+              gap: 1.25,
+              pl: 0.75,
+              pr: 2,
               py: 0.75,
-              borderRadius: RADIUS.lg,
-              bgcolor: isCurrent ? 'neutral.surface' : 'transparent',
+              border: '1px solid',
+              borderColor: isCurrent ? 'primary.main' : 'neutral.border',
+              borderRadius: rem(999),
+              bgcolor: 'background.paper',
             }}
           >
             <Box
               aria-hidden="true"
               sx={{
-                width: rem(24),
-                height: rem(24),
+                width: rem(28),
+                height: rem(28),
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: FONT.xs,
+                fontSize: FONT.sm,
                 fontWeight: 700,
-                bgcolor: isCurrent ? 'primary.main' : isDone ? 'success.main' : 'neutral.border',
-                color: isCurrent || isDone ? 'common.white' : 'neutral.main',
+                bgcolor: isCurrent ? 'primary.main' : isDone ? 'success.main' : 'neutral.surface',
+                color: isCurrent || isDone ? 'common.white' : 'text.secondary',
               }}
             >
               {isDone ? <CheckOutlinedIcon sx={{ fontSize: FONT.sm }} /> : number}
             </Box>
             <Typography
               component="span"
-              sx={{ fontSize: FONT.sm, fontWeight: isCurrent ? 700 : 500, color: isCurrent ? 'primary.main' : 'text.secondary' }}
+              sx={{ fontSize: FONT.md, fontWeight: isCurrent ? 700 : 600, color: isCurrent ? 'primary.main' : 'text.secondary' }}
             >
               {label}
             </Typography>

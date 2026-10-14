@@ -1,22 +1,22 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { NAV_GROUP_ICONS } from './navIcons';
+import { isGroupActive } from '../../config/navigation';
 import { CARD_PATTERN_SX, FONT } from '../../theme';
 
 // Naranja más oscuro que el de la marca: el de marca sobre blanco no llega a 4.5:1 en texto pequeño.
 const ACTIVE_COLOR = '#C25100';
 
-const isGroupActive = (group, pathname) =>
-  pathname === group.path || group.items.some((item) => item.path === pathname);
-
 /**
  * Barra de pestañas inferior para teléfonos: una pestaña por grupo de navegación, que lleva al menú
- * del módulo.
- * @param {{ groups: Array }} props Grupos de `getNavigationForRole`.
+ * del módulo, y una de ajustes al final si el rol la tiene.
+ * @param {{ groups: Array, settings?: object|null }} props Grupos de `getNavigationForRole` y menú de `getSettingsForRole`.
  */
-export default function MobileBottomNav({ groups }) {
+export default function MobileBottomNav({ groups, settings = null }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  // Los ajustes van como una pestaña más, al final.
+  const tabs = settings ? [...groups, settings] : groups;
 
   return (
     <Box
@@ -32,7 +32,7 @@ export default function MobileBottomNav({ groups }) {
         borderTop: '1px solid', borderColor: 'neutral.border',
       }}
     >
-      {groups.map((group) => {
+      {tabs.map((group) => {
         const target = group.path;
         const active = isGroupActive(group, pathname);
         const Icon = NAV_GROUP_ICONS[group.id];
@@ -57,7 +57,7 @@ export default function MobileBottomNav({ groups }) {
               <Icon sx={{ fontSize: FONT.xl, mb: 0.375, color: active ? ACTIVE_COLOR : 'text.secondary' }} />
             )}
             <Typography sx={{ fontSize: FONT.xs, fontWeight: 700, color: active ? ACTIVE_COLOR : 'text.secondary' }}>
-              {group.shortTitle}
+              {group.shortTitle ?? group.title}
             </Typography>
           </ButtonBase>
         );

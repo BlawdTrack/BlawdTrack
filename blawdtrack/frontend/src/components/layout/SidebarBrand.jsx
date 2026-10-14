@@ -23,7 +23,10 @@ export default function SidebarBrand({ collapsed = false, onToggleCollapsed }) {
         borderBottom: '1px solid rgba(255,255,255,.08)',
       }}
     >
-      {collapsed ? <BrandLogo variant="isologo" onDark width={30} /> : <BrandLogo variant="horizontalShort" onDark width={118} />}
+      {/* Las dos versiones del logo se quedan montadas y solo se alterna cuál se ve: si se montara una nueva en cada
+          cambio, el navegador tendría que decodificar la imagen y repintar sus filtros de color y el logo tardaría. */}
+      <BrandLogo variant="isologo" onDark width={30} sx={{ display: collapsed ? 'block' : 'none' }} />
+      <BrandLogo variant="horizontalShort" onDark width={118} sx={{ display: collapsed ? 'none' : 'block' }} />
       {onToggleCollapsed && (
         <Tooltip title={toggleLabel} placement="right" arrow>
           <IconButton

@@ -1,23 +1,22 @@
-import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   Box,
   ClickAwayListener,
-  Collapse,
-  ListItemIcon,
-  MenuItem,
   MenuList,
   Paper,
   Popper,
   Typography,
 } from '@mui/material';
-import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
+import SidebarModuleLink from './SidebarModuleLink';
 import SidebarNavItem from './SidebarNavItem';
-import { NAV_GROUP_ICONS, NAV_ITEM_ICONS } from './navIcons';
+import SidebarToggleSection from './SidebarToggleSection';
+import { isGroupActive, isSingleScreenMenu } from '../../config/navigation';
+import SidebarSubmenuFlyout, { FlyoutMenuItem } from './SidebarFlyoutItems';
+import { NAV_GROUP_ICONS } from './navIcons';
 import { RADIUS, FONT, rem } from '../../theme';
 
 /**
- * Un grupo del menú. Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
+ * Un grupo del menú (un módulo de una sola pantalla es un enlace directo, `SidebarModuleLink`). Con la barra expandida su título abre y cierra la lista de ítems (arranca cerrado
  * y, si la pantalla actual es del grupo, lo marca con un punto naranja). Con la barra colapsada el grupo
  * es un solo icono que despliega la lista de sus pantallas en un menú flotante al pasar el cursor.
  * @param {{ group: { id: string, title: string, items: Array }, collapsed?: boolean,
@@ -25,16 +24,24 @@ import { RADIUS, FONT, rem } from '../../theme';
  *   es el controlador compartido de los menús flotantes (obligatorio con la barra colapsada).
  */
 export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
-  const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
-  const hasActiveItem = pathname === group.path || group.items.some((item) => item.path === pathname);
+  const hasActiveItem = isGroupActive(group, pathname);
   const listId = `sidebar-group-${group.id}`;
+
+  // Un módulo de una sola pantalla no se despliega: es un enlace directo a ella.
+  if (isSingleScreenMenu(group)) return <SidebarModuleLink group={group} collapsed={collapsed} />;
 
   if (collapsed) {
     const GroupIcon = NAV_GROUP_ICONS[group.id];
     const menuId = `${listId}-menu`;
     const { openId, anchorEl, focusFirst, registerPanel, close, onPanelEnter, onPanelLeave } = flyout;
     const menuOpen = openId === group.id;
+    const handleMenuKeyDown = (event) => {
+      if (event.key === 'Escape' || event.key === 'Tab') {
+        if (event.key === 'Escape') anchorEl?.focus();
+        close();
+      }
+    };
 
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -81,38 +88,23 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
                 >
                   {group.title}
                 </Typography>
-                <MenuList
-                  id={menuId}
-                  autoFocusItem={focusFirst}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Escape' || event.key === 'Tab') {
-                      if (event.key === 'Escape') anchorEl?.focus();
-                      close();
-                    }
-                  }}
-                >
-                  {group.items.map((item) => {
-                    const ItemIcon = NAV_ITEM_ICONS[item.id];
-                    const active = item.path === pathname;
-                    return (
-                      <MenuItem
-                        key={item.id}
-                        {...(item.path ? { component: NavLink, to: item.path, end: true } : {})}
-                        disabled={!item.path}
-                        selected={active}
-                        onClick={close}
-                        sx={{ minHeight: 44, fontSize: FONT.sm, fontWeight: active ? 600 : 500 }}
-                      >
-                        {ItemIcon && (
-                          <ListItemIcon sx={{ minWidth: rem(28), color: active ? 'secondary.main' : 'text.secondary' }}>
-                            <ItemIcon fontSize="small" />
-                          </ListItemIcon>
-                        )}
-                        {item.path ? item.label : `${item.label} · próximamente`}
-                      </MenuItem>
-                    );
-                  })}
-                </MenuList>
+                {group.submenus ? (
+                  <SidebarSubmenuFlyout
+                    submenus={group.submenus}
+                    directItems={group.directItems}
+                    pathname={pathname}
+                    onClose={close}
+                    menuId={menuId}
+                    autoFocusItem={focusFirst}
+                    onKeyDown={handleMenuKeyDown}
+                  />
+                ) : (
+                  <MenuList id={menuId} autoFocusItem={focusFirst} onKeyDown={handleMenuKeyDown}>
+                    {group.items.map((item) => (
+                      <FlyoutMenuItem key={item.id} item={item} active={item.path === pathname} onClick={close} />
+                    ))}
+                  </MenuList>
+                )}
               </Paper>
             </ClickAwayListener>
           </Box>
@@ -122,57 +114,25 @@ export default function SidebarNavGroup({ group, collapsed = false, flyout }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.1154rem' }}>
-      <Box
-        component="button"
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        aria-expanded={open}
-        aria-controls={listId}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
-          minHeight: 44,
-          '@media (pointer: fine)': { minHeight: 38 },
-          px: 1.5,
-          border: 0,
-          borderRadius: RADIUS.sm,
-          background: 'transparent',
-          cursor: 'pointer',
-          fontFamily: 'inherit',
-          // Etiqueta en minúsculas y alineada a la izquierda: en mayúsculas espaciadas se partía en dos líneas.
-          textAlign: 'left',
-          fontSize: FONT.sm,
-          fontWeight: 600,
-          letterSpacing: 0,
-          color: hasActiveItem ? 'common.white' : 'rgba(255,255,255,.6)',
-          '&:hover': { color: 'common.white', backgroundColor: 'rgba(255,255,255,.05)' },
-          '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 1 },
-        }}
-      >
-        <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {group.title}
-          {hasActiveItem && (
-            <Box
-              component="span"
-              aria-hidden="true"
-              sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'secondary.main' }}
-            />
-          )}
-        </Box>
-        <ExpandMoreOutlinedIcon
-          sx={{ fontSize: FONT.lg, transition: 'transform .2s ease', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
-        />
-      </Box>
-      <Collapse in={open} id={listId}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.1154rem' }}>
-          {group.items.map((item) => (
-            <SidebarNavItem key={item.id} item={item} />
-          ))}
-        </Box>
-      </Collapse>
-    </Box>
+    <SidebarToggleSection id={listId} title={group.title} active={hasActiveItem}>
+      {group.submenus
+        ? group.submenus.map((submenu) => (
+            <SidebarToggleSection
+              key={submenu.id}
+              id={`sidebar-group-${submenu.id}`}
+              title={submenu.title}
+              active={isGroupActive(submenu, pathname)}
+              nested
+            >
+              {submenu.items.map((item) => (
+                <SidebarNavItem key={item.id} item={item} />
+              ))}
+            </SidebarToggleSection>
+          ))
+        : group.items.map((item) => <SidebarNavItem key={item.id} item={item} />)}
+      {(group.directItems ?? []).map((item) => (
+        <SidebarNavItem key={item.id} item={item} />
+      ))}
+    </SidebarToggleSection>
   );
 }

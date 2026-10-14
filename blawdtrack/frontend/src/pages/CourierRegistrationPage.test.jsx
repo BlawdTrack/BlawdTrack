@@ -61,7 +61,7 @@ describe('CourierRegistrationPage', () => {
     await fillForm(user);
     await submit(user);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Gestión de mensajeros' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Mensajeros' })).toBeInTheDocument();
     const notice = await screen.findByRole('status');
     expect(notice).toHaveTextContent('Mensajero creado correctamente');
     expect(notice).toHaveTextContent('ana@blawdgourmet.com');
@@ -108,7 +108,7 @@ describe('CourierRegistrationPage', () => {
         </Routes>,
         { route: ROUTES.COURIER_CREATE, user: superUser }
       );
-    const menuHeading = () => screen.findByRole('heading', { level: 1, name: 'Gestión de mensajeros' });
+    const menuHeading = () => screen.findByRole('heading', { level: 1, name: 'Mensajeros' });
 
     it('goes straight back to the couriers menu when "Descartar" is pressed with an empty form', async () => {
       const user = userEvent.setup();
