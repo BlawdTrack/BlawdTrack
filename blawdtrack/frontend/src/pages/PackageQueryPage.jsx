@@ -143,7 +143,7 @@ export function PackageQueryPage() {
 
         {state === PACKAGE_LOOKUP_STATE.IDLE && !fieldError && (
           <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
-            Ingresa un número de envío (por ejemplo, BG-2026-00123) y pulsa Consultar para ver su ficha.
+            Ingresa un número de envío (por ejemplo, BG-2026-00123) y pulsa la lupa para ver su ficha.
           </Typography>
         )}
 

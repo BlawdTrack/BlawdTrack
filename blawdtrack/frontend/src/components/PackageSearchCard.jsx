@@ -1,13 +1,15 @@
 import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { CARD_SX, INPUT_SX } from './formStyles';
-import { FONT, RADIUS, rem, TOUCH_TARGET } from '../theme';
+import { FONT, RADIUS, TOUCH_TARGET } from '../theme';
 
 /**
  * Tarjeta de consulta por número de envío: encabezado, campo de texto y botón
- * "Consultar" en una fila (se apilan en móvil). El envío se hace por formulario,
- * así que el botón y la tecla Enter disparan la misma acción (sin duplicar la
- * consulta: el componente que la consume la bloquea mientras está en curso).
+ * de solo ícono (lupa) en una fila (se apilan en móvil). El botón se anuncia
+ * como "Consultar" vía `aria-label` para conservar la accesibilidad. El envío se
+ * hace por formulario, así que el botón y la tecla Enter disparan la misma acción
+ * (sin duplicar la consulta: el componente que la consume la bloquea mientras
+ * está en curso).
  *
  * @param {{ value: string, onChange: (value: string) => void, onSubmit: Function,
  *   loading?: boolean, error?: string|null }} props
@@ -61,18 +63,19 @@ export default function PackageSearchCard({ value, onChange, onSubmit, loading =
           type="submit"
           variant="contained"
           disabled={loading}
-          startIcon={<SearchOutlinedIcon fontSize="small" />}
+          aria-label="Consultar"
           sx={{
             flexShrink: 0,
-            width: { xs: '100%', sm: rem(106) },
+            width: { xs: '100%', sm: TOUCH_TARGET },
             minHeight: TOUCH_TARGET,
+            minWidth: TOUCH_TARGET,
+            p: 0,
             borderRadius: RADIUS.sm,
-            fontWeight: 700,
             bgcolor: 'primary.main',
             '&:hover': { bgcolor: 'primary.dark' },
           }}
         >
-          Consultar
+          <SearchOutlinedIcon />
         </Button>
       </Box>
 
