@@ -52,9 +52,11 @@ describe('PackageSearchPage', () => {
     });
 
     expect(screen.getByRole('status')).toHaveTextContent('46 paquetes en la lista de distribución');
-    expect(screen.getByText('BG-2026-001')).toBeInTheDocument();
+    expect(screen.getAllByText('BG-2026-001')).toHaveLength(2);
+    expect(screen.getByRole('table', { name: 'Paquetes encontrados' })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /BG-2026-001/ })).toBeInTheDocument();
     expect(screen.getByText('Heredia')).toBeInTheDocument();
-    expect(screen.getByText('Pendiente')).toBeInTheDocument();
+    expect(screen.getAllByText('Pendiente')).toHaveLength(2);
     expect(screen.getByText('8:00 am')).toBeInTheDocument();
 
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
@@ -74,5 +76,83 @@ describe('PackageSearchPage', () => {
 
     expect(input).toHaveValue('');
     expect(screen.getByRole('status')).toHaveTextContent('46 paquetes en la lista de distribución');
+  });
+
+  it('shows the empty-state card for a search with no matches and hides it after clearing', async () => {
+    searchPackages.mockResolvedValueOnce({ content: [{ id: 1, shipmentNumber: 'BG-2026-001' }], totalElements: 1 });
+    render(<PackageSearchPage />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
+    searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
+    fireEvent.change(input, { target: { value: 'Limon' } });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(screen.getByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Sin resultados para “Limon”' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('0 de 1 paquetes coinciden con “Limon”');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Limpiar búsqueda' }));
+
+    expect(input).toHaveValue('');
+    expect(screen.queryByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('1 paquete en la lista de distribución');
+  });
+
+  it('does not show the empty state when the term is empty, while loading or when there is an error', async () => {
+    searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
+    render(<PackageSearchPage />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(screen.queryByText(/Sin resultados para/i)).not.toBeInTheDocument();
+
+    const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
+    searchPackages.mockImplementation(() => new Promise(() => {}));
+    fireEvent.change(input, { target: { value: 'Limon' } });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    expect(screen.queryByText(/Sin resultados para/i)).not.toBeInTheDocument();
+
+    searchPackages.mockRejectedValueOnce({ response: { status: 500 } });
+    fireEvent.change(input, { target: { value: 'Mango' } });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    expect(screen.queryByText(/Sin resultados para/i)).not.toBeInTheDocument();
+  });
+
+  it('also clears the empty state when the bar clear button is used', async () => {
+    searchPackages.mockResolvedValueOnce({ content: [{ id: 1, shipmentNumber: 'BG-2026-001' }], totalElements: 1 });
+    render(<PackageSearchPage />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
+    searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
+    fireEvent.change(input, { target: { value: 'Limon' } });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(screen.getByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Limpiar' }));
+
+    expect(input).toHaveValue('');
+    expect(screen.queryByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).not.toBeInTheDocument();
   });
 });

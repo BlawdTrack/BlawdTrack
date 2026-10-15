@@ -64,11 +64,7 @@ export function usePackageSearch() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!normalizeSearchTerm(term)) {
-      setResults(distributionResults);
-    }
-  }, [term, distributionResults]);
+  const effectiveResults = normalizeSearchTerm(term) ? results : distributionResults;
 
   useEffect(() => {
     const normalizedTerm = normalizeSearchTerm(term);
@@ -77,8 +73,6 @@ export function usePackageSearch() {
       cancelCurrentRequest();
       requestSequenceRef.current += 1;
       lastRequestedTermRef.current = null;
-      setIsLoading(false);
-      setErrorMessage(null);
       return undefined;
     }
 
@@ -163,7 +157,7 @@ export function usePackageSearch() {
   return {
     term,
     setTerm,
-    results,
+    results: effectiveResults,
     distributionResults,
     isLoading,
     errorMessage,
