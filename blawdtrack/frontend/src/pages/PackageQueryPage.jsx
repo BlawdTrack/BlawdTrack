@@ -28,7 +28,7 @@ export function PackageQueryPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [shipmentNumber, setShipmentNumber] = useState('');
-  const { state, pkg, message, fieldError, loading, lookup } = usePackageLookup();
+  const { state, pkg, message, fieldError, loading, lookup, retryable } = usePackageLookup();
 
   const homeRoute = getHomeRoute(user?.role);
 
@@ -126,7 +126,19 @@ export function PackageQueryPage() {
         )}
 
         {state === PACKAGE_LOOKUP_STATE.ERROR && (
-          <StatusMessage severity="error" message={message} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1.5 }}>
+            <StatusMessage severity="error" message={message} />
+            {retryable && (
+              <Button
+                variant="outlined"
+                onClick={handleSubmit}
+                disabled={loading}
+                sx={{ minHeight: TOUCH_TARGET, px: 3 }}
+              >
+                Reintentar
+              </Button>
+            )}
+          </Box>
         )}
 
         {state === PACKAGE_LOOKUP_STATE.IDLE && !fieldError && (

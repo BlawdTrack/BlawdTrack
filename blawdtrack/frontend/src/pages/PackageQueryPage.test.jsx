@@ -100,6 +100,8 @@ describe('PackageQueryPage (HU-013)', () => {
     await search(user, 'BG-2026-00001');
 
     expect(await screen.findByText(/No se pudo conectar con el servidor/)).toBeInTheDocument();
+    // Un error de red sí admite reintentar la misma consulta.
+    expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument();
   });
 
   it('maneja datos incompletos sin inventar valores', async () => {

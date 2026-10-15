@@ -481,7 +481,7 @@ class PackageControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"SUPER_USUARIO", "MENSAJERO"})
+    @ValueSource(strings = {"MENSAJERO"})
     void otrosRolesConsultandoHistorialReciben403(String role) throws Exception {
         var otroUsuario = users.saveAndFlush(User.builder()
                 .documentType(DocumentType.CEDULA)
@@ -496,6 +496,21 @@ class PackageControllerTest {
 
         getPackageHistory(token(otroUsuario), "ENV-2024-0001")
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void superUsuarioConsultaHistorialRetornaLista() throws Exception {
+        recordPackageEvent(
+                pkg,
+                AuditAction.PACKAGE_STATUS_CHANGED,
+                "El usuario 'Super Usuario Test' cambió el estado del paquete ENV-2024-0001.",
+                "PENDING",
+                "ASSIGNED");
+
+        getPackageHistory(token(superUser), "ENV-2024-0001")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test

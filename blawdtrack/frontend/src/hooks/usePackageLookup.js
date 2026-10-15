@@ -78,6 +78,7 @@ export function usePackageLookup() {
       if (!data || !data.shipmentNumber) {
         setState(PACKAGE_LOOKUP_STATE.ERROR);
         setMessage(PACKAGE_LOOKUP_MESSAGES.incomplete);
+        setRetryable(true);
         return;
       }
       setPkg(data);
@@ -91,18 +92,23 @@ export function usePackageLookup() {
         setMessage(
           `No se encontró un paquete con el número de envío "${shipmentNumber}". Verifícalo e inténtalo de nuevo.`
         );
+        setRetryable(false);
       } else if (!error?.response) {
         setState(PACKAGE_LOOKUP_STATE.ERROR);
         setMessage(PACKAGE_LOOKUP_MESSAGES.network);
+        setRetryable(true);
       } else if (status === 403) {
         setState(PACKAGE_LOOKUP_STATE.ERROR);
         setMessage(PACKAGE_LOOKUP_MESSAGES.forbidden);
+        setRetryable(false);
       } else if (status >= 500) {
         setState(PACKAGE_LOOKUP_STATE.ERROR);
         setMessage(PACKAGE_LOOKUP_MESSAGES.server);
+        setRetryable(true);
       } else {
         setState(PACKAGE_LOOKUP_STATE.ERROR);
         setMessage(PACKAGE_LOOKUP_MESSAGES.fallback);
+        setRetryable(true);
       }
     } finally {
       inFlight.current = false;
@@ -114,6 +120,7 @@ export function usePackageLookup() {
     pkg,
     message,
     fieldError,
+    retryable,
     loading: state === PACKAGE_LOOKUP_STATE.LOADING,
     lookup,
     reset,
