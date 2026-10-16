@@ -149,10 +149,6 @@ de sus pantallas (`getGroupRoles`), así que el Administrador de Ventas no entra
 | `DuplicateExclusionServiceImplTest` | Quedan solo las filas sin duplicados y en orden; sin duplicados se importa todo; archivo vacío no consulta la base de datos. |
 | `DuplicateExclusionIntegrationTest` | Excluye registrados y repetidos con la base de datos de pruebas; detecta un número registrado después de la previsualización. |
 
-Guías de ejecución y evidencias: [`HU011-Task113-pruebas.md`](../HU011-Task113-pruebas.md),
-[`HU011-Task114-pruebas.md`](../HU011-Task114-pruebas.md), [`HU011-Task115-pruebas.md`](../HU011-Task115-pruebas.md) y
-[`HU011-Task116-pruebas.md`](../HU011-Task116-pruebas.md).
-
 ### Frontend
 
 | Test | Qué verifica |

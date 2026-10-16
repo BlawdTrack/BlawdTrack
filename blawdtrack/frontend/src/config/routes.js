@@ -19,6 +19,7 @@ export const ROUTES = {
   COURIER_UPDATE: '/editar-mensajero',
   COURIER_DEACTIVATE: '/main-menu/couriers/deactivate',
   ADMIN_CREATE: '/main-menu/admins/new',
+  ADMIN_UPDATE: '/main-menu/admins/update',
   ADMIN_DELETE: '/main-menu/admins/delete',
   ROLES_PERMISSIONS: '/gestion-roles',
   // Inicio del rol que no usa el menú principal (HU-001 T12). El Administrador de Ventas usa el menú principal.

@@ -216,6 +216,7 @@ describe('getParentMenu', () => {
     expect(getParentMenu(ROUTES.COURIER_CREATE)).toEqual({ to: ROUTES.MODULE_COURIERS, label: 'Mensajeros' });
     expect(getParentMenu(`${ROUTES.COURIER_UPDATE}/1-0345-0678`)).toEqual({ to: ROUTES.MODULE_COURIERS, label: 'Mensajeros' });
     expect(getParentMenu(ROUTES.ADMIN_DELETE)).toEqual({ to: ROUTES.MODULE_ADMINS, label: 'Administradores' });
+    expect(getParentMenu(ROUTES.ADMIN_UPDATE)).toEqual({ to: ROUTES.MODULE_ADMINS, label: 'Administradores' });
   });
 
   it('sends a function of a group without submenus back to the group menu', () => {

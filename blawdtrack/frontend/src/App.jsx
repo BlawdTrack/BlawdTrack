@@ -1,6 +1,7 @@
 // src/App.jsx
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import AdminManagement from './pages/AdminManagement';
+import EditAdmin from './pages/EditAdmin';
 import AdminRegistrationPage from './pages/AdminRegistrationPage';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
@@ -116,6 +117,7 @@ function App() {
             <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
             <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />
             <Route path={ROUTES.ADMIN_CREATE} element={<AdminRegistrationPage />} />
+            <Route path={ROUTES.ADMIN_UPDATE} element={<EditAdmin />} />
             <Route path={ROUTES.ADMIN_DELETE} element={<AdminManagement />} />
             <Route path={ROUTES.ROLES_PERMISSIONS} element={<RoleAccessManagement />} />
             <Route path={ROUTES.COURIER_UPDATE} element={<EditMessenger />} />

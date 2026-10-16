@@ -22,6 +22,7 @@ export const NAV_ITEM_ICONS = {
   'courier-update': EditOutlinedIcon,
   'courier-deactivate': PersonOffOutlinedIcon,
   'admin-create': PersonAddAltOutlinedIcon,
+  'admin-update': EditOutlinedIcon,
   'admin-delete': PersonRemoveOutlinedIcon,
   'roles-permissions': ManageAccountsOutlinedIcon,
 };
