@@ -1,20 +1,20 @@
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Link, Paper, Typography } from '@mui/material';
 import BrandLogo from './BrandLogo';
 import { LABEL_SX } from './formStyles';
-import { getPackageStatusMeta } from '../utils/packageStatus';
-import { formatDateTime } from '../utils/dates';
+import { getPackageStatusMeta } from '../config/packageStatus';
 import { CARD_PATTERN_SX, FONT, RADIUS, rem } from '../theme';
 
 const NO_DISPONIBLE = 'No disponible';
 
-// Estilo del valor principal de cada bloque y de la línea secundaria.
-const VALUE_SX = { fontSize: FONT.lg, color: '#333333', lineHeight: 1.4, wordBreak: 'break-word' };
-const SECONDARY_SX = { fontSize: FONT.md, color: '#777777', lineHeight: 1.4, mt: 0.25, wordBreak: 'break-word' };
+// Estilo del valor principal de cada bloque y de la línea secundaria. Se usan
+// los tokens del tema en vez de grises sueltos.
+const VALUE_SX = { fontSize: FONT.lg, color: 'text.primary', lineHeight: 1.4, wordBreak: 'break-word' };
+const SECONDARY_SX = { fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.4, mt: 0.25, wordBreak: 'break-word' };
 
 /** Bloque de datos con la jerarquía etiqueta → valor → información secundaria. */
-function InfoBlock({ label, children }) {
+function InfoBlock({ label, sx, children }) {
   return (
-    <Box component="section">
+    <Box component="section" sx={sx}>
       <Typography component="h3" sx={LABEL_SX}>
         {label}
       </Typography>
@@ -23,10 +23,23 @@ function InfoBlock({ label, children }) {
   );
 }
 
+/** Cantidad sin ceros decimales innecesarios (2.000 → "2"). */
+function formatQuantity(quantity) {
+  const value = Number(quantity);
+  return Number.isFinite(value) ? value.toLocaleString('es-CR') : String(quantity ?? '');
+}
+
+/** Precio con separador de miles local. El backend no expone moneda, así que no se antepone ningún símbolo. */
+function formatUnitPrice(unitPrice) {
+  const value = Number(unitPrice);
+  return Number.isFinite(value) ? value.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null;
+}
+
 /**
  * Ficha de consulta de un paquete (solo lectura): encabezado verde con el
  * número de envío, la orden y el estado real, y un cuerpo blanco en dos
- * columnas con cliente, dirección, horario de preferencia y mensajero asignado.
+ * columnas con cliente, dirección, horario de preferencia, mensajero asignado,
+ * artículos y (si el paquete está entregado) la evidencia de entrega.
  *
  * Todos los datos vienen del `PackageDetailResponse` del backend; los campos
  * opcionales sin información se muestran como "No disponible" / "No
@@ -37,17 +50,20 @@ function InfoBlock({ label, children }) {
 export default function PackageDetailCard({ pkg }) {
   const status = getPackageStatusMeta(pkg.status);
   const courier = pkg.assignedCourier;
+  const items = Array.isArray(pkg.items) ? pkg.items : [];
 
-  // La fecha/hora de importación no forma parte del contrato actual
-  // (`PackageDetailResponse` no la expone); si el backend llega a añadirla, se
-  // muestra aquí sin cambiar el resto de la ficha.
-  const importedAt = pkg.importedAt ?? pkg.importDate ?? pkg.createdAt ?? null;
   const orderLine = pkg.orderNumber ? `Orden ${pkg.orderNumber}` : 'Orden no disponible';
-  const importLine = importedAt ? ` · importado ${formatDateTime(importedAt)}` : '';
 
   const courierDetail = courier
     ? [courier.phone, courier.schedule].filter(Boolean).join(' · ')
     : '';
+
+  // El backend solo devuelve la evidencia cuando el estado es DELIVERED.
+  const evidenceLinks = [
+    { label: 'Firma', url: pkg.deliverySignatureUrl },
+    { label: 'Foto', url: pkg.deliveryPhotoUrl },
+    { label: 'Comprobante', url: pkg.deliveryEvidenceUrl },
+  ].filter((entry) => Boolean(entry.url));
 
   return (
     <Paper
@@ -95,9 +111,8 @@ export default function PackageDetailCard({ pkg }) {
             >
               {pkg.shipmentNumber}
             </Typography>
-            <Typography sx={{ fontSize: FONT.md, color: 'rgba(255,255,255,0.82)', mt: 0.25, wordBreak: 'break-word' }}>
+            <Typography sx={{ fontSize: FONT.md, color: 'primary.contrastText', opacity: 0.82, mt: 0.25, wordBreak: 'break-word' }}>
               {orderLine}
-              {importLine}
             </Typography>
           </Box>
         </Box>
@@ -155,6 +170,52 @@ export default function PackageDetailCard({ pkg }) {
             <Typography sx={VALUE_SX}>Sin mensajero asignado</Typography>
           )}
         </InfoBlock>
+
+        {items.length > 0 && (
+          <InfoBlock label="Artículos" sx={{ gridColumn: { md: '1 / -1' } }}>
+            <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+              {items.map((item, index) => {
+                const unitPrice = formatUnitPrice(item.unitPrice);
+                const detail = [
+                  `Cantidad: ${formatQuantity(item.quantity)}`,
+                  item.sku ? `SKU ${item.sku}` : null,
+                  unitPrice ? `Precio unitario: ${unitPrice}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ');
+
+                return (
+                  <Box component="li" key={item.itemId ?? `${item.name}-${index}`}>
+                    <Typography sx={VALUE_SX}>{item.name || NO_DISPONIBLE}</Typography>
+                    <Typography sx={SECONDARY_SX}>{detail}</Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+          </InfoBlock>
+        )}
+
+        {pkg.status === 'DELIVERED' && (
+          <InfoBlock label="Evidencia de entrega" sx={{ gridColumn: { md: '1 / -1' } }}>
+            {evidenceLinks.length > 0 ? (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 0.25 }}>
+                {evidenceLinks.map((entry) => (
+                  <Link
+                    key={entry.label}
+                    href={entry.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{ fontSize: FONT.md, fontWeight: 600 }}
+                  >
+                    {entry.label}
+                  </Link>
+                ))}
+              </Box>
+            ) : (
+              <Typography sx={VALUE_SX}>Sin evidencia registrada</Typography>
+            )}
+          </InfoBlock>
+        )}
       </Box>
     </Paper>
   );

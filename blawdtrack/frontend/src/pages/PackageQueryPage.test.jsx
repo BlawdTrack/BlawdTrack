@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PackageQueryPage from './PackageQueryPage';
-import { getPackageByShipmentNumber } from '../services/PackageService';
+import { getPackageByShipmentNumber } from '../services/SearchPackageService';
 import { renderWithProviders } from '../test-utils';
 
 // Se conserva `normalizeShipmentNumber` real y solo se simula la llamada HTTP.
-vi.mock('../services/PackageService', async (importOriginal) => {
+vi.mock('../services/SearchPackageService', async (importOriginal) => {
   const actual = await importOriginal();
   return { ...actual, getPackageByShipmentNumber: vi.fn() };
 });
@@ -27,7 +27,12 @@ const packageDetail = {
   address: 'Tibás, San José',
   schedule: '8:00 am – 12:00 md',
   status: 'DELIVERED',
-  items: [],
+  items: [
+    { itemId: 'ART-1', name: 'Caja de chocolates', quantity: 2, sku: 'CH-100', unitPrice: 1500 },
+  ],
+  deliveryEvidenceUrl: null,
+  deliverySignatureUrl: 'https://cdn.blawd.test/firma.png',
+  deliveryPhotoUrl: 'https://cdn.blawd.test/foto.png',
   assignedCourier: {
     courierId: 5,
     fullName: 'María José Solano',
