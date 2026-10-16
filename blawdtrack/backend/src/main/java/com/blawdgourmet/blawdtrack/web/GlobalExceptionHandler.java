@@ -1,4 +1,4 @@
-package com.blawdgourmet.blawdtrack.common.exception;
+package com.blawdgourmet.blawdtrack.web;
 
 import java.util.List;
 
@@ -14,6 +14,8 @@ import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
 import com.blawdgourmet.blawdtrack.auth.exception.InvalidResetTokenException;
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
+import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationException;
+import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.RolePermissionException;
 import com.blawdgourmet.blawdtrack.users.service.UserNotFoundException;
