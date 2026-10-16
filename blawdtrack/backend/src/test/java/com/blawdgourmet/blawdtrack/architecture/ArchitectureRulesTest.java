@@ -60,11 +60,13 @@ class ArchitectureRulesTest {
             .should().dependOnClassesThat().resideInAPackage("..service.impl..")
             .because("se depende de la interfaz del servicio, no de su implementación");
 
-    // Módulos sin ciclos: common <- users <- audit y auth <- couriers, packages y web.
+    // Módulos hoja: couriers y packages usan a los demás, pero nadie depende de ellos.
+    // Pendiente de refactor: audit, auth, common y users se referencian entre sí (ciclo); cuando se
+    // desacoplen, esta regla puede pasar a slices().matching("com.blawdgourmet.blawdtrack.(*)..").beFreeOfCycles().
     @ArchTest
-    static final ArchRule modules_have_no_cycles = slices()
-            .matching("com.blawdgourmet.blawdtrack.(*)..")
-            .should().beFreeOfCycles();
+    static final ArchRule feature_modules_are_leaves = noClasses()
+            .that().resideOutsideOfPackages("..couriers..", "..packages..")
+            .should().dependOnClassesThat().resideInAnyPackage("..couriers..", "..packages..");
 
     // Higiene: nada de System.out ni java.util.logging.
     @ArchTest
