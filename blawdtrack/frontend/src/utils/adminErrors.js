@@ -6,7 +6,7 @@
 // text-matching the message.
 // UI texts are in Spanish; identifiers and comments in English.
 
-import { normalizeApiError, extractFieldsFromApiError } from './apiErrors';
+import { normalizeApiError, mapFieldErrors } from './apiErrors';
 
 const MESSAGES = {
   validationGeneric: 'Revisa los datos ingresados e intenta de nuevo.',
@@ -33,23 +33,8 @@ const FIELD_MESSAGES = {
 // Maps a 400 body's field names (Spanish, per AdminRegistrationRequest) to
 // this form's inputs.
 function mapValidation(data) {
-  const { names, backendMessages } = extractFieldsFromApiError(data);
-  const fieldErrors = {};
-  let globalMessage = null;
-
-  names.forEach((name) => {
-    if (FIELD_MESSAGES[name]) {
-      fieldErrors[name] = FIELD_MESSAGES[name];
-    } else if (!globalMessage) {
-      globalMessage = backendMessages[name] || MESSAGES.validationGeneric;
-    }
-  });
-
-  if (names.length === 0) {
-    globalMessage = MESSAGES.validationGeneric;
-  }
-
-  return { fieldErrors, globalMessage };
+  const { names, fieldErrors, globalMessage } = mapFieldErrors(data, FIELD_MESSAGES, MESSAGES.validationGeneric);
+  return { fieldErrors, globalMessage: names.length === 0 ? MESSAGES.validationGeneric : globalMessage };
 }
 
 // AdminUniquenessValidator (backend) sets a distinct code per duplicate.

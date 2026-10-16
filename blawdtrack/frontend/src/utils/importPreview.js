@@ -45,16 +45,14 @@ export function formatDeliveryWindow(window) {
   return isValidTime(start) && isValidTime(end) ? `${formatTime(start)} – ${formatTime(end)}` : null;
 }
 
+const TEXT_FIELDS = ['shipmentNumber', 'orderNumber', 'customerName', 'address', 'phone', 'schedule'];
+
 function packageRow(status, record, index, notes = []) {
+  const texts = Object.fromEntries(TEXT_FIELDS.map((field) => [field, record?.[field] || null]));
   return {
     key: `${status}-${index}-${record?.shipmentNumber ?? ''}`,
     status,
-    shipmentNumber: record?.shipmentNumber || null,
-    orderNumber: record?.orderNumber || null,
-    customerName: record?.customerName || null,
-    address: record?.address || null,
-    phone: record?.phone || null,
-    schedule: record?.schedule || null,
+    ...texts,
     deliveryRange: formatDeliveryWindow(record?.deliveryWindow),
     notes,
   };
