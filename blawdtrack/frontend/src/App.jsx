@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
 import SalesHomePage from './pages/SalesHomePage';
+import PackageDeletionPage from './pages/PackageDeletionPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
@@ -115,6 +116,7 @@ function App() {
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
         <Route path={ROUTES.SALES_HOME} element={<SalesHomePage />} />
         <Route path={ROUTES.SALES_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
+        <Route path={ROUTES.PACKAGE_DELETE} element={<PackageDeletionPage />} />
       </Route>
       
       <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>
