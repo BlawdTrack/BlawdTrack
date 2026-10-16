@@ -17,6 +17,7 @@ vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla
 vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
 vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
 vi.mock('./pages/SalesHomePage',() => ({ default: () => <div>Pantalla ventas</div> }));
+vi.mock('./pages/PackageDeletionPage', () => ({ default: () => <div>Pantalla eliminar paquetes</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/OwnPasswordResetPage', () => ({ default: () => <div>Pantalla restablecer mi contraseña</div> }));
 vi.mock('./pages/PasswordRecoveryRequestPage',() => ({ default: () => <div>Pantalla recuperación</div> }));
@@ -40,6 +41,7 @@ const SCREENS = {
   [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
   [ROUTES.ROLES_PERMISSIONS]: 'Pantalla roles y permisos',
   [ROUTES.SALES_HOME]: 'Pantalla ventas',
+  [ROUTES.PACKAGE_DELETE]: 'Pantalla eliminar paquetes',
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
   // Cada rol restablece su propia contraseña con la sesión iniciada.
   [ROUTES.PASSWORD_RESET_OWN]: 'Pantalla restablecer mi contraseña',
@@ -65,7 +67,7 @@ const ALLOWED_ROUTES = {
     ROUTES.PASSWORD_RESET_OWN,
     '/editar-mensajero'
   ],
-  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME, ROUTES.SALES_PASSWORD_RESET],
+  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME, ROUTES.SALES_PASSWORD_RESET, ROUTES.PACKAGE_DELETE],
   [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],
 };
 
