@@ -213,7 +213,8 @@ describe('PackageQueryPage (HU-013)', () => {
     // Nombre descriptivo del evento, tomado del estado real de cada registro.
     expect(screen.getByText('Registrado como Pendiente')).toBeInTheDocument();
     expect(screen.getByText('Asignado')).toBeInTheDocument();
-    expect(screen.getByText('Entregado')).toBeInTheDocument();
+    // "Entregado" aparece tanto en la píldora del paquete como en el historial.
+    expect(screen.getAllByText('Entregado').length).toBeGreaterThanOrEqual(2);
 
     // Fecha · hora · responsable, con el momento real del cambio.
     expect(screen.getByText('16/09/2026 · 22:19 · Administrador de Ventas')).toBeInTheDocument();
@@ -261,7 +262,7 @@ describe('PackageQueryPage (HU-013)', () => {
     render();
 
     await search(user, 'BG-2026-00121');
-    expect(await screen.findByText('Entregado')).toBeInTheDocument();
+    expect(await screen.findByText('17/09/2026 · 08:30')).toBeInTheDocument();
 
     // Segunda consulta: otro paquete con su propio historial.
     getPackageByShipmentNumber.mockResolvedValueOnce({ ...packageDetail, shipmentNumber: 'BG-2026-00999', status: 'PENDING' });
@@ -274,6 +275,6 @@ describe('PackageQueryPage (HU-013)', () => {
 
     expect(await screen.findByText('Registrado como Pendiente')).toBeInTheDocument();
     // No se conservan eventos de la consulta anterior.
-    expect(screen.queryByText('Entregado')).toBeNull();
+    expect(screen.queryByText('17/09/2026 · 08:30')).toBeNull();
   });
 });
