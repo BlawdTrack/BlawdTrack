@@ -23,5 +23,4 @@ export const NAV_GROUP_ICONS = {
   security: LockResetOutlinedIcon,
   couriers: LocalShippingOutlinedIcon,
   admins: AdminPanelSettingsOutlinedIcon,
-  permissions: ManageAccountsOutlinedIcon,
 };

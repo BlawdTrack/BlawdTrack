@@ -1,15 +1,16 @@
 import { Box, Typography } from '@mui/material';
 import { evaluatePasswordRules } from '../utils/passwordRules';
+import { RADIUS, FONT, rem } from '../theme';
 
 // Checklist "Requisitos" (bloque r3 del mockup). Las reglas 1-3 se evalúan en
 // vivo con lo que el usuario escribe. La regla 4 (distinta de las últimas 3
 // contraseñas) se queda SIEMPRE en estado neutro: el cliente no puede saberlo.
 // Solo pasa a "no cumplida" cuando el propio backend la rechazó
 // (`historyRejected`, tras un CONTRASENA_REUTILIZADA).
-const OK_COLOR = '#2F7D4F';
-const ERROR_COLOR = '#C0392B';
-const NEUTRAL_TEXT = '#9E968D';
-const NEUTRAL_RING = '#DCD4CA';
+const OK_COLOR = 'success.main';
+const ERROR_COLOR = 'error.main';
+const NEUTRAL_TEXT = 'text.secondary';
+const NEUTRAL_RING = 'neutral.borderStrong';
 
 const VISUALLY_HIDDEN = {
   position: 'absolute',
@@ -28,24 +29,25 @@ function Rule({ label, state, note }) {
   return (
     <Box
       component="li"
-      sx={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: 12.5, lineHeight: 1.35, color }}
+      sx={{ display: 'flex', alignItems: 'center', gap: '0.5385rem', fontSize: FONT.xs, lineHeight: 1.35, color }}
     >
       <Box
         component="span"
         aria-hidden
         sx={{
-          width: 15,
-          height: 15,
-          flex: '0 0 15px',
+          width: rem(15),
+          height: rem(15),
+          flex: `0 0 ${rem(15)}`,
           borderRadius: '50%',
           bgcolor: state === 'ok' ? OK_COLOR : 'transparent',
-          border: `1.5px solid ${state === 'ok' ? OK_COLOR : state === 'failed' ? ERROR_COLOR : NEUTRAL_RING}`,
+          border: '1.5px solid',
+          borderColor: state === 'ok' ? OK_COLOR : state === 'failed' ? ERROR_COLOR : NEUTRAL_RING,
         }}
       />
       <span>
         {label}
         {note && (
-          <Box component="span" sx={{ ml: 0.75, fontSize: 11.5, color: NEUTRAL_TEXT }}>
+          <Box component="span" sx={{ ml: 0.75, fontSize: FONT.xs, color: NEUTRAL_TEXT }}>
             ({note})
           </Box>
         )}
@@ -67,24 +69,24 @@ export function PasswordRequirements({ password, historyRejected = false }) {
   return (
     <Box
       sx={{
-        bgcolor: '#F1ECE7',
-        borderRadius: '12px',
-        p: '15px 16px',
+        bgcolor: 'neutral.surface',
+        borderRadius: RADIUS.sm,
+        p: '0.9231rem 1rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '9px',
+        gap: '0.5385rem',
       }}
     >
       <Typography
         id="password-requirements-title"
-        sx={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: '#6B6560' }}
+        sx={{ fontSize: FONT.xs, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: 'text.secondary' }}
       >
         Requisitos
       </Typography>
       <Box
         component="ul"
         aria-labelledby="password-requirements-title"
-        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}
+        sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: '0.5385rem' }}
       >
         <Rule label="Mínimo 8 caracteres" state={results.length ? 'ok' : 'pending'} />
         <Rule label="Al menos una letra" state={results.letter ? 'ok' : 'pending'} />

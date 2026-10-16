@@ -5,6 +5,7 @@ import AdminRegistrationPage from './pages/AdminRegistrationPage';
 import CourierRegistrationPage from './pages/CourierRegistrationPage';
 import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
+import ModuleMenuPage from './pages/ModuleMenuPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
@@ -18,6 +19,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 import { ROLES } from './config/roles';
 import { ROUTES } from './config/routes';
+import { NAVIGATION_GROUPS } from './config/navigation';
 import { getHomeRoute } from './utils/roleRoutes';
 
 // T12: si ya hay sesión, "/" manda directo al inicio del rol en vez de
@@ -94,6 +96,9 @@ function App() {
         {/* Mantenemos el MainMenuLayout de develop para que tu pantalla tenga menú */}
         <Route element={<MainMenuLayout />}>
           <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
+          {NAVIGATION_GROUPS.map((group) => (
+            <Route key={group.id} path={group.path} element={<ModuleMenuPage groupId={group.id} />} />
+          ))}
           <Route path={ROUTES.PASSWORD_RESET_OWN} element={<OwnPasswordResetPage />} />
           <Route path={ROUTES.COURIER_CREATE} element={<CourierRegistrationPage />} />
           <Route path={ROUTES.COURIER_DEACTIVATE} element={<MessengerFleetList />} />

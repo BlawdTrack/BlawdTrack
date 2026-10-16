@@ -94,6 +94,20 @@ class EmailServiceTest {
                         "{{temporaryPassword}}");
     }
 
+    @Test
+    void sendsAdminWelcomeWithTheAdminAccountLabel() throws Exception {
+        var message = prepare();
+        service.sendAdminWelcome("admin@example.com", "Ana Admin", "Ab12cd34!");
+        verify(sender).send(message);
+        message.saveChanges();
+        assertThat(message.getAllRecipients()[0].toString()).isEqualTo("admin@example.com");
+        assertThat(body(message, "text/plain"))
+                .contains("Tu cuenta de administrador de ventas está lista", "admin@example.com", "Ab12cd34!");
+        assertThat(body(message, "text/html"))
+                .contains("Tu cuenta de administrador de ventas en BlawdTrack está lista", "Ab12cd34!")
+                .doesNotContain("{{accountLabel}}", "mensajero");
+    }
+
     private String body(Part part, String type) throws Exception {
         if (part.isMimeType(type)) return (String) part.getContent();
         if (part.getContent() instanceof Multipart multipart) {

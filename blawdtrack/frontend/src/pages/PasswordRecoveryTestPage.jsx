@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { requestPasswordReset } from '../services/PasswordRecoveryService';
 import { Toast } from '../components/Toast';
+import { RADIUS } from '../theme';
 
 // Pantalla de PRUEBA para T06: solo valida la integración con el
 // endpoint de solicitud de recuperación y el patrón de notificación tipo
@@ -57,7 +58,7 @@ export function PasswordRecoveryTestPage({ onBackToLogin }) {
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', py: { xs: 1.5, sm: 4 } }}>
       <Container maxWidth="sm">
-        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        <Paper elevation={3} sx={{ borderRadius: RADIUS.md, overflow: 'hidden' }}>
           <Box sx={{ height: 4, bgcolor: 'secondary.main' }} />
           <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', p: 3, textAlign: 'center' }}>
             <Typography variant="overline" sx={{ opacity: 0.6, letterSpacing: 1.2 }}>
@@ -75,7 +76,7 @@ export function PasswordRecoveryTestPage({ onBackToLogin }) {
             component="form"
             onSubmit={handleSubmit}
             noValidate
-            sx={{ p: 4, bgcolor: '#F1ECE7', display: 'flex', flexDirection: 'column', gap: 2.5 }}
+            sx={{ p: 4, bgcolor: 'neutral.surface', display: 'flex', flexDirection: 'column', gap: 2.5 }}
           >
             <TextField
               fullWidth

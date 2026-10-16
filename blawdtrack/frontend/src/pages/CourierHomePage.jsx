@@ -7,7 +7,7 @@ export function CourierHomePage() {
   return (
     <ProvisionalHomePage
       title="Panel del Mensajero"
-      description="Pantalla provisional. Aquí irán tus paquetes asignados del día (HU-022)."
+      description="Muy pronto verás aquí los paquetes que tienes asignados para el día."
     />
   );
 }
