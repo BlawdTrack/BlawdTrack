@@ -10,9 +10,10 @@ const DELETABLE_STATES_TEXT = [...DELETABLE_PACKAGE_STATES].map(getPackageStateL
 /**
  * Tarjeta "Lista de distribución" de la pantalla Eliminar paquetes (HU-012): un encabezado con la regla de qué se
  * puede eliminar y una fila por paquete. Solo muestra; qué pasa al pulsar "Eliminar" lo decide `onEliminar`.
- * @param {{ paquetes: object[], onEliminar: (paquete: object) => void }} props
+ * @param {{ paquetes: object[], onEliminar: (paquete: object) => void, titleRef?: import('react').Ref<HTMLElement> }}
+ *   props `titleRef` permite llevar el foco al título (por ejemplo, cuando la fila que lo tenía desaparece).
  */
-export default function PackageDeletionList({ paquetes, onEliminar }) {
+export default function PackageDeletionList({ paquetes, onEliminar, titleRef }) {
   return (
     <Paper elevation={0} component="section" aria-labelledby="package-deletion-list-title" sx={{ ...CARD_SX, overflow: 'hidden' }}>
       <Box
@@ -28,6 +29,8 @@ export default function PackageDeletionList({ paquetes, onEliminar }) {
       >
         <Typography
           id="package-deletion-list-title"
+          ref={titleRef}
+          tabIndex={-1}
           component="h2"
           sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}
         >

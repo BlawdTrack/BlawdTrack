@@ -25,7 +25,8 @@ export default function PackageDeletionRow({ paquete, onEliminar }) {
         flexWrap: 'wrap',
       }}
     >
-      <Typography sx={{ flex: `0 0 ${rem(120)}`, fontSize: FONT.md, fontWeight: 700, color: 'text.primary' }}>
+      {/* El número de envío no se parte: con la escala fluida un ancho fijo en rem queda corto en pantallas chicas. */}
+      <Typography sx={{ flex: '0 0 auto', minWidth: rem(120), whiteSpace: 'nowrap', fontSize: FONT.md, fontWeight: 700, color: 'text.primary' }}>
         {paquete.shipmentNumber}
       </Typography>
       <Box sx={{ flex: '1 1 200px', minWidth: 0 }}>
@@ -37,7 +38,10 @@ export default function PackageDeletionRow({ paquete, onEliminar }) {
         </Typography>
       </Box>
       <PackageStateChip status={paquete.status} />
-      <DeletePackageButton paquete={paquete} onEliminar={onEliminar} />
+      {/* `ml: auto` deja el botón siempre a la derecha, también cuando la fila se parte en dos líneas en móvil. */}
+      <Box sx={{ ml: 'auto' }}>
+        <DeletePackageButton paquete={paquete} onEliminar={onEliminar} />
+      </Box>
     </Box>
   );
 }
