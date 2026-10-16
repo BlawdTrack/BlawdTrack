@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { getPackageByShipmentNumber, normalizeShipmentNumber } from '../services/PackageService';
+import { getPackageByShipmentNumber, normalizeShipmentNumber } from '../services/SearchPackageService';
 
 /** Estados posibles de una consulta de paquete. */
 export const PACKAGE_LOOKUP_STATE = {
@@ -85,9 +85,11 @@ export function usePackageLookup() {
       setState(PACKAGE_LOOKUP_STATE.SUCCESS);
     } catch (error) {
       const status = error?.response?.status;
-      const code = error?.response?.data?.code;
 
-      if (status === 404 || code === 'PACKAGE_NOT_FOUND') {
+      // Un 404 es "no encontrado" sin importar el código del cuerpo: el backend
+      // ya unificó ese código en `PAQUETE_NO_ENCONTRADO`, así que guiarse por un
+      // código concreto quedaría desfasado. El estado HTTP es el contrato.
+      if (status === 404) {
         setState(PACKAGE_LOOKUP_STATE.NOT_FOUND);
         setMessage(
           `No se encontró un paquete con el número de envío "${shipmentNumber}". Verifícalo e inténtalo de nuevo.`
