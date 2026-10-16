@@ -83,11 +83,18 @@ describe('PackageQueryPage (HU-013)', () => {
     // El estado sale del dato real, no fijo.
     expect(screen.getByText('Entregado')).toBeInTheDocument();
     expect(screen.getByText('Orden ZI-88301')).toBeInTheDocument();
+    // Se muestran los artículos y la evidencia de entrega del backend.
+    expect(screen.getByText('Caja de chocolates')).toBeInTheDocument();
+    expect(screen.getByText('Cantidad: 2 · SKU CH-100 · Precio unitario: 1.500,00')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Firma' })).toHaveAttribute('href', 'https://cdn.blawd.test/firma.png');
+    expect(screen.getByRole('link', { name: 'Foto' })).toHaveAttribute('href', 'https://cdn.blawd.test/foto.png');
   });
 
   it('informa cuando el paquete no existe (404)', async () => {
+    // El backend unificó el código en PAQUETE_NO_ENCONTRADO; la decisión se toma
+    // solo por el estado HTTP, así que un cambio de código no rompe la pantalla.
     getPackageByShipmentNumber.mockRejectedValue({
-      response: { status: 404, data: { code: 'PACKAGE_NOT_FOUND' } },
+      response: { status: 404, data: { code: 'PAQUETE_NO_ENCONTRADO' } },
     });
     const user = userEvent.setup();
     render();
@@ -107,6 +114,37 @@ describe('PackageQueryPage (HU-013)', () => {
     expect(await screen.findByText(/No se pudo conectar con el servidor/)).toBeInTheDocument();
     // Un error de red sí admite reintentar la misma consulta.
     expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument();
+  });
+
+  it('no muestra evidencia de entrega si el paquete no está entregado', async () => {
+    getPackageByShipmentNumber.mockResolvedValue({
+      ...packageDetail,
+      status: 'IN_TRANSIT',
+      deliverySignatureUrl: null,
+      deliveryPhotoUrl: null,
+    });
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'BG-2026-00003');
+
+    expect(await screen.findByText('BG-2026-00003')).toBeInTheDocument();
+    expect(screen.queryByText('Evidencia de entrega')).toBeNull();
+  });
+
+  it('indica que un paquete entregado no tiene evidencia registrada', async () => {
+    getPackageByShipmentNumber.mockResolvedValue({
+      ...packageDetail,
+      deliverySignatureUrl: null,
+      deliveryPhotoUrl: null,
+      deliveryEvidenceUrl: null,
+    });
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'BG-2026-00004');
+
+    expect(await screen.findByText('Sin evidencia registrada')).toBeInTheDocument();
   });
 
   it('maneja datos incompletos sin inventar valores', async () => {
