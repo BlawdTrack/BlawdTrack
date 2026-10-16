@@ -1,12 +1,11 @@
 import { Box, Button, Chip, Typography } from '@mui/material';
 import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import ConstructionOutlinedIcon from '@mui/icons-material/ConstructionOutlined';
-import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
 import { getPasswordResetRoute } from '../utils/roleRoutes';
-import BrandLogo from './BrandLogo';
+import AppHeaderBar from './AppHeaderBar';
 import PageContainer from './PageContainer';
 import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET } from '../theme';
 
@@ -30,49 +29,14 @@ const CARD_SX = {
  *   botón hacia una pantalla nueva) sin rehacer la pantalla provisional.
  */
 export function ProvisionalHomePage({ title, description, children }) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   // Cada rol restablece su propia contraseña desde su inicio.
   const passwordResetRoute = getPasswordResetRoute(user?.role);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
-  };
-
   return (
     <Box sx={{ minHeight: '100vh' }}>
-      <Box
-        component="header"
-        sx={{
-          bgcolor: 'primary.main',
-          color: 'primary.contrastText',
-          borderBottom: '4px solid',
-          borderColor: 'secondary.main',
-          px: { xs: 2, sm: 4 },
-          py: 1.5,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 2,
-        }}
-      >
-        <BrandLogo variant="horizontal" onDark width={108} />
-        <Button
-          onClick={handleLogout}
-          startIcon={<LogoutOutlinedIcon fontSize="small" />}
-          sx={{
-            color: 'rgba(255,255,255,.9)',
-            minHeight: 44,
-            border: '1px solid rgba(255,255,255,.25)',
-            // Sobre la cabecera verde el botón es transparente (el tema da fondo blanco a los botones de texto).
-            bgcolor: 'transparent',
-            '&:hover': { bgcolor: 'rgba(255,255,255,.08)' },
-          }}
-        >
-          Cerrar sesión
-        </Button>
-      </Box>
+      <AppHeaderBar />
 
       <PageContainer component="main">
         <Box sx={{ pl: 2, borderLeft: '4px solid', borderColor: 'secondary.main' }}>
