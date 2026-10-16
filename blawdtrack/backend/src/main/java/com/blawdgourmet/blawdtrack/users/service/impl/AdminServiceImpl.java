@@ -211,6 +211,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private AdminDetailResponse toDetail(User admin) {
+        User admin = findSalesAdministrator(documentType, documentNumber);
+
         return new AdminDetailResponse(
                 admin.getId(),
                 admin.getDocumentType(),
