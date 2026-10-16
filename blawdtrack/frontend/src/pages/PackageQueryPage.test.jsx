@@ -59,7 +59,7 @@ const historyEntries = [
     newStatus: 'ASSIGNED',
   },
   {
-    timestamp: '2026-09-17T10:45:00',
+    timestamp: '2026-09-17T08:30:00',
     action: 'CAMBIAR_ESTADO_PAQUETE',
     details: 'Entrega confirmada',
     actorName: null,

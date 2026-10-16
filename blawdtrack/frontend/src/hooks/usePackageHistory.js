@@ -62,7 +62,9 @@ export function usePackageHistory(shipmentNumber) {
     if (!normalized) return undefined;
 
     let active = true;
-    getPackageHistory(normalized)
+    // `Promise.resolve` envuelve también respuestas ya resueltas (p. ej. datos
+    // sembrados), para no depender de que el servicio devuelva siempre un thenable.
+    Promise.resolve(getPackageHistory(normalized))
       .then((data) => {
         if (!active) return;
         const entries = Array.isArray(data) ? data : [];
