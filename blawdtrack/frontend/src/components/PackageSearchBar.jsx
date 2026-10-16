@@ -81,9 +81,16 @@ export function PackageSearchBar({ value, onChange, onClear, isLoading, maxLengt
         />
         <Button
           type="button"
-          variant="outlined"
+          variant="contained"
           onClick={onClear}
-          sx={{ minHeight: 56, borderRadius: '12px', whiteSpace: 'nowrap' }}
+          sx={{
+            minHeight: 56,
+            borderRadius: '12px',
+            whiteSpace: 'nowrap',
+            backgroundColor: 'primary.main',
+            color: 'primary.contrastText',
+            '&:hover': { backgroundColor: 'primary.dark' },
+          }}
         >
           Limpiar
         </Button>

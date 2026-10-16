@@ -31,6 +31,16 @@ export function usePackageSearch() {
     }
   };
 
+  const clearSearch = () => {
+    cancelCurrentRequest();
+    requestSequenceRef.current += 1;
+    lastRequestedTermRef.current = null;
+    setTerm('');
+    setResults(null);
+    setIsLoading(false);
+    setErrorMessage(null);
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     distributionControllerRef.current = controller;
@@ -64,11 +74,7 @@ export function usePackageSearch() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!normalizeSearchTerm(term)) {
-      setResults(distributionResults);
-    }
-  }, [term, distributionResults]);
+  const effectiveResults = normalizeSearchTerm(term) ? results : distributionResults;
 
   useEffect(() => {
     const normalizedTerm = normalizeSearchTerm(term);
@@ -77,8 +83,6 @@ export function usePackageSearch() {
       cancelCurrentRequest();
       requestSequenceRef.current += 1;
       lastRequestedTermRef.current = null;
-      setIsLoading(false);
-      setErrorMessage(null);
       return undefined;
     }
 
@@ -163,7 +167,8 @@ export function usePackageSearch() {
   return {
     term,
     setTerm,
-    results,
+    clearSearch,
+    results: effectiveResults,
     distributionResults,
     isLoading,
     errorMessage,

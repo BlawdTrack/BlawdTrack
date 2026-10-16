@@ -69,7 +69,7 @@ describe('usePackageSearch', () => {
     });
 
     act(() => {
-      result.current.setTerm('');
+      result.current.clearSearch();
     });
     act(() => {
       result.current.setTerm('limon');
@@ -80,6 +80,31 @@ describe('usePackageSearch', () => {
 
     expect(searchPackages).toHaveBeenCalledTimes(3);
     expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'limon' }));
+  });
+
+  it('restores the initial state immediately when clearing an in-flight search', async () => {
+    searchPackages
+      .mockResolvedValueOnce({ content: [{ id: 'distribution' }], totalElements: 1 })
+      .mockImplementationOnce(() => new Promise(() => {}));
+
+    const { result } = renderHook(() => usePackageSearch());
+    await act(async () => {});
+
+    act(() => {
+      result.current.setTerm('limon');
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    expect(result.current.isLoading).toBe(true);
+
+    act(() => {
+      result.current.clearSearch();
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.errorMessage).toBeNull();
+    expect(result.current.results).toEqual({ content: [{ id: 'distribution' }], totalElements: 1 });
   });
 
   it('keeps the previous results while a newer query is in flight and ignores old responses', async () => {
