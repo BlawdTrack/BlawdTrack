@@ -28,9 +28,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.audit.service.AuditService;
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.service.AdminRegisteredEvent;
@@ -38,6 +40,7 @@ import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminUpdateRequest;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -58,6 +61,9 @@ class AdminServiceImplTest {
     @Mock private AuditLogRepository auditLogRepository;
     @Mock private TemporaryPasswordGenerator temporaryPasswords;
     @Mock private ApplicationEventPublisher events;
+
+    private static final AuthenticatedUser SUPER_USER_ACTOR = new AuthenticatedUser(
+            1L, DocumentType.CEDULA, "1-1111-1111", "Alicia Admin", RoleName.SUPER_USER, "alicia@example.test");
 
     private AdminServiceImpl service;
 
@@ -91,6 +97,102 @@ class AdminServiceImplTest {
         assertThat(event.getValue().temporaryPassword()).isEqualTo("Temp-Pass-123!");
         assertThat(event.getValue().toString()).doesNotContain("Temp-Pass-123!");
         assertThat(response.correoElectronico()).isEqualTo("ana@example.com");
+    }
+
+    @Test
+    void findingAnAdminReturnsTheProfileWithoutCredentials() {
+        User admin = usuarioConRol(RoleName.SALES_ADMIN);
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber()))
+            .thenReturn(Optional.of(admin));
+
+        var detail = service.findAdministrator(DocumentType.CEDULA, admin.getDocumentNumber());
+
+        assertThat(detail.documentType()).isEqualTo(DocumentType.CEDULA);
+        assertThat(detail.documentNumber()).isEqualTo(admin.getDocumentNumber());
+        assertThat(detail.fullName()).isEqualTo(admin.getFullName());
+        assertThat(detail.email()).isEqualTo(admin.getEmail());
+        assertThat(detail.status()).isEqualTo(admin.getStatus());
+        assertThat(detail.toString()).doesNotContain(admin.getPasswordHash());
+    }
+
+    @Test
+    void findingAnUnknownDocumentThrowsAdminNotFound() {
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findAdministrator(DocumentType.CEDULA, "1-2345-6789"))
+                .isInstanceOf(AdminNotFoundException.class)
+                .hasMessage("Administrador no existente");
+    }
+
+    @Test
+    void findingAUserWithAnotherRoleIsNotFoundEither() {
+        User mensajero = usuarioConRol(RoleName.COURIER);
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, mensajero.getDocumentNumber()))
+            .thenReturn(Optional.of(mensajero));
+
+        assertThatThrownBy(() -> service.findAdministrator(DocumentType.CEDULA, mensajero.getDocumentNumber()))
+                .isInstanceOf(AdminNotFoundException.class);
+    }
+
+    @Test
+    void updatingOnlyTheNameAuditsItAndKeepsTheSessionOpen() {
+        User admin = usuarioConRol(RoleName.SALES_ADMIN);
+        int versionBefore = admin.getTokenVersion();
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber()))
+            .thenReturn(Optional.of(admin));
+
+        var detail = service.updateAdministrator(DocumentType.CEDULA, admin.getDocumentNumber(),
+                new AdminUpdateRequest("Ana Nueva", null, null, null), SUPER_USER_ACTOR);
+
+        assertThat(detail.fullName()).isEqualTo("Ana Nueva");
+        assertThat(admin.getTokenVersion()).isEqualTo(versionBefore);
+        verify(auditService).logAction(eq(AuditAction.ADMIN_UPDATED), eq(SUPER_USER_ACTOR), eq(admin),
+                argThat(text -> text.contains("Alicia Admin") && text.contains("modificó los datos (nombre)")
+                        && text.contains("Ana Nueva")));
+        verify(passwordEncoder, never()).encode(any());
+    }
+
+    @Test
+    void changingStatusAndPasswordRaisesTheTokenVersionAndNeverAuditsThePassword() {
+        User admin = usuarioConRol(RoleName.SALES_ADMIN);
+        int versionBefore = admin.getTokenVersion();
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber()))
+            .thenReturn(Optional.of(admin));
+        when(passwordEncoder.encode("NuevaClave123")).thenReturn("nuevo-hash");
+
+        service.updateAdministrator(DocumentType.CEDULA, admin.getDocumentNumber(),
+                new AdminUpdateRequest(null, null, "NuevaClave123", UserStatus.INACTIVE), SUPER_USER_ACTOR);
+
+        assertThat(admin.getStatus()).isEqualTo(UserStatus.INACTIVE);
+        assertThat(admin.getPasswordHash()).isEqualTo("nuevo-hash");
+        assertThat(admin.getTokenVersion()).isGreaterThan(versionBefore);
+        verify(auditService).logAction(eq(AuditAction.ADMIN_DEACTIVATED), eq(SUPER_USER_ACTOR), eq(admin),
+                argThat(text -> text.contains("desactivó") && text.contains("sesión activa se cerró")));
+        verify(auditService).logAction(eq(AuditAction.ADMIN_PASSWORD_CHANGED), eq(SUPER_USER_ACTOR), eq(admin),
+                argThat(text -> text.contains("cambió la contraseña") && !text.contains("NuevaClave123")));
+    }
+
+    @Test
+    void anUnchangedRequestLeavesNoTrace() {
+        User admin = usuarioConRol(RoleName.SALES_ADMIN);
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber()))
+            .thenReturn(Optional.of(admin));
+
+        service.updateAdministrator(DocumentType.CEDULA, admin.getDocumentNumber(),
+                new AdminUpdateRequest(admin.getFullName(), admin.getEmail(), null, admin.getStatus()), SUPER_USER_ACTOR);
+
+        verify(auditService, never()).logAction(any(), any(), any(), any());
+    }
+
+    @Test
+    void updatingAnUnknownAdminThrowsAdminNotFound() {
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.updateAdministrator(DocumentType.CEDULA, "1-2345-6789",
+                new AdminUpdateRequest("X", null, null, null), SUPER_USER_ACTOR))
+                .isInstanceOf(AdminNotFoundException.class);
     }
 
     @Test
@@ -168,7 +270,7 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void getAuditLogReturnsOnlyCreationAndDeletionEntriesNewestFirst() {
+    void getAuditLogReturnsTheAdminEntriesNewestFirst() {
         User actor = usuarioConRol(RoleName.SUPER_USER);
         AuditLog creacion = AuditLog.builder()
                 .id(1L)
@@ -184,8 +286,11 @@ class AdminServiceImplTest {
                 .details("El Super Usuario eliminó al Administrador Y.")
                 .timestamp(LocalDateTime.now().minusDays(1))
                 .build();
-        when(auditLogRepository.findByActionInOrderByTimestampDesc(
-                List.of("CREAR_ADMINISTRADOR", "ELIMINAR_ADMINISTRADOR")))
+        // La bitácora de administradores incluye creación, eliminación y, desde la HU-007, sus modificaciones.
+        when(auditLogRepository.findByActionInOrderByTimestampDesc(argThat(actions -> actions != null
+                && actions.containsAll(List.of("CREAR_ADMINISTRADOR", "ELIMINAR_ADMINISTRADOR",
+                        "ACTUALIZAR_ADMINISTRADOR", "ACTIVAR_ADMINISTRADOR", "DESACTIVAR_ADMINISTRADOR",
+                        "CAMBIAR_CONTRASENA_ADMINISTRADOR")))))
                 .thenReturn(List.of(creacion, eliminacion));
 
         List<AdminAuditLogResponse> respuesta = service.getAuditLog();

@@ -51,7 +51,7 @@ const COURIER_MENU = {
 const ADMIN_MENU = {
   id: 'admins',
   title: 'Administradores',
-  description: 'Da de alta a quienes gestionan las ventas o quítales el acceso.',
+  description: 'Da de alta a quienes gestionan las ventas, actualiza sus datos o quítales el acceso.',
   actionLabel: 'Ver funciones',
   path: ROUTES.MODULE_ADMINS,
   items: [
@@ -61,6 +61,14 @@ const ADMIN_MENU = {
       description: 'Registra a un nuevo administrador de ventas.',
       actionLabel: 'Registrar nuevo',
       path: ROUTES.ADMIN_CREATE,
+      roles: [ROLES.SUPER_USER],
+    },
+    {
+      id: 'admin-update',
+      label: 'Actualizar administrador',
+      description: 'Modifica el nombre, el correo, la contraseña o el estado de acceso de un administrador.',
+      actionLabel: 'Editar datos',
+      path: ROUTES.ADMIN_UPDATE,
       roles: [ROLES.SUPER_USER],
     },
     {

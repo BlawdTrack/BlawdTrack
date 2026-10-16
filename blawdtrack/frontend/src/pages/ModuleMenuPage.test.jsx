@@ -56,6 +56,7 @@ describe('ModuleMenuPage', () => {
     renderWithProviders(tree, { route: ROUTES.MODULE_ADMINS, user: superUser });
 
     expect(screen.getByRole('link', { name: /Crear administrador/ })).toHaveAttribute('href', ROUTES.ADMIN_CREATE);
+    expect(screen.getByRole('link', { name: /Actualizar administrador/ })).toHaveAttribute('href', ROUTES.ADMIN_UPDATE);
     expect(screen.getByRole('link', { name: /Eliminar administrador/ })).toHaveAttribute('href', ROUTES.ADMIN_DELETE);
   });
 
