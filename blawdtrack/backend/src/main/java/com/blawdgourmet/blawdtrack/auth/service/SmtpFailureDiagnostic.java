@@ -18,39 +18,63 @@ import org.springframework.mail.MailSendException;
 public final class SmtpFailureDiagnostic {
     private static final Pattern STATUS = Pattern.compile("^\\s*([245]\\d{2})(?:[ -]|$)");
 
+    private static final String DEFAULT_REASON = "SMTP_ERROR";
+
     public static String describe(Throwable failure) {
         var pending = new ArrayDeque<Throwable>();
         var visited = Collections.newSetFromMap(new IdentityHashMap<Throwable, Boolean>());
         pending.add(failure);
-        String reason = "SMTP_ERROR";
+        String reason = DEFAULT_REASON;
         String status = "no disponible";
         while (!pending.isEmpty() && visited.size() < 64) {
             Throwable current = pending.removeFirst();
             if (!visited.add(current)) continue;
-            if (current instanceof MailAuthenticationException || current instanceof AuthenticationFailedException) {
-                reason = "AUTH_FAILED: verificar usuario y clave SMTP";
-            } else if (current instanceof UnknownHostException) {
-                reason = "DNS_ERROR: no se pudo resolver el servidor SMTP";
-            } else if (current instanceof ConnectException) {
-                reason = "CONNECTION_FAILED: revisar host, puerto y acceso de red";
-            } else if (current instanceof SocketTimeoutException) {
-                reason = "TIMEOUT: el servidor SMTP no respondio a tiempo";
-            } else if (current instanceof SSLException) {
-                reason = "TLS_ERROR: revisar certificados y configuracion TLS";
-            } else if (current instanceof SendFailedException && reason.equals("SMTP_ERROR")) {
-                reason = "SEND_REJECTED: revisar remitente, destinatario y restricciones del proveedor";
-            }
-            if (current instanceof MessagingException mail) {
-                var match = STATUS.matcher(mail.getMessage() == null ? "" : mail.getMessage());
-                if (match.find()) status = match.group(1);
-                if (mail.getNextException() != null) pending.add(mail.getNextException());
-            }
-            if (current instanceof MailSendException mail) {
-                for (Exception nested : mail.getMessageExceptions()) pending.add(nested);
-            }
-            if (current.getCause() != null) pending.add(current.getCause());
+            reason = classify(current, reason);
+            status = statusOf(current, status);
+            enqueueRelated(current, pending);
         }
         return reason + "; codigo SMTP=" + status;
+    }
+
+    /** Etiqueta que corresponde a este eslabon de la cadena; si no reconoce el tipo, conserva la anterior. */
+    private static String classify(Throwable current, String reason) {
+        if (current instanceof MailAuthenticationException || current instanceof AuthenticationFailedException) {
+            return "AUTH_FAILED: verificar usuario y clave SMTP";
+        }
+        if (current instanceof UnknownHostException) {
+            return "DNS_ERROR: no se pudo resolver el servidor SMTP";
+        }
+        if (current instanceof ConnectException) {
+            return "CONNECTION_FAILED: revisar host, puerto y acceso de red";
+        }
+        if (current instanceof SocketTimeoutException) {
+            return "TIMEOUT: el servidor SMTP no respondio a tiempo";
+        }
+        if (current instanceof SSLException) {
+            return "TLS_ERROR: revisar certificados y configuracion TLS";
+        }
+        if (current instanceof SendFailedException && DEFAULT_REASON.equals(reason)) {
+            return "SEND_REJECTED: revisar remitente, destinatario y restricciones del proveedor";
+        }
+        return reason;
+    }
+
+    private static String statusOf(Throwable current, String status) {
+        if (!(current instanceof MessagingException mail)) {
+            return status;
+        }
+        var match = STATUS.matcher(mail.getMessage() == null ? "" : mail.getMessage());
+        return match.find() ? match.group(1) : status;
+    }
+
+    private static void enqueueRelated(Throwable current, ArrayDeque<Throwable> pending) {
+        if (current instanceof MessagingException mail && mail.getNextException() != null) {
+            pending.add(mail.getNextException());
+        }
+        if (current instanceof MailSendException mail) {
+            for (Exception nested : mail.getMessageExceptions()) pending.add(nested);
+        }
+        if (current.getCause() != null) pending.add(current.getCause());
     }
 
     private SmtpFailureDiagnostic() { }

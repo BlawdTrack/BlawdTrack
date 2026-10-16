@@ -23,46 +23,38 @@ public class DocumentValidator implements ConstraintValidator<ValidDocument, Doc
         if (documentType == null && documentNumber == null) {
             return true;
         }
-
         if (documentType == null) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("The document type is required.")
-                    .addPropertyNode("documentType")
-                    .addConstraintViolation();
-            return false;
+            return reject(context, "documentType", "The document type is required.");
         }
-
-        if (documentNumber == null || documentNumber.isBlank()) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("The document number is required.")
-                    .addPropertyNode("documentNumber")
-                    .addConstraintViolation();
-            return false;
+        if (isBlank(documentNumber) || isBlank(normalizedDocument)) {
+            return reject(context, "documentNumber", "The document number is required.");
         }
-
-        if (normalizedDocument == null || normalizedDocument.isBlank()) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("The document number is required.")
-                    .addPropertyNode("documentNumber")
-                    .addConstraintViolation();
-            return false;
+        if (!hasValidFormat(documentType, normalizedDocument)) {
+            return reject(context, "documentNumber",
+                    "The document number is not valid for the selected document type.");
         }
+        return true;
+    }
 
-        boolean valid = switch (documentType) {
+    private static boolean isBlank(String text) {
+        return text == null || text.isBlank();
+    }
+
+    private static boolean hasValidFormat(DocumentType documentType, String normalizedDocument) {
+        return switch (documentType) {
             case CEDULA -> normalizedDocument.matches("\\d{9,12}");
             case DIMEX -> normalizedDocument.matches("\\d{9,12}");
             case PASAPORTE -> normalizedDocument.matches("^(?=.*[A-Za-z])[A-Za-z0-9]{5,15}$")
                     && !normalizedDocument.matches("\\d+");
         };
+    }
 
-        if (!valid) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(
-                            "The document number is not valid for the selected document type.")
-                    .addPropertyNode("documentNumber")
-                    .addConstraintViolation();
-        }
-
-        return valid;
+    /** Sustituye el mensaje por defecto por uno asociado al campo indicado y devuelve siempre false. */
+    private static boolean reject(ConstraintValidatorContext context, String property, String message) {
+        context.disableDefaultConstraintViolation();
+        context.buildConstraintViolationWithTemplate(message)
+                .addPropertyNode(property)
+                .addConstraintViolation();
+        return false;
     }
 }
