@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.users.model;
 
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;

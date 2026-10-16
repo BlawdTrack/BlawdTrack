@@ -2,7 +2,7 @@ package com.blawdgourmet.blawdtrack.couriers.service;
 
 import org.springframework.stereotype.Component;
 
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;

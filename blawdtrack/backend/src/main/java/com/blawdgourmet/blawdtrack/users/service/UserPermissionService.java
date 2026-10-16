@@ -13,13 +13,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
-import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.constant.RolePermissionDefaults;
 import com.blawdgourmet.blawdtrack.users.dto.UserPermissionsResponse;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Permission;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserPermission;
@@ -43,7 +41,7 @@ public class UserPermissionService {
     private final UserRepository users;
     private final PermissionRepository permissions;
     private final UserPermissionRepository userPermissions;
-    private final AuditService auditService;
+    private final UserAuditTrail auditTrail;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
@@ -88,7 +86,7 @@ public class UserPermissionService {
                 UserPermission.builder().user(user).permission(catalog.get(code)).allowed(false).build()));
         userPermissions.saveAllAndFlush(overrides);
 
-        auditService.logAction(AuditAction.USER_PERMISSIONS_UPDATED, actor, user,
+        auditTrail.permissionsUpdated(actor, user,
                 "granted=" + sorted(granted) + "; revoked=" + sorted(revoked));
         return response(user, overrides);
     }
@@ -104,7 +102,7 @@ public class UserPermissionService {
         if (!userPermissions.findWithPermissionByUserId(user.getId()).isEmpty()) {
             userPermissions.deleteByUserId(user.getId());
             userPermissions.flush();
-            auditService.logAction(AuditAction.USER_PERMISSIONS_RESET, actor, user,
+            auditTrail.permissionsReset(actor, user,
                     "role=" + user.getRole().getName());
         }
         return response(user, List.of());

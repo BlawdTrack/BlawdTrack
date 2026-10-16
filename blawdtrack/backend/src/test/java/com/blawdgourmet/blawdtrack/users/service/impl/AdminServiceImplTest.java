@@ -36,7 +36,7 @@ import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.service.AdminRegisteredEvent;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
@@ -48,6 +48,8 @@ import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import com.blawdgourmet.blawdtrack.users.service.AdminNotFoundException;
 import com.blawdgourmet.blawdtrack.users.service.AdminUniquenessValidator;
+import com.blawdgourmet.blawdtrack.users.service.AdminAuditHistory;
+import com.blawdgourmet.blawdtrack.users.service.UserAuditTrail;
 import com.blawdgourmet.blawdtrack.users.service.UserRelatedRecordsCleaner;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,9 +58,9 @@ class AdminServiceImplTest {
     @Mock private UserRepository userRepository;
     @Mock private RoleRepository roleRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private AuditService auditService;
+    @Mock private UserAuditTrail auditTrail;
     @Mock private UserRelatedRecordsCleaner relatedRecordsCleaner;
-    @Mock private AuditLogRepository auditLogRepository;
+    @Mock private AdminAuditHistory auditHistory;
     @Mock private TemporaryPasswordGenerator temporaryPasswords;
     @Mock private ApplicationEventPublisher events;
 
@@ -69,8 +71,8 @@ class AdminServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditService,
-                new AdminUniquenessValidator(userRepository), auditLogRepository, relatedRecordsCleaner,
+        service = new AdminServiceImpl(userRepository, roleRepository, passwordEncoder, auditTrail,
+                new AdminUniquenessValidator(userRepository), auditHistory, relatedRecordsCleaner,
                 temporaryPasswords, events);
         ReflectionTestUtils.setField(service, "jwtExpirationMs", 3_600_000L);
     }
@@ -295,11 +297,7 @@ class AdminServiceImplTest {
 
         List<AdminAuditLogResponse> respuesta = service.getAuditLog();
 
-        assertThat(respuesta).hasSize(2);
-        assertThat(respuesta.get(0).action()).isEqualTo("CREAR_ADMINISTRADOR");
-        assertThat(respuesta.get(0).actorName()).isEqualTo(actor.getFullName());
-        assertThat(respuesta.get(0).details()).isEqualTo(creacion.getDetails());
-        assertThat(respuesta.get(1).action()).isEqualTo("ELIMINAR_ADMINISTRADOR");
+        assertThat(service.getAuditLog()).isSameAs(history);
     }
 
     private User usuarioConRol(String nombreRol) {

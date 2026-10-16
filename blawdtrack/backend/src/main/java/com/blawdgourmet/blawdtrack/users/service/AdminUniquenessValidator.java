@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.users.service;
 import org.springframework.stereotype.Component;
 
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
