@@ -31,6 +31,16 @@ export function usePackageSearch() {
     }
   };
 
+  const clearSearch = () => {
+    cancelCurrentRequest();
+    requestSequenceRef.current += 1;
+    lastRequestedTermRef.current = null;
+    setTerm('');
+    setResults(null);
+    setIsLoading(false);
+    setErrorMessage(null);
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     distributionControllerRef.current = controller;
@@ -157,6 +167,7 @@ export function usePackageSearch() {
   return {
     term,
     setTerm,
+    clearSearch,
     results: effectiveResults,
     distributionResults,
     isLoading,

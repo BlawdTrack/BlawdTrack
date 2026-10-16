@@ -52,15 +52,14 @@ describe('PackageSearchPage', () => {
     });
 
     expect(screen.getByRole('status')).toHaveTextContent('46 paquetes en la lista de distribución');
-    expect(screen.getAllByText('BG-2026-001')).toHaveLength(2);
+    expect(screen.getAllByText('BG-2026-001')).toHaveLength(1);
     expect(screen.getByRole('table', { name: 'Paquetes encontrados' })).toBeInTheDocument();
     expect(screen.getByRole('row', { name: /BG-2026-001/ })).toBeInTheDocument();
-    expect(screen.getByText('Heredia')).toBeInTheDocument();
-    expect(screen.getAllByText('Pendiente')).toHaveLength(2);
-    expect(screen.getByText('8:00 am')).toBeInTheDocument();
+    expect(screen.getAllByText('Pendiente')).toHaveLength(1);
+    expect(screen.getByText('08:00 AM')).toBeInTheDocument();
 
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
-    fireEvent.click(screen.getByRole('button', { name: 'Heredia' }));
+    fireEvent.change(input, { target: { value: 'Heredia' } });
     expect(input).toHaveValue('Heredia');
     fireEvent.click(screen.getByRole('button', { name: 'Limpiar' }));
     expect(input).toHaveValue('');

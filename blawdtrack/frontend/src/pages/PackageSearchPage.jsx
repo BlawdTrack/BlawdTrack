@@ -1,7 +1,6 @@
 import {
   Alert,
   Box,
-  Button,
   Container,
   Table,
   TableBody,
@@ -24,42 +23,18 @@ function titleCase(value) {
     .replace(/(^|\s)\p{L}/gu, (letter) => letter.toLocaleUpperCase('es-CR'));
 }
 
-function formatSchedule(schedule) {
-  return schedule?.replace(/\b0?(\d{1,2}:\d{2})\s*(AM|PM)\b/i, (_, time, period) => (
-    `${time} ${period.toLowerCase()}`
-  ));
-}
-
 /**
  * Pantalla de búsqueda de paquetes con estado vacío y restablecimiento inmediato del listado completo.
  */
 export function PackageSearchPage() {
-  const { term, setTerm, results, distributionResults, isLoading, errorMessage } = usePackageSearch();
+  const { term, setTerm, clearSearch, results, distributionResults, isLoading, errorMessage } = usePackageSearch();
   const packageCount = results?.totalElements ?? results?.content?.length ?? null;
   const distributionCount = distributionResults?.totalElements
     ?? distributionResults?.content?.length
     ?? null;
-  const firstPackage = distributionResults?.content?.[0];
   const matchingPackages = results?.content ?? [];
   const normalizedTerm = normalizeSearchTerm(term);
   const activeErrorMessage = errorMessage;
-  const quickSearchButtonSx = {
-    borderRadius: 18,
-    height: 36,
-    minWidth: 0,
-    px: 1.5,
-    backgroundColor: '#F2EEEA',
-    color: 'text.secondary',
-    fontWeight: 600,
-    textTransform: 'none',
-    '&:hover': { backgroundColor: '#EAE4DE' },
-  };
-  const quickSearchTerms = [
-    firstPackage?.shipmentNumber,
-    firstPackage?.address && titleCase(firstPackage.address.split(',')[0].trim()),
-    firstPackage?.status && titleCase(firstPackage.status.replaceAll('_', ' ')),
-    firstPackage?.schedule && formatSchedule(firstPackage.schedule),
-  ].filter(Boolean);
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 4 }}>
@@ -84,25 +59,10 @@ export function PackageSearchPage() {
         <PackageSearchBar
           value={term}
           onChange={setTerm}
-          onClear={() => setTerm('')}
+          onClear={clearSearch}
           isLoading={isLoading}
           maxLength={MAX_SEARCH_TERM_LENGTH}
         >
-          {firstPackage && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
-              {quickSearchTerms.map((quickTerm) => (
-                <Button
-                  key={quickTerm}
-                  type="button"
-                  onClick={() => setTerm(quickTerm)}
-                  sx={quickSearchButtonSx}
-                >
-                  {quickTerm}
-                </Button>
-              ))}
-            </Box>
-          )}
-
           {distributionCount !== null && packageCount !== null && (
             <Typography role="status" aria-live="polite" sx={{ mt: 1.5, color: 'text.secondary', textAlign: 'left' }}>
               {normalizedTerm ? (
@@ -121,7 +81,7 @@ export function PackageSearchPage() {
         )}
 
         {hasNoSearchMatches({ term, results, isLoading, errorMessage: activeErrorMessage }) && (
-          <PackageSearchEmptyState term={normalizedTerm} onClear={() => setTerm('')} />
+          <PackageSearchEmptyState term={normalizedTerm} onClear={clearSearch} />
         )}
 
         {matchingPackages.length > 0 && (
