@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.users.service;
 import java.util.List;
 
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;

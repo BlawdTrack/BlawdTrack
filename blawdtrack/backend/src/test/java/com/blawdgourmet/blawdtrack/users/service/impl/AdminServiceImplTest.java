@@ -31,7 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.service.AdminRegisteredEvent;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;

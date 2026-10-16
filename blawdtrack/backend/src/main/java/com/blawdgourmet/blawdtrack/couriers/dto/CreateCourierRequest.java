@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.couriers.dto;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.validation.DocumentHolder;
 import com.blawdgourmet.blawdtrack.users.validation.DocumentNormalizer;
 import com.blawdgourmet.blawdtrack.users.validation.ValidDocument;

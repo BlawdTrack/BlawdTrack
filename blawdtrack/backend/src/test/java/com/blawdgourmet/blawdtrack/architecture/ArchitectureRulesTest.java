@@ -5,6 +5,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING;
+import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
@@ -59,13 +60,11 @@ class ArchitectureRulesTest {
             .should().dependOnClassesThat().resideInAPackage("..service.impl..")
             .because("se depende de la interfaz del servicio, no de su implementación");
 
-    // Módulos hoja: couriers y packages usan a los demás, pero nadie depende de ellos.
-    // Pendiente de refactor: audit, auth, common y users se referencian entre sí (ciclo); cuando se
-    // desacoplen, esta regla puede pasar a slices().matching("com.blawdgourmet.blawdtrack.(*)..").beFreeOfCycles().
+    // Módulos sin ciclos: common <- users <- audit y auth <- couriers, packages y web.
     @ArchTest
-    static final ArchRule feature_modules_are_leaves = noClasses()
-            .that().resideOutsideOfPackages("..couriers..", "..packages..")
-            .should().dependOnClassesThat().resideInAnyPackage("..couriers..", "..packages..");
+    static final ArchRule modules_have_no_cycles = slices()
+            .matching("com.blawdgourmet.blawdtrack.(*)..")
+            .should().beFreeOfCycles();
 
     // Higiene: nada de System.out ni java.util.logging.
     @ArchTest

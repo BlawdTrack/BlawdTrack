@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.users.validation;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 
 class DocumentNormalizerTest {
 

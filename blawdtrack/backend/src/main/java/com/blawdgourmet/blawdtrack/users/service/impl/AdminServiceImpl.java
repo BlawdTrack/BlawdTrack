@@ -18,7 +18,7 @@ import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationExcepti
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
