@@ -1,17 +1,16 @@
 # HU007 · Edición de administradores
 
-**Estado:** en desarrollo (Sprint 3). Tasks 91 y 92 hechas: búsqueda y validación de existencia del administrador, y
-actualización de datos con cierre de sesión y bitácora. La interfaz de edición sigue pendiente.
+**Estado:** en desarrollo (Sprint 3). Tasks 91 a 95 hechas: búsqueda y validación de existencia del administrador, actualización de datos
+con cierre de sesión y bitácora (backend), y la pantalla *Actualizar administrador* con su integración y avisos
+(frontend).
 
-**Ramas:** `feature/hu007/T01/91/silesky` (Task 91) y `feature/hu007/T02/92/silesky` (Task 92, apilada sobre la 91),
-ambas de backend. Pruebas y evidencias: [`HU007-Task91-pruebas.md`](../HU007-Task91-pruebas.md) y
-[`HU007-Task92-pruebas.md`](../HU007-Task92-pruebas.md).
+**Ramas:** `feature/hu007/T01/91/silesky` (Task 91), `feature/hu007/T02/92/silesky` (Task 92, apilada sobre la 91) y
+`feature/hu007/T03/93-94-95/silesky` (Tasks 93, 94 y 95, frontend, apilada sobre la 92).
 
 ## Task 91 · Buscar y validar que el administrador exista
 
 `GET /api/v1/admins/{documentType}/{documentNumber}`, solo Súper Usuario: devuelve el perfil del administrador (sin
-credenciales) o `404 ADMINISTRADOR_NO_EXISTENTE` si no existe o el documento es de otro rol. Detalle en el documento
-de pruebas.
+credenciales) o `404 ADMINISTRADOR_NO_EXISTENTE` si no existe o el documento es de otro rol.
 
 ## Task 92 · Actualizar datos, cerrar la sesión y dejar historial
 
@@ -19,7 +18,15 @@ de pruebas.
 opcionales (al menos uno). Cambiar el estado o la contraseña cierra de inmediato la sesión abierta del administrador;
 cada cambio queda en la bitácora de administradores con las acciones `ACTUALIZAR_ADMINISTRADOR`,
 `ACTIVAR_ADMINISTRADOR`, `DESACTIVAR_ADMINISTRADOR` y `CAMBIAR_CONTRASENA_ADMINISTRADOR`, sin guardar nunca la
-contraseña. Detalle en el documento de pruebas.
+contraseña. `GET /api/v1/admins/{documentType}/{documentNumber}/history` devuelve el historial de un solo administrador.
+
+## Tasks 93, 94 y 95 · Pantalla Actualizar administrador
+
+Pantalla del Súper Usuario en *Gestión de usuarios → Administradores → Actualizar administrador*
+(`/main-menu/admins/update`), con el mismo diseño que *Actualizar mensajero*: lista con búsqueda por documento, formulario
+prellenado (nombre, correo, contraseña opcional y estado de acceso) y avisos de éxito y de error. Consulta el perfil con
+la Task 91 y guarda con un `PATCH` de la Task 92. Igual que *Actualizar mensajero*, tiene la pestaña *Historial* de cada administrador y
+el botón *Ver historial general* (con las eliminaciones).
 
 ## Qué se sabe hoy
 

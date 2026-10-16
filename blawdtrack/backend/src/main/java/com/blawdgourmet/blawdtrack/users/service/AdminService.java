@@ -78,6 +78,15 @@ public interface AdminService {
             DocumentType documentType, String documentNumber, AuthenticatedUser actor);
 
     /**
+     * Lists the audit trail of ONE "Sales Administrator" (creation, modifications, activations, deactivations and
+     * password changes), newest first (HU-007). Their deletion is not included: it leaves no administrator to ask about,
+     * and shows up in {@link #getAuditLog()}.
+     *
+     * @throws AdminNotFoundException if no Sales Administrator matches the given document.
+     */
+    List<AdminAuditLogResponse> getAdministratorHistory(DocumentType documentType, String documentNumber);
+
+    /**
      * Lists the audit trail of administrator creations and deletions (HU-006 / T06),
      * newest first.
      */

@@ -12,6 +12,7 @@ import { ROUTES } from './config/routes';
 vi.mock('./pages/MainMenuPage', () => ({ default: () => <div>Pantalla menú principal</div> }));
 vi.mock('./pages/ModuleMenuPage', () => ({ default: () => <div>Pantalla menú de módulo</div> }));
 vi.mock('./pages/AdminManagement', () => ({ default: () => <div>Pantalla administradores</div> }));
+vi.mock('./pages/EditAdmin', () => ({ default: () => <div>Pantalla actualizar administrador</div> }));
 vi.mock('./pages/AdminRegistrationPage', () => ({ default: () => <div>Pantalla registro de administrador</div> }));
 vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla registro de mensajero</div> }));
 vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
@@ -38,6 +39,7 @@ const SCREENS = {
   [ROUTES.MODULE_SETTINGS]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
+  [ROUTES.ADMIN_UPDATE]: 'Pantalla actualizar administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
   [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
@@ -67,6 +69,7 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
     ROUTES.ADMIN_CREATE,
+    ROUTES.ADMIN_UPDATE,
     ROUTES.ADMIN_DELETE,
     ROUTES.COURIER_CREATE,
     ROUTES.COURIER_DEACTIVATE,

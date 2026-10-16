@@ -9,8 +9,6 @@ fusionadas.
 El Super Usuario crea un administrador de ventas con su documento, nombre, teléfono, correo y contraseña
 inicial. Toda creación queda registrada en el historial de auditoría.
 
-Guía de pruebas manuales y ejemplos de cuerpo: [`docs/HU006-Task85-pruebas.md`](../HU006-Task85-pruebas.md).
-
 ## Criterios de aceptación
 
 | Criterio | Estado en `develop` |

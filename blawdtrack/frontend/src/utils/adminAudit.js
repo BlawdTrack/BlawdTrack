@@ -4,6 +4,10 @@ import { formatDateTime } from './dates';
 const ACTION_BADGES = {
   CREAR_ADMINISTRADOR: { label: 'Creación', tone: 'success' },
   ELIMINAR_ADMINISTRADOR: { label: 'Eliminación', tone: 'danger' },
+  ACTUALIZAR_ADMINISTRADOR: { label: 'Actualización', tone: 'success' },
+  ACTIVAR_ADMINISTRADOR: { label: 'Activación', tone: 'success' },
+  DESACTIVAR_ADMINISTRADOR: { label: 'Desactivación', tone: 'danger' },
+  CAMBIAR_CONTRASENA_ADMINISTRADOR: { label: 'Contraseña', tone: 'success' },
 };
 
 /**
