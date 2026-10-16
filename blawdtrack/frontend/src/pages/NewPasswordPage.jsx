@@ -53,6 +53,12 @@ const BRAND_SUBTITLE = 'Te enviamos un enlace de un solo uso al correo de tu cue
 //    (valor por defecto de MAIL_LINK_URL en el backend; ver EmailService).
 //  - El contrato de POST /v1/auth/password-reset/confirm está en
 //    PasswordRecoveryService.confirmPasswordReset.
+function submitState(newPassword, confirmPassword) {
+  const confirmMismatch = confirmPassword !== '' && newPassword !== confirmPassword;
+  const canSubmit = meetsClientPasswordRules(newPassword) && confirmPassword !== '' && !confirmMismatch;
+  return { confirmMismatch, canSubmit };
+}
+
 /**
  * Pantalla "Crear nueva contraseña" (HU-002). Se abre desde el enlace del correo (`/recovery?token=...`),
  * valida la contraseña con `PasswordRequirements` y confirma con `confirmPasswordReset`. Tiene tres
@@ -88,6 +94,26 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     clearFeedback();
   };
 
+  // Traduce el rechazo del backend a la vista que corresponde: enlace vencido, contraseña reutilizada, etc.
+  const applyConfirmError = (err) => {
+    const code = err.response?.data?.code;
+    if (!err.response) {
+      setError({ message: CONNECTION_ERROR_MESSAGE });
+    } else if (code === 'TOKEN_INVALIDO') {
+      setTokenRejected(true);
+    } else if (code === 'CONTRASENA_REUTILIZADA') {
+      // Esto sí lo confirmó el backend: la regla 4 pasa a "no cumplida".
+      setHistoryRejected(true);
+      setError({ message: REUSED_ERROR_MESSAGE, field: 'newPassword' });
+    } else {
+      setError(
+        code === 'VALIDATION_ERROR'
+          ? { message: VALIDATION_ERROR_MESSAGE, field: 'newPassword' }
+          : { message: GENERIC_ERROR_MESSAGE }
+      );
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (loading) return;
@@ -110,28 +136,14 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
       setConfirmPassword('');
       setSucceeded(true);
     } catch (err) {
-      const code = err.response?.data?.code;
-      if (!err.response) {
-        setError({ message: CONNECTION_ERROR_MESSAGE });
-      } else if (code === 'TOKEN_INVALIDO') {
-        setTokenRejected(true);
-      } else if (code === 'CONTRASENA_REUTILIZADA') {
-        // Esto sí lo confirmó el backend: la regla 4 pasa a "no cumplida".
-        setHistoryRejected(true);
-        setError({ message: REUSED_ERROR_MESSAGE, field: 'newPassword' });
-      } else if (code === 'VALIDATION_ERROR') {
-        setError({ message: VALIDATION_ERROR_MESSAGE, field: 'newPassword' });
-      } else {
-        setError({ message: GENERIC_ERROR_MESSAGE });
-      }
+      applyConfirmError(err);
     } finally {
       setLoading(false);
     }
   };
 
   // Solo UI: la coincidencia se avisa en vivo bajo la confirmación y el botón se habilita cuando todo es válido.
-  const confirmMismatch = confirmPassword !== '' && newPassword !== confirmPassword;
-  const canSubmit = meetsClientPasswordRules(newPassword) && confirmPassword !== '' && !confirmMismatch;
+  const { confirmMismatch, canSubmit } = submitState(newPassword, confirmPassword);
 
   let content;
   if (succeeded) {

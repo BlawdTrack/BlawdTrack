@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useFieldErrors } from './useFieldErrors';
 
 /**
  * Generic "submit a registration form" state machine: tracks the in-flight
@@ -17,7 +18,7 @@ export function useResourceRegistration(registerFn, normalizeError, onSuccess = 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [successData, setSuccessData] = useState(null);
-  const [fieldErrors, setFieldErrors] = useState({});
+  const { fieldErrors, setFieldErrors, setFieldError, clearFieldError } = useFieldErrors();
   const [globalMessage, setGlobalMessage] = useState(null);
   const [severity, setSeverity] = useState('error');
 
@@ -58,19 +59,6 @@ export function useResourceRegistration(registerFn, normalizeError, onSuccess = 
     setIsSuccess(false);
     setGlobalMessage(null);
     setFieldErrors(errors);
-  };
-
-  const setFieldError = (name, message) => {
-    setFieldErrors((previous) => ({ ...previous, [name]: message }));
-  };
-
-  const clearFieldError = (name) => {
-    setFieldErrors((previous) => {
-      if (!previous[name]) return previous;
-      const next = { ...previous };
-      delete next[name];
-      return next;
-    });
   };
 
   return {

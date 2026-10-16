@@ -4,6 +4,30 @@ import { NAV_GROUP_ICONS } from './navIcons';
 import { isGroupActive } from '../../config/navigation';
 import { RADIUS, FONT } from '../../theme';
 
+const ACTIVE_COLOR = '#FF6C0E';
+const ACTIVE_BG = 'rgba(255,108,14,.18)';
+
+/** Estilos del enlace según esté activo y la barra colapsada (aparte para que el componente solo componga). */
+function linkSx(active, collapsed) {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1.5,
+    width: collapsed ? 44 : '100%',
+    minHeight: 44,
+    '@media (pointer: fine)': { minHeight: collapsed ? 44 : 38 },
+    justifyContent: collapsed ? 'center' : 'flex-start',
+    px: collapsed ? 0 : 1.75,
+    borderRadius: RADIUS.sm,
+    textDecoration: 'none',
+    color: active ? ACTIVE_COLOR : 'rgba(255,255,255,.75)',
+    backgroundColor: active ? ACTIVE_BG : 'transparent',
+    transition: 'background-color .15s ease',
+    '&:hover': { backgroundColor: active ? ACTIVE_BG : 'rgba(255,255,255,.08)' },
+    '&:focus-visible': { outline: `2px solid ${ACTIVE_COLOR}`, outlineOffset: 1 },
+  };
+}
+
 /**
  * Tuerca de ajustes al pie de la barra lateral, encima del usuario: lleva al menú de ajustes desde cualquier pantalla.
  * Expandida es una fila con el icono y "Ajustes"; colapsada, solo el icono con su rótulo al pasar el cursor.
@@ -22,23 +46,7 @@ export default function SidebarSettingsLink({ settings, collapsed = false }) {
           component={NavLink}
           to={settings.path}
           aria-label={settings.title}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            width: collapsed ? 44 : '100%',
-            minHeight: 44,
-            '@media (pointer: fine)': { minHeight: collapsed ? 44 : 38 },
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            px: collapsed ? 0 : 1.75,
-            borderRadius: RADIUS.sm,
-            textDecoration: 'none',
-            color: active ? '#FF6C0E' : 'rgba(255,255,255,.75)',
-            backgroundColor: active ? 'rgba(255,108,14,.18)' : 'transparent',
-            transition: 'background-color .15s ease',
-            '&:hover': { backgroundColor: active ? 'rgba(255,108,14,.18)' : 'rgba(255,255,255,.08)' },
-            '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 1 },
-          }}
+          sx={linkSx(active, collapsed)}
         >
           {Icon && <Icon sx={{ fontSize: FONT.xl }} />}
           {!collapsed && (
