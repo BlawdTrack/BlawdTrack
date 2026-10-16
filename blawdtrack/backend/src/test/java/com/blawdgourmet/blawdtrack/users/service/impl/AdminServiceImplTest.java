@@ -94,6 +94,42 @@ class AdminServiceImplTest {
     }
 
     @Test
+    void findingAnAdminReturnsTheProfileWithoutCredentials() {
+        User admin = usuarioConRol(RoleName.SALES_ADMIN);
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber()))
+            .thenReturn(Optional.of(admin));
+
+        var detail = service.findAdministrator(DocumentType.CEDULA, admin.getDocumentNumber());
+
+        assertThat(detail.documentType()).isEqualTo(DocumentType.CEDULA);
+        assertThat(detail.documentNumber()).isEqualTo(admin.getDocumentNumber());
+        assertThat(detail.fullName()).isEqualTo(admin.getFullName());
+        assertThat(detail.email()).isEqualTo(admin.getEmail());
+        assertThat(detail.status()).isEqualTo(admin.getStatus());
+        assertThat(detail.toString()).doesNotContain(admin.getPasswordHash());
+    }
+
+    @Test
+    void findingAnUnknownDocumentThrowsAdminNotFound() {
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findAdministrator(DocumentType.CEDULA, "1-2345-6789"))
+                .isInstanceOf(AdminNotFoundException.class)
+                .hasMessage("Administrador no existente");
+    }
+
+    @Test
+    void findingAUserWithAnotherRoleIsNotFoundEither() {
+        User mensajero = usuarioConRol(RoleName.COURIER);
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, mensajero.getDocumentNumber()))
+            .thenReturn(Optional.of(mensajero));
+
+        assertThatThrownBy(() -> service.findAdministrator(DocumentType.CEDULA, mensajero.getDocumentNumber()))
+                .isInstanceOf(AdminNotFoundException.class);
+    }
+
+    @Test
     void unknownDocumentThrowsAdminNotFound() {
         when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, "1-2345-6789"))
             .thenReturn(Optional.empty());

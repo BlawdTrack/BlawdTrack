@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDetailResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDocumentRequest;
@@ -59,6 +60,12 @@ public class AdminController {
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<List<AdminAuditLogResponse>> listarAuditoria() {
         return ResponseEntity.ok(adminService.getAuditLog());
+    }
+
+    @GetMapping("/{documentType}/{documentNumber}")
+    @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
+    public ResponseEntity<AdminDetailResponse> buscar(@Valid AdminDocumentRequest request) {
+        return ResponseEntity.ok(adminService.findAdministrator(request.documentType(), request.documentNumber()));
     }
 
     @GetMapping("/{documentType}/{documentNumber}/deletion-eligibility")

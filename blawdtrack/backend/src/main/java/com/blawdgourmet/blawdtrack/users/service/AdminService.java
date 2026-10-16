@@ -5,6 +5,7 @@ import java.util.List;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.users.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
+import com.blawdgourmet.blawdtrack.users.dto.AdminDetailResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionEligibilityResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminDeletionResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
@@ -26,6 +27,17 @@ public interface AdminService {
      * @param actor   authenticated Super User executing the creation (for auditing).
      */
     AdminRegistrationResponse registrarAdministrador(AdminRegistrationRequest request, AuthenticatedUser actor);
+
+    /**
+     * Finds the "Sales Administrator" to modify by identity document and confirms they exist (HU-007 / T01).
+     *
+     * @param documentType   document type of the administrator to find.
+     * @param documentNumber document number of the administrator to find.
+     * @return the administrator's profile, without credentials.
+     * @throws AdminNotFoundException if no Sales Administrator matches the given document (a user with another
+     *                                role is not found either).
+     */
+    AdminDetailResponse findAdministrator(DocumentType documentType, String documentNumber);
 
     /**
      * Checks whether a "Sales Administrator" can be deleted (HU-008 / T01). An administrator is
