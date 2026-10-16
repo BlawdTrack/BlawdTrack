@@ -142,6 +142,7 @@ export default function PackageHistoryCard({ state, entries = [], message = null
                   )}
                   <Box
                     aria-hidden
+                    data-testid={`history-dot-${index}`}
                     sx={{
                       position: 'absolute',
                       left: 0,
