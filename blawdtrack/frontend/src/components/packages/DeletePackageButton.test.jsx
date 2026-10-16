@@ -73,4 +73,30 @@ describe('DeletePackageButton (HU-012 / T05)', () => {
 
     expect(screen.getByRole('button', { name: 'Eliminar' })).toHaveFocus();
   });
+
+  it('el botón no eliminable emite onBloqueado con el paquete, y no onEliminar (T07)', async () => {
+    const onEliminar = vi.fn();
+    const onBloqueado = vi.fn();
+    const paquete = { shipmentNumber: 'BG-2026-00121', status: PACKAGE_STATES.DELIVERED };
+    renderWithProviders(<DeletePackageButton paquete={paquete} onEliminar={onEliminar} onBloqueado={onBloqueado} />, {
+      user: userWithRole(ROLES.SALES_ADMIN),
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+
+    expect(onBloqueado).toHaveBeenCalledWith(paquete);
+    expect(onEliminar).not.toHaveBeenCalled();
+  });
+
+  it('el botón eliminable no emite onBloqueado (T07)', async () => {
+    const onBloqueado = vi.fn();
+    const paquete = { shipmentNumber: 'BG-2026-00125', status: PACKAGE_STATES.PENDING };
+    renderWithProviders(<DeletePackageButton paquete={paquete} onEliminar={vi.fn()} onBloqueado={onBloqueado} />, {
+      user: userWithRole(ROLES.SALES_ADMIN),
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+
+    expect(onBloqueado).not.toHaveBeenCalled();
+  });
 });

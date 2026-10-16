@@ -61,3 +61,87 @@ describe('PackageDeletionPage (HU-012 / T06)', () => {
     expect(screen.getByText('BG-2026-00125')).toBeInTheDocument();
   });
 });
+
+const httpError = (status, code) => Object.assign(new Error(String(status)), { response: { status, data: { code } } });
+
+async function confirmDeletionOf(shipmentNumber) {
+  const dialog = await openDialogFor(shipmentNumber);
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Sí, eliminar' }));
+  await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+}
+
+describe('PackageDeletionPage: mensajes de resultado (HU-012 / T07)', () => {
+  beforeEach(() => {
+    deletePackage.mockReset();
+  });
+
+  it('tras eliminar muestra el mensaje de éxito', async () => {
+    deletePackage.mockResolvedValue({ message: 'Paquete eliminado correctamente.' });
+    renderWithProviders(<PackageDeletionPage />, { user: SALES_ADMIN });
+
+    await confirmDeletionOf('BG-2026-00125');
+
+    expect(await screen.findByText('Paquete BG-2026-00125 eliminado correctamente.')).toBeInTheDocument();
+  });
+
+  it('pulsar un botón no eliminable muestra el aviso y no abre el diálogo', async () => {
+    renderWithProviders(<PackageDeletionPage />, { user: SALES_ADMIN });
+
+    // BG-2026-00121 está en Entregado en el fixture.
+    await userEvent.click(within(rowOf('BG-2026-00121')).getByRole('button', { name: 'Eliminar' }));
+
+    expect(await screen.findByText('El paquete BG-2026-00121 está en “Entregado”: ya no puede eliminarse.')).toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(deletePackage).not.toHaveBeenCalled();
+  });
+
+  it('un 409 muestra el aviso y deja el paquete (la recarga no lo da por eliminado)', async () => {
+    deletePackage.mockRejectedValue(httpError(409, 'PAQUETE_DESPACHADO'));
+    renderWithProviders(<PackageDeletionPage />, { user: SALES_ADMIN });
+
+    await confirmDeletionOf('BG-2026-00125');
+
+    expect(await screen.findByText('El paquete BG-2026-00125 ya fue despachado y no puede eliminarse.')).toBeInTheDocument();
+    expect(screen.getByText('BG-2026-00125')).toBeInTheDocument();
+  });
+
+  it('un 404 muestra el error y la recarga quita el paquete que ya no existe', async () => {
+    deletePackage.mockRejectedValue(httpError(404, 'PAQUETE_NO_ENCONTRADO'));
+    renderWithProviders(<PackageDeletionPage />, { user: SALES_ADMIN });
+    const rowsBefore = screen.getAllByRole('listitem').length;
+
+    await confirmDeletionOf('BG-2026-00125');
+
+    expect(await screen.findByText('El paquete BG-2026-00125 ya no existe. La lista se actualizó.')).toBeInTheDocument();
+    expect(screen.queryByText('BG-2026-00125')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(rowsBefore - 1);
+  });
+
+  it('un 403 muestra el error de permisos sin el message del backend', async () => {
+    deletePackage.mockRejectedValue(httpError(403, 'ACCESS_DENIED'));
+    renderWithProviders(<PackageDeletionPage />, { user: SALES_ADMIN });
+
+    await confirmDeletionOf('BG-2026-00125');
+
+    expect(await screen.findByText('No tienes permiso para eliminar paquetes.')).toBeInTheDocument();
+    expect(screen.getByText('BG-2026-00125')).toBeInTheDocument();
+  });
+
+  it('un error de red muestra el mensaje genérico', async () => {
+    deletePackage.mockRejectedValue(new Error('Network Error'));
+    renderWithProviders(<PackageDeletionPage />, { user: SALES_ADMIN });
+
+    await confirmDeletionOf('BG-2026-00125');
+
+    expect(await screen.findByText('No se pudo eliminar el paquete. Intenta de nuevo.')).toBeInTheDocument();
+  });
+
+  it('un 401 no muestra ningún mensaje (lo atiende el flujo de sesión)', async () => {
+    deletePackage.mockRejectedValue(httpError(401, 'NO_AUTENTICADO'));
+    renderWithProviders(<PackageDeletionPage />, { user: SALES_ADMIN });
+
+    await confirmDeletionOf('BG-2026-00125');
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+});

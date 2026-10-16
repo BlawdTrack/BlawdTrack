@@ -8,9 +8,9 @@ import { FONT, rem } from '../../theme';
  * "Eliminar". Con `flex-wrap`, en pantallas angostas el botón baja debajo de los datos. Se dibuja como elemento de
  * lista: va dentro de un `ul`.
  * @param {{ paquete: { shipmentNumber: string, customerName: string, address: string, status: string },
- *   onEliminar: (paquete: object) => void }} props
+ *   onEliminar: (paquete: object) => void, onBloqueado?: (paquete: object) => void }} props
  */
-export default function PackageDeletionRow({ paquete, onEliminar }) {
+export default function PackageDeletionRow({ paquete, onEliminar, onBloqueado }) {
   return (
     <Box
       component="li"
@@ -40,7 +40,7 @@ export default function PackageDeletionRow({ paquete, onEliminar }) {
       <PackageStateChip status={paquete.status} />
       {/* `ml: auto` deja el botón siempre a la derecha, también cuando la fila se parte en dos líneas en móvil. */}
       <Box sx={{ ml: 'auto' }}>
-        <DeletePackageButton paquete={paquete} onEliminar={onEliminar} />
+        <DeletePackageButton paquete={paquete} onEliminar={onEliminar} onBloqueado={onBloqueado} />
       </Box>
     </Box>
   );
