@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
-import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
-import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 import { usePackageLookup, PACKAGE_LOOKUP_STATE } from '../hooks/usePackageLookup';
 import { getHomeRoute } from '../utils/roleRoutes';
-import { ROUTES } from '../config/routes';
-import BrandLogo from '../components/BrandLogo';
+import { useAuth } from '../hooks/useAuth';
+import AppHeaderBar from '../components/AppHeaderBar';
+import PageHeaderBar from '../components/PageHeaderBar';
 import PageContainer from '../components/PageContainer';
 import PackageSearchCard from '../components/PackageSearchCard';
 import PackageDetailCard from '../components/PackageDetailCard';
@@ -20,22 +17,16 @@ import { FONT, TOUCH_TARGET } from '../theme';
  * detalle real de un paquete en el backend y muestra su ficha de solo lectura.
  *
  * Accesible para el administrador de ventas y el súper usuario. La consulta va
- * por `PackageService` (cliente axios compartido con el JWT de la sesión); los
- * campos que el backend no expone se marcan como no disponibles en vez de
+ * por `SearchPackageService` (cliente axios compartido con el JWT de la sesión);
+ * los campos que el backend no expone se marcan como no disponibles en vez de
  * rellenarse con datos de ejemplo.
  */
 export function PackageQueryPage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [shipmentNumber, setShipmentNumber] = useState('');
   const { state, pkg, message, fieldError, loading, lookup, retryable } = usePackageLookup();
 
   const homeRoute = getHomeRoute(user?.role);
-
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.LOGIN, { replace: true });
-  };
 
   const handleSubmit = () => {
     lookup(shipmentNumber);
@@ -43,65 +34,10 @@ export function PackageQueryPage() {
 
   return (
     <Box sx={{ minHeight: '100vh' }}>
-      <Box
-        component="header"
-        sx={{
-          bgcolor: 'primary.main',
-          color: 'primary.contrastText',
-          borderBottom: '4px solid',
-          borderColor: 'secondary.main',
-          px: { xs: 2, sm: 4 },
-          py: 1.5,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 2,
-          flexWrap: 'wrap',
-        }}
-      >
-        <BrandLogo variant="horizontal" onDark width={108} />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-          {homeRoute && (
-            <Button
-              onClick={() => navigate(homeRoute)}
-              startIcon={<ArrowBackOutlinedIcon fontSize="small" />}
-              sx={{
-                color: 'rgba(255,255,255,.9)',
-                minHeight: TOUCH_TARGET,
-                border: '1px solid rgba(255,255,255,.25)',
-                bgcolor: 'transparent',
-                '&:hover': { bgcolor: 'rgba(255,255,255,.08)' },
-              }}
-            >
-              Volver
-            </Button>
-          )}
-          <Button
-            onClick={handleLogout}
-            startIcon={<LogoutOutlinedIcon fontSize="small" />}
-            sx={{
-              color: 'rgba(255,255,255,.9)',
-              minHeight: TOUCH_TARGET,
-              border: '1px solid rgba(255,255,255,.25)',
-              bgcolor: 'transparent',
-              '&:hover': { bgcolor: 'rgba(255,255,255,.08)' },
-            }}
-          >
-            Cerrar sesión
-          </Button>
-        </Box>
-      </Box>
+      <AppHeaderBar backTo={homeRoute} />
+      <PageHeaderBar title="Consultar paquete" description="Busca un envío por su número y revisa su ficha de entrega." />
 
       <PageContainer component="main">
-        <Box sx={{ pl: 2, borderLeft: '4px solid', borderColor: 'secondary.main' }}>
-          <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
-            Consultar paquete
-          </Typography>
-          <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', mt: 0.5 }}>
-            Busca un envío por su número y revisa su ficha de entrega.
-          </Typography>
-        </Box>
-
         <PackageSearchCard
           value={shipmentNumber}
           onChange={setShipmentNumber}
