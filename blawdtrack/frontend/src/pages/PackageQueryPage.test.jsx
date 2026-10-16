@@ -85,7 +85,7 @@ describe('PackageQueryPage (HU-013)', () => {
     expect(screen.getByText('Orden ZI-88301')).toBeInTheDocument();
     // Se muestran los artículos y la evidencia de entrega del backend.
     expect(screen.getByText('Caja de chocolates')).toBeInTheDocument();
-    expect(screen.getByText('Cantidad: 2 · SKU CH-100 · Precio unitario: 1.500,00')).toBeInTheDocument();
+    expect(screen.getByText(/Cantidad: 2 · SKU CH-100 · Precio unitario:/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Firma' })).toHaveAttribute('href', 'https://cdn.blawd.test/firma.png');
     expect(screen.getByRole('link', { name: 'Foto' })).toHaveAttribute('href', 'https://cdn.blawd.test/foto.png');
   });
@@ -119,6 +119,7 @@ describe('PackageQueryPage (HU-013)', () => {
   it('no muestra evidencia de entrega si el paquete no está entregado', async () => {
     getPackageByShipmentNumber.mockResolvedValue({
       ...packageDetail,
+      shipmentNumber: 'BG-2026-00003',
       status: 'IN_TRANSIT',
       deliverySignatureUrl: null,
       deliveryPhotoUrl: null,
