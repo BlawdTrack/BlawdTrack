@@ -1,22 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { getBlockedPackageMessage, getDeletionResultMessage, shouldReloadAfter } from './packageDeletionMessages';
-import { PACKAGE_STATES } from '../config/packageStates';
 
-const PAQUETE = { shipmentNumber: 'BG-2026-00125', status: PACKAGE_STATES.PENDING };
-const failure = (status, code, extra = {}) => ({ ok: false, paquete: PAQUETE, status, code, ...extra });
+const PKG = { shipmentNumber: 'BG-2026-00125', status: 'PENDING' };
+const failure = (status, code, extra = {}) => ({ ok: false, pkg: PKG, status, code, ...extra });
 
 describe('packageDeletionMessages (HU-012 / T07)', () => {
   it('éxito: mensaje verde con el número de envío', () => {
-    expect(getDeletionResultMessage({ ok: true, paquete: PAQUETE })).toEqual({
+    expect(getDeletionResultMessage({ ok: true, pkg: PKG })).toEqual({
       message: 'Paquete BG-2026-00125 eliminado correctamente.',
       severity: 'success',
     });
   });
 
   it.each([
-    [409, 'PAQUETE_DESPACHADO', 'El paquete BG-2026-00125 ya fue despachado y no puede eliminarse.', 'warning'],
-    [409, 'PAQUETE_ENTREGADO', 'El paquete BG-2026-00125 ya fue entregado y no puede eliminarse.', 'warning'],
-    [404, 'PAQUETE_NO_ENCONTRADO', 'El paquete BG-2026-00125 ya no existe. La lista se actualizó.', 'error'],
+    [409, 'PAQUETE_DESPACHADO', 'El paquete BG-2026-00125 ya salió a reparto: ya no puede eliminarse.', 'warning'],
+    [409, 'PAQUETE_ENTREGADO', 'El paquete BG-2026-00125 está en “Entregado”: ya no puede eliminarse.', 'warning'],
+    [404, 'PAQUETE_NO_ENCONTRADO', 'El paquete BG-2026-00125 ya no existe.', 'error'],
     [403, 'ACCESS_DENIED', 'No tienes permiso para eliminar paquetes.', 'error'],
     [403, 'ACCESO_DENEGADO', 'No tienes permiso para eliminar paquetes.', 'error'],
   ])('%i %s → mensaje propio', (status, code, message, severity) => {
@@ -25,7 +24,7 @@ describe('packageDeletionMessages (HU-012 / T07)', () => {
 
   it.each([
     [409, 'El paquete BG-2026-00125 ya no puede eliminarse.', 'warning'],
-    [404, 'El paquete BG-2026-00125 ya no existe. La lista se actualizó.', 'error'],
+    [404, 'El paquete BG-2026-00125 ya no existe.', 'error'],
     [403, 'No tienes permiso para eliminar paquetes.', 'error'],
   ])('un %i con un code desconocido usa el mensaje de su estado HTTP', (status, message, severity) => {
     expect(getDeletionResultMessage(failure(status, 'CODIGO_NUEVO'))).toEqual({ message, severity });
@@ -52,18 +51,21 @@ describe('packageDeletionMessages (HU-012 / T07)', () => {
     expect(getDeletionResultMessage(result).message).not.toMatch(/permission/);
   });
 
-  it('aviso del botón no eliminable, con el nombre legible del estado', () => {
-    expect(getBlockedPackageMessage({ shipmentNumber: 'BG-2026-00122', status: PACKAGE_STATES.IN_TRANSIT })).toEqual({
+  it('el aviso del botón no eliminable usa el nombre legible del estado y la misma forma que el 409', () => {
+    expect(getBlockedPackageMessage({ shipmentNumber: 'BG-2026-00122', status: 'IN_TRANSIT' })).toEqual({
       message: 'El paquete BG-2026-00122 está en “En tránsito”: ya no puede eliminarse.',
       severity: 'warning',
     });
+    expect(getBlockedPackageMessage({ shipmentNumber: 'BG-2026-00125', status: 'DELIVERED' })).toEqual(
+      getDeletionResultMessage(failure(409, 'PAQUETE_ENTREGADO'))
+    );
   });
 
-  it('recarga la lista solo tras un 409 o un 404', () => {
+  it('vuelve a consultar el paquete solo tras un 409 o un 404', () => {
     expect(shouldReloadAfter(failure(409, 'PAQUETE_DESPACHADO'))).toBe(true);
     expect(shouldReloadAfter(failure(404, 'PAQUETE_NO_ENCONTRADO'))).toBe(true);
     expect(shouldReloadAfter(failure(403, 'ACCESS_DENIED'))).toBe(false);
     expect(shouldReloadAfter(failure(null, null))).toBe(false);
-    expect(shouldReloadAfter({ ok: true, paquete: PAQUETE })).toBe(false);
+    expect(shouldReloadAfter({ ok: true, pkg: PKG })).toBe(false);
   });
 });

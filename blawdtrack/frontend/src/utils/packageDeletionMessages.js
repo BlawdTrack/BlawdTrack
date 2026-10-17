@@ -1,28 +1,29 @@
-import { getPackageStateLabel } from '../config/packageStates';
+import { getPackageStatusMeta } from '../config/packageStatus';
 
 /**
  * Textos de la eliminación de paquetes (HU-012), en un solo lugar: el resultado del backend y el aviso del botón no
- * eliminable. Los arma el frontend según `code` y estado HTTP; el `message` del backend nunca se muestra.
+ * eliminable. Los arma el frontend según `code` y estado HTTP; el `message` del backend nunca se muestra. Los avisos
+ * de "no se puede eliminar" comparten la forma "El paquete {envío} {motivo}: ya no puede eliminarse.".
  * Cada función devuelve `{ message, severity }` para `useToast().notify`.
  */
 
-const NOT_FOUND = (shipmentNumber) => ({
-  message: `El paquete ${shipmentNumber} ya no existe. La lista se actualizó.`,
-  severity: 'error',
+const cannotDelete = (shipmentNumber, reason) => ({
+  message: `El paquete ${shipmentNumber} ${reason}: ya no puede eliminarse.`,
+  severity: 'warning',
 });
+
+const inStatus = (status) => `está en “${getPackageStatusMeta(status).label}”`;
+
+const NOT_FOUND = (shipmentNumber) => ({ message: `El paquete ${shipmentNumber} ya no existe.`, severity: 'error' });
 
 const FORBIDDEN = () => ({ message: 'No tienes permiso para eliminar paquetes.', severity: 'error' });
 
 // Mensaje por `code` del backend (GlobalExceptionHandler / RestAccessDeniedHandler).
 const MESSAGES_BY_CODE = {
-  PAQUETE_DESPACHADO: (shipmentNumber) => ({
-    message: `El paquete ${shipmentNumber} ya fue despachado y no puede eliminarse.`,
-    severity: 'warning',
-  }),
-  PAQUETE_ENTREGADO: (shipmentNumber) => ({
-    message: `El paquete ${shipmentNumber} ya fue entregado y no puede eliminarse.`,
-    severity: 'warning',
-  }),
+  // El backend no dice en cuál de los estados despachados está (Enviado, En tránsito o No entregado); la nueva
+  // consulta del paquete lo muestra en la ficha.
+  PAQUETE_DESPACHADO: (shipmentNumber) => cannotDelete(shipmentNumber, 'ya salió a reparto'),
+  PAQUETE_ENTREGADO: (shipmentNumber) => cannotDelete(shipmentNumber, inStatus('DELIVERED')),
   PAQUETE_NO_ENCONTRADO: NOT_FOUND,
   // El 403 llega con un code u otro según dónde lo corte el backend: el filtro de seguridad o @PreAuthorize.
   ACCESS_DENIED: FORBIDDEN,
@@ -45,7 +46,7 @@ const GENERIC_ERROR = { message: 'No se pudo eliminar el paquete. Intenta de nue
  *   atiende el flujo de sesión (interceptor de `axiosClient`).
  */
 export function getDeletionResultMessage(result) {
-  const { shipmentNumber } = result.paquete;
+  const { shipmentNumber } = result.pkg;
 
   if (result.ok) {
     return { message: `Paquete ${shipmentNumber} eliminado correctamente.`, severity: 'success' };
@@ -61,19 +62,14 @@ export function getDeletionResultMessage(result) {
 
 /**
  * Aviso al pulsar "Eliminar" en un paquete que ya no puede eliminarse (botón gris de T05).
- * @param {{ shipmentNumber: string, status: string }} paquete
+ * @param {{ shipmentNumber: string, status: string }} pkg
  * @returns {{ message: string, severity: 'warning' }}
  */
-export function getBlockedPackageMessage(paquete) {
-  return {
-    message: `El paquete ${paquete.shipmentNumber} está en “${getPackageStateLabel(paquete.status)}”: ya no puede eliminarse.`,
-    severity: 'warning',
-  };
-}
+export const getBlockedPackageMessage = (pkg) => cannotDelete(pkg.shipmentNumber, inStatus(pkg.status));
 
 /**
- * ¿Hay que volver a cargar la lista después de este resultado? Sí tras un 409 o un 404: alguien más pudo cambiar el
- * estado del paquete o eliminarlo.
+ * ¿Hay que volver a consultar el paquete después de este resultado? Sí tras un 409 o un 404: alguien más pudo
+ * cambiar su estado o eliminarlo.
  * @param {import('../hooks/usePackageDeletion').PackageDeletionResult} result
  * @returns {boolean}
  */
