@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PackageQueryPage from './PackageQueryPage';
-import { getPackageByShipmentNumber } from '../services/SearchPackageService';
+import { getPackageByShipmentNumber, getPackageHistory } from '../services/SearchPackageService';
 import { renderWithProviders } from '../test-utils';
 
-// Se conserva `normalizeShipmentNumber` real y solo se simula la llamada HTTP.
+// Se conserva `normalizeShipmentNumber` real y solo se simulan las llamadas HTTP.
 vi.mock('../services/SearchPackageService', async (importOriginal) => {
   const actual = await importOriginal();
-  return { ...actual, getPackageByShipmentNumber: vi.fn() };
+  return { ...actual, getPackageByShipmentNumber: vi.fn(), getPackageHistory: vi.fn() };
 });
 
 const salesAdmin = {
@@ -41,6 +41,33 @@ const packageDetail = {
   },
 };
 
+const historyEntries = [
+  {
+    timestamp: '2026-09-16T22:19:00',
+    action: 'CAMBIAR_ESTADO_PAQUETE',
+    details: 'Paquete registrado',
+    actorName: 'Administrador de Ventas',
+    previousStatus: null,
+    newStatus: 'PENDING',
+  },
+  {
+    timestamp: '2026-09-17T03:09:00',
+    action: 'ASIGNAR_PAQUETE',
+    details: 'Asignado a María José Solano',
+    actorName: 'María José Solano',
+    previousStatus: 'PENDING',
+    newStatus: 'ASSIGNED',
+  },
+  {
+    timestamp: '2026-09-17T08:30:00',
+    action: 'CAMBIAR_ESTADO_PAQUETE',
+    details: 'Entrega confirmada',
+    actorName: null,
+    previousStatus: 'IN_TRANSIT',
+    newStatus: 'DELIVERED',
+  },
+];
+
 const render = () => renderWithProviders(<PackageQueryPage />, { user: salesAdmin, route: '/paquetes/consulta' });
 
 const search = async (user, value) => {
@@ -52,6 +79,7 @@ const search = async (user, value) => {
 describe('PackageQueryPage (HU-013)', () => {
   beforeEach(() => {
     getPackageByShipmentNumber.mockReset();
+    getPackageHistory.mockReset();
   });
 
   it('no consulta si el campo está vacío y muestra la validación', async () => {
@@ -168,5 +196,85 @@ describe('PackageQueryPage (HU-013)', () => {
     expect(screen.getByText('Sin mensajero asignado')).toBeInTheDocument();
     // Sin cliente: "No disponible" en el bloque del cliente.
     expect(screen.getAllByText('No disponible').length).toBeGreaterThan(0);
+  });
+
+  it('muestra el historial de estados reales del paquete consultado', async () => {
+    getPackageByShipmentNumber.mockResolvedValue(packageDetail);
+    getPackageHistory.mockResolvedValue(historyEntries);
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'bg-2026-00121');
+
+    // El historial se pide para el mismo paquete, con el número normalizado.
+    expect(getPackageHistory).toHaveBeenCalledWith('BG-2026-00121');
+    expect(await screen.findByText('Historial de estados')).toBeInTheDocument();
+
+    // Nombre descriptivo del evento, tomado del estado real de cada registro.
+    expect(screen.getByText('Registrado como Pendiente')).toBeInTheDocument();
+    expect(screen.getByText('Asignado')).toBeInTheDocument();
+    // "Entregado" aparece tanto en la píldora del paquete como en el historial.
+    expect(screen.getAllByText('Entregado').length).toBeGreaterThanOrEqual(2);
+
+    // Fecha · hora · responsable, con el momento real del cambio.
+    expect(screen.getByText('16/09/2026 · 22:19 · Administrador de Ventas')).toBeInTheDocument();
+    expect(screen.getByText('17/09/2026 · 03:09 · María José Solano')).toBeInTheDocument();
+
+    // Un evento sin responsable muestra solo fecha y hora (sin "undefined").
+    expect(screen.getByText('17/09/2026 · 08:30')).toBeInTheDocument();
+  });
+
+  it('muestra el mensaje de historial vacío sin inventar registros', async () => {
+    getPackageByShipmentNumber.mockResolvedValue(packageDetail);
+    getPackageHistory.mockResolvedValue([]);
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'BG-2026-00121');
+
+    expect(await screen.findByText('No hay historial de estados disponible para este paquete.')).toBeInTheDocument();
+  });
+
+  it('si falla el historial conserva la ficha del paquete y permite reintentar', async () => {
+    getPackageByShipmentNumber.mockResolvedValue(packageDetail);
+    getPackageHistory.mockRejectedValueOnce(new Error('network down'));
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'BG-2026-00121');
+
+    // La ficha general sigue visible aunque el historial falle.
+    expect(await screen.findByText('Mariela Solís Gómez')).toBeInTheDocument();
+    expect(screen.getByText(/No se pudo conectar con el servidor para cargar el historial/)).toBeInTheDocument();
+
+    // Al reintentar con éxito, se muestran los registros.
+    getPackageHistory.mockResolvedValueOnce(historyEntries);
+    await user.click(screen.getByRole('button', { name: /reintentar/i }));
+
+    expect(await screen.findByText('Registrado como Pendiente')).toBeInTheDocument();
+    expect(getPackageHistory).toHaveBeenCalledTimes(2);
+  });
+
+  it('actualiza el historial al consultar otro paquete', async () => {
+    getPackageByShipmentNumber.mockResolvedValueOnce(packageDetail);
+    getPackageHistory.mockResolvedValueOnce([historyEntries[2]]);
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'BG-2026-00121');
+    expect(await screen.findByText('17/09/2026 · 08:30')).toBeInTheDocument();
+
+    // Segunda consulta: otro paquete con su propio historial.
+    getPackageByShipmentNumber.mockResolvedValueOnce({ ...packageDetail, shipmentNumber: 'BG-2026-00999', status: 'PENDING' });
+    getPackageHistory.mockResolvedValueOnce([historyEntries[0]]);
+
+    const input = screen.getByRole('textbox', { name: 'Número de envío' });
+    await user.clear(input);
+    await user.type(input, 'BG-2026-00999');
+    await user.click(screen.getByRole('button', { name: /consultar/i }));
+
+    expect(await screen.findByText('Registrado como Pendiente')).toBeInTheDocument();
+    // No se conservan eventos de la consulta anterior.
+    expect(screen.queryByText('17/09/2026 · 08:30')).toBeNull();
   });
 });
