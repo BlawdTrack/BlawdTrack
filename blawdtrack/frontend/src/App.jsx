@@ -7,9 +7,9 @@ import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
 import SalesHomePage from './pages/SalesHomePage';
-import PackageDeletionPage from './pages/PackageDeletionPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
+import PackageQueryPage from './pages/PackageQueryPage';
 import NewPasswordPage from './pages/NewPasswordPage';
 import OwnPasswordResetPage from './pages/OwnPasswordResetPage';
 import EditMessenger from './pages/EditMessenger';
@@ -113,10 +113,16 @@ function App() {
         </Route>
       </Route>
 
+      {/* Consulta de paquetes (HU-013): pantalla compartida por el
+          administrador de ventas y el súper usuario. Va fuera del menú
+          principal porque es autocontenida para ambos roles. */}
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
+        <Route path={ROUTES.PACKAGE_QUERY} element={<PackageQueryPage />} />
+      </Route>
+
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
         <Route path={ROUTES.SALES_HOME} element={<SalesHomePage />} />
         <Route path={ROUTES.SALES_PASSWORD_RESET} element={<OwnPasswordResetPage />} />
-        <Route path={ROUTES.PACKAGE_DELETE} element={<PackageDeletionPage />} />
       </Route>
       
       <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>

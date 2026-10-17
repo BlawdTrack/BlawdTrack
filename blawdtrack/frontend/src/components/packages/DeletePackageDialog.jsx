@@ -2,9 +2,6 @@ import { useId, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { FONT, RADIUS, rem } from '../../theme';
 
-// Fondo del mockup detrás del diálogo: verde de marca translúcido.
-const BACKDROP_COLOR = 'rgba(26,60,52,.6)';
-
 const ACTION_BUTTON_SX = { borderRadius: RADIUS.sm, px: 2.5, fontWeight: 600, fontSize: FONT.md };
 
 /**
@@ -12,18 +9,18 @@ const ACTION_BUTTON_SX = { borderRadius: RADIUS.sm, px: 2.5, fontWeight: 600, fo
  * segura), queda atrapado dentro y vuelve al botón que lo abrió al cerrarse. "Cancelar", Esc o un clic fuera cierran
  * sin hacer nada. Mientras se elimina, "Sí, eliminar" muestra la carga, los dos botones quedan deshabilitados y no se
  * puede cerrar.
- * @param {{ paquete: { shipmentNumber: string, customerName: string, address: string }|null, isDeleting: boolean,
- *   onCancel: Function, onConfirm: Function, onClosed?: Function }} props Sin `paquete`, el diálogo está cerrado.
+ * @param {{ pkg: { shipmentNumber: string, customerName: string, address: string }|null, isDeleting: boolean,
+ *   onCancel: Function, onConfirm: Function, onClosed?: Function }} props Sin `pkg`, el diálogo está cerrado.
  *   `onClosed` se llama cuando terminó de cerrarse (por ejemplo, para mover el foco si el botón que lo abrió ya no
  *   existe).
  */
-export default function DeletePackageDialog({ paquete, isDeleting, onCancel, onConfirm, onClosed }) {
+export default function DeletePackageDialog({ pkg, isDeleting, onCancel, onConfirm, onClosed }) {
   const titleId = useId();
   const descriptionId = useId();
   // Conserva el último paquete mientras el diálogo se desvanece al cerrarse, para que el contenido no desaparezca antes.
-  const [shownPaquete, setShownPaquete] = useState(paquete);
-  if (paquete && paquete !== shownPaquete) {
-    setShownPaquete(paquete);
+  const [shownPkg, setShownPkg] = useState(pkg);
+  if (pkg && pkg !== shownPkg) {
+    setShownPkg(pkg);
   }
 
   const handleClose = () => {
@@ -32,19 +29,18 @@ export default function DeletePackageDialog({ paquete, isDeleting, onCancel, onC
 
   return (
     <Dialog
-      open={Boolean(paquete)}
+      open={Boolean(pkg)}
       onClose={handleClose}
       role="alertdialog"
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
       fullWidth
       slotProps={{
-        backdrop: { sx: { backgroundColor: BACKDROP_COLOR } },
         transition: { onExited: onClosed },
         paper: { sx: { maxWidth: rem(470), p: { xs: 1, sm: 1.5 } } },
       }}
     >
-      {shownPaquete && (
+      {shownPkg && (
         <>
           <DialogTitle id={titleId} sx={{ display: 'flex', alignItems: 'center', gap: 1.75, pb: 1.5 }}>
             <Box
@@ -69,10 +65,10 @@ export default function DeletePackageDialog({ paquete, isDeleting, onCancel, onC
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <Box sx={{ bgcolor: 'neutral.surface', borderRadius: RADIUS.sm, px: 2.5, py: 2.25 }}>
               <Typography sx={{ fontSize: FONT.md, fontWeight: 700, color: 'text.primary' }}>
-                {shownPaquete.shipmentNumber}
+                {shownPkg.shipmentNumber}
               </Typography>
               <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.45, mt: 0.5, overflowWrap: 'anywhere' }}>
-                {shownPaquete.customerName} · {shownPaquete.address}
+                {shownPkg.customerName} · {shownPkg.address}
               </Typography>
             </Box>
             <Typography id={descriptionId} sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.55 }}>

@@ -5,13 +5,13 @@ import { ThemeProvider } from '@mui/material/styles';
 import DeletePackageDialog from './DeletePackageDialog';
 import { theme } from '../../theme';
 
-const PAQUETE = { shipmentNumber: 'BG-2026-00125', customerName: 'Paola Herrera Sánchez', address: 'Atenas, Alajuela' };
+const PKG = { shipmentNumber: 'BG-2026-00125', customerName: 'Paola Herrera Sánchez', address: 'Atenas, Alajuela' };
 
 function renderDialog(props = {}) {
   const handlers = { onCancel: vi.fn(), onConfirm: vi.fn() };
   render(
     <ThemeProvider theme={theme}>
-      <DeletePackageDialog paquete={PAQUETE} isDeleting={false} {...handlers} {...props} />
+      <DeletePackageDialog pkg={PKG} isDeleting={false} {...handlers} {...props} />
     </ThemeProvider>
   );
   return handlers;
@@ -28,7 +28,7 @@ describe('DeletePackageDialog (HU-012 / T06)', () => {
   });
 
   it('sin paquete está cerrado', () => {
-    renderDialog({ paquete: null });
+    renderDialog({ pkg: null });
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
