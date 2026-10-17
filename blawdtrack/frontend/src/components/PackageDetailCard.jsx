@@ -45,9 +45,10 @@ function formatUnitPrice(unitPrice) {
  * opcionales sin información se muestran como "No disponible" / "No
  * especificado" en vez de inventar valores.
  *
- * @param {{ pkg: object }} props Detalle devuelto por el backend.
+ * @param {{ pkg: object, actions?: import('react').ReactNode }} props `pkg` es el detalle devuelto por el
+ *   backend; `actions`, si se pasa, se muestra al pie de la ficha (por ejemplo, el botón "Eliminar" de HU-012).
  */
-export default function PackageDetailCard({ pkg }) {
+export default function PackageDetailCard({ pkg, actions = null }) {
   const status = getPackageStatusMeta(pkg.status);
   const courier = pkg.assignedCourier;
   const items = Array.isArray(pkg.items) ? pkg.items : [];
@@ -217,6 +218,23 @@ export default function PackageDetailCard({ pkg }) {
           </InfoBlock>
         )}
       </Box>
+
+      {actions && (
+        <Box
+          sx={{
+            px: { xs: 2.5, md: 3.25 },
+            py: 2,
+            borderTop: '1px solid',
+            borderColor: 'neutral.border',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            flexWrap: 'wrap',
+            gap: 1.5,
+          }}
+        >
+          {actions}
+        </Box>
+      )}
     </Paper>
   );
 }
