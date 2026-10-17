@@ -18,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Casos de uso para consultar paquetes/envíos.
- * El acceso está restringido al rol ADMIN_VENTAS (administrador de ventas).
+ * El acceso está permitido al rol ADMIN_VENTAS (administrador de ventas) y al
+ * rol SUPER_USUARIO (súper usuario), que supervisa todas las pantallas.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class PackageService {
      * @throws PackageNotFoundException si no existe un paquete con ese número de envío
      */
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAnyRole('" + RoleName.SALES_ADMIN + "', '" + RoleName.SUPER_USER + "')")
     public PackageDetailResponse getPackageByShipmentNumber(String shipmentNumber) {
         String normalizedShipmentNumber = ShipmentNumberNormalizer.normalize(shipmentNumber);
         var pkg = packageRepository.findByShipmentNumber(normalizedShipmentNumber)
@@ -52,7 +53,7 @@ public class PackageService {
      * @throws PackageNotFoundException si no existe un paquete con ese número de envío
      */
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAnyRole('" + RoleName.SALES_ADMIN + "', '" + RoleName.SUPER_USER + "')")
     public List<PackageHistoryEntry> getPackageHistory(String shipmentNumber) {
         return historyService.getHistoryByShipmentNumber(shipmentNumber);
     }

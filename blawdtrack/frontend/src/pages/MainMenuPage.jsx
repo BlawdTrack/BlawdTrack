@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Chip, Typography } from '@mui/material';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { ROUTES } from '../config/routes';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_LABELS } from '../config/roles';
@@ -113,6 +114,16 @@ export default function MainMenuPage() {
                 variant="row"
               />
             ))}
+            {/* Acceso directo a la consulta de paquetes (HU-013): pantalla
+                compartida con el administrador de ventas, fuera de los módulos
+                porque es autocontenida. */}
+            <MenuCard
+              to={ROUTES.PACKAGE_QUERY}
+              icon={SearchOutlinedIcon}
+              title="Consultar paquete"
+              description="Busca un envío por su número y revisa su ficha de entrega."
+              variant="row"
+            />
           </Box>
         </Box>
       )}

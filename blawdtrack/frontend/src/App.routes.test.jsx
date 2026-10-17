@@ -18,6 +18,7 @@ vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición 
 vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
 vi.mock('./pages/SalesHomePage',() => ({ default: () => <div>Pantalla ventas</div> }));
 vi.mock('./pages/PackageDeletionPage', () => ({ default: () => <div>Pantalla eliminar paquetes</div> }));
+vi.mock('./pages/PackageQueryPage',() => ({ default: () => <div>Pantalla consulta de paquete</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/OwnPasswordResetPage', () => ({ default: () => <div>Pantalla restablecer mi contraseña</div> }));
 vi.mock('./pages/PasswordRecoveryRequestPage',() => ({ default: () => <div>Pantalla recuperación</div> }));
@@ -40,6 +41,7 @@ const SCREENS = {
   [ROUTES.COURIER_CREATE]: 'Pantalla registro de mensajero',
   [ROUTES.COURIER_DEACTIVATE]: 'Pantalla flota de mensajeros',
   [ROUTES.ROLES_PERMISSIONS]: 'Pantalla roles y permisos',
+  [ROUTES.PACKAGE_QUERY]: 'Pantalla consulta de paquete',
   [ROUTES.SALES_HOME]: 'Pantalla ventas',
   [ROUTES.PACKAGE_DELETE]: 'Pantalla eliminar paquetes',
   [ROUTES.COURIER_HOME]: 'Pantalla mensajero',
@@ -65,11 +67,18 @@ const ALLOWED_ROUTES = {
     ROUTES.COURIER_DEACTIVATE,
     ROUTES.ROLES_PERMISSIONS,
     ROUTES.PASSWORD_RESET_OWN,
-    '/editar-mensajero'
+    '/editar-mensajero',
+    ROUTES.PACKAGE_QUERY,
   ],
-  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME, ROUTES.SALES_PASSWORD_RESET, ROUTES.PACKAGE_DELETE],
+  // La consulta de paquetes (HU-013) la comparten el súper usuario y el
+  // administrador de ventas: es la única ruta de dos roles (ver SHARED_ROUTES).
+  [ROLES.SALES_ADMIN]: [ROUTES.SALES_HOME, ROUTES.SALES_PASSWORD_RESET, ROUTES.PACKAGE_QUERY, ROUTES.PACKAGE_DELETE],
   [ROLES.COURIER]: [ROUTES.COURIER_HOME, ROUTES.COURIER_PASSWORD_RESET],
 };
+
+// Rutas que, a propósito, ven más de un rol (HU-013). El resto pertenece a uno
+// solo; la prueba de "exactamente un rol" las exceptúa.
+const SHARED_ROUTES = [ROUTES.PACKAGE_QUERY];
 
 function loginAs(role) {
   const user = { id: 1, fullName: 'Usuario de prueba', email: 'prueba@test.com', role };
@@ -107,7 +116,11 @@ describe('App - rutas protegidas por rol (HU-001)', () => {
       const roles = Object.entries(ALLOWED_ROUTES)
         .filter(([, routes]) => routes.includes(route))
         .map(([role]) => role);
-      expect(roles).toHaveLength(1);
+      if (SHARED_ROUTES.includes(route)) {
+        expect(roles.length).toBeGreaterThan(1);
+      } else {
+        expect(roles).toHaveLength(1);
+      }
     }
   });
 
