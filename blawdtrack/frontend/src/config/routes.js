@@ -18,12 +18,13 @@ export const ROUTES = {
   ADMIN_CREATE: '/main-menu/admins/new',
   ADMIN_DELETE: '/main-menu/admins/delete',
   ROLES_PERMISSIONS: '/gestion-roles',
+  // Consulta de paquetes por número de envío (HU-013). Compartida por el
+  // administrador de ventas y el súper usuario.
+  PACKAGE_QUERY: '/paquetes/consulta',
   // Inicios de los roles que no usan el menú principal (HU-001 T12).
   SALES_HOME: '/ventas',
   COURIER_HOME: '/mensajero',
   // Restablecer la propia contraseña de esos roles (el Super Usuario usa PASSWORD_RESET_OWN).
   SALES_PASSWORD_RESET: '/ventas/restablecer-contrasena',
-  // Eliminar paquetes (HU-012), del Administrador de Ventas.
-  PACKAGE_DELETE: '/ventas/paquetes/eliminar',
   COURIER_PASSWORD_RESET: '/mensajero/restablecer-contrasena',
 };
