@@ -9,6 +9,7 @@ import ModuleMenuPage from './pages/ModuleMenuPage';
 import SalesHomePage from './pages/SalesHomePage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
+import PackageQueryPage from './pages/PackageQueryPage';
 import NewPasswordPage from './pages/NewPasswordPage';
 import OwnPasswordResetPage from './pages/OwnPasswordResetPage';
 import EditMessenger from './pages/EditMessenger';
@@ -110,6 +111,13 @@ function App() {
           <Route path={ROUTES.COURIER_UPDATE} element={<EditMessenger />} />
           <Route path={`${ROUTES.COURIER_UPDATE}/:documentNumber`} element={<EditMessenger />} />
         </Route>
+      </Route>
+
+      {/* Consulta de paquetes (HU-013): pantalla compartida por el
+          administrador de ventas y el súper usuario. Va fuera del menú
+          principal porque es autocontenida para ambos roles. */}
+      <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
+        <Route path={ROUTES.PACKAGE_QUERY} element={<PackageQueryPage />} />
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={[ROLES.SALES_ADMIN]} />}>
