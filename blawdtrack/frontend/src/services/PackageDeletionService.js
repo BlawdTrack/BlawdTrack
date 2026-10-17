@@ -1,7 +1,5 @@
 import axiosClient from '../api/axiosClient';
-
-// Ruta de paquetes del backend. `VITE_API_URL` ya incluye el `/api`, así que aquí va sin ese prefijo.
-const PACKAGES_PATH = '/v1/packages';
+import { PACKAGES_PATH } from '../api/packagesApi';
 
 /**
  * Elimina un paquete por su número de envío (HU-012): `DELETE /api/v1/packages/{shipmentNumber}`. Solo el

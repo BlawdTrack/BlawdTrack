@@ -12,9 +12,10 @@ import { FONT, RADIUS, TOUCH_TARGET } from '../theme';
  * está en curso).
  *
  * @param {{ value: string, onChange: (value: string) => void, onSubmit: Function,
- *   loading?: boolean, error?: string|null }} props
+ *   loading?: boolean, error?: string|null, inputRef?: import('react').Ref<HTMLInputElement> }} props
+ *   `inputRef` permite devolver el foco al campo (por ejemplo, tras eliminar el paquete consultado).
  */
-export default function PackageSearchCard({ value, onChange, onSubmit, loading = false, error = null }) {
+export default function PackageSearchCard({ value, onChange, onSubmit, loading = false, error = null, inputRef }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     onSubmit();
@@ -50,6 +51,7 @@ export default function PackageSearchCard({ value, onChange, onSubmit, loading =
       >
         <TextField
           value={value}
+          inputRef={inputRef}
           onChange={(event) => onChange(event.target.value)}
           placeholder="BG-2026-00123"
           autoComplete="off"

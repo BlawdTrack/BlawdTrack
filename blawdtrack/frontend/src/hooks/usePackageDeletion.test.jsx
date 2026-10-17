@@ -5,7 +5,7 @@ import { deletePackage } from '../services/PackageDeletionService';
 
 vi.mock('../services/PackageDeletionService', () => ({ deletePackage: vi.fn() }));
 
-const PAQUETE = { shipmentNumber: 'BG-2026-00125', customerName: 'Paola Herrera Sánchez', address: 'Atenas', status: 'PENDING' };
+const PKG = { shipmentNumber: 'BG-2026-00125', customerName: 'Paola Herrera Sánchez', address: 'Atenas', status: 'PENDING' };
 
 const httpError = (status, code) => Object.assign(new Error('Request failed'), { response: { status, data: { code } } });
 
@@ -21,8 +21,8 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
   it('open deja el paquete en confirmación y close lo descarta sin llamar al servicio', () => {
     const { result } = renderDeletion();
 
-    act(() => result.current.open(PAQUETE));
-    expect(result.current.selected).toBe(PAQUETE);
+    act(() => result.current.open(PKG));
+    expect(result.current.selected).toBe(PKG);
 
     act(() => result.current.close());
     expect(result.current.selected).toBeNull();
@@ -35,7 +35,7 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
     const onResult = vi.fn();
     const { result } = renderDeletion({ onDeleted, onResult });
 
-    act(() => result.current.open(PAQUETE));
+    act(() => result.current.open(PKG));
     let outcome;
     await act(async () => {
       outcome = await result.current.confirm();
@@ -43,9 +43,9 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
 
     expect(deletePackage).toHaveBeenCalledTimes(1);
     expect(deletePackage).toHaveBeenCalledWith('BG-2026-00125');
-    expect(outcome).toEqual({ ok: true, paquete: PAQUETE });
-    expect(onDeleted).toHaveBeenCalledWith(PAQUETE);
-    expect(onResult).toHaveBeenCalledWith({ ok: true, paquete: PAQUETE });
+    expect(outcome).toEqual({ ok: true, pkg: PKG });
+    expect(onDeleted).toHaveBeenCalledWith(PKG);
+    expect(onResult).toHaveBeenCalledWith({ ok: true, pkg: PKG });
     expect(result.current.selected).toBeNull();
     expect(result.current.isDeleting).toBe(false);
   });
@@ -55,7 +55,7 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
     deletePackage.mockReturnValue(new Promise((resolve) => { resolveDelete = resolve; }));
     const { result } = renderDeletion();
 
-    act(() => result.current.open(PAQUETE));
+    act(() => result.current.open(PKG));
     let first;
     let second;
     act(() => {
@@ -78,14 +78,14 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
     deletePackage.mockReturnValue(new Promise((resolve) => { resolveDelete = resolve; }));
     const { result } = renderDeletion();
 
-    act(() => result.current.open(PAQUETE));
+    act(() => result.current.open(PKG));
     let pending;
     act(() => {
       pending = result.current.confirm();
     });
     act(() => result.current.close());
 
-    expect(result.current.selected).toBe(PAQUETE);
+    expect(result.current.selected).toBe(PKG);
 
     await act(async () => {
       resolveDelete({ message: 'ok' });
@@ -94,9 +94,9 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
   });
 
   it.each([
-    [409, 'PAQUETE_DESPACHADO'],
-    [409, 'PAQUETE_ENTREGADO'],
-    [404, 'PAQUETE_NO_ENCONTRADO'],
+    [409, 'PKG_DESPACHADO'],
+    [409, 'PKG_ENTREGADO'],
+    [404, 'PKG_NO_ENCONTRADO'],
     [403, 'ACCESO_DENEGADO'],
   ])('un %i %s cierra el diálogo y devuelve status y code, sin dar el paquete por eliminado', async (status, code) => {
     deletePackage.mockRejectedValue(httpError(status, code));
@@ -104,13 +104,13 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
     const onResult = vi.fn();
     const { result } = renderDeletion({ onDeleted, onResult });
 
-    act(() => result.current.open(PAQUETE));
+    act(() => result.current.open(PKG));
     let outcome;
     await act(async () => {
       outcome = await result.current.confirm();
     });
 
-    expect(outcome).toEqual({ ok: false, paquete: PAQUETE, status, code });
+    expect(outcome).toEqual({ ok: false, pkg: PKG, status, code });
     expect(onResult).toHaveBeenCalledWith(outcome);
     expect(onDeleted).not.toHaveBeenCalled();
     expect(result.current.selected).toBeNull();
@@ -120,13 +120,13 @@ describe('usePackageDeletion (HU-012 / T06)', () => {
     deletePackage.mockRejectedValue(new Error('Network Error'));
     const { result } = renderDeletion();
 
-    act(() => result.current.open(PAQUETE));
+    act(() => result.current.open(PKG));
     let outcome;
     await act(async () => {
       outcome = await result.current.confirm();
     });
 
-    expect(outcome).toEqual({ ok: false, paquete: PAQUETE, status: null, code: null });
+    expect(outcome).toEqual({ ok: false, pkg: PKG, status: null, code: null });
   });
 
   it('confirmar sin paquete seleccionado no llama al servicio', async () => {
