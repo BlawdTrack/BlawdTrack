@@ -41,3 +41,27 @@ export const getPackageByShipmentNumber = async (shipmentNumber) => {
   const response = await axiosClient.get(`${PACKAGES_PATH}/${encodeURIComponent(normalized)}`);
   return response.data;
 };
+/**
+ * Consulta el historial cronológico de cambios de estado de un paquete:
+ * `GET /api/v1/packages/{shipmentNumber}/history`.
+ *
+ * El backend (`PackageHistoryEntry`) devuelve una lista ordenada del evento más
+ * antiguo al más reciente; cada entrada trae `timestamp`, `action`, `details`,
+ * `actorName`, `previousStatus` y `newStatus`. Responde 404 si el paquete no
+ * existe.
+ *
+ * @param {string} shipmentNumber Número de envío tal como lo escribió el usuario.
+ * @returns {Promise<Array<object>>} Los eventos devueltos por el backend.
+ * @throws {Error} Si el número de envío viene vacío.
+ */
+export const getPackageHistory = async (shipmentNumber) => {
+  const normalized = normalizeShipmentNumber(shipmentNumber);
+  if (!normalized) {
+    throw new Error('Ingresa un número de envío válido.');
+  }
+
+  const response = await axiosClient.get(
+    `${PACKAGES_PATH}/${encodeURIComponent(normalized)}/history`
+  );
+  return response.data;
+};
