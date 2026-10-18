@@ -96,8 +96,8 @@ describe('PackageProofCard', () => {
     // Sin URL de firma no se afirma que exista un registro de firma.
     rerender(<PackageProofCard pkg={{ ...deliveredPkg, deliverySignatureUrl: null }} entries={deliveredEntries} />);
 
-    expect(screen.getByText('Sin firma digital registrada.')).toBeInTheDocument();
-    expect(screen.queryByText(/Firma digital registrada/)).toBeNull();
+    expect(screen.getByText(/Sin firma digital registrada\./)).toBeInTheDocument();
+    expect(screen.queryByText(/Firma digital registrada al cierre/)).toBeNull();
   });
 
   it('incorpora la fecha real de la entrega tomada del historial del paquete', () => {

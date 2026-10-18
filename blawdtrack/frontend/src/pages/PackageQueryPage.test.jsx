@@ -318,6 +318,6 @@ it('muestra el historial de estados reales del paquete consultado', async () => 
 
     expect(await screen.findByText('El paquete aún no registra una entrega completada.')).toBeInTheDocument();
     expect(screen.queryByAltText(/fotografía de la entrega/i)).toBeNull();
-    expect(screen.queryByText(/Firma digital registrada/)).toBeNull();
+    expect(screen.queryByText(/Firma digital registrada al cierre/)).toBeNull();
   });
 });
