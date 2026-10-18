@@ -14,8 +14,8 @@ import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 
 /**
- * V17 agrega la columna "estado" a "paquetes". Se ejecuta Flyway con validación de JPA para
- * comprobar que la migración y la entidad coinciden.
+ * V19 (HU-014) agrega la columna "estado" a "paquetes" como texto en español y V23 la convierte al enum
+ * PackageStatus. Se ejecuta Flyway con validación de JPA para comprobar que las migraciones y la entidad coinciden.
  */
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:package-status-migration-test;MODE=MySQL;DB_CLOSE_DELAY=-1",
@@ -29,9 +29,9 @@ class PackageStatusMigrationTest {
     @Autowired private DeliveryPackageRepository packages;
 
     @Test
-    void laMigracionV17SeAplicaSinErrores() {
+    void laMigracionV23ConvierteElEstadoAlEnumSinErrores() {
         assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM \"flyway_schema_history\" WHERE \"version\" = '17' AND \"success\" = TRUE",
+                "SELECT COUNT(*) FROM \"flyway_schema_history\" WHERE \"version\" = '23' AND \"success\" = TRUE",
                 Integer.class)).isEqualTo(1);
     }
 

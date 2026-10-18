@@ -8,12 +8,13 @@ import { RADIUS, FONT, TOUCH_TARGET } from '../../theme';
 /**
  * Botón "Eliminar" de un paquete (HU-012). Solo existe para el Administrador de Ventas; para cualquier otro rol no
  * se renderiza. En Pendiente o Asignado es un botón rojo de contorno; en los demás estados queda en gris con
- * `aria-disabled` (sigue siendo enfocable) y un texto de ayuda asociado. Al pulsarlo solo emite `onDelete`: no
- * llama a la API ni abre el diálogo de confirmación.
- * @param {{ pkg: { shipmentNumber: string, status: string }, onDelete: (pkg: object) => void }} props
- *   `pkg` llega con la forma del backend; `onDelete` lo recibe tal cual.
+ * `aria-disabled` (sigue siendo enfocable) y un texto de ayuda asociado. Al pulsarlo solo emite `onDelete` (o
+ * `onBlocked` si el paquete no es eliminable): no llama a la API ni abre el diálogo de confirmación.
+ * @param {{ pkg: { shipmentNumber: string, status: string }, onDelete: (pkg: object) => void,
+ *   onBlocked?: (pkg: object) => void }} props `pkg` llega con la forma del backend; `onDelete` lo recibe tal cual.
+ *   `onBlocked` se llama si se pulsa el botón de un paquete no eliminable (para avisar por qué).
  */
-export default function DeletePackageButton({ pkg, onDelete }) {
+export default function DeletePackageButton({ pkg, onDelete, onBlocked }) {
   const canDelete = useCanDeletePackages();
   const hintId = useId();
 
@@ -26,6 +27,8 @@ export default function DeletePackageButton({ pkg, onDelete }) {
   const handleClick = () => {
     if (isDeletable) {
       onDelete(pkg);
+    } else {
+      onBlocked?.(pkg);
     }
   };
 

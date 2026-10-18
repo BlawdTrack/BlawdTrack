@@ -6,12 +6,16 @@ const LINE_COLORS = { muted: 'text.secondary', success: 'success.main' };
 
 /**
  * Fila de una cuenta (mensajero, administrador…) en una lista de acciones delicadas: avatar con iniciales,
- * nombre, líneas de detalle, una etiqueta de estado y un botón de acción en rojo.
+ * nombre, líneas de detalle, una etiqueta de estado y un botón de acción: rojo si es destructiva (eliminar, desactivar)
+ * o verde de marca si solo abre algo (editar).
  * @param {{ name: string, lines: Array<{ text: string, tone?: 'muted'|'success' }>, status: import('react').ReactNode,
- *   actionLabel: string, actionDisabled?: boolean, onAction: Function }} props La primera línea de detalle
+ *   actionLabel: string, actionDisabled?: boolean, actionTone?: 'danger'|'primary', onAction: Function }} props
+ *   La primera línea de detalle
  *   se muestra más grande; las siguientes, como apoyo.
  */
-export default function AccountRow({ name, lines, status, actionLabel, actionDisabled = false, onAction }) {
+export default function AccountRow({ name, lines, status, actionLabel, actionDisabled = false, actionTone = 'danger', onAction }) {
+  const accent = actionTone === 'primary' ? 'primary.main' : 'error.main';
+  const hover = actionTone === 'primary' ? 'neutral.surface' : 'error.light';
   return (
     <Box sx={{ px: 2.5, py: 1.75, borderTop: '1px solid #EFEAE4', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
       <Avatar sx={{ width: rem(36), height: rem(36), bgcolor: 'neutral.surface', color: 'text.secondary', fontWeight: 700, fontSize: FONT.sm, flex: `0 0 ${rem(36)}` }}>
@@ -48,9 +52,9 @@ export default function AccountRow({ name, lines, status, actionLabel, actionDis
           fontWeight: 600,
           fontSize: FONT.sm,
           bgcolor: 'background.paper',
-          color: actionDisabled ? '#7A736A' : 'error.main',
-          borderColor: actionDisabled ? 'neutral.border' : 'error.main',
-          '&:hover': { bgcolor: actionDisabled ? 'background.paper' : 'error.light', borderColor: actionDisabled ? 'neutral.border' : 'error.main' },
+          color: actionDisabled ? '#7A736A' : accent,
+          borderColor: actionDisabled ? 'neutral.border' : accent,
+          '&:hover': { bgcolor: actionDisabled ? 'background.paper' : hover, borderColor: actionDisabled ? 'neutral.border' : accent },
         }}
       >
         {actionLabel}

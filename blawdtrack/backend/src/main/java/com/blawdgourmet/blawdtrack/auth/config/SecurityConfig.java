@@ -87,8 +87,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         // Permisos individuales de usuarios (HU-009): exclusivos del Super Usuario.
                         .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
-                        // Consultar paquetes (detalle e historial, HU-013) es del Administrador de Ventas
-                        // y del Super Usuario, que supervisa todas las pantallas. Va ANTES de la regla de
+                        // Consultar y buscar paquetes (detalle e historial, HU-013; busqueda, HU-014) es del Administrador
+                        // de Ventas y del Super Usuario, que tiene acceso a todos los modulos. Va ANTES de la regla de
                         // prefijo: Spring Security aplica la primera que coincide.
                         .requestMatchers(HttpMethod.GET, "/api/v1/packages/**")
                                 .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)

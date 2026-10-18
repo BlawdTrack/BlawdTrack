@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { INPUT_SX } from './formStyles';
-import { Box, Button, Popover, TextField } from '@mui/material';
-import { Wheel, WHEEL_ITEM_HEIGHT, WHEEL_VISIBLE_ITEMS } from './TimeWheelField';
-import { RADIUS } from '../theme';
+import { Box, TextField } from '@mui/material';
+import { Wheel, WheelPopover } from './TimeWheelField';
 
 const WEIGHTS = Array.from({ length: 800 }, (_, i) => String(i + 1));
 
@@ -46,46 +45,12 @@ export function WeightWheelField({ label, value, onChange, error, id }) {
         }}
         sx={INPUT_SX}
       />
-      <Popover
-        open={Boolean(anchor)}
-        anchorEl={anchor}
-        onClose={() => setAnchor(null)}
-        slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1.5, mt: 0.5 } } }}
-      >
-        <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Box
-            aria-hidden
-            sx={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              top: WHEEL_ITEM_HEIGHT * ((WHEEL_VISIBLE_ITEMS - 1) / 2),
-              height: WHEEL_ITEM_HEIGHT,
-              borderRadius: RADIUS.sm,
-              backgroundColor: 'neutral.surface'
-            }}
-          />
-          <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Wheel items={WEIGHTS} selected={draft} onSelect={setDraft} label={label} />
-            <Box component="span" sx={{ color: 'text.secondary', fontWeight: 600 }}>kg</Box>
-          </Box>
+      <WheelPopover anchor={anchor} onClose={() => setAnchor(null)} onConfirm={confirm} rowSx={{ alignItems: 'center' }}>
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Wheel items={WEIGHTS} selected={draft} onSelect={setDraft} label={label} />
+          <Box component="span" sx={{ color: 'text.secondary', fontWeight: 600 }}>kg</Box>
         </Box>
-        <Button
-          fullWidth
-          onClick={confirm}
-          sx={{
-            mt: 1,
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: RADIUS.sm,
-            color: 'common.white',
-            backgroundColor: '#1A3C34',
-            '&:hover': { backgroundColor: '#12322B' }
-          }}
-        >
-          Listo
-        </Button>
-      </Popover>
+      </WheelPopover>
     </>
   );
 }

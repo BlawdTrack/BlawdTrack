@@ -34,7 +34,7 @@ import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackageItem;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;

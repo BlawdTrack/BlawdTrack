@@ -17,7 +17,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 

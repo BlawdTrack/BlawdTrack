@@ -1,6 +1,6 @@
 package com.blawdgourmet.blawdtrack.users.dto;
 
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 /**

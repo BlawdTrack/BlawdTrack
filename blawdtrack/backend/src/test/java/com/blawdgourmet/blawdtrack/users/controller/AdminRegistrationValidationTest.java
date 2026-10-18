@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;

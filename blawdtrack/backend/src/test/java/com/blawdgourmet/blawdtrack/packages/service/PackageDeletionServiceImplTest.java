@@ -24,7 +24,7 @@ import com.blawdgourmet.blawdtrack.packages.dto.PackageDeletionResponse;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 
 @ExtendWith(MockitoExtension.class)
 class PackageDeletionServiceImplTest {

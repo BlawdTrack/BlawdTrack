@@ -38,7 +38,6 @@ function RoleAccessManagement() {
       <UnsavedChangesGuard when={permissions.hasChanges} />
       <SplitScreen
         title="Roles y permisos"
-        description="Busca a un usuario y ajusta qué puede hacer dentro del sistema."
         columns="minmax(0, 1fr)"
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, minHeight: 0 }}>

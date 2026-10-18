@@ -30,7 +30,7 @@ import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
 import com.blawdgourmet.blawdtrack.packages.service.PackageDeletionAuditService;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;

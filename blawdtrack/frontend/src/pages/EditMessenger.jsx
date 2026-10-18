@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import PersonSearchOutlinedIcon from '@mui/icons-material/PersonSearchOutlined';
-import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
 import CourierDetailPanel from '../components/CourierDetailPanel';
 import CourierFleetPanel from '../components/CourierFleetPanel';
 import CourierGeneralHistoryPanel from '../components/CourierGeneralHistoryPanel';
+import EditScreenGuards from '../components/EditScreenGuards';
 import EmptyState from '../components/EmptyState';
 import SplitScreen from '../components/SplitScreen';
-import Toast from '../components/Toast';
-import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
 import { useConfirmLeave } from '../hooks/useConfirmLeave';
 import { useCourierEditor } from '../hooks/useCourierEditor';
 import { useCourierFleet } from '../hooks/useCourierFleet';
@@ -95,7 +93,6 @@ export function EditMessenger({ initialCedula = '' }) {
     <>
       <SplitScreen
         title="Actualizar mensajero"
-        description="Busca al mensajero por su documento, corrige sus datos y guarda los cambios."
         columns={listOpen ? `${rem(340)} minmax(0, 1fr)` : 'minmax(0, 1fr)'}
       >
         <CourierFleetPanel
@@ -139,10 +136,7 @@ export function EditMessenger({ initialCedula = '' }) {
         )}
       </SplitScreen>
 
-      <UnsavedChangesGuard when={editor.isDirty} />
-      <ConfirmLeaveDialog {...dialogProps} />
-
-      <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={closeToast} />
+      <EditScreenGuards dirty={editor.isDirty} dialogProps={dialogProps} toast={toast} onCloseToast={closeToast} />
     </>
   );
 }

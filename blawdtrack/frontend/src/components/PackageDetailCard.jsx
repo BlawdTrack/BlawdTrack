@@ -35,6 +35,76 @@ function formatUnitPrice(unitPrice) {
   return Number.isFinite(value) ? value.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null;
 }
 
+/** Mensajero asignado: su nombre y, debajo, su teléfono y horario; o aviso de que aún no hay uno. */
+function CourierBlock({ courier }) {
+  const detail = courier ? [courier.phone, courier.schedule].filter(Boolean).join(' · ') : '';
+
+  return (
+    <InfoBlock label="Mensajero asignado">
+      {courier ? (
+        <>
+          <Typography sx={VALUE_SX}>{courier.fullName || NO_DISPONIBLE}</Typography>
+          {detail && <Typography sx={SECONDARY_SX}>{detail}</Typography>}
+        </>
+      ) : (
+        <Typography sx={VALUE_SX}>Sin mensajero asignado</Typography>
+      )}
+    </InfoBlock>
+  );
+}
+
+/** Artículos del paquete: nombre y, debajo, cantidad, SKU y precio unitario cuando existen. */
+function ItemsBlock({ items }) {
+  return (
+    <InfoBlock label="Artículos" sx={{ gridColumn: { md: '1 / -1' } }}>
+      <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+        {items.map((item, index) => {
+          const unitPrice = formatUnitPrice(item.unitPrice);
+          const detail = [
+            `Cantidad: ${formatQuantity(item.quantity)}`,
+            item.sku ? `SKU ${item.sku}` : null,
+            unitPrice ? `Precio unitario: ${unitPrice}` : null,
+          ]
+            .filter(Boolean)
+            .join(' · ');
+
+          return (
+            <Box component="li" key={item.itemId ?? `${item.name}-${index}`}>
+              <Typography sx={VALUE_SX}>{item.name || NO_DISPONIBLE}</Typography>
+              <Typography sx={SECONDARY_SX}>{detail}</Typography>
+            </Box>
+          );
+        })}
+      </Box>
+    </InfoBlock>
+  );
+}
+
+/** Evidencia de entrega (firma, foto, comprobante). El backend solo la devuelve cuando el estado es DELIVERED. */
+function EvidenceBlock({ pkg }) {
+  const links = [
+    { label: 'Firma', url: pkg.deliverySignatureUrl },
+    { label: 'Foto', url: pkg.deliveryPhotoUrl },
+    { label: 'Comprobante', url: pkg.deliveryEvidenceUrl },
+  ].filter((entry) => Boolean(entry.url));
+
+  return (
+    <InfoBlock label="Evidencia de entrega" sx={{ gridColumn: { md: '1 / -1' } }}>
+      {links.length > 0 ? (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 0.25 }}>
+          {links.map((entry) => (
+            <Link key={entry.label} href={entry.url} target="_blank" rel="noopener noreferrer" sx={{ fontSize: FONT.md, fontWeight: 600 }}>
+              {entry.label}
+            </Link>
+          ))}
+        </Box>
+      ) : (
+        <Typography sx={VALUE_SX}>Sin evidencia registrada</Typography>
+      )}
+    </InfoBlock>
+  );
+}
+
 /**
  * Ficha de consulta de un paquete (solo lectura): encabezado verde con el
  * número de envío, la orden y el estado real, y un cuerpo blanco en dos
@@ -50,21 +120,9 @@ function formatUnitPrice(unitPrice) {
  */
 export default function PackageDetailCard({ pkg, actions = null }) {
   const status = getPackageStatusMeta(pkg.status);
-  const courier = pkg.assignedCourier;
   const items = Array.isArray(pkg.items) ? pkg.items : [];
 
   const orderLine = pkg.orderNumber ? `Orden ${pkg.orderNumber}` : 'Orden no disponible';
-
-  const courierDetail = courier
-    ? [courier.phone, courier.schedule].filter(Boolean).join(' · ')
-    : '';
-
-  // El backend solo devuelve la evidencia cuando el estado es DELIVERED.
-  const evidenceLinks = [
-    { label: 'Firma', url: pkg.deliverySignatureUrl },
-    { label: 'Foto', url: pkg.deliveryPhotoUrl },
-    { label: 'Comprobante', url: pkg.deliveryEvidenceUrl },
-  ].filter((entry) => Boolean(entry.url));
 
   return (
     <Paper
@@ -161,62 +219,11 @@ export default function PackageDetailCard({ pkg, actions = null }) {
           <Typography sx={VALUE_SX}>{pkg.schedule || 'No especificado'}</Typography>
         </InfoBlock>
 
-        <InfoBlock label="Mensajero asignado">
-          {courier ? (
-            <>
-              <Typography sx={VALUE_SX}>{courier.fullName || NO_DISPONIBLE}</Typography>
-              {courierDetail && <Typography sx={SECONDARY_SX}>{courierDetail}</Typography>}
-            </>
-          ) : (
-            <Typography sx={VALUE_SX}>Sin mensajero asignado</Typography>
-          )}
-        </InfoBlock>
+        <CourierBlock courier={pkg.assignedCourier} />
 
-        {items.length > 0 && (
-          <InfoBlock label="Artículos" sx={{ gridColumn: { md: '1 / -1' } }}>
-            <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-              {items.map((item, index) => {
-                const unitPrice = formatUnitPrice(item.unitPrice);
-                const detail = [
-                  `Cantidad: ${formatQuantity(item.quantity)}`,
-                  item.sku ? `SKU ${item.sku}` : null,
-                  unitPrice ? `Precio unitario: ${unitPrice}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ');
+        {items.length > 0 && <ItemsBlock items={items} />}
 
-                return (
-                  <Box component="li" key={item.itemId ?? `${item.name}-${index}`}>
-                    <Typography sx={VALUE_SX}>{item.name || NO_DISPONIBLE}</Typography>
-                    <Typography sx={SECONDARY_SX}>{detail}</Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-          </InfoBlock>
-        )}
-
-        {pkg.status === 'DELIVERED' && (
-          <InfoBlock label="Evidencia de entrega" sx={{ gridColumn: { md: '1 / -1' } }}>
-            {evidenceLinks.length > 0 ? (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 0.25 }}>
-                {evidenceLinks.map((entry) => (
-                  <Link
-                    key={entry.label}
-                    href={entry.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ fontSize: FONT.md, fontWeight: 600 }}
-                  >
-                    {entry.label}
-                  </Link>
-                ))}
-              </Box>
-            ) : (
-              <Typography sx={VALUE_SX}>Sin evidencia registrada</Typography>
-            )}
-          </InfoBlock>
-        )}
+        {pkg.status === 'DELIVERED' && <EvidenceBlock pkg={pkg} />}
       </Box>
 
       {actions && (
