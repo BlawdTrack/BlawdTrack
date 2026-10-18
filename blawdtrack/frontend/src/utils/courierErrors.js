@@ -4,7 +4,7 @@
 // the courier-specific texts and field matching live here.
 // UI texts are in Spanish; identifiers and comments in English.
 
-import { normalizeApiError, extractFieldsFromApiError } from './apiErrors';
+import { normalizeApiError, mapFieldErrors } from './apiErrors';
 
 const MESSAGES = {
   validationGeneric: 'Revisa los datos ingresados e intenta de nuevo.',
@@ -42,18 +42,8 @@ function normalizeText(text) {
 }
 
 function mapValidation(data) {
-  const { names, backendMessages } = extractFieldsFromApiError(data);
-  const fieldErrors = {};
-  let globalMessage = null;
-
-  names.forEach((name) => {
-    if (FIELD_MESSAGES[name]) {
-      fieldErrors[name] = FIELD_MESSAGES[name];
-    } else if (!globalMessage) {
-      // Field without an input in the form: show the backend text if any.
-      globalMessage = backendMessages[name] || MESSAGES.validationGeneric;
-    }
-  });
+  const { names, fieldErrors, globalMessage: mapped } = mapFieldErrors(data, FIELD_MESSAGES, MESSAGES.validationGeneric);
+  let globalMessage = mapped;
 
   if (names.length === 0) {
     if (data?.code === 'VALIDATION_FAILED') {

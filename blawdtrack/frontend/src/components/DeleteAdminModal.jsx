@@ -1,16 +1,6 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  Avatar,
-  Alert,
-} from '@mui/material';
-import { getInitials } from '../utils/getInitials';
-import { RADIUS, FONT, rem } from '../theme';
+import { Typography, Alert } from '@mui/material';
+import DestructiveConfirmDialog from './DestructiveConfirmDialog';
+import { RADIUS, FONT } from '../theme';
 
 /**
  * Diálogo de confirmación para eliminar un administrador (HU-008).
@@ -34,111 +24,33 @@ const DeleteAdminModal = ({
     || adminData.id;
 
   return (
-    <Dialog
+    <DestructiveConfirmDialog
       open={open}
-      onClose={!isSubmitting ? onClose : undefined}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{ sx: { borderRadius: RADIUS.md, padding: { xs: 1, sm: 1.5 }, maxWidth: rem(480) } }}
+      onClose={onClose}
+      onConfirm={() => onConfirm(adminData.documentType, documentNumber)}
+      title="Eliminar administrador"
+      subject={{ name: adminData.name, detail: `${documentNumber} · ${adminData.email}` }}
+      confirmLabel="Sí, eliminar"
+      loadingLabel="Eliminando..."
+      isLoading={isSubmitting}
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
-        <Box
-          sx={{
-            width: rem(28),
-            height: rem(28),
-            borderRadius: '50%',
-            bgcolor: 'error.light',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: `0 0 ${rem(28)}`,
-          }}
-        >
-          <Box sx={{ width: '3px', height: '14px', bgcolor: 'error.main', borderRadius: '2px' }} />
-        </Box>
-        <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.md, color: 'primary.main' }}>
-          Eliminar administrador
-        </Typography>
-      </DialogTitle>
+      <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.55 }}>
+        Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda
+        registrada en auditoría con fecha, hora y responsable.
+      </Typography>
 
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.7308rem',
-            p: '0.8462rem 1rem',
-            bgcolor: 'neutral.surface',
-            borderRadius: RADIUS.sm,
-          }}
-        >
-          <Avatar sx={{ width: rem(30), height: rem(30), bgcolor: 'neutral.main', color: 'common.white', fontWeight: 700, fontSize: FONT.xs, flex: `0 0 ${rem(30)}` }}>
-            {getInitials(adminData.name)}
-          </Avatar>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: '#1F2421' }}>
-              {adminData.name}
-            </Typography>
-            <Typography sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
-              {documentNumber} · {adminData.email}
-            </Typography>
-          </Box>
-        </Box>
+      {adminData.hasActiveSession && (
+        <Alert severity="warning" sx={{ borderRadius: RADIUS.sm, fontWeight: 500 }}>
+          Este administrador tiene una sesión abierta. Se cerrará automáticamente al eliminarlo.
+        </Alert>
+      )}
 
-        <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.55 }}>
-          Esta acción es permanente. La cuenta pierde todos sus accesos de inmediato y queda
-          registrada en auditoría con fecha, hora y responsable.
-        </Typography>
-
-        {adminData.hasActiveSession && (
-          <Alert severity="warning" sx={{ borderRadius: RADIUS.sm, fontWeight: 500 }}>
-            Este administrador tiene una sesión abierta. Se cerrará automáticamente al eliminarlo.
-          </Alert>
-        )}
-
-        {errorMessage && (
-          <Alert severity="error" sx={{ borderRadius: RADIUS.sm, fontWeight: 500 }}>
-            {errorMessage}
-          </Alert>
-        )}
-      </DialogContent>
-
-      <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1.5 }}>
-        <Button
-          onClick={onClose}
-          disabled={isSubmitting}
-          sx={{
-            color: 'primary.main',
-            border: '1.5px solid', borderColor: 'neutral.borderStrong',
-            borderRadius: RADIUS.sm,
-            textTransform: 'none',
-            fontWeight: 600,
-            fontSize: FONT.sm,
-            px: 2.5,
-          }}
-        >
-          Cancelar
-        </Button>
-        <Button
-          onClick={() => onConfirm(adminData.documentType, documentNumber)}
-          disabled={isSubmitting}
-          variant="contained"
-          sx={{
-            bgcolor: 'error.main',
-            color: 'common.white',
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: RADIUS.sm,
-            px: 2.5,
-            fontSize: FONT.sm,
-            boxShadow: 'none',
-            '&:hover': { bgcolor: 'error.dark', boxShadow: 'none' },
-          }}
-        >
-          {isSubmitting ? 'Eliminando...' : 'Sí, eliminar'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      {errorMessage && (
+        <Alert severity="error" sx={{ borderRadius: RADIUS.sm, fontWeight: 500 }}>
+          {errorMessage}
+        </Alert>
+      )}
+    </DestructiveConfirmDialog>
   );
 };
 

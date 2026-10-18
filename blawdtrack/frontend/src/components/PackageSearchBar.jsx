@@ -1,54 +1,31 @@
-import { Box, Button, CircularProgress, InputAdornment, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, InputAdornment, Paper, TextField, Typography } from '@mui/material';
 import { MAX_SEARCH_TERM_LENGTH } from '../config/packageSearch';
+import { CARD_SX, INPUT_SX, LABEL_SX } from './formStyles';
+
+const SEARCH_LABEL_ID = 'package-search-label';
 
 /**
- * Tarjeta de búsqueda presenteacional para el filtro en vivo de paquetes.
- * @param {{ value: string, onChange: Function, onClear: Function, isLoading: boolean, maxLength?: number, children?: React.ReactNode }} props
+ * Tarjeta de búsqueda en vivo de paquetes: el campo, el botón "Limpiar" y, debajo, el resumen que pasa la pantalla.
+ * @param {{ value: string, onChange: Function, onClear: Function, isLoading: boolean, maxLength?: number,
+ *   children?: import('react').ReactNode }} props
  */
 export function PackageSearchBar({ value, onChange, onClear, isLoading, maxLength = MAX_SEARCH_TERM_LENGTH, children }) {
-  const handleInputChange = (event) => {
-    onChange(event.target.value);
-  };
-
   return (
-    <Box
-      component="section"
-      sx={{
-        width: '100%',
-        backgroundColor: 'background.paper',
-        border: '1px solid #E4DED7',
-        borderRadius: '18px',
-        px: 3,
-        py: 2.5,
-      }}
-    >
-      <Typography
-        variant="overline"
-        sx={{
-          display: 'block',
-          fontWeight: 700,
-          textAlign: 'left',
-          letterSpacing: '0.04em',
-          color: 'text.secondary',
-          mb: 1.5,
-        }}
-      >
-        BÚSQUEDA EN VIVO
+    <Paper elevation={0} component="section" aria-labelledby={SEARCH_LABEL_ID} sx={{ ...CARD_SX, p: { xs: 2.5, md: 3 } }}>
+      <Typography id={SEARCH_LABEL_ID} component="h2" sx={LABEL_SX}>
+        Búsqueda en vivo
       </Typography>
 
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, flexWrap: 'wrap' }}>
         <TextField
           fullWidth
-          variant="outlined"
           type="text"
           name="searchTerm"
           autoComplete="off"
           value={value}
-          onChange={handleInputChange}
+          onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-            }
+            if (event.key === 'Enter') event.preventDefault();
           }}
           placeholder="N.º de envío, orden, cliente, dirección, teléfono u horario"
           slotProps={{
@@ -59,44 +36,16 @@ export function PackageSearchBar({ value, onChange, onClear, isLoading, maxLengt
                 </InputAdornment>
               ) : null,
             },
-            htmlInput: {
-              'aria-label': 'Buscar paquetes',
-              maxLength,
-              style: { fontSize: '16px' },
-            },
+            htmlInput: { 'aria-label': 'Buscar paquetes', maxLength },
           }}
-          sx={{
-            flex: '1 1 300px',
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '12px',
-              backgroundColor: 'background.paper',
-            },
-            '& .MuiOutlinedInput-root:focus-within': {
-              '& fieldset': {
-                borderColor: 'secondary.main',
-                borderWidth: '1.5px',
-              },
-            },
-          }}
+          sx={{ ...INPUT_SX, flex: '1 1 300px' }}
         />
-        <Button
-          type="button"
-          variant="contained"
-          onClick={onClear}
-          sx={{
-            minHeight: 56,
-            borderRadius: '12px',
-            whiteSpace: 'nowrap',
-            backgroundColor: 'primary.main',
-            color: 'primary.contrastText',
-            '&:hover': { backgroundColor: 'primary.dark' },
-          }}
-        >
+        <Button type="button" variant="outlined" onClick={onClear}>
           Limpiar
         </Button>
       </Box>
       {children}
-    </Box>
+    </Paper>
   );
 }
 

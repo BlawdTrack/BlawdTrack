@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useFieldErrors } from './useFieldErrors';
 import { registerCourier, updateCourier, getCourierByDocumentNumber } from '../services/CourierService';
 import { normalizeCourierError } from '../utils/courierErrors';
 import { useAuth } from './useAuth';
@@ -18,7 +19,7 @@ export const useCourier = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState(null);
-  const [fieldErrors, setFieldErrors] = useState({});
+  const { fieldErrors, setFieldErrors, setFieldError, clearFieldError } = useFieldErrors();
   const [globalMessage, setGlobalMessage] = useState(null);
   const [severity, setSeverity] = useState('error');
   
@@ -112,19 +113,6 @@ export const useCourier = () => {
     setIsSuccess(false);
     setGlobalMessage(null);
     setFieldErrors(errors);
-  };
-
-  const setFieldError = (name, message) => {
-    setFieldErrors((previous) => ({ ...previous, [name]: message }));
-  };
-
-  const clearFieldError = (name) => {
-    setFieldErrors((previous) => {
-      if (!previous[name]) return previous;
-      const next = { ...previous };
-      delete next[name];
-      return next;
-    });
   };
 
   return {

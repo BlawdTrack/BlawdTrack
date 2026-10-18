@@ -1,4 +1,4 @@
-import { DEFAULT_PACKAGE_STATUS_KEY } from '../config/packageStatus';
+import { DEFAULT_PACKAGE_STATUS_KEY, PACKAGE_STATUS_ALIASES } from '../config/packageStatus';
 
 /**
  * Normaliza la clave de estado para que siempre coincida con el mapa de estilos del componente.
@@ -18,7 +18,8 @@ export function normalizeStatusKey(status) {
     .replace(/[\s-]+/g, '_')
     .toUpperCase();
 
-  return lettersOnly.replace(/[^A-Z0-9_]/g, '') || DEFAULT_PACKAGE_STATUS_KEY;
+  const key = lettersOnly.replace(/[^A-Z0-9_]/g, '') || DEFAULT_PACKAGE_STATUS_KEY;
+  return PACKAGE_STATUS_ALIASES[key] ?? key;
 }
 
 /**

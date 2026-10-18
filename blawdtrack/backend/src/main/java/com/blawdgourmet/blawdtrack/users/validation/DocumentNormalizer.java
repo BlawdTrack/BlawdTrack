@@ -2,7 +2,7 @@ package com.blawdgourmet.blawdtrack.users.validation;
 
 import java.util.Locale;
 
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 
 /**
  * Normaliza el valor de un documento para que siempre se compare, valide y persista

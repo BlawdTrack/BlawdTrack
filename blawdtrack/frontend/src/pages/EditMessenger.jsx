@@ -95,7 +95,6 @@ export function EditMessenger({ initialCedula = '' }) {
     <>
       <SplitScreen
         title="Actualizar mensajero"
-        description="Busca al mensajero por su documento, corrige sus datos y guarda los cambios."
         columns={listOpen ? `${rem(340)} minmax(0, 1fr)` : 'minmax(0, 1fr)'}
       >
         <CourierFleetPanel

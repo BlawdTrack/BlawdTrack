@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PackageSearchController {
 
-    private static final String SEARCH_ROLE = "hasRole('" + RoleName.SALES_ADMIN + "')";
+    private static final String SEARCH_ROLE = "hasAnyRole('" + RoleName.SALES_ADMIN + "', '" + RoleName.SUPER_USER + "')";
 
     private final PackageSearchService searchService;
 

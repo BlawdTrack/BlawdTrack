@@ -53,7 +53,6 @@ export const MessengerFleetList = () => {
     <>
       <SplitScreen
         title="Desactivar mensajeros"
-        description="Elige al mensajero que dejará de operar y confirma la desactivación. Queda registrada en el historial."
         columns="minmax(0, 1fr)"
       >
         {showAudit ? (

@@ -1,57 +1,58 @@
-import { TableCell, TableRow, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { FONT } from '../theme';
 import { displayValue, formatPackageSchedule } from '../utils/packageFormat';
 import PackageStatusBadge from './PackageStatusBadge';
+import StatusRow from './StatusRow';
+
+const COLUMN_SX = { flex: '1 1 170px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25 };
+
+const isFilled = (value) => value !== null && value !== undefined && String(value).trim() !== '';
 
 /**
- * Fila de resultados para un paquete individual.
+ * Fila de un paquete encontrado: número de envío y orden, cliente con su dirección y teléfono, horario y estado.
+ * Va dentro de un `ul` (es un elemento de lista), igual que las filas de la previsualización de la importación.
  * @param {{ pkg: object }} props
  */
 export function PackageResultRow({ pkg }) {
-  const shipmentNumber = displayValue(pkg?.shipmentNumber);
-  const orderNumber = pkg?.orderNumber;
-  const customerName = displayValue(pkg?.customerName);
-  const phone = displayValue(pkg?.phone);
-  const address = displayValue(pkg?.address);
-  const schedule = formatPackageSchedule(pkg?.schedule) || '—';
-  const hasOrderNumber = orderNumber !== null && orderNumber !== undefined && String(orderNumber).trim() !== '';
-  const hasPhone = phone !== '—' && String(phone).trim() !== '';
+  const schedule = formatPackageSchedule(pkg?.schedule);
 
   return (
-    <TableRow
-      sx={{
-        '&:hover': { backgroundColor: 'neutral.surface' },
-        '& td': { borderBottom: '1px solid', borderColor: 'neutral.border' },
-      }}
-    >
-      <TableCell sx={{ py: 1.75, px: 2, verticalAlign: 'middle' }}>
-        <Typography sx={{ fontWeight: 700, fontSize: FONT.md, color: 'text.primary' }}>{shipmentNumber}</Typography>
-        {hasOrderNumber && (
-          <Typography sx={{ mt: 0.25, fontSize: FONT.xs, color: 'text.secondary' }}>
-            Orden {orderNumber}
+    <StatusRow>
+      <Box sx={{ ...COLUMN_SX, flex: '1 1 140px' }}>
+        <Typography component="span" sx={{ fontSize: FONT.md, fontWeight: 700, color: 'text.primary' }}>
+          {displayValue(pkg?.shipmentNumber)}
+        </Typography>
+        {isFilled(pkg?.orderNumber) && (
+          <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+            Orden {pkg.orderNumber}
           </Typography>
         )}
-      </TableCell>
+      </Box>
 
-      <TableCell sx={{ py: 1.75, px: 2, verticalAlign: 'middle' }}>
-        <Typography sx={{ fontWeight: 500, fontSize: FONT.md, color: 'text.primary' }}>{customerName}</Typography>
-        {hasPhone && (
-          <Typography sx={{ mt: 0.25, fontSize: FONT.xs, color: 'text.secondary' }}>{phone}</Typography>
+      <Box sx={COLUMN_SX}>
+        <Typography component="span" sx={{ fontSize: FONT.md, color: 'text.primary' }}>
+          {displayValue(pkg?.customerName)}
+        </Typography>
+        <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary', overflowWrap: 'anywhere' }}>
+          {displayValue(pkg?.address)}
+        </Typography>
+        {isFilled(pkg?.phone) && (
+          <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+            {pkg.phone}
+          </Typography>
         )}
-      </TableCell>
+      </Box>
 
-      <TableCell sx={{ py: 1.75, px: 2, verticalAlign: 'middle', color: 'text.secondary' }}>
-        <Typography sx={{ fontSize: FONT.md, color: 'text.secondary', wordBreak: 'break-word' }}>{address}</Typography>
-      </TableCell>
+      <Box sx={COLUMN_SX}>
+        <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+          Horario: {schedule || '—'}
+        </Typography>
+      </Box>
 
-      <TableCell sx={{ py: 1.75, px: 2, verticalAlign: 'middle', color: 'text.secondary' }}>
-        <Typography sx={{ fontSize: FONT.md, color: 'text.secondary' }}>{schedule}</Typography>
-      </TableCell>
-
-      <TableCell sx={{ py: 1.75, px: 2, verticalAlign: 'middle' }}>
+      <Box sx={{ ...COLUMN_SX, flex: '0 1 auto', alignItems: 'flex-start' }}>
         <PackageStatusBadge status={pkg?.status} />
-      </TableCell>
-    </TableRow>
+      </Box>
+    </StatusRow>
   );
 }
 

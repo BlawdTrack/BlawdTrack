@@ -1,9 +1,13 @@
 import { NavLink } from 'react-router-dom';
 import { Box, Tooltip, Typography } from '@mui/material';
-import { NAV_ITEM_ICONS } from './navIcons';
-import { RADIUS, FONT, rem } from '../../theme';
+import { COMING_SOON_MESSAGE } from '../../config/mainMenu';
+import { RADIUS, FONT } from '../../theme';
 
-function ItemContent({ label, active, disabled, Icon }) {
+// Gris de las opciones que cuelgan de un título de menú, y crema para el título y para la opción activa.
+const MUTED = 'rgba(255,255,255,.65)';
+const CREAM = '#FAF8F5';
+
+function ItemContent({ label, active, disabled }) {
   return (
     <Box
       sx={{
@@ -11,12 +15,12 @@ function ItemContent({ label, active, disabled, Icon }) {
         minHeight: 44,
         // Con mouse (puntero fino) la fila es más baja; con pantalla táctil se queda en 44 px.
         '@media (pointer: fine)': { minHeight: 36 },
-        px: 1.75,
-        ml: '0.1923rem',
+        // Sin icono: la jerarquía se marca con la sangría (alineada con los títulos de sección) y el color.
+        pl: 3,
+        pr: 1.75,
         borderRadius: RADIUS.sm,
         display: 'flex',
         alignItems: 'center',
-        gap: 1.5,
         cursor: disabled ? 'not-allowed' : 'pointer',
         backgroundColor: active ? 'rgba(255,108,14,.18)' : 'transparent',
         transition: 'background-color .15s ease',
@@ -33,20 +37,11 @@ function ItemContent({ label, active, disabled, Icon }) {
         },
       }}
     >
-      {Icon && (
-        <Icon
-          sx={{
-            fontSize: FONT.xl,
-            flex: `0 0 ${rem(17)}`,
-            color: active ? '#FF6C0E' : disabled ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.7)',
-          }}
-        />
-      )}
       <Typography
         sx={{
           fontSize: FONT.sm,
           fontWeight: active ? 600 : 500,
-          color: active ? 'common.white' : disabled ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.85)',
+          color: active ? CREAM : disabled ? 'rgba(255,255,255,.4)' : MUTED,
         }}
       >
         {label}
@@ -56,18 +51,17 @@ function ItemContent({ label, active, disabled, Icon }) {
 }
 
 /**
- * Un ítem del menú lateral. Si no tiene ruta (`path: null`) se muestra deshabilitado con el aviso
- * "Disponible próximamente"; si la tiene, resalta cuando es la ruta activa.
+ * Una opción del menú lateral expandido: solo texto, en gris (crema si es la pantalla activa), sin icono. Si no tiene
+ * ruta (`path: null`) se muestra deshabilitada con el aviso "Disponible próximamente"; si la tiene, resalta cuando es
+ * la ruta activa.
  * @param {{ item: { id: string, label: string, path: string|null } }} props
  */
 export default function SidebarNavItem({ item }) {
-  const Icon = NAV_ITEM_ICONS[item.id];
-
   if (!item.path) {
     return (
-      <Tooltip title="Disponible próximamente" placement="right" arrow>
+      <Tooltip title={COMING_SOON_MESSAGE} placement="right" arrow>
         <span>
-          <ItemContent label={item.label} active={false} disabled Icon={Icon} />
+          <ItemContent label={item.label} active={false} disabled />
         </span>
       </Tooltip>
     );
@@ -75,7 +69,7 @@ export default function SidebarNavItem({ item }) {
 
   return (
     <NavLink to={item.path} end className="sidebar-nav-link" style={{ textDecoration: 'none' }}>
-      {({ isActive }) => <ItemContent label={item.label} active={isActive} disabled={false} Icon={Icon} />}
+      {({ isActive }) => <ItemContent label={item.label} active={isActive} disabled={false} />}
     </NavLink>
   );
 }

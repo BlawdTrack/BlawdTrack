@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { ThemeProvider, CssBaseline } from '@mui/material'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
@@ -21,10 +21,10 @@ const router = createBrowserRouter([
 ])
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <RouterProvider router={router} />
     </ThemeProvider>
-  </StrictMode>,
+  </React.StrictMode>,
 )

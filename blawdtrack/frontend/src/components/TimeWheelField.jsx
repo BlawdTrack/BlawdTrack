@@ -211,6 +211,56 @@ export function Wheel({ items, selected, onSelect, label, cyclic = true }) {
 }
 
 /**
+ * Popover de las ruedas: la banda que resalta la fila elegida, las ruedas (`children`) y el botón "Listo".
+ * Lo comparten el selector de hora y el de peso.
+ * @param {{ anchor: Element|null, onClose: Function, onConfirm: Function, rowSx?: object,
+ *   children: import('react').ReactNode }} props `anchor` abre el popover; `rowSx` ajusta la fila de ruedas.
+ */
+export function WheelPopover({ anchor, onClose, onConfirm, rowSx, children }) {
+  return (
+    <Popover
+      open={Boolean(anchor)}
+      anchorEl={anchor}
+      onClose={onClose}
+      slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1.5, mt: 0.5 } } }}
+    >
+      <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', ...rowSx }}>
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: ITEM_HEIGHT * ((VISIBLE_ITEMS - 1) / 2),
+            height: ITEM_HEIGHT,
+            borderRadius: RADIUS.sm,
+            backgroundColor: 'neutral.surface',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+        {children}
+      </Box>
+      <Button
+        fullWidth
+        onClick={onConfirm}
+        sx={{
+          mt: 1,
+          textTransform: 'none',
+          fontWeight: 600,
+          borderRadius: RADIUS.sm,
+          color: 'common.white',
+          backgroundColor: '#1A3C34',
+          '&:hover': { backgroundColor: '#12322B' }
+        }}
+      >
+        Listo
+      </Button>
+    </Popover>
+  );
+}
+
+/**
  * Selector de hora estilo alarma de iOS con tres ruedas (hora, minuto y am/pm). El valor es un texto
  * "HH:MM" en formato de 24 horas; `''` significa sin selección.
  * @param {{ label: string, value: string, onChange: (value: string) => void, error?: string,
@@ -258,49 +308,13 @@ export function TimeWheelField({ label, value, onChange, error, id }) {
         }}
         sx={INPUT_SX}
       />
-      <Popover
-        open={Boolean(anchor)}
-        anchorEl={anchor}
-        onClose={() => setAnchor(null)}
-        slotProps={{ paper: { sx: { borderRadius: RADIUS.md, p: 1.5, mt: 0.5 } } }}
-      >
-        <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-          <Box
-            aria-hidden
-            sx={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              top: ITEM_HEIGHT * ((VISIBLE_ITEMS - 1) / 2),
-              height: ITEM_HEIGHT,
-              borderRadius: RADIUS.sm,
-              backgroundColor: 'neutral.surface',
-              zIndex: 0,
-              pointerEvents: 'none'
-            }}
-          />
-          <Box sx={{ position: 'relative', display: 'flex', zIndex: 1 }}>
-            <Wheel items={HOURS} selected={draft.hour} onSelect={setHour} label={`${label}: hora`} />
-            <Wheel items={MINUTES} selected={draft.minute} onSelect={set('minute')} label={`${label}: minutos`} />
-            <Wheel items={PERIODS} selected={draft.period} onSelect={set('period')} label={`${label}: am o pm`} cyclic={false} />
-          </Box>
+      <WheelPopover anchor={anchor} onClose={() => setAnchor(null)} onConfirm={confirm} rowSx={{ gap: 0.5 }}>
+        <Box sx={{ position: 'relative', display: 'flex', zIndex: 1 }}>
+          <Wheel items={HOURS} selected={draft.hour} onSelect={setHour} label={`${label}: hora`} />
+          <Wheel items={MINUTES} selected={draft.minute} onSelect={set('minute')} label={`${label}: minutos`} />
+          <Wheel items={PERIODS} selected={draft.period} onSelect={set('period')} label={`${label}: am o pm`} cyclic={false} />
         </Box>
-        <Button
-          fullWidth
-          onClick={confirm}
-          sx={{
-            mt: 1,
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: RADIUS.sm,
-            color: 'common.white',
-            backgroundColor: '#1A3C34',
-            '&:hover': { backgroundColor: '#12322B' }
-          }}
-        >
-          Listo
-        </Button>
-      </Popover>
+      </WheelPopover>
     </>
   );
 }

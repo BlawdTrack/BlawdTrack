@@ -54,12 +54,11 @@ describe('PackageSearchPage', () => {
       await vi.advanceTimersByTimeAsync(0);
     });
 
-    const table = screen.getByRole('table', { name: 'Listado de paquetes' });
-    expect(within(table).getByText('N.º ENVÍO')).toBeInTheDocument();
+    const table = screen.getByRole('region', { name: 'Paquetes encontrados' });
     expect(within(table).getByText('BG-2026-001')).toBeInTheDocument();
     expect(within(table).getByText('Orden ORD-100')).toBeInTheDocument();
     expect(within(table).getByText('Luis Madrigal')).toBeInTheDocument();
-    expect(within(table).getByText('8:00 am - 12:00 pm')).toBeInTheDocument();
+    expect(within(table).getByText('Horario: 8:00 am - 12:00 pm')).toBeInTheDocument();
     expect(within(table).getByText('Pendiente')).toBeInTheDocument();
   });
 
@@ -105,7 +104,7 @@ describe('PackageSearchPage', () => {
       await vi.advanceTimersByTimeAsync(300);
     });
 
-    const table = screen.getByRole('table', { name: 'Listado de paquetes' });
+    const table = screen.getByRole('region', { name: 'Paquetes encontrados' });
     expect(within(table).getByText('BG-2026-002')).toBeInTheDocument();
     expect(within(table).queryByText('BG-2026-001')).toBeNull();
     expect(screen.getByRole('status')).toHaveTextContent('1 de 1 paquetes coinciden con “Limon”');
@@ -119,7 +118,7 @@ describe('PackageSearchPage', () => {
       await vi.advanceTimersByTimeAsync(0);
     });
 
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Paquetes encontrados' })).toBeNull();
   });
 
   it('does not render the results table while results are still null', async () => {
@@ -133,7 +132,7 @@ describe('PackageSearchPage', () => {
       await vi.advanceTimersByTimeAsync(300);
     });
 
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Paquetes encontrados' })).toBeNull();
   });
 
   it('shows the result count and clears the search term', async () => {
@@ -155,10 +154,10 @@ describe('PackageSearchPage', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('46 paquetes en la lista de distribución');
     expect(screen.getAllByText('BG-2026-001')).toHaveLength(1);
-    expect(screen.getByRole('table', { name: 'Paquetes encontrados' })).toBeInTheDocument();
-    expect(screen.getByRole('row', { name: /BG-2026-001/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Paquetes encontrados' })).toBeInTheDocument();
+    expect(screen.getByText('BG-2026-001')).toBeInTheDocument();
     expect(screen.getAllByText('Pendiente')).toHaveLength(1);
-    expect(screen.getByText('08:00 AM')).toBeInTheDocument();
+    expect(screen.getByText('Horario: 8:00 am')).toBeInTheDocument();
 
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     fireEvent.change(input, { target: { value: 'Heredia' } });
@@ -195,14 +194,14 @@ describe('PackageSearchPage', () => {
       await vi.advanceTimersByTimeAsync(300);
     });
 
-    expect(screen.getByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Sin resultados para “Limon”' })).toBeInTheDocument();
+    expect(screen.getByText('Sin resultados para “Limon”')).toBeInTheDocument();
+    expect(screen.getByText('Sin resultados para “Limon”')).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('0 de 1 paquetes coinciden con “Limon”');
 
     fireEvent.click(screen.getByRole('button', { name: 'Limpiar búsqueda' }));
 
     expect(input).toHaveValue('');
-    expect(screen.queryByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).not.toBeInTheDocument();
+    expect(screen.queryByText('Sin resultados para “Limon”')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('1 paquete en la lista de distribución');
   });
 
@@ -250,10 +249,10 @@ describe('PackageSearchPage', () => {
       await vi.advanceTimersByTimeAsync(300);
     });
 
-    expect(screen.getByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).toBeInTheDocument();
+    expect(screen.getByText('Sin resultados para “Limon”')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Limpiar' }));
 
     expect(input).toHaveValue('');
-    expect(screen.queryByRole('heading', { name: 'Sin resultados para “Limon”', level: 2 })).not.toBeInTheDocument();
+    expect(screen.queryByText('Sin resultados para “Limon”')).not.toBeInTheDocument();
   });
 });

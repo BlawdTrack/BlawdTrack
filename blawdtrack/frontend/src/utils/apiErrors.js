@@ -37,6 +37,28 @@ export function extractFieldsFromApiError(data) {
 }
 
 /**
+ * Maps the field names of a 400 body to a form's inputs: the ones the form knows get their own message, the
+ * first one it does not know becomes the global message (the backend text if any, else `genericMessage`).
+ * @returns {{ names: string[], fieldErrors: object, globalMessage: string|null }} `names` is empty when the
+ *   body names no field, so each caller decides what that means.
+ */
+export function mapFieldErrors(data, fieldMessages, genericMessage) {
+  const { names, backendMessages } = extractFieldsFromApiError(data);
+  const fieldErrors = {};
+  let globalMessage = null;
+
+  names.forEach((name) => {
+    if (fieldMessages[name]) {
+      fieldErrors[name] = fieldMessages[name];
+    } else if (!globalMessage) {
+      globalMessage = backendMessages[name] || genericMessage;
+    }
+  });
+
+  return { names, fieldErrors, globalMessage };
+}
+
+/**
  * Normalizes a failed axios call into { kind, fieldErrors, globalMessage, severity }.
  *
  * @param {unknown} error - the caught axios error.
@@ -62,23 +84,28 @@ export function normalizeApiError(error, config) {
   const { status, data } = response;
 
   if (status === 400 && (VALIDATION_CODES.includes(data?.code) || data?.errores)) {
-    const { fieldErrors = {}, globalMessage = null } = mapValidation(data) ?? {};
-    return apiErrorResult('validation', { fieldErrors, globalMessage });
+    return mappedResult('validation', mapValidation, data);
   }
   if (status === 409) {
-    const { fieldErrors = {}, globalMessage = null } = mapConflict(data) ?? {};
-    return apiErrorResult('conflict', { fieldErrors, globalMessage });
+    return mappedResult('conflict', mapConflict, data);
   }
+  const generic = genericErrorFor(status, messages);
+  return apiErrorResult(generic.kind, generic.options);
+}
+
+// Respuestas que solo llevan un texto genérico; el resto cae en `unknown`.
+function genericErrorFor(status, messages) {
   if (status === 401) {
-    return apiErrorResult('unauthenticated', { globalMessage: messages.unauthenticated, severity: 'warning' });
+    return { kind: 'unauthenticated', options: { globalMessage: messages.unauthenticated, severity: 'warning' } };
   }
-  if (status === 403) {
-    return apiErrorResult('forbidden', { globalMessage: messages.forbidden });
-  }
-  if (status >= 500) {
-    return apiErrorResult('server', { globalMessage: messages.server });
-  }
-  return apiErrorResult('unknown', { globalMessage: messages.fallback });
+  if (status === 403) return { kind: 'forbidden', options: { globalMessage: messages.forbidden } };
+  if (status >= 500) return { kind: 'server', options: { globalMessage: messages.server } };
+  return { kind: 'unknown', options: { globalMessage: messages.fallback } };
+}
+
+function mappedResult(kind, mapper, data) {
+  const { fieldErrors = {}, globalMessage = null } = mapper(data) ?? {};
+  return apiErrorResult(kind, { fieldErrors, globalMessage });
 }
 
 export default normalizeApiError;

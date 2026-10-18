@@ -16,27 +16,26 @@ describe('PackageResultsTable', () => {
     },
   ];
 
-  it('renders the table headings and row data', () => {
+  it('renders one row per package inside a labelled list', () => {
     render(<PackageResultsTable packages={packages} />);
 
-    const table = screen.getByRole('table', { name: 'Listado de paquetes' });
-    expect(within(table).getByText('N.º ENVÍO')).toBeInTheDocument();
-    expect(within(table).getByText('CLIENTE')).toBeInTheDocument();
-    expect(within(table).getByText('DIRECCIÓN')).toBeInTheDocument();
-    expect(within(table).getByText('HORARIO')).toBeInTheDocument();
-    expect(within(table).getByText('ESTADO')).toBeInTheDocument();
-    expect(within(table).getAllByRole('row')).toHaveLength(2);
-    expect(within(table).getByText('BG-2026-001')).toBeInTheDocument();
+    const list = screen.getByRole('region', { name: 'Paquetes encontrados' });
+    expect(within(list).getAllByRole('listitem')).toHaveLength(1);
+    expect(within(list).getByText('BG-2026-001')).toBeInTheDocument();
+    expect(within(list).getByText('Orden ORD-100')).toBeInTheDocument();
+    expect(within(list).getByText('Heredia, Barva')).toBeInTheDocument();
+    expect(within(list).getByText('Horario: 8:00 am - 12:00 pm')).toBeInTheDocument();
+    expect(within(list).getByText('Pendiente')).toBeInTheDocument();
   });
 
   it('does not render anything when data is empty', () => {
     const { rerender } = render(<PackageResultsTable packages={[]} />);
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Paquetes encontrados' })).toBeNull();
 
     rerender(<PackageResultsTable packages={null} />);
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Paquetes encontrados' })).toBeNull();
 
     rerender(<PackageResultsTable packages={undefined} />);
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Paquetes encontrados' })).toBeNull();
   });
 });

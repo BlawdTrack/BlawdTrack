@@ -10,7 +10,7 @@ describe('PackageSearchBar', () => {
       <PackageSearchBar value="" onChange={handleChange} onClear={handleClear} isLoading={false} maxLength={100} />
     );
 
-    expect(screen.getByText('BÚSQUEDA EN VIVO')).toBeInTheDocument();
+    expect(screen.getByText('Búsqueda en vivo')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('N.º de envío, orden, cliente, dirección, teléfono u horario')).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('Buscar paquetes'), { target: { value: 'cafe' } });

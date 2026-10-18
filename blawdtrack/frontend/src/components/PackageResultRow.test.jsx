@@ -1,4 +1,3 @@
-import { Table, TableBody } from '@mui/material';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import PackageResultRow from './PackageResultRow';
@@ -6,9 +5,8 @@ import PackageResultRow from './PackageResultRow';
 describe('PackageResultRow', () => {
   it('renders package information with formatted metadata and status badge', () => {
     render(
-      <Table>
-        <TableBody>
-          <PackageResultRow
+      <ul>
+        <PackageResultRow
             pkg={{
               id: 12,
               shipmentNumber: 'BG-2026-001',
@@ -19,9 +17,8 @@ describe('PackageResultRow', () => {
               schedule: '08:00 AM - 12:00 PM',
               status: 'PENDIENTE',
             }}
-          />
-        </TableBody>
-      </Table>
+        />
+      </ul>
     );
 
     expect(screen.getByText('BG-2026-001')).toHaveStyle({ fontWeight: '700' });
@@ -29,7 +26,7 @@ describe('PackageResultRow', () => {
     expect(screen.getByText('Luis Madrigal')).toBeInTheDocument();
     expect(screen.getByText('8888-9999')).toBeInTheDocument();
     expect(screen.getAllByText('—')).toHaveLength(1);
-    expect(screen.getByText('8:00 am - 12:00 pm')).toBeInTheDocument();
+    expect(screen.getByText('Horario: 8:00 am - 12:00 pm')).toBeInTheDocument();
     expect(screen.getByText('Pendiente')).toBeInTheDocument();
   });
 });

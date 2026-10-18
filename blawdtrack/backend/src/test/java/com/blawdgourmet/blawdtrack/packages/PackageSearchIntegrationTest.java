@@ -19,7 +19,7 @@ import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageSearchRepository;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -73,9 +73,10 @@ class PackageSearchIntegrationTest {
     }
 
     @Test
-    void superUserIsForbidden() throws Exception {
+    void superUserCanSearchBecauseItSeesEveryModule() throws Exception {
         mvc.perform(get(SEARCH_URL).header("Authorization", bearer(RoleName.SUPER_USER)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     @Test
