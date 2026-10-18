@@ -1,10 +1,13 @@
 package com.blawdgourmet.blawdtrack.packages.repository;
 
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Acceso a paquetes/envíos (tabla {@code paquetes}).
@@ -12,7 +15,8 @@ import java.util.Optional;
 public interface DeliveryPackageRepository extends JpaRepository<DeliveryPackage, Long> {
 
     /**
-     * Busca un paquete por su número de envío, cargando las relaciones necesarias.
+     * Busca un paquete por su número de envío exacto (ya normalizado: recortado y en mayúsculas),
+     * cargando las relaciones necesarias.
      */
     @EntityGraph(attributePaths = {
             "assignedCourier",
@@ -21,4 +25,9 @@ public interface DeliveryPackageRepository extends JpaRepository<DeliveryPackage
             "items"
     })
     Optional<DeliveryPackage> findByShipmentNumber(String shipmentNumber);
+
+    @Query("select upper(p.shipmentNumber) from DeliveryPackage p "
+            + "where upper(p.shipmentNumber) in :shipmentNumbers")
+    Set<String> findExistingShipmentNumbers(
+            @Param("shipmentNumbers") Collection<String> shipmentNumbers);
 }

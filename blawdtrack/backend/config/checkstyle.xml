@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<!-- Señales de SOLID/POO que el CI hace cumplir. No es una guía de estilo: solo tamaño y complejidad. -->
+<module name="Checker">
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java"/>
+
+    <!-- S: un archivo no debería hacerlo todo. -->
+    <module name="FileLength">
+        <property name="max" value="450"/>
+    </module>
+
+    <module name="TreeWalker">
+        <module name="MethodLength">
+            <property name="max" value="60"/>
+            <property name="countEmpty" value="false"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="max" value="7"/>
+            <property name="tokens" value="METHOD_DEF"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="12"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="3"/>
+        </module>
+        <module name="NestedTryDepth">
+            <property name="max" value="2"/>
+        </module>
+        <!-- O/L: no capturar Throwable/Error ni lanzar excepciones genéricas. -->
+        <module name="IllegalCatch">
+            <property name="illegalClassNames" value="Throwable, Error, RuntimeException"/>
+        </module>
+        <module name="IllegalThrows"/>
+        <!-- POO: el estado de un objeto es privado; se accede por métodos. -->
+        <module name="VisibilityModifier">
+            <property name="packageAllowed" value="false"/>
+            <property name="protectedAllowed" value="false"/>
+            <property name="allowPublicFinalFields" value="true"/>
+            <property name="allowPublicImmutableFields" value="true"/>
+        </module>
+        <module name="FinalClass"/>
+        <module name="InterfaceIsType"/>
+    </module>
+</module>

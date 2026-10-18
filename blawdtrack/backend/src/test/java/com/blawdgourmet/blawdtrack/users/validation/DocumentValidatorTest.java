@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

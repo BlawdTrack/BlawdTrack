@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.couriers.dto;
 import java.math.BigDecimal;
 
 import com.blawdgourmet.blawdtrack.couriers.model.Courier;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 /**

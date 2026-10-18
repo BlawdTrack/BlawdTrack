@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.ProviderManager;
@@ -86,6 +87,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/roles/**").hasRole(RoleName.SUPER_USER)
                         // Permisos individuales de usuarios (HU-009): exclusivos del Super Usuario.
                         .requestMatchers("/api/v1/users/**").hasRole(RoleName.SUPER_USER)
+                        // Consultar y buscar paquetes (detalle e historial, HU-013; busqueda, HU-014) es del Administrador
+                        // de Ventas y del Super Usuario, que tiene acceso a todos los modulos. Va ANTES de la regla de
+                        // prefijo: Spring Security aplica la primera que coincide.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/**")
+                                .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
+                        // La importacion y la gestion de paquetes (incluida su eliminacion, HU-012)
+                        // pertenecen exclusivamente al Administrador de Ventas. Esta regla se evalua
+                        // antes del binding; @PreAuthorize en el controlador queda como segunda barrera.
+                        .requestMatchers("/api/v1/packages/**").hasRole(RoleName.SALES_ADMIN)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

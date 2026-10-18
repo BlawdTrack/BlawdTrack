@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.couriers.dto;
 import java.time.LocalDateTime;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 
 /**
  * Un cambio del historial general de mensajeros: lo mismo que {@link CourierHistoryEntry} más el

@@ -7,12 +7,21 @@ import { recordsLabel } from '../utils/courierEdit';
 import { RADIUS, FONT } from '../theme';
 
 /**
- * Historial general: los cambios de TODOS los mensajeros, cada uno con el mensajero al que pertenece.
- * @param {{ history: ReturnType<typeof import('../hooks/useCourierHistory').useCourierGeneralHistory>,
- *   backLabel: string, onBack: Function }} props `backLabel` dice a dónde se vuelve ("Volver" o
- *   "Volver a María…").
+ * Historial general: los cambios de TODOS los mensajeros, cada uno con el mensajero al que pertenece. También lo usa
+ * "Actualizar administrador" con sus propios textos (cada registro lleva la etiqueta de su tipo y una frase que dice a quién).
+ * @param {{ history: { entries: object[], status: 'idle'|'loading'|'error', load: Function },
+ *   backLabel: string, onBack: Function, title?: string, emptyMessage?: string, errorMessage?: string,
+ *   showSubject?: boolean }} props `backLabel` dice a dónde se vuelve ("Volver" o "Volver a María…").
  */
-export default function CourierGeneralHistoryPanel({ history, backLabel, onBack }) {
+export default function CourierGeneralHistoryPanel({
+  history,
+  backLabel,
+  onBack,
+  title = 'Historial general de mensajeros',
+  emptyMessage = 'Todavía no hay cambios registrados en ningún mensajero.',
+  errorMessage = 'No se pudo cargar el historial general. Revisa tu conexión e inténtalo de nuevo.',
+  showSubject = true,
+}) {
   const { entries, status, load } = history;
 
   return (
@@ -20,7 +29,7 @@ export default function CourierGeneralHistoryPanel({ history, backLabel, onBack 
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', borderBottom: '1px solid', borderColor: 'neutral.border' }}>
         <BackButton onClick={onBack}>{backLabel}</BackButton>
         <Typography sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>
-          Historial general de mensajeros
+          {title}
         </Typography>
         {status === 'idle' && (
           <Chip
@@ -39,14 +48,14 @@ export default function CourierGeneralHistoryPanel({ history, backLabel, onBack 
         )}
         {status === 'error' && (
           <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
-            <StatusMessage severity="error" message="No se pudo cargar el historial general. Revisa tu conexión e inténtalo de nuevo." />
+            <StatusMessage severity="error" message={errorMessage} />
             <Button variant="outlined" onClick={load} sx={{ fontWeight: 600 }}>
               Reintentar
             </Button>
           </Box>
         )}
         {status === 'idle' && (
-          <HistoryList entries={entries} showSubject emptyMessage="Todavía no hay cambios registrados en ningún mensajero." />
+          <HistoryList entries={entries} showSubject={showSubject} emptyMessage={emptyMessage} />
         )}
       </Box>
     </Paper>

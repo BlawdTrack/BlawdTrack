@@ -34,7 +34,7 @@ import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackageItem;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
@@ -285,8 +285,8 @@ class PackageControllerTest {
     void paqueteInexistenteRetorna404() throws Exception {
         getPackage(token(adminVentas), "ENV-NO-EXISTE")
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Paquete no encontrado con número de envío: ENV-NO-EXISTE"))
+                .andExpect(jsonPath("$.code").value("PAQUETE_NO_ENCONTRADO"))
+                .andExpect(jsonPath("$.message").value("No existe un paquete con el número de envío ENV-NO-EXISTE."))
                 .andExpect(jsonPath("$.status").value(404));
     }
 
@@ -463,8 +463,8 @@ class PackageControllerTest {
     void historialDePaqueteInexistenteRetorna404() throws Exception {
         getPackageHistory(token(adminVentas), "ENV-NO-EXISTE")
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PACKAGE_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Paquete no encontrado con número de envío: ENV-NO-EXISTE"))
+                .andExpect(jsonPath("$.code").value("PAQUETE_NO_ENCONTRADO"))
+                .andExpect(jsonPath("$.message").value("No existe un paquete con el número de envío ENV-NO-EXISTE."))
                 .andExpect(jsonPath("$.status").value(404));
     }
 

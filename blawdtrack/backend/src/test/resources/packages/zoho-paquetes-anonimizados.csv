@@ -1,0 +1,15 @@
+PackageItemID,Packing Number,Notes,SO Number,Customer Name,Item Name,Quantity Packed,SKU,Item Price,Shipping Address,Shipping Address,Shipping City,Shipping State,Shipping Country,Shipping Phone
+1001,ENV-00953,800,SO-00957,Cliente Norte,Articulo 01,1,SKU-01,1200,,Avenida Uno,San Jose,San Jose,Costa Rica,'7110-0914
+1002,ENV-00953,800,SO-00957,Cliente Norte,Articulo 02,2,SKU-02,1500,,Avenida Uno,San Jose,San Jose,Costa Rica,'7110-0914
+1003,ENV-00953,800,SO-00957,Cliente Norte,Articulo 03,1,SKU-03,1800,,Avenida Uno,San Jose,San Jose,Costa Rica,'7110-0914
+1004,ENV-00953,800,SO-00957,Cliente Norte,Articulo 04,2,SKU-04,2100,,Avenida Uno,San Jose,San Jose,Costa Rica,'7110-0914
+1005,ENV-00953,800,SO-00957,Cliente Norte,Articulo 05,1,SKU-05,2400,,Avenida Uno,San Jose,San Jose,Costa Rica,'7110-0914
+2001,ENV-00956,De 8 a 5,SO-00958,Cliente Central,Articulo 06,3,SKU-06,1200,,Calle Dos,Alajuela,Alajuela,Costa Rica,'8888-1111
+2002,ENV-00956,De 8 a 5,SO-00958,Cliente Central,Articulo 07,1,SKU-07,1500,,Calle Dos,Alajuela,Alajuela,Costa Rica,'8888-1111
+2003,ENV-00956,De 8 a 5,SO-00958,Cliente Central,Articulo 08,2,SKU-08,1800,,Calle Dos,Alajuela,Alajuela,Costa Rica,'8888-1111
+2004,ENV-00956,De 8 a 5,SO-00958,Cliente Central,Articulo 09,1,SKU-09,2100,,Calle Dos,Alajuela,Alajuela,Costa Rica,'8888-1111
+3001,ENV-00958,,SO-00959,Cliente Pacifico,Articulo 10,5,SKU-10,1200,,Ruta Tres,Puntarenas,Puntarenas,Costa Rica,'8777-2222
+3002,ENV-00958,,SO-00959,Cliente Pacifico,Articulo 11,1,SKU-11,1500,,Ruta Tres,Puntarenas,Puntarenas,Costa Rica,'8777-2222
+3003,ENV-00958,,SO-00959,Cliente Pacifico,Articulo 12,2,SKU-12,1800,,Ruta Tres,Puntarenas,Puntarenas,Costa Rica,'8777-2222
+3004,ENV-00958,,SO-00959,Cliente Pacifico,Articulo 13,3,SKU-13,2100,,Ruta Tres,Puntarenas,Puntarenas,Costa Rica,'8777-2222
+3005,ENV-00958,,SO-00959,Cliente Pacifico,Articulo 14,1,SKU-14,2400,,Ruta Tres,Puntarenas,Puntarenas,Costa Rica,'8777-2222

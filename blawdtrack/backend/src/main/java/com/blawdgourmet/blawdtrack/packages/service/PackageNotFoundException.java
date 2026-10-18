@@ -1,11 +1,11 @@
 package com.blawdgourmet.blawdtrack.packages.service;
 
 /**
- * Excepción lanzada cuando no se encuentra un paquete con el número de envío especificado.
+ * No existe un paquete con el número de envío indicado (HU-012). Se responde 404
+ * {@code PAQUETE_NO_ENCONTRADO}.
  */
 public class PackageNotFoundException extends RuntimeException {
-
     public PackageNotFoundException(String shipmentNumber) {
-        super("Paquete no encontrado con número de envío: " + shipmentNumber);
+        super("No existe un paquete con el número de envío " + shipmentNumber + ".");
     }
 }

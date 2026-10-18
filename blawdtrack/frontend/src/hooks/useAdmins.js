@@ -9,7 +9,7 @@ const LOAD_ERROR_MESSAGE = 'No se pudieron cargar los datos. Verifica la conexi�
  * refrescar en silencio (para el sondeo periódico: así el estado de sesión se mantiene al día) y se quita
  * uno de la lista en memoria al eliminarlo.
  * @returns {{ admins: object[], loading: boolean, error: string|null, reload: Function, refresh: Function,
- *   removeByDocument: (documentNumber: string) => void }}
+ *   removeByDocument: (documentNumber: string) => void, patch: (updated: object) => void }}
  */
 export function useAdmins() {
   const [admins, setAdmins] = useState([]);
@@ -69,5 +69,12 @@ export function useAdmins() {
     ));
   }, []);
 
-  return { admins, loading, error, reload, refresh, removeByDocument };
+  // Refleja en la lista un administrador ya actualizado, sin volver a pedirla.
+  const patch = useCallback((updated) => {
+    setAdmins((current) => current.map((admin) => (admin.id === updated.id
+      ? { ...admin, ...updated, name: updated.fullName ?? admin.name }
+      : admin)));
+  }, []);
+
+  return { admins, loading, error, reload, refresh, removeByDocument, patch };
 }

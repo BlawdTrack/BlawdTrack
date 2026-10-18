@@ -8,17 +8,16 @@ import {
 } from '@mui/material';
 import { confirmPasswordReset } from '../services/PasswordRecoveryService';
 import { StatusMessage } from '../components/StatusMessage';
-import { RecoverySteps } from '../components/RecoverySteps';
-import AuthCardLayout from '../components/AuthCardLayout';
+import AuthSplitLayout from '../components/AuthSplitLayout';
+import RecoveryProgress from '../components/RecoveryProgress';
 import PasswordField from '../components/PasswordField';
-import { INLINE_LABEL_SX, INPUT_SX } from '../components/formStyles';
+import { FIELD_LABEL_SX, FIELD_SX, AUTH_BUTTON_SX } from '../components/authStyles';
 import AuthStateHeader from '../components/AuthStateHeader';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import LinkOffOutlinedIcon from '@mui/icons-material/LinkOffOutlined';
 import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import { PasswordRequirements } from '../components/PasswordRequirements';
 import { meetsClientPasswordRules } from '../utils/passwordRules';
-import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
 
 // Textos propios del frontend (no se muestra el `message` crudo del backend,
 // que viene en otro idioma). Los tres primeros son los del mockup (`savePwd`).
@@ -36,7 +35,14 @@ const MISSING_TOKEN_MESSAGE =
 const REJECTED_TOKEN_MESSAGE =
   'Este enlace no es válido o ya expiró. Solicita uno nuevo para restablecer tu contraseña.';
 
-const BUTTON_SX = { borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET, fontWeight: 600, fontSize: FONT.md };
+const BRAND_TITLE = (
+  <>
+    Recupera tu acceso
+    <br />
+    <Box component="span" sx={{ color: 'secondary.main' }}>en 3 pasos.</Box>
+  </>
+);
+const BRAND_SUBTITLE = 'Te enviamos un enlace de un solo uso al correo de tu cuenta.';
 
 // T05 de HU-002 (#66): el usuario llega desde el enlace del correo y define
 // su nueva contraseña. Vistas del mismo flujo (r3/r4 del mockup + el caso sin
@@ -47,6 +53,12 @@ const BUTTON_SX = { borderRadius: RADIUS.sm, minHeight: TOUCH_TARGET, fontWeight
 //    (valor por defecto de MAIL_LINK_URL en el backend; ver EmailService).
 //  - El contrato de POST /v1/auth/password-reset/confirm está en
 //    PasswordRecoveryService.confirmPasswordReset.
+function submitState(newPassword, confirmPassword) {
+  const confirmMismatch = confirmPassword !== '' && newPassword !== confirmPassword;
+  const canSubmit = meetsClientPasswordRules(newPassword) && confirmPassword !== '' && !confirmMismatch;
+  return { confirmMismatch, canSubmit };
+}
+
 /**
  * Pantalla "Crear nueva contraseña" (HU-002). Se abre desde el enlace del correo (`/recovery?token=...`),
  * valida la contraseña con `PasswordRequirements` y confirma con `confirmPasswordReset`. Tiene tres
@@ -82,6 +94,26 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     clearFeedback();
   };
 
+  // Traduce el rechazo del backend a la vista que corresponde: enlace vencido, contraseña reutilizada, etc.
+  const applyConfirmError = (err) => {
+    const code = err.response?.data?.code;
+    if (!err.response) {
+      setError({ message: CONNECTION_ERROR_MESSAGE });
+    } else if (code === 'TOKEN_INVALIDO') {
+      setTokenRejected(true);
+    } else if (code === 'CONTRASENA_REUTILIZADA') {
+      // Esto sí lo confirmó el backend: la regla 4 pasa a "no cumplida".
+      setHistoryRejected(true);
+      setError({ message: REUSED_ERROR_MESSAGE, field: 'newPassword' });
+    } else {
+      setError(
+        code === 'VALIDATION_ERROR'
+          ? { message: VALIDATION_ERROR_MESSAGE, field: 'newPassword' }
+          : { message: GENERIC_ERROR_MESSAGE }
+      );
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (loading) return;
@@ -104,43 +136,33 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
       setConfirmPassword('');
       setSucceeded(true);
     } catch (err) {
-      const code = err.response?.data?.code;
-      if (!err.response) {
-        setError({ message: CONNECTION_ERROR_MESSAGE });
-      } else if (code === 'TOKEN_INVALIDO') {
-        setTokenRejected(true);
-      } else if (code === 'CONTRASENA_REUTILIZADA') {
-        // Esto sí lo confirmó el backend: la regla 4 pasa a "no cumplida".
-        setHistoryRejected(true);
-        setError({ message: REUSED_ERROR_MESSAGE, field: 'newPassword' });
-      } else if (code === 'VALIDATION_ERROR') {
-        setError({ message: VALIDATION_ERROR_MESSAGE, field: 'newPassword' });
-      } else {
-        setError({ message: GENERIC_ERROR_MESSAGE });
-      }
+      applyConfirmError(err);
     } finally {
       setLoading(false);
     }
   };
+
+  // Solo UI: la coincidencia se avisa en vivo bajo la confirmación y el botón se habilita cuando todo es válido.
+  const { confirmMismatch, canSubmit } = submitState(newPassword, confirmPassword);
 
   let content;
   if (succeeded) {
     content = (
       <Box
         role="status"
-        sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
       >
         <AuthStateHeader
           icon={CheckCircleOutlinedIcon}
           tone="success"
-          title="Contraseña actualizada"
+          title="¡Contraseña actualizada!"
           description="Ya puedes iniciar sesión con tu nueva contraseña."
         />
         <Button
           fullWidth
           variant="contained"
           onClick={() => onGoToLogin?.()}
-          sx={BUTTON_SX}
+          sx={AUTH_BUTTON_SX}
         >
           Ir a iniciar sesión
         </Button>
@@ -148,7 +170,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
     );
   } else if (!token || tokenRejected) {
     content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         <AuthStateHeader icon={LinkOffOutlinedIcon} tone="error" title="Enlace no válido" />
         {/* StatusMessage ya expone role="alert". */}
         <StatusMessage
@@ -159,7 +181,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
           fullWidth
           variant="contained"
           onClick={() => onRequestNewLink?.()}
-          sx={BUTTON_SX}
+          sx={AUTH_BUTTON_SX}
         >
           Solicitar un enlace nuevo
         </Button>
@@ -171,7 +193,7 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
         component="form"
         onSubmit={handleSubmit}
         noValidate
-        sx={{ display: 'flex', flexDirection: 'column', gap: '1.2308rem' }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
       >
         <AuthStateHeader
           icon={LockResetOutlinedIcon}
@@ -179,28 +201,32 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
           description="Elige una contraseña segura que no hayas usado antes."
         />
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
-          <Typography component="label" htmlFor="new-password" sx={INLINE_LABEL_SX}>
-            Nueva contraseña
-          </Typography>
-          <PasswordField
-            id="new-password"
-            visibilityLabel="nueva contraseña"
-            fullWidth
-            required
-            name="newPassword"
-            placeholder="••••••••"
-            autoComplete="new-password"
-            value={newPassword}
-            onChange={handleNewPasswordChange}
-            disabled={loading}
-            error={error?.field === 'newPassword'}
-            sx={INPUT_SX}
-          />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography component="label" htmlFor="new-password" sx={FIELD_LABEL_SX}>
+              Nueva contraseña
+            </Typography>
+            <PasswordField
+              id="new-password"
+              visibilityLabel="nueva contraseña"
+              fullWidth
+              required
+              name="newPassword"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={handleNewPasswordChange}
+              disabled={loading}
+              error={error?.field === 'newPassword'}
+              sx={FIELD_SX}
+            />
+          </Box>
+
+          <PasswordRequirements password={newPassword} historyRejected={historyRejected} />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.3846rem' }}>
-          <Typography component="label" htmlFor="confirm-password" sx={INLINE_LABEL_SX}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Typography component="label" htmlFor="confirm-password" sx={FIELD_LABEL_SX}>
             Confirmar contraseña
           </Typography>
           <PasswordField
@@ -214,30 +240,28 @@ export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
             disabled={loading}
-            error={error?.field === 'confirmPassword'}
-            sx={INPUT_SX}
+            error={confirmMismatch || error?.field === 'confirmPassword'}
+            helperText={confirmMismatch ? MISMATCH_ERROR_MESSAGE : undefined}
+            sx={FIELD_SX}
           />
         </Box>
 
-        <PasswordRequirements password={newPassword} historyRejected={historyRejected} />
-
         {error && <StatusMessage severity="error" message={error.message} />}
 
-        <Button type="submit" fullWidth variant="contained" disabled={loading} sx={BUTTON_SX}>
-          {loading ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Guardar nueva contraseña'}
+        <Button type="submit" fullWidth variant="contained" disabled={loading || !canSubmit} sx={AUTH_BUTTON_SX}>
+          {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Guardar nueva contraseña'}
         </Button>
       </Box>
     );
   }
 
   return (
-    <AuthCardLayout>
-      <RecoverySteps current={3} />
-
-      <Box sx={{ p: { xs: '24px 16px', sm: '32px' }, display: 'flex', justifyContent: 'center' }}>
-        <Box sx={{ width: '100%', maxWidth: rem(460) }}>{content}</Box>
+    <AuthSplitLayout brandTitle={BRAND_TITLE} brandSubtitle={BRAND_SUBTITLE}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <RecoveryProgress current={3} onBackToLogin={onGoToLogin} />
+        {content}
       </Box>
-    </AuthCardLayout>
+    </AuthSplitLayout>
   );
 }
 

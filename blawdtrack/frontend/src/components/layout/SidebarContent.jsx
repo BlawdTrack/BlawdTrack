@@ -1,16 +1,18 @@
 import { Box } from '@mui/material';
 import SidebarBrand from './SidebarBrand';
+import SidebarComingSoon from './SidebarComingSoon';
 import SidebarNavGroup from './SidebarNavGroup';
+import SidebarSettingsLink from './SidebarSettingsLink';
 import SidebarUserFooter from './SidebarUserFooter';
 import { useFlyoutHover } from '../../hooks/useFlyoutHover';
 
 /**
- * Contenido de la barra lateral: marca, grupos de navegación y pie con el usuario y el botón de cerrar
- * sesión.
- * @param {{ groups: Array, user: { fullName: string, email: string }, roleLabel: string,
+ * Contenido de la barra lateral: marca, grupos de navegación, la tuerca de ajustes (si el rol tiene ajustes) y pie con
+ * el usuario y el botón de cerrar sesión.
+ * @param {{ modules: Array, settings?: object|null, user: { fullName: string, email: string }, roleLabel: string,
  *   onLogout: Function, collapsed?: boolean, onToggleCollapsed?: Function }} props
  */
-export default function SidebarContent({ groups, user, roleLabel, onLogout, collapsed = false, onToggleCollapsed }) {
+export default function SidebarContent({ modules, settings = null, user, roleLabel, onLogout, collapsed = false, onToggleCollapsed }) {
   const flyout = useFlyoutHover();
 
   return (
@@ -31,10 +33,15 @@ export default function SidebarContent({ groups, user, roleLabel, onLogout, coll
           overflowY: 'auto',
         }}
       >
-        {groups.map((group) => (
-          <SidebarNavGroup key={group.id} group={group} collapsed={collapsed} flyout={flyout} />
-        ))}
+        {modules.map((module) =>
+          module.comingSoon ? (
+            <SidebarComingSoon key={module.id} module={module} collapsed={collapsed} />
+          ) : (
+            <SidebarNavGroup key={module.id} group={module} collapsed={collapsed} flyout={flyout} />
+          )
+        )}
       </Box>
+      {settings && <SidebarSettingsLink settings={settings} collapsed={collapsed} />}
       <SidebarUserFooter
         fullName={user.fullName}
         email={user.email}
