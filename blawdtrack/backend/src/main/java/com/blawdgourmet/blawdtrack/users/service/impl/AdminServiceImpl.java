@@ -15,10 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.security.access.AccessDeniedException;
 
-import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
-import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
-import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
-import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.exception.BusinessConfigurationException;
 import com.blawdgourmet.blawdtrack.common.exception.DuplicateResourceException;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
@@ -169,44 +165,17 @@ public class AdminServiceImpl implements AdminService {
         );
     }
 
-    // "ELIMINAR_ADMINISTRADOR" mirrors AuditServiceImpl.ACCION_ELIMINAR_ADMINISTRADOR
-    // (not in the AuditAction enum yet; that entry is written directly by
-    // registrarEliminacionAdministrador instead of going through logAction).
-    private static final List<String> ADMIN_AUDIT_ACTIONS = List.of(
-            AuditAction.ADMIN_CREATED.getCode(),
-            AuditAction.ADMIN_UPDATED.getCode(),
-            AuditAction.ADMIN_ACTIVATED.getCode(),
-            AuditAction.ADMIN_DEACTIVATED.getCode(),
-            AuditAction.ADMIN_PASSWORD_CHANGED.getCode(),
-            "ELIMINAR_ADMINISTRADOR");
-
     @Override
     @Transactional(readOnly = true)
     public List<AdminAuditLogResponse> getAuditLog() {
-        return auditLogRepository.findByActionInOrderByTimestampDesc(ADMIN_AUDIT_ACTIONS).stream()
-                .map(AdminServiceImpl::toAuditResponse)
-                .toList();
+        return auditHistory.adminHistory();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<AdminAuditLogResponse> getAdministratorHistory(DocumentType documentType, String documentNumber) {
         User admin = findSalesAdministrator(documentType, documentNumber);
-        return auditLogRepository
-                .findByUsuarioAfectadoIdAndActionInOrderByTimestampDescIdDesc(admin.getId(), ADMIN_AUDIT_ACTIONS)
-                .stream()
-                .map(AdminServiceImpl::toAuditResponse)
-                .toList();
-    }
-
-    private static AdminAuditLogResponse toAuditResponse(AuditLog log) {
-        return new AdminAuditLogResponse(
-                log.getId(),
-                log.getAction(),
-                log.getActor().getFullName(),
-                log.getDetails(),
-                log.getTimestamp()
-        );
+        return auditHistory.adminHistory(admin.getId());
     }
 
     /**
@@ -285,23 +254,34 @@ public class AdminServiceImpl implements AdminService {
 
         userRepository.saveAndFlush(admin);
 
-        if (!profileFields.isEmpty()) {
-            auditService.logAction(AuditAction.ADMIN_UPDATED, actor, admin,
-                    updateDetail(actor, admin, "modificó los datos (" + String.join(", ", profileFields) + ") del"));
-        }
+        auditProfileChange(actor, admin, profileFields);
         if (statusChanges) {
-            auditService.logAction(
-                    admin.getStatus() == UserStatus.INACTIVE ? AuditAction.ADMIN_DEACTIVATED : AuditAction.ADMIN_ACTIVATED,
-                    actor, admin,
-                    updateDetail(actor, admin, (admin.getStatus() == UserStatus.INACTIVE ? "desactivó" : "activó") + " al")
-                            + SESSION_CLOSED_NOTE);
+            auditStatusChange(actor, admin);
         }
         if (passwordChanges) {
-            auditService.logAction(AuditAction.ADMIN_PASSWORD_CHANGED, actor, admin,
+            auditTrail.adminPasswordChanged(actor, admin,
                     updateDetail(actor, admin, "cambió la contraseña del") + SESSION_CLOSED_NOTE);
         }
 
         return toDetail(admin);
+    }
+
+    private void auditProfileChange(AuthenticatedUser actor, User admin, List<String> profileFields) {
+        if (profileFields.isEmpty()) {
+            return;
+        }
+        auditTrail.adminUpdated(actor, admin,
+                updateDetail(actor, admin, "modificó los datos (" + String.join(", ", profileFields) + ") del"));
+    }
+
+    private void auditStatusChange(AuthenticatedUser actor, User admin) {
+        if (admin.getStatus() == UserStatus.INACTIVE) {
+            auditTrail.adminDeactivated(actor, admin,
+                    updateDetail(actor, admin, "desactivó al") + SESSION_CLOSED_NOTE);
+        } else {
+            auditTrail.adminActivated(actor, admin,
+                    updateDetail(actor, admin, "activó al") + SESSION_CLOSED_NOTE);
+        }
     }
 
     @Override

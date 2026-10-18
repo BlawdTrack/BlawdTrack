@@ -18,6 +18,7 @@ vi.mock('./pages/CourierRegistrationPage', () => ({ default: () => <div>Pantalla
 vi.mock('./pages/EditMessenger', () => ({ default: () => <div>Pantalla edición de mensajero</div> }));
 vi.mock('./pages/RoleAccessManagement', () => ({ default: () => <div>Pantalla roles y permisos</div> }));
 vi.mock('./pages/PackageImportPage', () => ({ default: () => <div>Pantalla importar paquetes</div> }));
+vi.mock('./pages/PackageSearchPage', () => ({ default: () => <div>Pantalla búsqueda de paquetes</div> }));
 vi.mock('./pages/PackageImportPreviewPage', () => ({ default: () => <div>Pantalla previsualización</div> }));
 vi.mock('./pages/CourierHomePage', () => ({ default: () => <div>Pantalla mensajero</div> }));
 vi.mock('./pages/OwnPasswordResetPage', () => ({ default: () => <div>Pantalla restablecer mi contraseña</div> }));
@@ -38,6 +39,7 @@ const SCREENS = {
   [ROUTES.MODULE_ADMINS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_SETTINGS]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
+  [ROUTES.PACKAGE_SEARCH]: 'Pantalla búsqueda de paquetes',
   [ROUTES.ADMIN_CREATE]: 'Pantalla registro de administrador',
   [ROUTES.ADMIN_UPDATE]: 'Pantalla actualizar administrador',
   [ROUTES.ADMIN_DELETE]: 'Pantalla administradores',
@@ -53,7 +55,7 @@ const SCREENS = {
 
 // Rutas que comparten el Súper Usuario y el Administrador de Ventas (ambos usan el menú lateral); el resto
 // de las rutas protegidas es de un solo rol.
-const SHARED_ROUTES = [ROUTES.MAIN_MENU, ROUTES.PACKAGE_IMPORT];
+const SHARED_ROUTES = [ROUTES.MAIN_MENU, ROUTES.PACKAGE_IMPORT, ROUTES.PACKAGE_SEARCH];
 
 // Ajustes y restablecer la propia contraseña los usan los tres roles (el mensajero también tiene el menú lateral).
 const ALL_ROLES_ROUTES = [ROUTES.MODULE_SETTINGS, ROUTES.PASSWORD_RESET_OWN];
@@ -68,6 +70,7 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_ADMINS,
     ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
+    ROUTES.PACKAGE_SEARCH,
     ROUTES.ADMIN_CREATE,
     ROUTES.ADMIN_UPDATE,
     ROUTES.ADMIN_DELETE,
@@ -81,6 +84,7 @@ const ALLOWED_ROUTES = {
     ROUTES.MAIN_MENU,
     ROUTES.MODULE_SETTINGS,
     ROUTES.PACKAGE_IMPORT,
+    ROUTES.PACKAGE_SEARCH,
     ROUTES.PASSWORD_RESET_OWN,
   ],
   // El mensajero usa el mismo menú lateral: su inicio, los ajustes y el restablecimiento de su contraseña.

@@ -73,12 +73,14 @@ describe('MainMenuPage', () => {
   it('shows the modules that are not built yet as disabled "Próximamente" cards, without a link', () => {
     renderWithProviders(tree, { route: ROUTES.MAIN_MENU, user: superUser });
 
-    ['Gestión de paquetes', 'Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((title) => {
+    ['Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((title) => {
       const heading = screen.getByRole('heading', { level: 3, name: title });
       expect(heading.closest('a')).toBeNull();
       expect(heading.parentElement.closest('[aria-disabled="true"]')).not.toBeNull();
     });
-    expect(screen.getAllByText('Próximamente')).toHaveLength(4);
+    expect(screen.getAllByText('Próximamente')).toHaveLength(3);
+    // Gestión de paquetes ya existe: su tarjeta enlaza a la búsqueda.
+    expect(screen.getByRole('heading', { level: 3, name: 'Gestión de paquetes' }).closest('a')).toHaveAttribute('href', ROUTES.PACKAGE_SEARCH);
   });
 
   it('says the module is coming soon when the cursor is over a future card', async () => {

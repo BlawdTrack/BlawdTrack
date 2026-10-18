@@ -126,12 +126,13 @@ describe('MainMenuLayout sidebar', () => {
       'Reportes y notificaciones',
       'Operación de mensajero',
     ];
-    const items = names.map((name) => bar.getByRole(name === 'Importación de paquetes' ? 'link' : 'button', { name }));
+    const implementedLinks = ['Importación de paquetes', 'Gestión de paquetes'];
+    const items = names.map((name) => bar.getByRole(implementedLinks.includes(name) ? 'link' : 'button', { name }));
 
     items.slice(1).forEach((item, index) =>
       expect(items[index].compareDocumentPosition(item)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
     );
-    ['Gestión de paquetes', 'Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((name) =>
+    ['Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((name) =>
       expect(bar.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true')
     );
     expect(bar.getByRole('button', { name: 'Gestión de usuarios' })).not.toHaveAttribute('aria-disabled');

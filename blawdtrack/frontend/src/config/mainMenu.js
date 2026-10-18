@@ -10,9 +10,8 @@ const MODULES = {
     description: 'Carga los envíos desde Zoho Inventory en Excel o CSV. Los duplicados se detectan en el mismo flujo.',
   },
   'package-management': {
-    title: 'Gestión de paquetes',
+    groupId: 'package-management',
     description: 'Busca, filtra por estado o pendientes, consulta el detalle, genera el QR, elimina y exporta a Excel.',
-    roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
   },
   'assignment-tracking': {
     title: 'Asignación y seguimiento',

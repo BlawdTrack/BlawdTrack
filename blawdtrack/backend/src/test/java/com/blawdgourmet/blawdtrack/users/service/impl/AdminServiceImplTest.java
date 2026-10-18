@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,10 +29,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
-import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
-import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
-import com.blawdgourmet.blawdtrack.audit.service.AuditService;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.common.security.TemporaryPasswordGenerator;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
@@ -149,7 +146,7 @@ class AdminServiceImplTest {
 
         assertThat(detail.fullName()).isEqualTo("Ana Nueva");
         assertThat(admin.getTokenVersion()).isEqualTo(versionBefore);
-        verify(auditService).logAction(eq(AuditAction.ADMIN_UPDATED), eq(SUPER_USER_ACTOR), eq(admin),
+        verify(auditTrail).adminUpdated(eq(SUPER_USER_ACTOR), eq(admin),
                 argThat(text -> text.contains("Alicia Admin") && text.contains("modificó los datos (nombre)")
                         && text.contains("Ana Nueva")));
         verify(passwordEncoder, never()).encode(any());
@@ -169,9 +166,9 @@ class AdminServiceImplTest {
         assertThat(admin.getStatus()).isEqualTo(UserStatus.INACTIVE);
         assertThat(admin.getPasswordHash()).isEqualTo("nuevo-hash");
         assertThat(admin.getTokenVersion()).isGreaterThan(versionBefore);
-        verify(auditService).logAction(eq(AuditAction.ADMIN_DEACTIVATED), eq(SUPER_USER_ACTOR), eq(admin),
+        verify(auditTrail).adminDeactivated(eq(SUPER_USER_ACTOR), eq(admin),
                 argThat(text -> text.contains("desactivó") && text.contains("sesión activa se cerró")));
-        verify(auditService).logAction(eq(AuditAction.ADMIN_PASSWORD_CHANGED), eq(SUPER_USER_ACTOR), eq(admin),
+        verify(auditTrail).adminPasswordChanged(eq(SUPER_USER_ACTOR), eq(admin),
                 argThat(text -> text.contains("cambió la contraseña") && !text.contains("NuevaClave123")));
     }
 
@@ -184,7 +181,7 @@ class AdminServiceImplTest {
         service.updateAdministrator(DocumentType.CEDULA, admin.getDocumentNumber(),
                 new AdminUpdateRequest(admin.getFullName(), admin.getEmail(), null, admin.getStatus()), SUPER_USER_ACTOR);
 
-        verify(auditService, never()).logAction(any(), any(), any(), any());
+        verifyNoInteractions(auditTrail);
     }
 
     @Test
@@ -272,32 +269,24 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void getAuditLogReturnsTheAdminEntriesNewestFirst() {
-        User actor = usuarioConRol(RoleName.SUPER_USER);
-        AuditLog creacion = AuditLog.builder()
-                .id(1L)
-                .actor(actor)
-                .action("CREAR_ADMINISTRADOR")
-                .details("El Super Usuario creó al Administrador X.")
-                .timestamp(LocalDateTime.now())
-                .build();
-        AuditLog eliminacion = AuditLog.builder()
-                .id(2L)
-                .actor(actor)
-                .action("ELIMINAR_ADMINISTRADOR")
-                .details("El Super Usuario eliminó al Administrador Y.")
-                .timestamp(LocalDateTime.now().minusDays(1))
-                .build();
-        // La bitácora de administradores incluye creación, eliminación y, desde la HU-007, sus modificaciones.
-        when(auditLogRepository.findByActionInOrderByTimestampDesc(argThat(actions -> actions != null
-                && actions.containsAll(List.of("CREAR_ADMINISTRADOR", "ELIMINAR_ADMINISTRADOR",
-                        "ACTUALIZAR_ADMINISTRADOR", "ACTIVAR_ADMINISTRADOR", "DESACTIVAR_ADMINISTRADOR",
-                        "CAMBIAR_CONTRASENA_ADMINISTRADOR")))))
-                .thenReturn(List.of(creacion, eliminacion));
-
-        List<AdminAuditLogResponse> respuesta = service.getAuditLog();
+    void getAuditLogDelegatesToTheAdminHistoryPort() {
+        List<AdminAuditLogResponse> history = List.of(
+                new AdminAuditLogResponse(1L, "CREAR_ADMINISTRADOR", "Ana Perez", "detalle", LocalDateTime.now()));
+        when(auditHistory.adminHistory()).thenReturn(history);
 
         assertThat(service.getAuditLog()).isSameAs(history);
+    }
+
+    @Test
+    void getAdministratorHistoryAsksThePortForThatAdminOnly() {
+        User admin = usuarioConRol(RoleName.SALES_ADMIN);
+        List<AdminAuditLogResponse> history = List.of(
+                new AdminAuditLogResponse(2L, "ACTUALIZAR_ADMINISTRADOR", "Ana Perez", "detalle", LocalDateTime.now()));
+        when(userRepository.findByDocumentTypeAndDocumentNumber(DocumentType.CEDULA, admin.getDocumentNumber()))
+            .thenReturn(Optional.of(admin));
+        when(auditHistory.adminHistory(admin.getId())).thenReturn(history);
+
+        assertThat(service.getAdministratorHistory(DocumentType.CEDULA, admin.getDocumentNumber())).isSameAs(history);
     }
 
     private User usuarioConRol(String nombreRol) {

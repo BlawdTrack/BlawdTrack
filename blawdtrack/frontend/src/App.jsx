@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
 import PackageImportPage from './pages/PackageImportPage';
+import PackageSearchPage from './pages/PackageSearchPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
 import NewPasswordPage from './pages/NewPasswordPage';
@@ -107,6 +108,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={[ROLES.SUPER_USER, ROLES.SALES_ADMIN]} />}>
             <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
             <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
+            <Route path={ROUTES.PACKAGE_SEARCH} element={<PackageSearchPage />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>

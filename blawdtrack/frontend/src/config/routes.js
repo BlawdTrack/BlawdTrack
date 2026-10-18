@@ -15,6 +15,7 @@ export const ROUTES = {
   PASSWORD_RESET_OWN: '/main-menu/restablecer-contrasena',
   // Importación de paquetes: una sola pantalla con los tres pasos (cargar, revisar, listo); sin menú de módulo.
   PACKAGE_IMPORT: '/main-menu/paquetes/importar',
+  PACKAGE_SEARCH: '/main-menu/paquetes/buscar',
   COURIER_CREATE: '/main-menu/couriers/new',
   COURIER_UPDATE: '/editar-mensajero',
   COURIER_DEACTIVATE: '/main-menu/couriers/deactivate',

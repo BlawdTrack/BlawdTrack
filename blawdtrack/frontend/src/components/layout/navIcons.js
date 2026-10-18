@@ -7,6 +7,7 @@ import PersonRemoveOutlinedIcon from '@mui/icons-material/PersonRemoveOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
@@ -17,6 +18,7 @@ import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 // Icono por item de navegación (sidebar de escritorio).
 export const NAV_ITEM_ICONS = {
   'package-import': UploadFileOutlinedIcon,
+  'package-search': SearchOutlinedIcon,
   'password-reset': LockResetOutlinedIcon,
   'courier-create': PersonAddAltOutlinedIcon,
   'courier-update': EditOutlinedIcon,

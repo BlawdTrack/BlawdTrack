@@ -119,6 +119,23 @@ export const NAVIGATION_GROUPS = [
       },
     ],
   },
+  {
+    id: 'package-management',
+    title: 'Gestión de paquetes',
+    shortTitle: 'Gestión',
+    // Un módulo de una sola pantalla (por ahora solo la búsqueda): su `path` es el de la pantalla.
+    path: ROUTES.PACKAGE_SEARCH,
+    items: [
+      {
+        id: 'package-search',
+        label: 'Buscar paquetes',
+        description: 'Busca un paquete por número de envío, orden, cliente, dirección, teléfono, horario o estado.',
+        actionLabel: 'Buscar',
+        path: ROUTES.PACKAGE_SEARCH,
+        roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
+      },
+    ],
+  },
 ];
 
 /** Menú de ajustes: se abre desde la tuerca del menú lateral (y desde la pestaña "Ajustes" del teléfono). */

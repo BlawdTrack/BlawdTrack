@@ -22,8 +22,9 @@ describe('getMainMenuColumns', () => {
 
     // El módulo de una sola pantalla enlaza directo a ella, sin menú intermedio.
     expect(byTitle['Importación de paquetes']).toBe(ROUTES.PACKAGE_IMPORT);
+    expect(byTitle['Gestión de paquetes']).toBe(ROUTES.PACKAGE_SEARCH);
     expect(byTitle['Gestión de usuarios']).toBe(ROUTES.MODULE_USERS);
-    ['Gestión de paquetes', 'Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((title) =>
+    ['Asignación y seguimiento', 'Reportes y notificaciones', 'Operación de mensajero'].forEach((title) =>
       expect(byTitle[title]).toBeNull()
     );
   });
@@ -45,7 +46,7 @@ describe('getMainMenuColumns', () => {
       'Asignación y seguimiento',
       'Reportes y notificaciones',
     ]);
-    expect(modulesOf(columns).map((m) => m.path)).toEqual([ROUTES.PACKAGE_IMPORT, null, null, null]);
+    expect(modulesOf(columns).map((m) => m.path)).toEqual([ROUTES.PACKAGE_IMPORT, ROUTES.PACKAGE_SEARCH, null, null]);
   });
 
   it('gives the sales admin the four counts of the day, with no value yet, and the reports their own description', () => {
@@ -94,7 +95,6 @@ describe('getSidebarModules', () => {
       'Operación de mensajero',
     ]);
     expect(modules.filter((m) => m.comingSoon).map((m) => m.id)).toEqual([
-      'package-management',
       'assignment-tracking',
       'reports',
       'courier-operation',

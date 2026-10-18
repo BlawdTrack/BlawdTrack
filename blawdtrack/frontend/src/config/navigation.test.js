@@ -53,7 +53,7 @@ describe('navigation config', () => {
   });
 
   it('orders the groups Usuarios and Paquetes, with no Seguridad y acceso module', () => {
-    expect(NAVIGATION_GROUPS.map((g) => g.title)).toEqual(['Gestión de usuarios', 'Importación de paquetes']);
+    expect(NAVIGATION_GROUPS.map((g) => g.title)).toEqual(['Gestión de usuarios', 'Importación de paquetes', 'Gestión de paquetes']);
   });
 
   it('puts Mensajeros and Administradores inside Gestión de usuarios, which lists all their screens and Roles y permisos', () => {
@@ -89,8 +89,8 @@ describe('getNavigationForRole', () => {
     expect(groups.map((g) => g.id)).toEqual(NAVIGATION_GROUPS.map((g) => g.id));
   });
 
-  it('gives the sales admin only the packages group, and their own password reset in Ajustes', () => {
-    expect(getNavigationForRole(ROLES.SALES_ADMIN).map((g) => g.id)).toEqual(['packages']);
+  it('gives the sales admin only the package groups, and their own password reset in Ajustes', () => {
+    expect(getNavigationForRole(ROLES.SALES_ADMIN).map((g) => g.id)).toEqual(['packages', 'package-management']);
     expect(getSettingsForRole(ROLES.SALES_ADMIN).items.map((i) => i.id)).toEqual(['password-reset']);
   });
 
@@ -186,8 +186,18 @@ describe('single-screen modules', () => {
     expect(NAVIGATION_MENUS.map((m) => m.id)).not.toContain('packages');
   });
 
+  it('treats Gestión de paquetes the same way: its only screen is the package search', () => {
+    const management = NAVIGATION_GROUPS.find((g) => g.id === 'package-management');
+
+    expect(management.path).toBe(ROUTES.PACKAGE_SEARCH);
+    expect(management.items.map((i) => i.id)).toEqual(['package-search']);
+    expect(management.items[0].roles).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]);
+    expect(isSingleScreenMenu(management)).toBe(true);
+    expect(NAVIGATION_MENUS.map((m) => m.id)).not.toContain('package-management');
+  });
+
   it('keeps a menu page for every module with several functions, and for settings', () => {
-    NAVIGATION_GROUPS.filter((g) => g.id !== 'packages').forEach((group) => {
+    NAVIGATION_GROUPS.filter((g) => !['packages', 'package-management'].includes(g.id)).forEach((group) => {
       expect(isSingleScreenMenu(group)).toBe(false);
       expect(NAVIGATION_MENUS).toContain(group);
     });

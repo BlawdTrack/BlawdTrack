@@ -3,11 +3,9 @@ import PersonSearchOutlinedIcon from '@mui/icons-material/PersonSearchOutlined';
 import AdminDetailPanel from '../components/AdminDetailPanel';
 import AdminEditListPanel from '../components/AdminEditListPanel';
 import CourierGeneralHistoryPanel from '../components/CourierGeneralHistoryPanel';
-import ConfirmLeaveDialog from '../components/ConfirmLeaveDialog';
+import EditScreenGuards from '../components/EditScreenGuards';
 import EmptyState from '../components/EmptyState';
 import SplitScreen from '../components/SplitScreen';
-import Toast from '../components/Toast';
-import UnsavedChangesGuard from '../components/UnsavedChangesGuard';
 import { useAdminEditor } from '../hooks/useAdminEditor';
 import { useAdminGeneralHistory } from '../hooks/useAdminHistory';
 import { useAdmins } from '../hooks/useAdmins';
@@ -126,10 +124,7 @@ export function EditAdmin() {
         )}
       </SplitScreen>
 
-      <UnsavedChangesGuard when={editor.isDirty} />
-      <ConfirmLeaveDialog {...dialogProps} />
-
-      <Toast open={toast.open} message={toast.message} severity={toast.severity} onClose={closeToast} />
+      <EditScreenGuards dirty={editor.isDirty} dialogProps={dialogProps} toast={toast} onCloseToast={closeToast} />
     </>
   );
 }

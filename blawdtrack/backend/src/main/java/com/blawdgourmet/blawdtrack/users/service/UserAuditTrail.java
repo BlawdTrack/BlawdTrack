@@ -14,6 +14,14 @@ public interface UserAuditTrail {
 
     void adminDeleted(AuthenticatedUser actor, User admin);
 
+    void adminUpdated(AuthenticatedUser actor, User admin, String details);
+
+    void adminActivated(AuthenticatedUser actor, User admin, String details);
+
+    void adminDeactivated(AuthenticatedUser actor, User admin, String details);
+
+    void adminPasswordChanged(AuthenticatedUser actor, User admin, String details);
+
     void permissionsUpdated(AuthenticatedUser actor, User affected, String details);
 
     void permissionsReset(AuthenticatedUser actor, User affected, String details);

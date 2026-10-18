@@ -4,9 +4,12 @@ import java.util.List;
 
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
 
-/** Puerto de lectura del historial de altas y bajas de administradores; lo implementa el módulo de auditoría. */
+/** Puerto de lectura del historial de administradores (altas, modificaciones y bajas); lo implementa el módulo de auditoría. */
 public interface AdminAuditHistory {
 
-    /** Altas y bajas de administradores, de la más reciente a la más antigua. */
+    /** Todo lo registrado sobre administradores, del más reciente al más antiguo. */
     List<AdminAuditLogResponse> adminHistory();
+
+    /** Lo registrado sobre un administrador en particular, del más reciente al más antiguo. */
+    List<AdminAuditLogResponse> adminHistory(Long adminId);
 }
