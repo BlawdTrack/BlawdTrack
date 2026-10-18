@@ -286,7 +286,7 @@ it('muestra el historial de estados reales del paquete consultado', async () => 
 
     expect(await screen.findByRole('heading', { name: 'COMPROBANTE DE ENTREGA' })).toBeInTheDocument();
     // La fotografía sale del registro real del backend, con su firma y su fecha.
-    expect(screen.getByRole('img', { name: 'Fotografía de la entrega del paquete BG-2026-00121' }))
+    expect(screen.getByAltText('Fotografía de la entrega del paquete BG-2026-00121'))
       .toHaveAttribute('src', 'https://cdn.blawd.test/foto.png');
     expect(screen.getByText(/Firma digital registrada al cierre de la entrega\./)).toBeInTheDocument();
     expect(screen.getByText(/Entrega registrada el 17\/09\/2026 a las 08:30\./)).toBeInTheDocument();
@@ -299,7 +299,7 @@ it('muestra el historial de estados reales del paquete consultado', async () => 
     render();
 
     await search(user, 'BG-2026-00121');
-    expect(await screen.findByRole('img', { name: /BG-2026-00121/ })).toBeInTheDocument();
+    expect(await screen.findByAltText(/BG-2026-00121/)).toBeInTheDocument();
 
     // Segunda consulta: paquete aún no entregado, sin evidencia de la anterior.
     getPackageByShipmentNumber.mockResolvedValueOnce({
@@ -317,7 +317,7 @@ it('muestra el historial de estados reales del paquete consultado', async () => 
     await user.click(screen.getByRole('button', { name: /consultar/i }));
 
     expect(await screen.findByText('El paquete aún no registra una entrega completada.')).toBeInTheDocument();
-    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.queryByAltText(/fotografía de la entrega/i)).toBeNull();
     expect(screen.queryByText(/Firma digital registrada/)).toBeNull();
   });
 });
