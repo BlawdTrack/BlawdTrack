@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import MainMenuPage from './pages/MainMenuPage';
 import ModuleMenuPage from './pages/ModuleMenuPage';
 import PackageImportPage from './pages/PackageImportPage';
+import PackageDetailPage from './pages/PackageDetailPage';
 import PackageSearchPage from './pages/PackageSearchPage';
 import CourierHomePage from './pages/CourierHomePage';
 import PasswordRecoveryRequestPage from './pages/PasswordRecoveryRequestPage';
@@ -109,6 +110,7 @@ function App() {
             <Route path={ROUTES.MAIN_MENU} element={<MainMenuPage />} />
             <Route path={ROUTES.PACKAGE_IMPORT} element={<PackageImportPage />} />
             <Route path={ROUTES.PACKAGE_SEARCH} element={<PackageSearchPage />} />
+            <Route path={ROUTES.PACKAGE_DETAIL} element={<PackageDetailPage />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={[ROLES.COURIER]} />}>

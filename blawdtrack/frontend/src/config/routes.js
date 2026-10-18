@@ -16,6 +16,8 @@ export const ROUTES = {
   // Importación de paquetes: una sola pantalla con los tres pasos (cargar, revisar, listo); sin menú de módulo.
   PACKAGE_IMPORT: '/main-menu/paquetes/importar',
   PACKAGE_SEARCH: '/main-menu/paquetes/buscar',
+  // Ficha de un paquete, a la que se llega desde las filas de la búsqueda (HU-013).
+  PACKAGE_DETAIL: '/main-menu/paquetes/buscar/:shipmentNumber',
   COURIER_CREATE: '/main-menu/couriers/new',
   COURIER_UPDATE: '/editar-mensajero',
   COURIER_DEACTIVATE: '/main-menu/couriers/deactivate',
@@ -26,3 +28,7 @@ export const ROUTES = {
   // Inicio del rol que no usa el menú principal (HU-001 T12). El Administrador de Ventas usa el menú principal.
   COURIER_HOME: '/mensajero',
 };
+
+/** Ruta de la ficha del paquete con ese número de envío. */
+export const packageDetailPath = (shipmentNumber) =>
+  `${ROUTES.PACKAGE_SEARCH}/${encodeURIComponent(shipmentNumber)}`;

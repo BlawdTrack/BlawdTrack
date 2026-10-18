@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { PackageSearchPage } from './PackageSearchPage';
 import { searchPackages } from '../services/PackageService';
 
@@ -19,7 +20,7 @@ describe('PackageSearchPage', () => {
 
   it('fires the search automatically after the debounce and shows the error alert', async () => {
     searchPackages.mockRejectedValueOnce({ response: { status: 500 } });
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -43,12 +44,12 @@ describe('PackageSearchPage', () => {
         customerName: 'Luis Madrigal',
         phone: '8888-9999',
         address: 'HEREDIA, Barva',
-        status: 'PENDIENTE',
+        status: 'PENDING',
         schedule: '08:00 AM - 12:00 PM',
       }],
       totalElements: 1,
     });
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -71,7 +72,7 @@ describe('PackageSearchPage', () => {
         customerName: 'Luis Madrigal',
         phone: '8888-9999',
         address: 'HEREDIA, Barva',
-        status: 'PENDIENTE',
+        status: 'PENDING',
         schedule: '08:00 AM',
       }],
       totalElements: 1,
@@ -84,14 +85,14 @@ describe('PackageSearchPage', () => {
         customerName: 'Marta López',
         phone: '2222-3333',
         address: 'LIMÓN, Pococí',
-        status: 'ASIGNADO',
+        status: 'ASSIGNED',
         schedule: '09:30 AM',
       }],
       totalElements: 1,
     };
 
     searchPackages.mockResolvedValueOnce(distributionPayload);
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
     });
@@ -112,7 +113,7 @@ describe('PackageSearchPage', () => {
 
   it('does not render the results table when the backend returns no content', async () => {
     searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -123,7 +124,7 @@ describe('PackageSearchPage', () => {
 
   it('does not render the results table while results are still null', async () => {
     searchPackages.mockImplementation(() => new Promise(() => {}));
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     fireEvent.change(input, { target: { value: 'Limon' } });
@@ -141,12 +142,12 @@ describe('PackageSearchPage', () => {
         id: 1,
         shipmentNumber: 'BG-2026-001',
         address: 'HEREDIA, Barva',
-        status: 'PENDIENTE',
+        status: 'PENDING',
         schedule: '08:00 AM',
       }],
       totalElements: 46,
     });
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -180,7 +181,7 @@ describe('PackageSearchPage', () => {
 
   it('shows the empty-state card for a search with no matches and hides it after clearing', async () => {
     searchPackages.mockResolvedValueOnce({ content: [{ id: 1, shipmentNumber: 'BG-2026-001' }], totalElements: 1 });
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -207,7 +208,7 @@ describe('PackageSearchPage', () => {
 
   it('does not show the empty state when the term is empty, while loading or when there is an error', async () => {
     searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -235,7 +236,7 @@ describe('PackageSearchPage', () => {
 
   it('also clears the empty state when the bar clear button is used', async () => {
     searchPackages.mockResolvedValueOnce({ content: [{ id: 1, shipmentNumber: 'BG-2026-001' }], totalElements: 1 });
-    render(<PackageSearchPage />);
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);

@@ -11,6 +11,6 @@ public class PackageSearchMapper {
     public PackageSearchResponse toResponse(DeliveryPackage entity) {
         return new PackageSearchResponse(entity.getId(), entity.getShipmentNumber(), entity.getOrderNumber(),
             entity.getCustomerName(), entity.getAddress(), entity.getPhone(), entity.getSchedule(),
-            entity.getStatus());
+            entity.getStatus() == null ? null : entity.getStatus().name());
     }
 }

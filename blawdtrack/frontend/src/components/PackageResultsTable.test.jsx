@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import PackageResultsTable from './PackageResultsTable';
 
@@ -12,12 +13,12 @@ describe('PackageResultsTable', () => {
       phone: '8888-9999',
       address: 'Heredia, Barva',
       schedule: '08:00 AM - 12:00 PM',
-      status: 'PENDIENTE',
+      status: 'PENDING',
     },
   ];
 
   it('renders one row per package inside a labelled list', () => {
-    render(<PackageResultsTable packages={packages} />);
+    render(<PackageResultsTable packages={packages} />, { wrapper: MemoryRouter });
 
     const list = screen.getByRole('region', { name: 'Paquetes encontrados' });
     expect(within(list).getAllByRole('listitem')).toHaveLength(1);
@@ -29,7 +30,7 @@ describe('PackageResultsTable', () => {
   });
 
   it('does not render anything when data is empty', () => {
-    const { rerender } = render(<PackageResultsTable packages={[]} />);
+    const { rerender } = render(<PackageResultsTable packages={[]} />, { wrapper: MemoryRouter });
     expect(screen.queryByRole('region', { name: 'Paquetes encontrados' })).toBeNull();
 
     rerender(<PackageResultsTable packages={null} />);

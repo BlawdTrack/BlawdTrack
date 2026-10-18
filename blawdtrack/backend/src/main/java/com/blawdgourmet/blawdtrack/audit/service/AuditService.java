@@ -19,4 +19,17 @@ public interface AuditService {
      *         si no hay una transacción activa
      */
     void logAction(AuditAction action, AuthenticatedUser actor, User affected, String details);
+
+    /**
+     * Registra un evento de paquete con su identidad y transición estructuradas.
+     * Exige una transacción activa para que el evento sea atómico con el cambio del paquete.
+     */
+    void logPackageAction(
+            AuditAction action,
+            AuthenticatedUser actor,
+            Long packageId,
+            String shipmentNumber,
+            String details,
+            String previousStatus,
+            String newStatus);
 }
