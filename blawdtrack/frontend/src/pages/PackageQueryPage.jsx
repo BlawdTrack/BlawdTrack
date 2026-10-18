@@ -10,6 +10,7 @@ import PageContainer from '../components/PageContainer';
 import PackageSearchCard from '../components/PackageSearchCard';
 import PackageDetailCard from '../components/PackageDetailCard';
 import PackageHistoryCard from '../components/PackageHistoryCard';
+import PackageProofCard from '../components/PackageProofCard';
 import StatusMessage from '../components/StatusMessage';
 import { CARD_SX } from '../components/formStyles';
 import { FONT, TOUCH_TARGET } from '../theme';
@@ -98,6 +99,10 @@ export function PackageQueryPage() {
               retryable={history.retryable}
               onRetry={history.retry}
             />
+            {/* Comprobante de entrega: evidencia real (fotografía y firma) del
+                paquete consultado, derivada de la misma consulta y del historial,
+                sin llamadas adicionales al backend. */}
+            <PackageProofCard pkg={pkg} entries={history.entries} />
           </>
         )}
       </PageContainer>
