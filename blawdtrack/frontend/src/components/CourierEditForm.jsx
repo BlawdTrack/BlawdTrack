@@ -1,33 +1,18 @@
-import { Box, Button, CircularProgress, Switch, TextField, Typography } from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
+import AccessStatusPanel from './AccessStatusPanel';
+import EditFormActions from './EditFormActions';
+import OptionalPasswordField from './OptionalPasswordField';
 import { TimeWheelField } from './TimeWheelField';
 import { WeightWheelField } from './WeightWheelField';
 import StatusMessage from './StatusMessage';
 import { INPUT_SX, LABEL_SX } from './formStyles';
-import { CARD_PATTERN_SX, RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
+import { FONT } from '../theme';
 
 const FIELD_GRID_SX = {
   display: 'grid',
   gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(0, 1fr))' },
   gap: { xs: 2, md: '20px 24px' },
   alignItems: 'start',
-};
-
-const SWITCH_SX = {
-  width: rem(46),
-  height: rem(27),
-  padding: 0,
-  flex: `0 0 ${rem(46)}`,
-  '& .MuiSwitch-switchBase': {
-    padding: '0.1923rem',
-    '&.Mui-checked': {
-      transform: 'translateX(19px)',
-      '& + .MuiSwitch-track': { backgroundColor: 'success.main', opacity: 1 },
-    },
-    '&.Mui-disabled': { opacity: 0.55 },
-    '&.Mui-disabled + .MuiSwitch-track': { opacity: 0.55 },
-  },
-  '& .MuiSwitch-thumb': { width: rem(21), height: rem(21), boxShadow: 2 },
-  '& .MuiSwitch-track': { borderRadius: RADIUS.md, backgroundColor: 'neutral.borderStrong', opacity: 1 },
 };
 
 function FieldError({ children }) {
@@ -136,78 +121,32 @@ export default function CourierEditForm({ editor, onDiscard }) {
             <FieldError>{formErrors.maxLoadCapacityKg}</FieldError>
           </Box>
 
-          <Box>
-            <Typography sx={LABEL_SX}>Nueva contraseña (opcional)</Typography>
-            <TextField
-              fullWidth
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={editor.change}
-              error={Boolean(formErrors.password)}
-              helperText={formErrors.password || 'Dejar vacío para no cambiar'}
-              placeholder="••••••••"
-              sx={INPUT_SX}
-            />
-          </Box>
-        </Box>
-
-        <Box
-          sx={{
-            bgcolor: 'neutral.surface',
-            borderRadius: RADIUS.sm,
-            p: '1rem 1.1154rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.8462rem',
-            flexWrap: 'wrap',
-          }}
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.1923rem', minWidth: 0 }}>
-            <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: '#1F2421' }}>Estado de acceso</Typography>
-            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.4 }}>
-              {isActive
-                ? 'Habilitado. Al revocarlo, la sesión activa se cierra de inmediato.'
-                : 'Revocado. El mensajero no puede iniciar sesión.'}
-            </Typography>
-            {isStatusLocked && (
-              <Typography sx={{ fontSize: FONT.sm, color: 'error.main', fontWeight: 600 }}>
-                Solo puedes cambiar el estado fuera de labores y sin envíos en proceso.
-              </Typography>
-            )}
-          </Box>
-          <Switch
-            checked={isActive}
-            onChange={editor.toggleStatus}
-            disabled={isStatusLocked}
-            inputProps={{ 'aria-label': 'Estado de acceso' }}
-            sx={SWITCH_SX}
+          <OptionalPasswordField
+            id="courier-password"
+            value={formData.password}
+            onChange={editor.change}
+            error={formErrors.password}
+            hint="Dejar vacío para no cambiar"
           />
         </Box>
+
+        <AccessStatusPanel
+          isActive={isActive}
+          revokedText="Revocado. El mensajero no puede iniciar sesión."
+          onToggle={editor.toggleStatus}
+          disabled={isStatusLocked}
+        >
+          {isStatusLocked && (
+            <Typography sx={{ fontSize: FONT.sm, color: 'error.main', fontWeight: 600 }}>
+              Solo puedes cambiar el estado fuera de labores y sin envíos en proceso.
+            </Typography>
+          )}
+        </AccessStatusPanel>
 
         {updateError && <StatusMessage severity="error" message={updateError} />}
       </Box>
 
-      <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'neutral.border', ...CARD_PATTERN_SX, display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={submitting}
-          sx={{ fontWeight: 600, px: 4, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
-        >
-          {submitting ? <CircularProgress size={22} sx={{ color: 'inherit' }} /> : 'Guardar cambios'}
-        </Button>
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={onDiscard}
-          disabled={submitting}
-          sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
-        >
-          Descartar
-        </Button>
-      </Box>
+      <EditFormActions submitting={submitting} onDiscard={onDiscard} />
     </Box>
   );
 }
