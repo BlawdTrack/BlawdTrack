@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <g id="leaf">
+      <path d="M0 0 C30 -70 150 -90 230 -30 C150 20 50 40 0 0 Z"/>
+      <path d="M0 0 L215 -30" fill="none" stroke="#1A3C34" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g id="box">
+      <polygon points="-44,22 0,44 0,96 -44,74" fill="#D9D1C7"/>
+      <polygon points="0,44 44,22 44,74 0,96" fill="#C4B9AC"/>
+      <polygon points="0,0 44,22 0,44 -44,22" fill="#F1ECE7"/>
+      <polygon points="-8,4 8,4 8,40 -8,40" fill="#FF6C0E"/>
+      <polygon points="14,58 30,50 30,62 14,70" fill="#FF6C0E" opacity="0.9"/>
+    </g>
+  </defs>
+
+  <rect width="800" height="1000" fill="#1A3C34"/>
+
+  <!-- contour rings -->
+  <g fill="none" stroke="#2A5448" stroke-width="2">
+    <circle cx="640" cy="720" r="110"/>
+    <circle cx="640" cy="720" r="190"/>
+    <circle cx="640" cy="720" r="270"/>
+    <circle cx="640" cy="720" r="350"/>
+    <circle cx="640" cy="720" r="430"/>
+  </g>
+
+  <!-- leaves -->
+  <g fill="#22473D">
+    <use href="#leaf" transform="translate(800 1000) rotate(-150) scale(1.5)"/>
+    <use href="#leaf" transform="translate(800 1000) rotate(-115) scale(1.2)"/>
+    <use href="#leaf" transform="translate(800 1000) rotate(-185) scale(1.1)"/>
+    <use href="#leaf" transform="translate(800 0) rotate(150) scale(1.2)"/>
+    <use href="#leaf" transform="translate(800 0) rotate(115) scale(0.9)"/>
+    <use href="#leaf" transform="translate(0 1000) rotate(-30) scale(0.9)"/>
+  </g>
+
+  <!-- route -->
+  <path d="M80 920 C200 800 120 700 300 680 S560 700 520 540 S380 420 560 330 S700 220 660 130"
+        fill="none" stroke="#FF6C0E" stroke-width="7" stroke-linecap="round" stroke-dasharray="1 17"/>
+
+  <!-- start -->
+  <circle cx="80" cy="920" r="16" fill="#F1ECE7"/>
+  <circle cx="80" cy="920" r="7" fill="#FF6C0E"/>
+
+  <!-- stops -->
+  <g fill="#F1ECE7">
+    <circle cx="300" cy="680" r="11"/>
+    <circle cx="520" cy="540" r="11"/>
+    <circle cx="560" cy="330" r="11"/>
+  </g>
+  <g fill="#1A3C34">
+    <circle cx="300" cy="680" r="4.5"/>
+    <circle cx="520" cy="540" r="4.5"/>
+    <circle cx="560" cy="330" r="4.5"/>
+  </g>
+
+  <!-- destination pin -->
+  <g transform="translate(660 130)">
+    <ellipse cx="0" cy="4" rx="24" ry="6" fill="#12322B"/>
+    <path d="M0 0 C-14 -22 -40 -50 -40 -80 A40 40 0 0 1 40 -80 C40 -50 14 -22 0 0 Z" fill="#FF6C0E"/>
+    <circle cx="0" cy="-80" r="15" fill="#F1ECE7"/>
+  </g>
+
+  <!-- parcels -->
+  <use href="#box" transform="translate(690 480)"/>
+  <use href="#box" transform="translate(630 800) scale(1.25)"/>
+  <use href="#box" transform="translate(420 880) scale(0.8)"/>
+
+  <!-- sparkles -->
+  <g fill="#F1ECE7" opacity="0.5">
+    <circle cx="140" cy="260" r="3"/>
+    <circle cx="380" cy="140" r="4"/>
+    <circle cx="470" cy="760" r="3"/>
+    <circle cx="740" cy="330" r="3"/>
+    <circle cx="230" cy="600" r="3"/>
+  </g>
+</svg>

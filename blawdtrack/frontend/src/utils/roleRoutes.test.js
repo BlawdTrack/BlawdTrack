@@ -4,9 +4,9 @@ import { ROLE_HOME_ROUTES, getHomeRoute, getPasswordResetRoute } from './roleRou
 describe('getPasswordResetRoute (restablecer la propia contraseña)', () => {
   it('devuelve la pantalla de cada rol del backend', () => {
     expect(getPasswordResetRoute('SUPER_USUARIO')).toBe('/main-menu/restablecer-contrasena');
-    // El Administrador de Ventas comparte con el Súper Usuario la pantalla dentro del menú principal.
+    // Los tres roles comparten la pantalla dentro del menú lateral.
     expect(getPasswordResetRoute('ADMIN_VENTAS')).toBe('/main-menu/restablecer-contrasena');
-    expect(getPasswordResetRoute('MENSAJERO')).toBe('/mensajero/restablecer-contrasena');
+    expect(getPasswordResetRoute('MENSAJERO')).toBe('/main-menu/restablecer-contrasena');
   });
 
   it.each(['ROL_QUE_NO_EXISTE', undefined, null, '', 'constructor', 'toString'])(

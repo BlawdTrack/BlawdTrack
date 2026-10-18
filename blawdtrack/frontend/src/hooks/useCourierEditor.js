@@ -96,6 +96,32 @@ export function useCourierEditor({ notify, onSaved, onPartialSave }) {
     }
   };
 
+  // Algo ya quedó guardado aunque otra llamada falló: el historial y la flota lo reflejan y no se reenvía.
+  const keepSavedSteps = (current, { dataSaved, passwordSaved }) => {
+    loadHistory(current.id);
+    onPartialSave();
+    if (passwordSaved) setFormData((previous) => ({ ...previous, password: '' }));
+    if (!dataSaved) return;
+    const saved = {
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      schedule: formData.schedule,
+      scheduleStart: formData.scheduleStart,
+      scheduleEnd: formData.scheduleEnd,
+      maxLoadCapacityKg: formData.maxLoadCapacityKg,
+    };
+    setInitialValues((previous) => ({ ...previous, ...saved }));
+    setCourier((previous) => ({
+      ...previous,
+      fullName: saved.fullName,
+      email: saved.email,
+      phone: saved.phone,
+      schedule: saved.schedule,
+      maxPackageWeightKg: Number(saved.maxLoadCapacityKg),
+    }));
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     if (!courier) return;
@@ -162,31 +188,7 @@ export function useCourierEditor({ notify, onSaved, onPartialSave }) {
     } catch (err) {
       // Si un paso anterior ya quedó guardado, el historial y la flota deben reflejarlo igualmente y no se
       // vuelve a enviar lo ya guardado (p. ej. la contraseña).
-      if (dataSaved || passwordSaved) {
-        loadHistory(courier.id);
-        onPartialSave();
-        if (passwordSaved) setFormData((previous) => ({ ...previous, password: '' }));
-        if (dataSaved) {
-          const saved = {
-            fullName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            schedule: formData.schedule,
-            scheduleStart: formData.scheduleStart,
-            scheduleEnd: formData.scheduleEnd,
-            maxLoadCapacityKg: formData.maxLoadCapacityKg,
-          };
-          setInitialValues((previous) => ({ ...previous, ...saved }));
-          setCourier((previous) => ({
-            ...previous,
-            fullName: saved.fullName,
-            email: saved.email,
-            phone: saved.phone,
-            schedule: saved.schedule,
-            maxPackageWeightKg: Number(saved.maxLoadCapacityKg),
-          }));
-        }
-      }
+      if (dataSaved || passwordSaved) keepSavedSteps(courier, { dataSaved, passwordSaved });
       const message = err.response?.data?.message || err.message || 'Error al actualizar la información del mensajero.';
       setUpdateError(message);
       notify(message, 'error');

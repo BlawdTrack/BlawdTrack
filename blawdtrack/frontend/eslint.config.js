@@ -17,5 +17,17 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    // Señales de SOLID/POO: una página es composición, no un archivo gigante.
+    rules: {
+      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-params': ['error', 4],
+      complexity: ['error', 15],
+      'max-depth': ['error', 4],
+    },
+  },
+  {
+    // Los tests y la configuración de datos (rutas, tema) son largos por naturaleza.
+    files: ['**/*.test.{js,jsx}', 'src/theme.js', 'src/config/**'],
+    rules: { 'max-lines': 'off', complexity: 'off' },
   },
 ])

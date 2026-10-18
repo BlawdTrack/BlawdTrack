@@ -20,47 +20,32 @@ export function describeDuplicate({ reasons = [], occurrences = 1 }) {
   return notes.join(' · ');
 }
 
-const countOf = (value) => (Number.isFinite(value) ? value : 0);
+/**
+ * Filas del archivo que excluye un duplicado. El backend agrupa por número de envío y `occurrences` es la cantidad
+ * de filas del archivo con ese número (todas se excluyen); si no llega, se asume una.
+ * @param {{ occurrences?: number }|null|undefined} duplicate Duplicado de `PackageImportPreviewResponse`.
+ * @returns {number}
+ */
+export function duplicateRowCount(duplicate) {
+  return Number.isInteger(duplicate?.occurrences) && duplicate.occurrences > 0 ? duplicate.occurrences : 1;
+}
 
 /**
- * Convierte la respuesta de previsualización de una importación (`PackageImportPreviewResponse`) en lo que
- * muestra la pantalla de duplicados: los totales y una fila por número de envío duplicado.
- *
- * Los contadores de causa son excluyentes, igual que en el backend: un número ya registrado cuenta solo como
- * "ya registrado", aunque además esté repetido en el archivo. `customerName` y `address` de cada duplicado son
- * opcionales; si el backend no los envía, la fila solo muestra el número y la nota.
- * @param {object|null|undefined} preview Respuesta de previsualización.
- * @returns {{ fileName: string, totalRecords: number, validCount: number, duplicateCount: number,
- *   alreadyRegisteredCount: number, duplicatedInFileCount: number,
- *   duplicates: Array<{ shipmentNumber: string, customerName: string|null, address: string|null, note: string }> }|null}
- *   `null` si no hay una previsualización utilizable.
+ * Cuenta las **filas** duplicadas por causa. Las causas son excluyentes, igual que los contadores de la comparación
+ * del backend (`alreadyRegisteredCount` y `duplicatedInFileCount`): las filas de un número ya registrado cuentan
+ * solo como "ya registrado", aunque además esté repetido en el archivo. La suma de las dos es el total de filas
+ * duplicadas (`duplicateRecordsCount`).
+ * @param {Array<{ reasons?: string[], occurrences?: number }>} duplicates Duplicados de `PackageImportPreviewResponse`.
+ * @returns {{ alreadyRegistered: number, duplicatedInFile: number }}
  */
-export function buildDuplicateReport(preview) {
-  if (!preview || typeof preview !== 'object') return null;
-
-  const duplicates = Array.isArray(preview.duplicates) ? preview.duplicates : [];
-  const alreadyRegisteredCount = duplicates.filter((item) =>
-    item.reasons?.includes(DUPLICATE_REASONS.ALREADY_REGISTERED)
-  ).length;
-  const duplicatedInFileCount = duplicates.filter(
-    (item) =>
-      !item.reasons?.includes(DUPLICATE_REASONS.ALREADY_REGISTERED) &&
-      item.reasons?.includes(DUPLICATE_REASONS.DUPLICATED_IN_FILE)
-  ).length;
-  const validCount = countOf(preview.validRecordsCount);
-
-  return {
-    fileName: preview.fileName ?? '',
-    totalRecords: countOf(preview.totalRecords) || validCount + duplicates.length + countOf(preview.invalidRecordsCount),
-    validCount,
-    duplicateCount: duplicates.length,
-    alreadyRegisteredCount,
-    duplicatedInFileCount,
-    duplicates: duplicates.map((item) => ({
-      shipmentNumber: item.shipmentNumber,
-      customerName: item.customerName ?? null,
-      address: item.address ?? null,
-      note: describeDuplicate(item),
-    })),
-  };
+export function countDuplicateCauses(duplicates = []) {
+  const totals = { alreadyRegistered: 0, duplicatedInFile: 0 };
+  duplicates.forEach((item) => {
+    if (item?.reasons?.includes(DUPLICATE_REASONS.ALREADY_REGISTERED)) {
+      totals.alreadyRegistered += duplicateRowCount(item);
+    } else if (item?.reasons?.includes(DUPLICATE_REASONS.DUPLICATED_IN_FILE)) {
+      totals.duplicatedInFile += duplicateRowCount(item);
+    }
+  });
+  return totals;
 }

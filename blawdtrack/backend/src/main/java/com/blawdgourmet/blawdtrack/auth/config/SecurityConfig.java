@@ -91,11 +91,18 @@ public class SecurityConfig {
                         // HU-010: la importacion se autoriza por su permiso funcional.
                         .requestMatchers("/api/v1/packages/import", "/api/v1/packages/import/**")
                         .hasAuthority(PermissionCode.PACKAGE_IMPORT)
-                        // El resto de los paquetes (validaciones previas, consulta, eliminacion...) es del
-                        // Administrador de Ventas y del Super Usuario, que tiene acceso a todos los modulos
-                        // (documento de arquitectura, "Control de acceso"). Cualquier otro rol recibe 403.
-                        .requestMatchers("/api/v1/packages/**")
-                        .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
+                        // Consultar y buscar paquetes (detalle e historial, HU-013; busqueda, HU-014) es del Administrador
+                        // de Ventas y del Super Usuario, que tiene acceso a todos los modulos. Va ANTES de la regla de
+                        // prefijo: Spring Security aplica la primera que coincide.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/**")
+                                .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
+                        // La comparacion de numeros de envio (HU-011) tambien la usa el Super Usuario.
+                        .requestMatchers("/api/v1/packages/shipment-numbers/**")
+                                .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
+                        // La gestion de paquetes (incluida su eliminacion, HU-012) pertenece exclusivamente al
+                        // Administrador de Ventas. Esta regla se evalua antes del binding; @PreAuthorize en el
+                        // controlador queda como segunda barrera.
+                        .requestMatchers("/api/v1/packages/**").hasRole(RoleName.SALES_ADMIN)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

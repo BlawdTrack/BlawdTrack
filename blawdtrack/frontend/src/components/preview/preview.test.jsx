@@ -169,6 +169,17 @@ describe('ImportPreviewView', () => {
     expect(screen.getAllByRole('listitem').length).toBeGreaterThan(4);
   });
 
+  it('explica qué tipo de duplicados hay: ya registrados y repetidos en el archivo', () => {
+    const duplicates = [
+      { shipmentNumber: 'BG-5', occurrences: 1, reasons: ['ALREADY_REGISTERED'] },
+      { shipmentNumber: 'BG-6', occurrences: 1, reasons: ['ALREADY_REGISTERED'] },
+      { shipmentNumber: 'BG-7', occurrences: 2, reasons: ['DUPLICATED_IN_FILE'] },
+    ];
+    render(<ImportPreviewView preview={previewOf({ duplicates, duplicateRecordsCount: 4 })} />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Duplicados: 2 ya registrados en la base de datos y 2 repetidos en el archivo.');
+  });
+
   it('filtra la lista al elegir un grupo y vuelve a mostrar todo con "Todos"', async () => {
     const user = userEvent.setup();
     render(<ImportPreviewView preview={previewOf()} />);

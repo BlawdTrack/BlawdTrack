@@ -2,7 +2,7 @@ package com.blawdgourmet.blawdtrack.users.dto;
 
 import java.util.Set;
 
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 
 /**
  * Matriz de permisos de un usuario: los de su rol, los efectivos (rol más excepciones individuales)

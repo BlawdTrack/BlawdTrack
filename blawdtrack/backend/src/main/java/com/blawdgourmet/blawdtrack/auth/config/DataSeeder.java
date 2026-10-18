@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
@@ -70,84 +70,80 @@ public class DataSeeder implements CommandLineRunner {
     private void seedDefaultAdminUser() {
         Optional<User> defaultSuperUser =
                 userRepository.findByEmail(DEFAULT_SUPER_USER_EMAIL);
-
         if (defaultSuperUser.isPresent()) {
-            User admin = defaultSuperUser.get();
-            boolean updated = false;
-
-            if (!DEFAULT_SUPER_USER_NAME.equals(admin.getFullName())) {
-                admin.setFullName(DEFAULT_SUPER_USER_NAME);
-                log.info(
-                        "Default Super User name updated to {}",
-                        DEFAULT_SUPER_USER_NAME
-                );
-                updated = true;
-            }
-
-            if (usesLegacyDefaultPassword(admin)) {
-                admin.setPasswordHash(
-                        passwordEncoder.encode(
-                                DEFAULT_SUPER_USER_PASSWORD
-                        )
-                );
-                log.info(
-                        "Default Super User legacy password updated"
-                );
-                updated = true;
-            }
-
-            if (resetSuperUserPassword && !hasDefaultPassword(admin)) {
-                // changePassword también cierra las sesiones abiertas con la contraseña anterior.
-                admin.changePassword(
-                        passwordEncoder.encode(
-                                DEFAULT_SUPER_USER_PASSWORD
-                        )
-                );
-                log.warn(
-                        "Default Super User password restored (app.seed.super-user.reset-password=true); "
-                                + "disable it outside development"
-                );
-                updated = true;
-            }
-
-            if (updated) {
-                userRepository.save(admin);
-            }
-
-            log.info(
-                    "Default Super User already exists, skipping creation"
-            );
+            refreshDefaultSuperUser(defaultSuperUser.get());
             return;
         }
 
         Optional<User> legacySuperUser =
                 userRepository.findByEmail(LEGACY_SUPER_USER_EMAIL);
-
         if (legacySuperUser.isPresent()) {
-            User admin = legacySuperUser.get();
-
-            admin.setEmail(DEFAULT_SUPER_USER_EMAIL);
-            admin.setFullName(DEFAULT_SUPER_USER_NAME);
-
-            if (usesLegacyDefaultPassword(admin)) {
-                admin.setPasswordHash(
-                        passwordEncoder.encode(
-                                DEFAULT_SUPER_USER_PASSWORD
-                        )
-                );
-            }
-
-            userRepository.save(admin);
-
-            log.info(
-                    "Default Super User migrated from {} to {} with name {}",
-                    LEGACY_SUPER_USER_EMAIL,
-                    DEFAULT_SUPER_USER_EMAIL,
-                    DEFAULT_SUPER_USER_NAME
-            );
+            migrateLegacySuperUser(legacySuperUser.get());
             return;
         }
 
+        createDefaultSuperUser();
+    }
+
+    /** Pone al día nombre y contraseña del Super Usuario por defecto sin recrearlo. */
+    private void refreshDefaultSuperUser(User admin) {
+        boolean updated = false;
+
+        if (!DEFAULT_SUPER_USER_NAME.equals(admin.getFullName())) {
+            admin.setFullName(DEFAULT_SUPER_USER_NAME);
+            log.info(
+                    "Default Super User name updated to {}",
+                    DEFAULT_SUPER_USER_NAME
+            );
+            updated = true;
+        }
+
+        if (usesLegacyDefaultPassword(admin)) {
+            admin.setPasswordHash(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD));
+            log.info(
+                    "Default Super User legacy password updated"
+            );
+            updated = true;
+        }
+
+        if (resetSuperUserPassword && !hasDefaultPassword(admin)) {
+            // changePassword también cierra las sesiones abiertas con la contraseña anterior.
+            admin.changePassword(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD));
+            log.warn(
+                    "Default Super User password restored (app.seed.super-user.reset-password=true); "
+                            + "disable it outside development"
+            );
+            updated = true;
+        }
+
+        if (updated) {
+            userRepository.save(admin);
+        }
+
+        log.info(
+                "Default Super User already exists, skipping creation"
+        );
+    }
+
+    private void migrateLegacySuperUser(User admin) {
+        admin.setEmail(DEFAULT_SUPER_USER_EMAIL);
+        admin.setFullName(DEFAULT_SUPER_USER_NAME);
+
+        if (usesLegacyDefaultPassword(admin)) {
+            admin.setPasswordHash(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD));
+        }
+
+        userRepository.save(admin);
+
+        log.info(
+                "Default Super User migrated from {} to {} with name {}",
+                LEGACY_SUPER_USER_EMAIL,
+                DEFAULT_SUPER_USER_EMAIL,
+                DEFAULT_SUPER_USER_NAME
+        );
+    }
+
+    private void createDefaultSuperUser() {
         Role superUserRole = roleRepository.findByName(RoleName.SUPER_USER)
                 .orElseThrow(() -> new IllegalStateException(
                         "Role not seeded: " + RoleName.SUPER_USER));
@@ -158,11 +154,7 @@ public class DataSeeder implements CommandLineRunner {
                 .documentId("000000000")
                 .fullName(DEFAULT_SUPER_USER_NAME)
                 .email(DEFAULT_SUPER_USER_EMAIL)
-                .passwordHash(
-                        passwordEncoder.encode(
-                                DEFAULT_SUPER_USER_PASSWORD
-                        )
-                )
+                .passwordHash(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD))
                 .phone("00000000")
                 .status(UserStatus.ACTIVE)
                 .role(superUserRole)
