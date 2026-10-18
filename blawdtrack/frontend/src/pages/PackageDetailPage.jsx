@@ -5,6 +5,7 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import BackButton from '../components/BackButton';
 import EmptyState from '../components/EmptyState';
 import PackageDetailCard from '../components/PackageDetailCard';
+import PackageFollowUp from '../components/PackageFollowUp';
 import PageContainer from '../components/PageContainer';
 import PageHeaderBar from '../components/PageHeaderBar';
 import StatusMessage from '../components/StatusMessage';
@@ -53,7 +54,8 @@ function LookupError({ message, retryable, loading, onRetry }) {
  * de envío de la ruta y lo muestra de solo lectura. El Administrador de Ventas puede eliminarlo desde aquí (HU-012): el
  * botón abre una confirmación y, si el backend lo elimina, la ficha da paso a un aviso con el camino de vuelta a la
  * búsqueda. El resultado se informa con un aviso flotante; tras un 409 o un 404 el paquete se vuelve a consultar para
- * mostrar su estado real. El Súper Usuario ve la ficha sin el botón.
+ * mostrar su estado real. El Súper Usuario ve la ficha sin el botón. Bajo la ficha va el seguimiento del paquete: su
+ * historial de estados y, si ya se entregó, el comprobante.
  */
 export function PackageDetailPage() {
   const { shipmentNumber } = useParams();
@@ -132,19 +134,22 @@ export function PackageDetailPage() {
         )}
 
         {!deleted && state === PACKAGE_LOOKUP_STATE.SUCCESS && pkg && (
-          <PackageDetailCard
-            pkg={pkg}
-            // Sin permiso no se pasa nada: así la ficha no dibuja un pie vacío.
-            actions={
-              canDeletePackages ? (
-                <DeletePackageButton
-                  pkg={pkg}
-                  onDelete={deletion.open}
-                  onBlocked={(blockedPkg) => showFeedback(getBlockedPackageMessage(blockedPkg))}
-                />
-              ) : null
-            }
-          />
+          <>
+            <PackageDetailCard
+              pkg={pkg}
+              // Sin permiso no se pasa nada: así la ficha no dibuja un pie vacío.
+              actions={
+                canDeletePackages ? (
+                  <DeletePackageButton
+                    pkg={pkg}
+                    onDelete={deletion.open}
+                    onBlocked={(blockedPkg) => showFeedback(getBlockedPackageMessage(blockedPkg))}
+                  />
+                ) : null
+              }
+            />
+            <PackageFollowUp pkg={pkg} />
+          </>
         )}
       </PageContainer>
 

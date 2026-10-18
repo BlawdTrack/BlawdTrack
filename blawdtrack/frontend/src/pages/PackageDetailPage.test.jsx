@@ -3,14 +3,14 @@ import { screen } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import PackageDetailPage from './PackageDetailPage';
-import { getPackageByShipmentNumber } from '../services/SearchPackageService';
+import { getPackageByShipmentNumber, getPackageHistory } from '../services/SearchPackageService';
 import { renderWithProviders } from '../test-utils';
 import { ROUTES, packageDetailPath } from '../config/routes';
 
 // Se conserva `normalizeShipmentNumber` real y solo se simula la llamada HTTP.
 vi.mock('../services/SearchPackageService', async (importOriginal) => {
   const actual = await importOriginal();
-  return { ...actual, getPackageByShipmentNumber: vi.fn() };
+  return { ...actual, getPackageByShipmentNumber: vi.fn(), getPackageHistory: vi.fn() };
 });
 
 const salesAdmin = {
@@ -58,6 +58,8 @@ const render = (shipmentNumber) =>
 describe('PackageDetailPage (HU-013)', () => {
   beforeEach(() => {
     getPackageByShipmentNumber.mockReset();
+    getPackageHistory.mockReset();
+    getPackageHistory.mockResolvedValue([]);
   });
 
   it('consulta el paquete del número que viene en la ruta', async () => {
@@ -165,5 +167,30 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(screen.getByText('Sin mensajero asignado')).toBeInTheDocument();
     // Sin cliente: "No disponible" en el bloque del cliente.
     expect(screen.getAllByText('No disponible').length).toBeGreaterThan(0);
+  });
+
+  it('muestra bajo la ficha el historial de estados del paquete', async () => {
+    getPackageByShipmentNumber.mockResolvedValue({ ...packageDetail, status: 'ASSIGNED' });
+    getPackageHistory.mockResolvedValue([
+      { timestamp: '2026-10-16T08:15:00', action: 'ASIGNAR_PAQUETE', actorName: 'Fernanda Vindas', previousStatus: 'PENDING', newStatus: 'ASSIGNED' },
+    ]);
+
+    render('BG-2026-00121');
+
+    expect(await screen.findByRole('region', { name: 'Historial de estados' })).toBeInTheDocument();
+    expect(await screen.findByText('Asignado', { selector: 'p' })).toBeInTheDocument();
+    expect(getPackageHistory).toHaveBeenCalledWith('BG-2026-00121');
+  });
+
+  it('muestra el comprobante de entrega solo cuando el paquete está entregado', async () => {
+    getPackageByShipmentNumber.mockResolvedValue(packageDetail);
+    const { unmount } = render('BG-2026-00121');
+    expect(await screen.findByText('COMPROBANTE DE ENTREGA')).toBeInTheDocument();
+    unmount();
+
+    getPackageByShipmentNumber.mockResolvedValue({ ...packageDetail, status: 'IN_TRANSIT' });
+    render('BG-2026-00121');
+    await screen.findByText('Mariela Solís Gómez');
+    expect(screen.queryByText('COMPROBANTE DE ENTREGA')).toBeNull();
   });
 });

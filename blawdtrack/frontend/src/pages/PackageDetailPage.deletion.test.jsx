@@ -3,7 +3,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import PackageDetailPage from './PackageDetailPage';
-import { getPackageByShipmentNumber } from '../services/SearchPackageService';
+import { getPackageByShipmentNumber, getPackageHistory } from '../services/SearchPackageService';
 import { deletePackage } from '../services/PackageDeletionService';
 import { renderWithProviders } from '../test-utils';
 import { ROLES } from '../config/roles';
@@ -12,7 +12,7 @@ import { ROUTES, packageDetailPath } from '../config/routes';
 // Se conserva `normalizeShipmentNumber` real y solo se simulan las llamadas HTTP.
 vi.mock('../services/SearchPackageService', async (importOriginal) => {
   const actual = await importOriginal();
-  return { ...actual, getPackageByShipmentNumber: vi.fn() };
+  return { ...actual, getPackageByShipmentNumber: vi.fn(), getPackageHistory: vi.fn() };
 });
 vi.mock('../services/PackageDeletionService', () => ({ deletePackage: vi.fn() }));
 
@@ -52,6 +52,8 @@ async function openDeleteDialog() {
 describe('PackageDetailPage: eliminar desde la ficha (HU-012 / T06)', () => {
   beforeEach(() => {
     getPackageByShipmentNumber.mockReset();
+    getPackageHistory.mockReset();
+    getPackageHistory.mockResolvedValue([]);
     deletePackage.mockReset();
   });
 
@@ -119,6 +121,8 @@ async function confirmDeletion() {
 describe('PackageDetailPage: mensajes de resultado (HU-012 / T07)', () => {
   beforeEach(() => {
     getPackageByShipmentNumber.mockReset();
+    getPackageHistory.mockReset();
+    getPackageHistory.mockResolvedValue([]);
     deletePackage.mockReset();
   });
 
