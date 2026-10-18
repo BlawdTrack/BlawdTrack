@@ -1,4 +1,4 @@
-package com.blawdgourmet.blawdtrack.users.model;
+package com.blawdgourmet.blawdtrack.common.model;
 
 /**
  * Tipos de documento soportados por la aplicación.
