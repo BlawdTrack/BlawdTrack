@@ -36,7 +36,9 @@ describe('PackageProofCard', () => {
   it('muestra la fotografía real registrada por el backend, sin marcador de posición', () => {
     render(<PackageProofCard pkg={deliveredPkg} entries={deliveredEntries} />);
 
-    const photo = screen.getByRole('img', { name: 'Fotografía de la entrega del paquete BG-2026-00121' });
+    // Se usa `getByAltText` (y no `getByRole('img')`) porque mientras la
+    // fotografía carga el nodo queda oculto y fuera del árbol de accesibilidad.
+    const photo = screen.getByAltText('Fotografía de la entrega del paquete BG-2026-00121');
     expect(photo).toHaveAttribute('src', 'https://cdn.blawd.test/foto.png');
 
     // Mientras la imagen carga hay un indicador discreto; al cargar desaparece.
@@ -53,7 +55,7 @@ describe('PackageProofCard', () => {
 
     expect(screen.getByText('Fotografía de la entrega')).toBeInTheDocument();
     expect(screen.getByText('(cargada por el mensajero)')).toBeInTheDocument();
-    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.queryByAltText(/fotografía de la entrega/i)).toBeNull();
   });
 
   it('distingue un paquete que todavía no está entregado', () => {
@@ -73,7 +75,7 @@ describe('PackageProofCard', () => {
   it('informa cuando la fotografía no puede cargarse y permite reintentar', () => {
     render(<PackageProofCard pkg={deliveredPkg} entries={deliveredEntries} />);
 
-    const photo = screen.getByRole('img', { name: /fotografía de la entrega/i });
+    const photo = screen.getByAltText(/fotografía de la entrega/i);
     fireEvent.error(photo);
 
     // El fallo de recuperación no se presenta como ausencia de evidencia.
@@ -82,7 +84,7 @@ describe('PackageProofCard', () => {
 
     // El reintento vuelve a montar la imagen para recuperarla.
     fireEvent.click(screen.getByRole('button', { name: /reintentar/i }));
-    expect(screen.getByRole('img', { name: /fotografía de la entrega/i })).toBeInTheDocument();
+    expect(screen.getByAltText(/fotografía de la entrega/i)).toBeInTheDocument();
     expect(screen.queryByText(/No fue posible cargar la fotografía de la entrega/)).toBeNull();
   });
 
@@ -115,7 +117,7 @@ describe('PackageProofCard', () => {
   it('actualiza la evidencia al consultar otro paquete, sin conservar la anterior', () => {
     const { rerender } = render(<PackageProofCard pkg={deliveredPkg} entries={deliveredEntries} />);
 
-    expect(screen.getByRole('img', { name: /BG-2026-00121/ })).toBeInTheDocument();
+    expect(screen.getByAltText(/BG-2026-00121/)).toBeInTheDocument();
 
     // Segunda consulta: paquete distinto, aún no entregado y sin evidencia propia.
     rerender(
@@ -126,7 +128,7 @@ describe('PackageProofCard', () => {
     );
 
     expect(screen.getByText('El paquete aún no registra una entrega completada.')).toBeInTheDocument();
-    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.queryByAltText(/fotografía de la entrega/i)).toBeNull();
     expect(screen.queryByText(/Firma digital registrada/)).toBeNull();
     expect(screen.queryByText(/Entrega registrada/)).toBeNull();
   });
