@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Button, CircularProgress, Paper, Typography } from '@mui/material';
 import { CARD_SX } from './formStyles';
-import { FONT, RADIUS, TOUCH_TARGET } from '../theme';
+import { FONT, TOUCH_TARGET } from '../theme';
 
 const TITLE_ID = 'package-proof-title';
 
@@ -97,14 +97,15 @@ export default function PackageProofCard({ pkg, entries = [] }) {
   const hasSignature = Boolean(pkg?.deliverySignatureUrl);
   const deliveredAt = formatProofTimestamp(findDeliveredTimestamp(entries));
 
-  const [photoState, setPhotoState] = useState(PHOTO_STATE.LOADING);
+  const [photoStatus, setPhotoStatus] = useState({ key: photoUrl, status: PHOTO_STATE.LOADING });
   const [retryNonce, setRetryNonce] = useState(0);
 
-  // Al llegar una fotografía distinta (otra consulta) o al reintentar, el
-  // contenedor vuelve a su estado de carga y la imagen se vuelve a pedir.
-  useEffect(() => {
-    setPhotoState(PHOTO_STATE.LOADING);
-  }, [photoUrl, retryNonce]);
+  // La clave de render agrupa la fotografía actual (URL + intento). Si cambia la
+  // URL (otra consulta) o se reintenta, se parte de un estado de carga limpio
+  // derivado durante el render, sin efectos ni renders en cascada.
+  const renderKey = `${photoUrl ?? ''}#${retryNonce}`;
+  const photoState = photoStatus.key === renderKey ? photoStatus.status : PHOTO_STATE.LOADING;
+  const markPhotoState = (status) => setPhotoStatus({ key: renderKey, status });
 
   const handleRetry = () => setRetryNonce((nonce) => nonce + 1);
 
@@ -180,8 +181,8 @@ export default function PackageProofCard({ pkg, entries = [] }) {
                 key={retryNonce}
                 src={photoUrl}
                 alt={`Fotografía de la entrega del paquete ${pkg?.shipmentNumber ?? ''}`.trim()}
-                onLoad={() => setPhotoState(PHOTO_STATE.READY)}
-                onError={() => setPhotoState(PHOTO_STATE.ERROR)}
+                onLoad={() => markPhotoState(PHOTO_STATE.READY)}
+                onError={() => markPhotoState(PHOTO_STATE.ERROR)}
                 sx={{
                   width: '100%',
                   height: '100%',
