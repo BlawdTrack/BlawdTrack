@@ -67,7 +67,6 @@ const historyEntries = [
     newStatus: 'DELIVERED',
   },
 ];
-
 const render = () => renderWithProviders(<PackageQueryPage />, { user: salesAdmin, route: '/paquetes/consulta' });
 
 const search = async (user, value) => {
@@ -79,7 +78,7 @@ const search = async (user, value) => {
 describe('PackageQueryPage (HU-013)', () => {
   beforeEach(() => {
     getPackageByShipmentNumber.mockReset();
-    getPackageHistory.mockReset();
+getPackageHistory.mockReset();
   });
 
   it('no consulta si el campo está vacío y muestra la validación', async () => {
@@ -197,8 +196,7 @@ describe('PackageQueryPage (HU-013)', () => {
     // Sin cliente: "No disponible" en el bloque del cliente.
     expect(screen.getAllByText('No disponible').length).toBeGreaterThan(0);
   });
-
-  it('muestra el historial de estados reales del paquete consultado', async () => {
+it('muestra el historial de estados reales del paquete consultado', async () => {
     getPackageByShipmentNumber.mockResolvedValue(packageDetail);
     getPackageHistory.mockResolvedValue(historyEntries);
     const user = userEvent.setup();
@@ -276,5 +274,50 @@ describe('PackageQueryPage (HU-013)', () => {
     expect(await screen.findByText('Registrado como Pendiente')).toBeInTheDocument();
     // No se conservan eventos de la consulta anterior.
     expect(screen.queryByText('17/09/2026 · 08:30')).toBeNull();
+  });
+
+  it('muestra el comprobante de entrega real del paquete consultado', async () => {
+    getPackageByShipmentNumber.mockResolvedValue(packageDetail);
+    getPackageHistory.mockResolvedValue(historyEntries);
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'BG-2026-00121');
+
+    expect(await screen.findByRole('heading', { name: 'COMPROBANTE DE ENTREGA' })).toBeInTheDocument();
+    // La fotografía sale del registro real del backend, con su firma y su fecha.
+    expect(screen.getByAltText('Fotografía de la entrega del paquete BG-2026-00121'))
+      .toHaveAttribute('src', 'https://cdn.blawd.test/foto.png');
+    expect(screen.getByText(/Firma digital registrada al cierre de la entrega\./)).toBeInTheDocument();
+    expect(screen.getByText(/Entrega registrada el 17\/09\/2026 a las 08:30\./)).toBeInTheDocument();
+  });
+
+  it('actualiza el comprobante al consultar otro paquete', async () => {
+    getPackageByShipmentNumber.mockResolvedValueOnce(packageDetail);
+    getPackageHistory.mockResolvedValueOnce(historyEntries);
+    const user = userEvent.setup();
+    render();
+
+    await search(user, 'BG-2026-00121');
+    expect(await screen.findByAltText(/BG-2026-00121/)).toBeInTheDocument();
+
+    // Segunda consulta: paquete aún no entregado, sin evidencia de la anterior.
+    getPackageByShipmentNumber.mockResolvedValueOnce({
+      ...packageDetail,
+      shipmentNumber: 'BG-2026-00999',
+      status: 'PENDING',
+      deliverySignatureUrl: null,
+      deliveryPhotoUrl: null,
+    });
+    getPackageHistory.mockResolvedValueOnce([historyEntries[0]]);
+
+    const input = screen.getByRole('textbox', { name: 'Número de envío' });
+    await user.clear(input);
+    await user.type(input, 'BG-2026-00999');
+    await user.click(screen.getByRole('button', { name: /consultar/i }));
+
+    expect(await screen.findByText('El paquete aún no registra una entrega completada.')).toBeInTheDocument();
+    expect(screen.queryByAltText(/fotografía de la entrega/i)).toBeNull();
+    expect(screen.queryByText(/Firma digital registrada al cierre/)).toBeNull();
   });
 });

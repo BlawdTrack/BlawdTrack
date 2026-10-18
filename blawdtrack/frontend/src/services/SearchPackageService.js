@@ -41,7 +41,6 @@ export const getPackageByShipmentNumber = async (shipmentNumber) => {
   const response = await axiosClient.get(`${PACKAGES_PATH}/${encodeURIComponent(normalized)}`);
   return response.data;
 };
-
 /**
  * Consulta el historial cronológico de cambios de estado de un paquete:
  * `GET /api/v1/packages/{shipmentNumber}/history`.

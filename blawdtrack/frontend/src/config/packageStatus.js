@@ -33,7 +33,7 @@ const UNKNOWN_META = { label: 'Estado desconocido', bgcolor: 'neutral.surface', 
 /**
  * Metadatos visuales para el estado de un paquete.
  * @param {string} status Valor devuelto por el backend.
- * @returns {{ label: string, bgcolor: string, color: string, dot: string, known: boolean }}
+* @returns {{ label: string, bgcolor: string, color: string, dot: string, known: boolean }}
  */
 export function getPackageStatusMeta(status) {
   const meta = STATUS_META[status];
@@ -49,5 +49,4 @@ export function getPackageStatusMeta(status) {
 export function getPackageStatusDotColor(status) {
   return getPackageStatusMeta(status).dot;
 }
-
 export default getPackageStatusMeta;

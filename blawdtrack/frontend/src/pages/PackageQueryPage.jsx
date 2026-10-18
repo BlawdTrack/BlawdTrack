@@ -10,6 +10,7 @@ import PageContainer from '../components/PageContainer';
 import PackageSearchCard from '../components/PackageSearchCard';
 import PackageDetailCard from '../components/PackageDetailCard';
 import PackageHistoryCard from '../components/PackageHistoryCard';
+import PackageProofCard from '../components/PackageProofCard';
 import StatusMessage from '../components/StatusMessage';
 import { CARD_SX } from '../components/formStyles';
 import { FONT, TOUCH_TARGET } from '../theme';
@@ -27,7 +28,7 @@ export function PackageQueryPage() {
   const { user } = useAuth();
   const [shipmentNumber, setShipmentNumber] = useState('');
   const { state, pkg, message, fieldError, loading, lookup, retryable } = usePackageLookup();
-  // El historial se carga para el mismo paquete resuelto por la consulta; si el
+// El historial se carga para el mismo paquete resuelto por la consulta; si el
   // usuario busca otro, `shipmentNumber` cambia y el historial se recarga solo.
   const history = usePackageHistory(pkg?.shipmentNumber);
 
@@ -88,7 +89,7 @@ export function PackageQueryPage() {
           </Typography>
         )}
 
-        {state === PACKAGE_LOOKUP_STATE.SUCCESS && pkg && (
+{state === PACKAGE_LOOKUP_STATE.SUCCESS && pkg && (
           <>
             <PackageDetailCard pkg={pkg} />
             <PackageHistoryCard
@@ -98,6 +99,10 @@ export function PackageQueryPage() {
               retryable={history.retryable}
               onRetry={history.retry}
             />
+            {/* Comprobante de entrega: evidencia real (fotografía y firma) del
+                paquete consultado, derivada de la misma consulta y del historial,
+                sin llamadas adicionales al backend. */}
+            <PackageProofCard pkg={pkg} entries={history.entries} />
           </>
         )}
       </PageContainer>

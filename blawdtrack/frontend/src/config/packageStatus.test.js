@@ -21,8 +21,7 @@ describe('getPackageStatusMeta', () => {
     expect(getPackageStatusMeta(null).known).toBe(false);
     expect(getPackageStatusMeta(undefined).known).toBe(false);
   });
-
-  it('da el color del indicador del historial según el estado real', () => {
+it('da el color del indicador del historial según el estado real', () => {
     // Verde para los estados de avance; naranja solo para el cierre (entregado).
     expect(getPackageStatusDotColor('PENDING')).toBe('#2E8055');
     expect(getPackageStatusDotColor('ASSIGNED')).toBe('#2E8055');
