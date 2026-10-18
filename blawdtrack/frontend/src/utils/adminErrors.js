@@ -6,7 +6,7 @@
 // text-matching the message.
 // UI texts are in Spanish; identifiers and comments in English.
 
-import { normalizeApiError, mapFieldErrors } from './apiErrors';
+import { apiErrorResult, extractFieldsFromApiError, normalizeApiError, mapFieldErrors } from './apiErrors';
 
 const MESSAGES = {
   validationGeneric: 'Revisa los datos ingresados e intenta de nuevo.',

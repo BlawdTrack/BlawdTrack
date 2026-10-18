@@ -27,6 +27,26 @@ public class UserAuditTrailAdapter implements UserAuditTrail {
     }
 
     @Override
+    public void adminUpdated(AuthenticatedUser actor, User admin, String details) {
+        auditService.logAction(AuditAction.ADMIN_UPDATED, actor, admin, details);
+    }
+
+    @Override
+    public void adminActivated(AuthenticatedUser actor, User admin, String details) {
+        auditService.logAction(AuditAction.ADMIN_ACTIVATED, actor, admin, details);
+    }
+
+    @Override
+    public void adminDeactivated(AuthenticatedUser actor, User admin, String details) {
+        auditService.logAction(AuditAction.ADMIN_DEACTIVATED, actor, admin, details);
+    }
+
+    @Override
+    public void adminPasswordChanged(AuthenticatedUser actor, User admin, String details) {
+        auditService.logAction(AuditAction.ADMIN_PASSWORD_CHANGED, actor, admin, details);
+    }
+
+    @Override
     public void permissionsUpdated(AuthenticatedUser actor, User affected, String details) {
         auditService.logAction(AuditAction.USER_PERMISSIONS_UPDATED, actor, affected, details);
     }
