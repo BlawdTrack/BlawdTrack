@@ -50,6 +50,7 @@ export default function PackageSearchCard({ value, onChange, onSubmit, loading =
       >
         <TextField
           value={value}
+          inputRef={inputRef}
           onChange={(event) => onChange(event.target.value)}
           placeholder="BG-2026-00123"
           autoComplete="off"

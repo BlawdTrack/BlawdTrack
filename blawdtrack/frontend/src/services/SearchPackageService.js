@@ -1,14 +1,12 @@
 import axiosClient from '../api/axiosClient';
+import { PACKAGES_PATH } from '../api/packagesApi';
 
-// Ruta base de la API de consulta de paquetes (HU-013, task 124).
-// El backend la publica como `/api/v1/packages` y `VITE_API_URL` ya incluye
-// el `/api`, así que aquí va sin ese prefijo (igual que el resto de servicios).
+// Consulta de paquetes (HU-013, task 124). La ruta base es compartida (`api/packagesApi.js`).
 //
 // Este módulo es solo la consulta puntual por número de envío. La búsqueda por
 // varios criterios de HU-014 vive en su propio `PackageService.js`, así que los
 // dos módulos no compiten por la misma ruta y se pueden fusionar en cualquier
 // orden.
-const PACKAGES_PATH = '/v1/packages';
 
 /**
  * Normaliza el número de envío igual que el backend (`trim` + mayúsculas), para
