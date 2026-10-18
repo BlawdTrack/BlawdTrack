@@ -30,8 +30,9 @@ En `develop` solo existen las piezas de apoyo:
 - `CourierDeactivationValidator.validateCanDeactivate(courierId)` consulta a `CourierWorkloadPort` y lanza
   `CourierHasActiveAssignmentsException` si el mensajero tiene asignaciones activas (cualquier estado
   distinto de Entregado y No entregado).
-- `ProvisionalCourierWorkloadPort` es la implementación provisional del puerto: siempre responde que no hay
-  asignaciones, porque el módulo de paquetes todavía no existe.
+- `PackageCourierWorkloadPort` (módulo de paquetes, Task 301) es la implementación real del puerto: el mensajero
+  tiene asignaciones activas si algún paquete suyo está en un estado distinto de Entregado y No entregado
+  (Asignado, Enviado o En tránsito). Reemplazó a la implementación provisional, que siempre respondía que no había.
 - `User.changeStatus(INACTIVE)` cambia el estado y sube `tokenVersion`, lo que invalida las sesiones activas.
 
 Nada del módulo de mensajeros llama a esas piezas todavía: falta el endpoint que las junte.
@@ -78,7 +79,8 @@ sequenceDiagram
 | Clase | Rol |
 |---|---|
 | `couriers.service.CourierDeactivationValidator` | Regla: no se desactiva con asignaciones activas. |
-| `couriers.service.CourierWorkloadPort`, `ProvisionalCourierWorkloadPort` | Consulta de la carga de trabajo (provisional). |
+| `couriers.service.CourierWorkloadPort` | Consulta de la carga de trabajo del mensajero. |
+| `packages.service.PackageCourierWorkloadPort` | Implementación real del puerto sobre los paquetes asignados (Task 301). |
 | `couriers.service.CourierHasActiveAssignmentsException` | Error de la regla anterior. |
 | `users.model.User` | `changeStatus` sube `tokenVersion`. |
 | `audit.model.AuditAction.COURIER_DEACTIVATED` | Código de auditoría `DESACTIVAR_MENSAJERO` (reservado). |
@@ -98,7 +100,7 @@ sequenceDiagram
 | Test | Qué verifica |
 |---|---|
 | `CourierDeactivationValidatorTest` | Lanza la excepción con asignaciones activas, no lanza sin ellas y consulta al puerto con el mismo id recibido. |
-| `ProvisionalCourierWorkloadPortTest` | El puerto provisional responde "sin asignaciones" para cualquier mensajero. |
+| `PackageCourierWorkloadPortTest`, `PackageCourierWorkloadIntegrationTest` | El puerto real: cuenta Asignado, Enviado y En tránsito; no cuenta Entregado ni No entregado; no cuenta los paquetes de otro mensajero; y con paquetes activos el endpoint de desactivación responde 409 sin desactivar. |
 | `CourierAuthorizationBeforeValidationTest` | Los roles sin permiso reciben 403 también en la ruta de desactivación, aunque el id sea inválido. |
 | `SessionInvalidationIntegrationTest` | Cambiar el estado de una cuenta invalida su token en la siguiente solicitud. |
 
@@ -109,7 +111,6 @@ No hay tests propios de `MessengerFleetList` ni del modal en `develop`.
 ## Limitaciones conocidas en `develop`
 
 - El endpoint `/deactivate` no existe: el botón termina en error.
-- La regla de asignaciones activas es provisional hasta que exista el módulo de paquetes.
 
 ## Cambios pendientes en el PR abierto
 
