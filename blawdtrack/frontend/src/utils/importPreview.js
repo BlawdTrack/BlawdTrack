@@ -1,4 +1,4 @@
-import { describeDuplicate } from './duplicateReport';
+import { countDuplicateCauses, describeDuplicate, duplicateRowCount } from './duplicateReport';
 
 /** Resultado de un registro del archivo en la previsualización. */
 export const PREVIEW_STATUS = Object.freeze({
@@ -45,16 +45,14 @@ export function formatDeliveryWindow(window) {
   return isValidTime(start) && isValidTime(end) ? `${formatTime(start)} – ${formatTime(end)}` : null;
 }
 
+const TEXT_FIELDS = ['shipmentNumber', 'orderNumber', 'customerName', 'address', 'phone', 'schedule'];
+
 function packageRow(status, record, index, notes = []) {
+  const texts = Object.fromEntries(TEXT_FIELDS.map((field) => [field, record?.[field] || null]));
   return {
     key: `${status}-${index}-${record?.shipmentNumber ?? ''}`,
     status,
-    shipmentNumber: record?.shipmentNumber || null,
-    orderNumber: record?.orderNumber || null,
-    customerName: record?.customerName || null,
-    address: record?.address || null,
-    phone: record?.phone || null,
-    schedule: record?.schedule || null,
+    ...texts,
     deliveryRange: formatDeliveryWindow(record?.deliveryWindow),
     notes,
   };
@@ -67,10 +65,12 @@ function packageRow(status, record, index, notes = []) {
  *
  * - **Válidos:** traen todos sus datos y, si el backend lo envía, el rango de entrega (`deliveryWindow`).
  * - **Con errores:** el motivo de cada uno es el mensaje de cada campo obligatorio que falta.
- * - **Duplicados:** hoy solo traen número de envío, ocurrencias y causas; cliente y dirección son opcionales.
+ * - **Duplicados:** el backend los agrupa por número de envío (con `occurrences` y causas); cada fila excluida
+ *   aparece en la lista, de modo que la lista coincide con el contador `duplicateRecordsCount`. Cliente y
+ *   dirección son opcionales.
  * @param {object|null|undefined} preview Respuesta de previsualización.
  * @returns {{ fileName: string, counts: { read: number, valid: number, invalid: number, duplicate: number },
- *   rows: Array<object> }|null} `null` si no hay una previsualización utilizable.
+ *   duplicateCauses: { alreadyRegistered: number, duplicatedInFile: number }, rows: Array<object> }|null} `null` si no hay una previsualización utilizable.
  */
 export function buildImportPreview(preview) {
   if (!preview || typeof preview !== 'object') return null;
@@ -84,8 +84,12 @@ export function buildImportPreview(preview) {
       asList(item?.issues).map((issue) => issue?.message).filter(Boolean)
     )
   );
-  const duplicate = asList(preview.duplicates).map((item, index) =>
-    packageRow(PREVIEW_STATUS.DUPLICATE, item, index, [describeDuplicate(item ?? {})].filter(Boolean))
+  // Una fila por cada fila del archivo que se excluye: un número repetido 3 veces aparece 3 veces, como lo cuenta el backend.
+  const duplicate = asList(preview.duplicates).flatMap((item, index) =>
+    Array.from({ length: duplicateRowCount(item) }, (_, copy) => ({
+      ...packageRow(PREVIEW_STATUS.DUPLICATE, item, index, [describeDuplicate(item ?? {})].filter(Boolean)),
+      key: `${PREVIEW_STATUS.DUPLICATE}-${index}-${copy}-${item?.shipmentNumber ?? ''}`,
+    }))
   );
 
   const counts = {
@@ -97,6 +101,7 @@ export function buildImportPreview(preview) {
   return {
     fileName: preview.fileName ?? '',
     counts: { read: countOf(preview.totalRecords, counts.valid + counts.invalid + counts.duplicate), ...counts },
+    duplicateCauses: countDuplicateCauses(asList(preview.duplicates)),
     rows: [...valid, ...invalid, ...duplicate],
   };
 }

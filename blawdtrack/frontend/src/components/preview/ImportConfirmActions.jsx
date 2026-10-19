@@ -1,30 +1,31 @@
-import { Link as RouterLink } from 'react-router-dom';
 import { Box, Button, CircularProgress } from '@mui/material';
 import StatusMessage from '../StatusMessage';
-import { ROUTES } from '../../config/routes';
+import { FONT, RADIUS } from '../../theme';
 
 const plural = (count) => (count === 1 ? '1 paquete válido' : `${count} paquetes válidos`);
 
 /**
- * Acciones del paso 2: confirmar la importación y cargar otro archivo. Confirmar solo se ofrece si hay registros
- * válidos y el archivo está disponible (se pierde al recargar la página); si no, dice por qué. Muestra el error de la
- * confirmación y bloquea los botones mientras se envía.
+ * Acciones del paso 2: confirmar la importación o cargar otro archivo. Confirmar solo se ofrece si hay registros
+ * válidos y el archivo está disponible; si no, queda bloqueado. Muestra el error de la confirmación y bloquea los
+ * botones mientras se envía.
  * @param {{ validCount: number, hasFile: boolean, isConfirming: boolean, errorMessage: string|null, severity: string,
- *   onConfirm: () => void, children?: import('react').ReactNode }} props Los `children` son acciones extra que
- *   van entre "Confirmar" y "Cargar otro archivo".
+ *   onConfirm: () => void, onLoadAnother: () => void }} props
  */
-export default function ImportConfirmActions({ validCount, hasFile, isConfirming, errorMessage, severity, onConfirm, children }) {
+export default function ImportConfirmActions({ validCount, hasFile, isConfirming, errorMessage, severity, onConfirm, onLoadAnother }) {
   const canConfirm = hasFile && validCount > 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {!hasFile && (
-        <StatusMessage severity="warning" message="Para confirmar la importación vuelve a cargar el archivo: la previsualización se perdió al recargar la página." />
-      )}
       {errorMessage && <StatusMessage severity={severity} message={errorMessage} />}
 
-      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& a, & button': { width: { xs: '100%', sm: 'auto' } } }}>
-        <Button variant="contained" onClick={onConfirm} disabled={!canConfirm || isConfirming} aria-busy={isConfirming}>
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
+        <Button
+          variant="contained"
+          onClick={onConfirm}
+          disabled={!canConfirm || isConfirming}
+          aria-busy={isConfirming}
+          sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm, boxShadow: 'none', fontSize: FONT.md }}
+        >
           {isConfirming ? (
             <>
               <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
@@ -34,8 +35,7 @@ export default function ImportConfirmActions({ validCount, hasFile, isConfirming
             `Confirmar importación${validCount > 0 ? ` de ${plural(validCount)}` : ''}`
           )}
         </Button>
-        {children}
-        <Button component={RouterLink} to={ROUTES.PACKAGE_IMPORT} variant="outlined" disabled={isConfirming}>
+        <Button variant="outlined" onClick={onLoadAnother} disabled={isConfirming}>
           Cargar otro archivo
         </Button>
       </Box>

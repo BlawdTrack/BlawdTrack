@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.couriers.dto;
 import java.time.LocalDateTime;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
-import com.blawdgourmet.blawdtrack.users.model.DocumentType;
+import com.blawdgourmet.blawdtrack.common.model.DocumentType;
 
 /**
  * Una desactivación registrada en la auditoría, con el mensajero afectado y quién la hizo. Se conserva

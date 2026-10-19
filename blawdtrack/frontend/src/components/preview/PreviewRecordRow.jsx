@@ -13,6 +13,46 @@ const BY_STATUS = {
 
 const COLUMN_SX = { flex: '1 1 170px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25 };
 
+function IdentityColumn({ row }) {
+  return (
+    <Box sx={{ ...COLUMN_SX, flex: '1 1 140px' }}>
+      <Typography component="span" sx={{ fontSize: FONT.md, fontWeight: 700, color: row.shipmentNumber ? 'text.primary' : 'text.secondary' }}>
+        {row.shipmentNumber ?? 'Sin número de envío'}
+      </Typography>
+      {row.orderNumber && (
+        <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+          Orden {row.orderNumber}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
+function CustomerColumn({ row }) {
+  if (!(row.customerName || row.address || row.phone)) return null;
+  return (
+    <Box sx={COLUMN_SX}>
+      {row.customerName && <Typography component="span" sx={{ fontSize: FONT.md, color: 'text.primary' }}>{row.customerName}</Typography>}
+      {row.address && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{row.address}</Typography>}
+      {row.phone && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{row.phone}</Typography>}
+    </Box>
+  );
+}
+
+function ScheduleColumn({ row, isValid }) {
+  if (!(row.schedule || isValid)) return null;
+  return (
+    <Box sx={COLUMN_SX}>
+      {row.schedule && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>Horario: {row.schedule}</Typography>}
+      {isValid && (
+        <Typography component="span" sx={{ fontSize: FONT.sm, fontWeight: 600, color: row.deliveryRange ? 'text.primary' : 'text.secondary' }}>
+          Entrega: {row.deliveryRange ?? 'Sin calcular'}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
 /**
  * Fila de un registro del archivo en la previsualización: número de envío y orden, cliente, dirección y teléfono,
  * horario y rango de entrega calculado (solo en los válidos) y su resultado con las notas. Los registros con
@@ -22,39 +62,12 @@ const COLUMN_SX = { flex: '1 1 170px', minWidth: 0, display: 'flex', flexDirecti
 export default function PreviewRecordRow({ row }) {
   const { tone, chip, noteColor } = BY_STATUS[row.status] ?? BY_STATUS[PREVIEW_STATUS.INVALID];
   const isValid = row.status === PREVIEW_STATUS.VALID;
-  const hasCustomer = row.customerName || row.address || row.phone;
 
   return (
     <StatusRow tone={tone}>
-      <Box sx={{ ...COLUMN_SX, flex: '1 1 140px' }}>
-        <Typography component="span" sx={{ fontSize: FONT.md, fontWeight: 700, color: row.shipmentNumber ? 'text.primary' : 'text.secondary' }}>
-          {row.shipmentNumber ?? 'Sin número de envío'}
-        </Typography>
-        {row.orderNumber && (
-          <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
-            Orden {row.orderNumber}
-          </Typography>
-        )}
-      </Box>
-
-      {hasCustomer && (
-        <Box sx={COLUMN_SX}>
-          {row.customerName && <Typography component="span" sx={{ fontSize: FONT.md, color: 'text.primary' }}>{row.customerName}</Typography>}
-          {row.address && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{row.address}</Typography>}
-          {row.phone && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{row.phone}</Typography>}
-        </Box>
-      )}
-
-      {(row.schedule || isValid) && (
-        <Box sx={COLUMN_SX}>
-          {row.schedule && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>Horario: {row.schedule}</Typography>}
-          {isValid && (
-            <Typography component="span" sx={{ fontSize: FONT.sm, fontWeight: 600, color: row.deliveryRange ? 'text.primary' : 'text.secondary' }}>
-              Entrega: {row.deliveryRange ?? 'Sin calcular'}
-            </Typography>
-          )}
-        </Box>
-      )}
+      <IdentityColumn row={row} />
+      <CustomerColumn row={row} />
+      <ScheduleColumn row={row} isValid={isValid} />
 
       <Box sx={{ ...COLUMN_SX, flex: '1 1 200px', alignItems: 'flex-start', gap: 0.75 }}>
         <PackageStatusChip kind={chip} />

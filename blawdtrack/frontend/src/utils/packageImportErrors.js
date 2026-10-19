@@ -1,4 +1,4 @@
-// Normaliza un POST /api/v1/packages/import/preview (y /import) fallido (error de axios) al mismo modelo uniforme que
+// Normaliza un POST /api/v1/packages/import/preview fallido (error de axios) al mismo modelo uniforme que
 // courierErrors.js y adminErrors.js (ver ./apiErrors para el mapeo código HTTP -> "kind"). Aquí solo se agregan
 // los textos de la importación y el caso propio del archivo: el backend responde 400 con
 // code = INVALID_PACKAGE_FILE y un mensaje en español que dice qué tiene mal el archivo.

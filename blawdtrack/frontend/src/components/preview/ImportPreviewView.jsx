@@ -8,8 +8,16 @@ import { filterPreviewRows } from '../../utils/importPreview';
 
 const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
 
+// Qué tipo de duplicados hay, para que se sepa si ya existían o se repiten en el propio archivo.
+function duplicateCausesText({ alreadyRegistered, duplicatedInFile }) {
+  const parts = [];
+  if (alreadyRegistered) parts.push(`${plural(alreadyRegistered, 'ya registrado', 'ya registrados')} en la base de datos`);
+  if (duplicatedInFile) parts.push(`${plural(duplicatedInFile, 'repetido', 'repetidos')} en el archivo`);
+  return parts.length ? ` Duplicados: ${parts.join(' y ')}.` : '';
+}
+
 // El aviso principal: éxito si todo se puede importar, error si nada, advertencia si una parte se excluye.
-function summaryAlert({ counts, fileName }) {
+function summaryAlert({ counts, duplicateCauses, fileName }) {
   const excluded = counts.invalid + counts.duplicate;
   const inFile = fileName ? ` en ${fileName}` : '';
 
@@ -25,7 +33,7 @@ function summaryAlert({ counts, fileName }) {
   return {
     severity: 'warning',
     title: `${parts.join(' y ')}${inFile}`,
-    message: 'Se excluyen de la importación. Los demás registros se pueden importar sin cambios.',
+    message: `Se excluyen de la importación.${duplicateCausesText(duplicateCauses)} Los demás registros se pueden importar sin cambios.`,
   };
 }
 

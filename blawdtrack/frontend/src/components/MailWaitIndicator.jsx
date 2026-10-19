@@ -1,4 +1,5 @@
 import { Box, LinearProgress, Typography } from '@mui/material';
+import { formatClock } from '../utils/formatClock';
 import { FONT, rem } from '../theme';
 
 // Mensajes que van rotando mientras se espera: muestran que el sistema sigue trabajando.
@@ -12,10 +13,6 @@ const SECONDS_PER_MESSAGE = 6;
 
 /** Espera mínima antes de pedir otro correo: el límite bajo de lo que puede tardar en llegar (2 a 5 minutos). */
 export const MAIL_RESEND_WAIT_SECONDS = 120;
-
-const formatClock = (totalSeconds) => (
-  `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, '0')}`
-);
 
 /**
  * Indicador de espera tras enviar un correo: una barra que avanza, un mensaje que cambia cada pocos segundos

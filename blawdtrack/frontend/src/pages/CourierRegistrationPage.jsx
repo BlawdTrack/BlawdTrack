@@ -98,7 +98,6 @@ export function CourierRegistrationPage() {
   return (
     <RegistrationFormPage
       title="Crear mensajero"
-      description="Registra a un nuevo mensajero con su horario y la capacidad de carga que puede transportar."
       onSubmit={handleSubmit}
       form={form}
       isSubmitting={isSubmitting}

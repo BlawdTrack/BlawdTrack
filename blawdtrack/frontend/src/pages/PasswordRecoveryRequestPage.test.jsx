@@ -68,17 +68,38 @@ describe('PasswordRecoveryRequestPage (HU-002 T04)', () => {
     expect(screen.getByRole('status')).not.toHaveTextContent(/minutos|horas/i);
   });
 
-  it('tras enviar bloquea "Enviar de nuevo" y muestra la espera con el tiempo restante', async () => {
+  it('tras enviar deja un solo botón "Reenviar en M:SS" deshabilitado mientras dura la espera', async () => {
     requestPasswordReset.mockResolvedValue({ message: 'ok' });
     const user = userEvent.setup();
     render(<PasswordRecoveryRequestPage />);
 
     await fillAndSubmit(user, 'ana@blawd.com');
 
-    expect((await screen.findByRole('button', { name: 'Enviar de nuevo' })).disabled).toBe(true);
-    expect(screen.getByText('Enviando el correo…')).toBeInTheDocument();
-    expect(screen.getByText('2:00')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Reenviar en 2:00' })).toBeDisabled();
+    // Sin la barra de "Enviando el correo…" ni un segundo botón de reenvío.
+    expect(screen.queryByText('Enviando el correo…')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /enviar de nuevo/i })).not.toBeInTheDocument();
     expect(requestPasswordReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('muestra el correo en negrita, el aviso de spam y el paso 2 de 3 al enviar', async () => {
+    requestPasswordReset.mockResolvedValue({ message: 'ok' });
+    const user = userEvent.setup();
+    render(<PasswordRecoveryRequestPage />);
+    expect(screen.getByText('Paso 1 de 3')).toBeInTheDocument();
+
+    await fillAndSubmit(user, 'ana@blawd.com');
+
+    expect(await screen.findByText('Paso 2 de 3')).toBeInTheDocument();
+    expect(screen.getByText('ana@blawd.com').tagName).toBe('STRONG');
+    expect(screen.getByText('¿No te llega? Revisa spam o promociones.')).toBeInTheDocument();
+  });
+
+  it('no usa ayudas con icono de información ni pestañas de pasos', () => {
+    render(<PasswordRecoveryRequestPage />);
+
+    expect(screen.queryByRole('button', { name: /qué se valida/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
   it('"Usar otro correo" vuelve al formulario conservando lo escrito', async () => {

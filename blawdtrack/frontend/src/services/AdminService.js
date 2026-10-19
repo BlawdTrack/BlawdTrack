@@ -67,6 +67,51 @@ export const getAdministrators = async () => {
 };
 
 /**
+ * Busca un administrador por su documento y confirma que existe: `GET /api/v1/admins/{documentType}/{documentNumber}`
+ * (solo Súper Usuario). Un documento sin administrador responde 404 `ADMINISTRADOR_NO_EXISTENTE`.
+ * @param {string} documentType `CEDULA`, `DIMEX` o `PASAPORTE`.
+ * @param {string} documentNumber
+ * @returns {Promise<{ id: number, documentType: string, documentNumber: string, fullName: string, email: string,
+ *   phone: string|null, status: 'ACTIVE'|'INACTIVE' }>} El perfil, sin contraseña.
+ */
+export const getAdministrator = async (documentType, documentNumber) => {
+  const response = await axiosClient.get(
+    `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}`
+  );
+  return response.data;
+};
+
+/**
+ * Historial de modificaciones de UN administrador: `GET /api/v1/admins/{documentType}/{documentNumber}/history`
+ * (creación, cambios de datos, activaciones, desactivaciones y cambios de contraseña), del más reciente al más antiguo.
+ * @param {string} documentType
+ * @param {string} documentNumber
+ * @returns {Promise<Array<{ id: number, action: string, actorName: string, details: string, timestamp: string }>>}
+ */
+export const getAdministratorHistory = async (documentType, documentNumber) => {
+  const response = await axiosClient.get(
+    `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}/history`
+  );
+  return response.data;
+};
+
+/**
+ * Actualiza un administrador: `PATCH /api/v1/admins/{documentType}/{documentNumber}` (solo Súper Usuario). Solo se
+ * envían los campos que cambian. Cambiar el estado o la contraseña cierra la sesión abierta del administrador.
+ * @param {string} documentType
+ * @param {string} documentNumber
+ * @param {{ fullName?: string, email?: string, password?: string, status?: 'ACTIVE'|'INACTIVE' }} changes
+ * @returns {Promise<object>} El perfil actualizado.
+ */
+export const updateAdministrator = async (documentType, documentNumber, changes) => {
+  const response = await axiosClient.patch(
+    `${ADMINISTRATORS_PATH}/${encodeURIComponent(documentType)}/${encodeURIComponent(documentNumber)}`,
+    changes
+  );
+  return response.data;
+};
+
+/**
  * Elimina un administrador: `DELETE /api/v1/admins/{documentType}/{documentNumber}`.
  * @param {string} documentType `CEDULA`, `DIMEX` o `PASAPORTE`.
  * @param {string} documentNumber

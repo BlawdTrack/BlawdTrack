@@ -7,6 +7,9 @@ export const PACKAGE_FILE_ACCEPT = PACKAGE_FILE_EXTENSIONS.join(',');
 /** Los formatos como se muestran al usuario: ".xlsx y .csv". */
 export const PACKAGE_FILE_FORMATS_LABEL = PACKAGE_FILE_EXTENSIONS.join(' y ');
 
+/** Los formatos como etiquetas de la zona de carga. */
+export const PACKAGE_FILE_FORMAT_CHIPS = ['Excel .xlsx', 'CSV'];
+
 const extensionOf = (fileName = '') => {
   const dot = fileName.lastIndexOf('.');
   return dot < 0 ? '' : fileName.slice(dot).toLowerCase();

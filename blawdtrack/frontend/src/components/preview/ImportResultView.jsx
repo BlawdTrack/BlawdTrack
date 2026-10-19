@@ -1,19 +1,18 @@
 import { Box, Button, Paper, Typography } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
 import StatCard from '../StatCard';
 import StatusMessage from '../StatusMessage';
 import { CARD_SX } from '../formStyles';
 import { FONT, rem } from '../../theme';
-import { ROUTES } from '../../config/routes';
 
 const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
 
 /**
  * Resultado de la importación confirmada (paso 3): el aviso con la cantidad importada, los totales y los números de
  * envío registrados. Si no se registró ningún paquete lo avisa en advertencia.
- * @param {{ result: object }} props Resultado de `buildImportResult`.
+ * @param {{ result: object, onImportAnother: () => void }} props Resultado de `buildImportResult`; `onImportAnother`
+ * vuelve al paso 1 para cargar otro archivo.
  */
-export default function ImportResultView({ result }) {
+export default function ImportResultView({ result, onImportAnother }) {
   const { counts, fileName, registeredShipmentNumbers } = result;
   const inFile = fileName ? ` de ${fileName}` : '';
 
@@ -55,8 +54,8 @@ export default function ImportResultView({ result }) {
         </Paper>
       )}
 
-      <Box sx={{ '& a': { width: { xs: '100%', sm: 'auto' } } }}>
-        <Button component={RouterLink} to={ROUTES.PACKAGE_IMPORT} variant="contained">
+      <Box sx={{ '& button': { width: { xs: '100%', sm: 'auto' } } }}>
+        <Button variant="contained" onClick={onImportAnother}>
           Importar otro archivo
         </Button>
       </Box>
