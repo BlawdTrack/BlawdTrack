@@ -5,6 +5,7 @@ import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +61,14 @@ public class DeliveryPackage {
     @Column(name = "estado", nullable = false, length = 30)
     @Builder.Default
     private PackageStatus status = PackageStatus.PENDING;
+
+    @Column(name = "hora_inicio_entrega", nullable = false)
+    @Builder.Default
+    private LocalTime deliveryStartTime = LocalTime.of(9, 0);
+
+    @Column(name = "hora_fin_entrega", nullable = false)
+    @Builder.Default
+    private LocalTime deliveryEndTime = LocalTime.of(16, 0);
 
     @OneToMany(mappedBy = "deliveryPackage", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

@@ -3,11 +3,11 @@ import { screen, within, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useLocation } from 'react-router-dom';
 import PackageImportPage from './PackageImportPage';
-import { previewPackageImport } from '../services/PackageImportService';
+import { confirmPackageImport, previewPackageImport } from '../services/PackageImportService';
 import { renderWithProviders, superUser } from '../test-utils';
 import { ROUTES } from '../config/routes';
 
-vi.mock('../services/PackageImportService', () => ({ previewPackageImport: vi.fn() }));
+vi.mock('../services/PackageImportService', () => ({ previewPackageImport: vi.fn(), confirmPackageImport: vi.fn() }));
 
 const preview = {
   fileName: 'paquetes.xlsx',
@@ -41,6 +41,24 @@ const renderPage = () =>
 const setup = () => userEvent.setup({ applyAccept: false });
 const input = () => screen.getByLabelText('Archivo de paquetes de Zoho Inventory');
 const submitButton = () => screen.getByRole('button', { name: /Revisar datos|Validando archivo/ });
+const executionResponse = {
+  fileName: 'paquetes.xlsx',
+  totalRecords: 4,
+  registeredRecordsCount: 2,
+  invalidRecordsCount: 1,
+  duplicateRecordsCount: 1,
+  registeredShipmentNumbers: ['BG-1', 'BG-2'],
+};
+const confirmButton = () => screen.getByRole('button', { name: /Confirmar importación/ });
+const reachStep2 = async (user) => {
+  previewPackageImport.mockResolvedValue(preview);
+  renderPage();
+  const file = fileOf('paquetes.xlsx');
+  await user.upload(input(), file);
+  await user.click(submitButton());
+  await records();
+  return file;
+};
 const records = () => screen.findByRole('region', { name: 'Registros del archivo' });
 const fileOf = (name, content = 'contenido') => new File([content], name);
 
@@ -157,8 +175,8 @@ describe('PackageImportPage (carga del archivo)', () => {
     expect(list.getByText('El campo teléfono es obligatorio')).toBeInTheDocument();
     expect(list.getByText('Ya registrado en la base de datos')).toBeInTheDocument();
     expect(screen.queryByLabelText('Archivo de paquetes de Zoho Inventory')).not.toBeInTheDocument();
-    // La confirmación (paso 3) todavía no existe: no se ofrece ni hay otra pantalla de duplicados.
-    expect(screen.queryByRole('button', { name: /Confirmar/ })).not.toBeInTheDocument();
+    // Desde el paso 2 se confirma (paso 3); los duplicados se revisan aquí mismo, no en otra pantalla.
+    expect(screen.getByRole('button', { name: /Confirmar importación/ })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /duplicados/i })).not.toBeInTheDocument();
   });
 
@@ -256,5 +274,108 @@ describe('PackageImportPage (carga del archivo)', () => {
     form.requestSubmit?.();
 
     expect(previewPackageImport).not.toHaveBeenCalled();
+  });
+});
+
+describe('PackageImportPage (confirmar la importación, pasos 2 y 3)', () => {
+  it('en el paso 2 ofrece confirmar con la cantidad de paquetes válidos', async () => {
+    await reachStep2(setup());
+
+    expect(screen.getByRole('button', { name: 'Confirmar importación de 2 paquetes válidos' })).toBeEnabled();
+  });
+
+  it('confirma enviando el mismo archivo y muestra el resultado con la cantidad importada, en el paso 3', async () => {
+    confirmPackageImport.mockResolvedValue(executionResponse);
+    const user = setup();
+    const file = await reachStep2(user);
+
+    await user.click(confirmButton());
+
+    expect(confirmPackageImport).toHaveBeenCalledWith(file);
+    expect(await screen.findByText('Importación completada')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('2 paquetes registrados de paquetes.xlsx');
+    expect(screen.getByRole('list', { name: 'Pasos de la importación' }).querySelector('[aria-current="step"]')).toHaveTextContent('Listo');
+    const imported = within(screen.getByRole('region', { name: 'Paquetes importados' }));
+    expect(imported.getByText('BG-1')).toBeInTheDocument();
+    expect(imported.getByText('BG-2')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Totales de la importación' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Confirmar/ })).not.toBeInTheDocument();
+    expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PACKAGE_IMPORT);
+  });
+
+  it('con un solo paquete registrado usa el singular', async () => {
+    confirmPackageImport.mockResolvedValue({ ...executionResponse, registeredRecordsCount: 1, registeredShipmentNumbers: ['BG-1'] });
+    const user = setup();
+    await reachStep2(user);
+
+    await user.click(confirmButton());
+
+    expect(await screen.findByRole('status')).toHaveTextContent('1 paquete registrado de paquetes.xlsx');
+  });
+
+  it('si no se registró ninguno lo avisa en advertencia', async () => {
+    confirmPackageImport.mockResolvedValue({ ...executionResponse, registeredRecordsCount: 0, registeredShipmentNumbers: [] });
+    const user = setup();
+    await reachStep2(user);
+
+    await user.click(confirmButton());
+
+    expect(await screen.findByText('No se registró ningún paquete')).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Paquetes importados' })).not.toBeInTheDocument();
+  });
+
+  it('mientras confirma bloquea los botones y lo avisa', async () => {
+    confirmPackageImport.mockReturnValue(new Promise(() => {}));
+    const user = setup();
+    await reachStep2(user);
+
+    await user.click(confirmButton());
+
+    expect(await screen.findByRole('button', { name: /Importando/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Cargar otro archivo' })).toBeDisabled();
+  });
+
+  it('si el backend falla muestra el error de la confirmación y deja volver a intentar', async () => {
+    confirmPackageImport.mockRejectedValue({ response: { status: 500, data: {} } });
+    const user = setup();
+    await reachStep2(user);
+
+    await user.click(confirmButton());
+
+    expect(await screen.findByText(/error inesperado al importar los paquetes/)).toBeInTheDocument();
+    expect(confirmButton()).toBeEnabled();
+  });
+
+  it('sin permiso lo dice con el texto de la confirmación', async () => {
+    confirmPackageImport.mockRejectedValue({ response: { status: 403, data: {} } });
+    const user = setup();
+    await reachStep2(user);
+
+    await user.click(confirmButton());
+
+    expect(await screen.findByText('No tienes permiso para confirmar la importación de paquetes.')).toBeInTheDocument();
+  });
+
+  it('sin registros válidos no se puede confirmar', async () => {
+    previewPackageImport.mockResolvedValue({ ...preview, validRecordsCount: 0, validRecords: [] });
+    const user = setup();
+    renderPage();
+    await user.upload(input(), fileOf('paquetes.xlsx'));
+    await user.click(submitButton());
+    await records();
+
+    expect(screen.getByRole('button', { name: 'Confirmar importación' })).toBeDisabled();
+  });
+
+  it('"Importar otro archivo" vuelve al paso 1 con la zona de carga vacía', async () => {
+    confirmPackageImport.mockResolvedValue(executionResponse);
+    const user = setup();
+    await reachStep2(user);
+    await user.click(confirmButton());
+    await user.click(await screen.findByRole('button', { name: 'Importar otro archivo' }));
+
+    expect(screen.getByText('Arrastra aquí el archivo de Zoho Inventory')).toBeInTheDocument();
+    expect(screen.queryByText('paquetes.xlsx')).not.toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Pasos de la importación' }).querySelector('[aria-current="step"]')).toHaveTextContent('Cargar archivos');
   });
 });

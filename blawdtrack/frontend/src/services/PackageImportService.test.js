@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axiosClient from '../api/axiosClient';
-import { previewPackageImport } from './PackageImportService';
+import { confirmPackageImport, previewPackageImport } from './PackageImportService';
 
 vi.mock('../api/axiosClient', () => ({ default: { postForm: vi.fn() } }));
 
@@ -23,5 +23,21 @@ describe('PackageImportService (HU-010)', () => {
     axiosClient.postForm.mockRejectedValue(error);
 
     await expect(previewPackageImport(new File(['x'], 'a.csv'))).rejects.toBe(error);
+  });
+
+  it('confirma la importación enviando el archivo como multipart a /import y devuelve el resultado', async () => {
+    const file = new File(['x'], 'paquetes.xlsx');
+    const result = { fileName: 'paquetes.xlsx', registeredRecordsCount: 2, registeredShipmentNumbers: ['BG-1', 'BG-2'] };
+    axiosClient.postForm.mockResolvedValue({ data: result });
+
+    await expect(confirmPackageImport(file)).resolves.toEqual(result);
+    expect(axiosClient.postForm).toHaveBeenCalledWith('/v1/packages/import', { file });
+  });
+
+  it('propaga el error de la confirmación tal cual', async () => {
+    const error = { response: { status: 403 } };
+    axiosClient.postForm.mockRejectedValue(error);
+
+    await expect(confirmPackageImport(new File(['x'], 'a.csv'))).rejects.toBe(error);
   });
 });

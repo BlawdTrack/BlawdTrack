@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.blawdgourmet.blawdtrack.common.dto.ApiError;
+import com.blawdgourmet.blawdtrack.packages.exception.InvalidPackageUploadException;
+import com.blawdgourmet.blawdtrack.packages.parser.PackageFileParsingException;
 import com.blawdgourmet.blawdtrack.packages.service.PackageDeliveredException;
 import com.blawdgourmet.blawdtrack.packages.service.PackageDispatchedException;
 import com.blawdgourmet.blawdtrack.packages.service.PackageNotFoundException;
@@ -34,6 +36,12 @@ public class PackageExceptionHandler {
     @ExceptionHandler(PackageDeliveredException.class)
     public ResponseEntity<ApiError> manejarPaqueteEntregado(PackageDeliveredException ex) {
         return respond("PAQUETE_ENTREGADO", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    /** El archivo de la importación (HU-010) no se pudo abrir o leer: el mensaje dice qué tiene mal. */
+    @ExceptionHandler({InvalidPackageUploadException.class, PackageFileParsingException.class})
+    public ResponseEntity<ApiError> manejarArchivoDePaquetesInvalido(RuntimeException ex) {
+        return respond("INVALID_PACKAGE_FILE", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     private static ResponseEntity<ApiError> respond(String code, String message, HttpStatus status) {

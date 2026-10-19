@@ -97,7 +97,7 @@ sequenceDiagram
 | `CourierUpdateAuditTest` | Cinco campos modificados generan un registro con actor, afectado, fecha y detalle; el detalle indica solo los campos cambiados y en orden; un cuerpo idéntico o con peso numéricamente equivalente no registra nada; el detalle no contiene hashes ni valores; los errores (404, 409, 400, 403) no registran nada. |
 | `CourierUpdateAtomicityTest` | Si la auditoría falla se revierte el cambio del mensajero. |
 | `CourierListTest`, `CourierRepositoryFindAllTest` | El listado ordena por nombre, incluye inactivos y carga la cuenta sin sesión abierta; solo lo ve el Super Usuario. |
-| `CourierDeactivationValidatorTest`, `ProvisionalCourierWorkloadPortTest` | La validación lanza una excepción con asignaciones activas; el puerto provisional siempre responde "sin asignaciones". |
+| `CourierDeactivationValidatorTest`, `PackageCourierWorkloadPortTest` | La validación lanza una excepción con asignaciones activas; el puerto consulta los paquetes asignados al mensajero. |
 
 ### Frontend
 
@@ -108,8 +108,6 @@ sequenceDiagram
 ## Limitaciones conocidas en `develop`
 
 - `UpdateCourierRequest` no incluye el estado: no existe forma de cambiar el estado de acceso desde la edición.
-- `ProvisionalCourierWorkloadPort` siempre responde que no hay asignaciones activas (a la espera del módulo
-  de paquetes, Task #301).
 - El documento se resuelve por `Long.valueOf` primero, así que una cédula de solo dígitos se interpreta como
   id de mensajero.
 

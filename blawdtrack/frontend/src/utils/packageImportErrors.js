@@ -18,26 +18,39 @@ const MESSAGES = {
   fallback: 'No se pudo cargar el archivo. Intenta de nuevo.',
 };
 
-/**
- * @param {unknown} error Error de axios de la carga del archivo.
- * @returns {{ kind: string, fieldErrors: object, globalMessage: string|null, severity: string }}
- */
-export function normalizePackageImportError(error) {
+const normalizeWith = (messages) => (error) => {
   const status = error?.response?.status;
   const data = error?.response?.data;
 
   if (status === 400 && data?.code === INVALID_PACKAGE_FILE_CODE) {
-    return apiErrorResult('validation', { globalMessage: data.message || MESSAGES.invalidFile });
+    return apiErrorResult('validation', { globalMessage: data.message || messages.invalidFile });
   }
   if (status === 413) {
-    return apiErrorResult('validation', { globalMessage: MESSAGES.tooLarge });
+    return apiErrorResult('validation', { globalMessage: messages.tooLarge });
   }
 
   return normalizeApiError(error, {
-    messages: MESSAGES,
-    mapValidation: () => ({ globalMessage: MESSAGES.validationGeneric }),
-    mapConflict: () => ({ globalMessage: MESSAGES.fallback }),
+    messages,
+    mapValidation: () => ({ globalMessage: messages.validationGeneric }),
+    mapConflict: () => ({ globalMessage: messages.fallback }),
   });
-}
+};
+
+/**
+ * @param {unknown} error Error de axios de la carga del archivo.
+ * @returns {{ kind: string, fieldErrors: object, globalMessage: string|null, severity: string }}
+ */
+export const normalizePackageImportError = normalizeWith(MESSAGES);
+
+/**
+ * Igual que `normalizePackageImportError`, con los textos de la confirmación de la importación.
+ * @param {unknown} error Error de axios de la confirmación.
+ */
+export const normalizePackageConfirmError = normalizeWith({
+  ...MESSAGES,
+  forbidden: 'No tienes permiso para confirmar la importación de paquetes.',
+  server: 'Ocurrió un error inesperado al importar los paquetes. Intenta de nuevo en unos minutos.',
+  fallback: 'No se pudo completar la importación. Intenta de nuevo.',
+});
 
 export default normalizePackageImportError;
