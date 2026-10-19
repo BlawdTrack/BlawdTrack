@@ -81,6 +81,36 @@ class PackageBulkRegistrationIntegrationTest {
     }
 
     @Test
+    void guardaElRangoDeEntregaQueCalculanLasRestriccionesDeHorario() throws Exception {
+        String csv = """
+                Packing Number,SO Number,Customer Name,Shipping Address,Shipping Phone,Notes
+                ENV-300-1,SO-1,Cliente Uno,San Jose,8888-0001,
+                ENV-300-2,SO-2,Cliente Dos,Heredia,8888-0002,Antes de las 3 p.m.
+                ENV-300-3,SO-3,Cliente Tres,Alajuela,8888-0003,Después de las dos de la tarde
+                ENV-300-4,SO-4,Cliente Cuatro,Cartago,8888-0004,antes de las 10 a.m.
+                ENV-300-5,SO-5,Cliente Cinco,Limon,8888-0005,Dejar en recepción
+                """;
+
+        mvc.perform(multipart(ENDPOINT)
+                        .file(file(csv))
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.registeredRecordsCount").value(5));
+
+        assertWindow("ENV-300-1", LocalTime.of(9, 0), LocalTime.of(16, 0));   // sin restricción
+        assertWindow("ENV-300-2", LocalTime.of(9, 0), LocalTime.of(14, 0));   // una hora antes de las 3 p.m.
+        assertWindow("ENV-300-3", LocalTime.of(14, 0), LocalTime.of(16, 0));  // desde las 2 p.m.
+        assertWindow("ENV-300-4", LocalTime.of(9, 0), LocalTime.of(16, 0));   // rango imposible: por defecto
+        assertWindow("ENV-300-5", LocalTime.of(9, 0), LocalTime.of(16, 0));   // texto sin hora
+    }
+
+    private void assertWindow(String shipmentNumber, LocalTime start, LocalTime end) {
+        DeliveryPackage stored = find(shipmentNumber);
+        assertThat(stored.getDeliveryStartTime()).as(shipmentNumber).isEqualTo(start);
+        assertThat(stored.getDeliveryEndTime()).as(shipmentNumber).isEqualTo(end);
+    }
+
+    @Test
     void superUsuarioPuedeEjecutarRegistroMasivoPorSuPermisoDeImportacion() throws Exception {
         mvc.perform(multipart(ENDPOINT)
                         .file(file(CSV))
