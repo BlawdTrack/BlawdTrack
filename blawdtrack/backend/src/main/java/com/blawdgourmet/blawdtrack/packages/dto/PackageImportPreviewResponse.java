@@ -9,7 +9,7 @@ public record PackageImportPreviewResponse(
         int validRecordsCount,
         int invalidRecordsCount,
         int duplicateRecordsCount,
-        List<ImportedPackage> validRecords,
+        List<ValidPackagePreview> validRecords,
         List<InvalidPackageRecord> invalidRecords,
         List<PackageImportDuplicateResponse> duplicates
 ) {
@@ -17,5 +17,10 @@ public record PackageImportPreviewResponse(
         validRecords = List.copyOf(validRecords);
         invalidRecords = List.copyOf(invalidRecords);
         duplicates = List.copyOf(duplicates);
+    }
+
+    /** Los paquetes que se registrarían al confirmar, sin los datos propios de la previsualización. */
+    public List<ImportedPackage> importablePackages() {
+        return validRecords.stream().map(ValidPackagePreview::packageData).toList();
     }
 }

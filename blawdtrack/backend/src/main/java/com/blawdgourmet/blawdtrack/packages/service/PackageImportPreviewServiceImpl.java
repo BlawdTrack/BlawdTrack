@@ -8,6 +8,7 @@ import com.blawdgourmet.blawdtrack.packages.dto.PackageImportPreviewResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageValidationResult;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberComparisonResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberRowResult;
+import com.blawdgourmet.blawdtrack.packages.dto.ValidPackagePreview;
 import com.blawdgourmet.blawdtrack.packages.parser.PackageFileParser;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ public class PackageImportPreviewServiceImpl implements PackageImportPreviewServ
     private final PackageFileParser fileParser;
     private final PackageRecordValidationService recordValidationService;
     private final DuplicateExclusionService duplicateExclusionService;
+    private final DeliveryWindowPolicy deliveryWindowPolicy;
 
     @Override
     public PackageImportPreviewResponse preview(InputStream input, String fileName) {
@@ -42,10 +44,16 @@ public class PackageImportPreviewServiceImpl implements PackageImportPreviewServ
                 exclusion.importable().size(),
                 validation.invalidRecords().size(),
                 report.duplicateCount(),
-                exclusion.importable(),
+                withDeliveryWindow(exclusion.importable()),
                 validation.invalidRecords(),
                 summarizeDuplicates(report)
         );
+    }
+
+    private List<ValidPackagePreview> withDeliveryWindow(List<ImportedPackage> importable) {
+        return importable.stream()
+                .map(record -> new ValidPackagePreview(record, deliveryWindowPolicy.calculate(record.schedule())))
+                .toList();
     }
 
     private List<PackageImportDuplicateResponse> summarizeDuplicates(
