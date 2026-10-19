@@ -22,7 +22,7 @@ public class PackageImportExecutionService implements PackageImportExecutionUseC
     public PackageImportExecutionResponse execute(InputStream input, String fileName) {
         PackageImportPreviewResponse preview = previewService.preview(input, fileName);
         PackageBulkRegistrationResult registration =
-                bulkRegistrationUseCase.registerValidPackages(preview.validRecords());
+                bulkRegistrationUseCase.registerValidPackages(preview.importablePackages());
 
         return new PackageImportExecutionResponse(
                 preview.fileName(),
