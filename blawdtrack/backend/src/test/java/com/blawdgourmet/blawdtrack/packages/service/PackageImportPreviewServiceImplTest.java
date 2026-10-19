@@ -10,6 +10,7 @@ import com.blawdgourmet.blawdtrack.packages.dto.DuplicateExclusionResult;
 import com.blawdgourmet.blawdtrack.packages.dto.DuplicateShipmentNumberReason;
 import com.blawdgourmet.blawdtrack.packages.dto.ImportedPackage;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageValidationResult;
+import com.blawdgourmet.blawdtrack.packages.dto.ParsedPackageFile;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberComparisonResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberRowResult;
 import com.blawdgourmet.blawdtrack.packages.parser.PackageFileParser;
@@ -26,7 +27,7 @@ class PackageImportPreviewServiceImplTest {
     private final DuplicateExclusionService exclusionService =
             mock(DuplicateExclusionService.class);
     private final PackageImportPreviewService service = new PackageImportPreviewServiceImpl(
-            parser, validationService, exclusionService);
+            parser, validationService, exclusionService, new ConflictingCopyDuplicates());
 
     @Test
     void cuentaFilasDuplicadasYNoSoloGrupos() {
@@ -46,7 +47,7 @@ class PackageImportPreviewServiceImplTest {
                         new ShipmentNumberRowResult(1, "ENV-REPETIDO", reasons, List.of(2)),
                         new ShipmentNumberRowResult(2, "ENV-REPETIDO", reasons, List.of(1))));
 
-        when(parser.parse(input, "repetidos.csv")).thenReturn(parsed);
+        when(parser.parseFile(input, "repetidos.csv")).thenReturn(new ParsedPackageFile(parsed, List.of()));
         when(validationService.validate(parsed))
                 .thenReturn(new PackageValidationResult(parsed, List.of()));
         when(exclusionService.excludeDuplicates(eq(parsed), any()))
@@ -66,6 +67,37 @@ class PackageImportPreviewServiceImplTest {
             assertThat(duplicate.occurrences()).isEqualTo(2);
             assertThat(duplicate.reasons())
                     .containsExactly(DuplicateShipmentNumberReason.DUPLICATED_IN_FILE);
+        });
+    }
+
+    @Test
+    void lasCopiasConDatosContradictoriosSeCuentanComoDuplicadasYElPrimeroSeConserva() {
+        InputStream input = new ByteArrayInputStream(new byte[] {1});
+        ImportedPackage first = packageWithShipmentNumber("ENV-1");
+        ImportedPackage other = packageWithShipmentNumber("ENV-2");
+        ImportedPackage copy =
+                new ImportedPackage("ENV-1", "SO-9", "Otro cliente", "Heredia", "7777-7777", null, List.of());
+        List<ImportedPackage> kept = List.of(first, other);
+        ShipmentNumberComparisonResponse report = new ShipmentNumberComparisonResponse(2, 2, 0, 0, 0, List.of());
+
+        when(parser.parseFile(input, "conflicto.csv")).thenReturn(new ParsedPackageFile(kept, List.of(copy)));
+        when(validationService.validate(kept)).thenReturn(new PackageValidationResult(kept, List.of()));
+        when(exclusionService.excludeDuplicates(eq(kept), any()))
+                .thenReturn(new DuplicateExclusionResult<>(kept, report));
+
+        var preview = service.preview(input, "conflicto.csv");
+
+        assertThat(preview.totalRecords()).isEqualTo(3);
+        assertThat(preview.validRecordsCount()).isEqualTo(2);
+        assertThat(preview.duplicateRecordsCount()).isEqualTo(1);
+        assertThat(preview.validRecordsCount()
+                + preview.invalidRecordsCount()
+                + preview.duplicateRecordsCount()).isEqualTo(preview.totalRecords());
+        assertThat(preview.validRecords()).containsExactly(first, other);
+        assertThat(preview.duplicates()).singleElement().satisfies(duplicate -> {
+            assertThat(duplicate.shipmentNumber()).isEqualTo("ENV-1");
+            assertThat(duplicate.occurrences()).isEqualTo(1);
+            assertThat(duplicate.reasons()).containsExactly(DuplicateShipmentNumberReason.DUPLICATED_IN_FILE);
         });
     }
 

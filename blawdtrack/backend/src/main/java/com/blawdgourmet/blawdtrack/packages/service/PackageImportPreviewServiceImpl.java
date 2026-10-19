@@ -6,6 +6,7 @@ import com.blawdgourmet.blawdtrack.packages.dto.ImportedPackage;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportDuplicateResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportPreviewResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageValidationResult;
+import com.blawdgourmet.blawdtrack.packages.dto.ParsedPackageFile;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberComparisonResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberRowResult;
 import com.blawdgourmet.blawdtrack.packages.parser.PackageFileParser;
@@ -26,10 +27,13 @@ public class PackageImportPreviewServiceImpl implements PackageImportPreviewServ
     private final PackageFileParser fileParser;
     private final PackageRecordValidationService recordValidationService;
     private final DuplicateExclusionService duplicateExclusionService;
+    private final ConflictingCopyDuplicates conflictingCopyDuplicates;
 
     @Override
     public PackageImportPreviewResponse preview(InputStream input, String fileName) {
-        List<ImportedPackage> parsedRecords = fileParser.parse(input, fileName);
+        ParsedPackageFile file = fileParser.parseFile(input, fileName);
+        List<ImportedPackage> parsedRecords = file.packages();
+        int conflictingCopies = file.conflictingCopies().size();
         PackageValidationResult validation = recordValidationService.validate(parsedRecords);
         DuplicateExclusionResult<ImportedPackage> exclusion =
                 duplicateExclusionService.excludeDuplicates(
@@ -38,13 +42,13 @@ public class PackageImportPreviewServiceImpl implements PackageImportPreviewServ
 
         return new PackageImportPreviewResponse(
                 fileName,
-                parsedRecords.size(),
+                parsedRecords.size() + conflictingCopies,
                 exclusion.importable().size(),
                 validation.invalidRecords().size(),
-                report.duplicateCount(),
+                report.duplicateCount() + conflictingCopies,
                 exclusion.importable(),
                 validation.invalidRecords(),
-                summarizeDuplicates(report)
+                conflictingCopyDuplicates.addTo(summarizeDuplicates(report), file.conflictingCopies())
         );
     }
 
