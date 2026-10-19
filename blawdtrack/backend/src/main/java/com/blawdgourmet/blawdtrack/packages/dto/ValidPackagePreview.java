@@ -1,6 +1,6 @@
 package com.blawdgourmet.blawdtrack.packages.dto;
 
-import com.blawdgourmet.blawdtrack.packages.service.DeliveryWindow;
+import com.blawdgourmet.blawdtrack.packages.model.DeliveryWindow;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**

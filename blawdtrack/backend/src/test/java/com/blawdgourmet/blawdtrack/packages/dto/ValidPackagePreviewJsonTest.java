@@ -2,7 +2,7 @@ package com.blawdgourmet.blawdtrack.packages.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.blawdgourmet.blawdtrack.packages.service.DeliveryWindow;
+import com.blawdgourmet.blawdtrack.packages.model.DeliveryWindow;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
