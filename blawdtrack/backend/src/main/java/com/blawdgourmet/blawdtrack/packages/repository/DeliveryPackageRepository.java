@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.packages.repository;
 
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
+import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -25,6 +26,12 @@ public interface DeliveryPackageRepository extends JpaRepository<DeliveryPackage
             "items"
     })
     Optional<DeliveryPackage> findByShipmentNumber(String shipmentNumber);
+
+    /**
+     * Indica si el mensajero (id de {@code mensajeros}, no el del usuario) tiene algún paquete asignado cuyo estado no
+     * está entre los excluidos; se usa para saber si tiene trabajo pendiente.
+     */
+    boolean existsByAssignedCourierIdAndStatusNotIn(Long courierId, Collection<PackageStatus> statuses);
 
     @Query("select upper(p.shipmentNumber) from DeliveryPackage p "
             + "where upper(p.shipmentNumber) in :shipmentNumbers")

@@ -19,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,14 +69,50 @@ class PackageShipmentNumberComparisonIntegrationTest {
     }
 
     @Test
-    void soloAdministradorDeVentasPuedeEjecutarLaComparacion() throws Exception {
-        for (String role : new String[] {RoleName.SUPER_USER, RoleName.COURIER}) {
-            mvc.perform(post(ENDPOINT)
-                            .header("Authorization", "Bearer " + token(role))
-                            .contentType(JSON)
-                            .content("no-es-json"))
-                    .andExpect(status().isForbidden());
-        }
+    void elSuperUsuarioTambienPuedeEjecutarLaComparacion() throws Exception {
+        mvc.perform(post(ENDPOINT)
+                        .header("Authorization", "Bearer " + token(RoleName.SUPER_USER))
+                        .contentType(JSON)
+                        .content("{\"shipmentNumbers\":[\"ENV-00960\"]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.validCount").value(1));
+    }
+
+    @Test
+    void elMensajeroNoPuedeEjecutarLaComparacion() throws Exception {
+        mvc.perform(post(ENDPOINT)
+                        .header("Authorization", "Bearer " + token(RoleName.COURIER))
+                        .contentType(JSON)
+                        .content("no-es-json"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void laImportacionEstaAbiertaAlSuperUsuarioYCerradaAlMensajero() throws Exception {
+        // La ruta de importacion aun no tiene controlador en esta rama: lo que se verifica es el filtro de seguridad.
+        // Un rol autorizado la atraviesa (no recibe 403; al no existir el endpoint la respuesta es otra) y el mensajero se detiene en el filtro (403).
+        mvc.perform(post("/api/v1/packages/import/preview")
+                        .header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
+                .andExpect(status().is(not(403)));
+        mvc.perform(post("/api/v1/packages/import/preview")
+                        .header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
+                .andExpect(status().is(not(403)));
+        mvc.perform(post("/api/v1/packages/import/preview")
+                        .header("Authorization", "Bearer " + token(RoleName.COURIER)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void todasLasRutasDePaquetesEstanAbiertasAlSuperUsuarioYCerradasAlMensajero() throws Exception {
+        // Ruta general de paquetes (la ocupan eliminar, detalle, historial y busqueda): el Super Usuario tiene acceso
+        // a todos los modulos; el mensajero no tiene ninguno de paquetes.
+        String route = "/api/v1/packages/ENV-1";
+        mvc.perform(get(route).header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
+                .andExpect(status().is(not(403)));
+        mvc.perform(get(route).header("Authorization", "Bearer " + token(RoleName.SALES_ADMIN)))
+                .andExpect(status().is(not(403)));
+        mvc.perform(get(route).header("Authorization", "Bearer " + token(RoleName.COURIER)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
