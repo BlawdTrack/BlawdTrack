@@ -1,4 +1,4 @@
-package com.blawdgourmet.blawdtrack.packages.service;
+package com.blawdgourmet.blawdtrack.packages.model;
 
 import java.time.LocalTime;
 
