@@ -281,13 +281,17 @@ export function isGroupActive(group, pathname) {
 
 /**
  * Menú al que lleva la flecha junto al título desde `pathname`: la pantalla de una función vuelve al menú que la
- * lista (su submenú, o su grupo si no tiene) y el menú de un submenú vuelve al de su grupo. El menú de un grupo no
+ * lista (su submenú, o su grupo si no tiene), la ficha de un paquete vuelve a Consultar paquetes y el menú de un
+ * submenú vuelve al de su grupo. El menú de un grupo no
  * tiene flecha: para salir de ahí está el enlace al menú principal. La pantalla de un módulo de una sola pantalla
  * tampoco (no tiene menú al que volver).
  * @param {string} pathname Ruta actual.
  * @returns {{ to: string, label: string } | null}
  */
 export function getParentMenu(pathname) {
+  // La ficha de un paquete cuelga de la lista de resultados: la flecha vuelve a ella, no al menú del módulo.
+  if (pathname.startsWith(`${ROUTES.PACKAGE_SEARCH}/`)) return { to: ROUTES.PACKAGE_SEARCH, label: 'Consultar paquetes' };
+
   const group = NAVIGATION_GROUPS.find((candidate) => candidate.submenus?.some((submenu) => submenu.path === pathname));
   if (group) return { to: group.path, label: group.title };
 

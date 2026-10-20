@@ -235,6 +235,11 @@ describe('getParentMenu', () => {
     expect(getParentMenu(ROUTES.PASSWORD_RESET_OWN)).toEqual({ to: ROUTES.MODULE_SETTINGS, label: 'Ajustes' });
   });
 
+  it('sends the ficha of a package back to Consultar paquetes', () => {
+    expect(getParentMenu(`${ROUTES.PACKAGE_SEARCH}/SO-01017`)).toEqual({ to: ROUTES.PACKAGE_SEARCH, label: 'Consultar paquetes' });
+    expect(getParentMenu(ROUTES.PACKAGE_SEARCH)).toEqual({ to: ROUTES.MODULE_PACKAGE_MANAGEMENT, label: 'Gestión de paquetes' });
+  });
+
   it('has no parent on the screen of a single-screen module: there is no menu to go back to', () => {
     expect(getParentMenu(ROUTES.PACKAGE_IMPORT)).toBeNull();
   });
