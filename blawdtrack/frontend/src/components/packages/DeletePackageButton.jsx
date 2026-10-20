@@ -1,15 +1,15 @@
 import { useId } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { useCanDeletePackages } from '../../hooks/useCanDeletePackages';
 import { isPackageDeletable } from '../../config/packageStates';
 import { getPackageStatusMeta } from '../../config/packageStatus';
-import { RADIUS, FONT, rem } from '../../theme';
+import { RADIUS, FONT } from '../../theme';
 
 /**
- * Botón "Eliminar" de un paquete (HU-012). Solo existe para el Administrador de Ventas y el Súper Usuario; para
- * cualquier otro rol no se renderiza. En Pendiente o Asignado es un botón rojo lleno; en los demás estados queda en gris con
- * `aria-disabled` (sigue siendo enfocable) y un texto de ayuda asociado. Al pulsarlo solo emite `onDelete` (o
+ * Botón "Eliminar paquete" (HU-012): ocupa todo el ancho y lleva en su interior el título y la regla. Solo existe para el Administrador de Ventas y el Súper Usuario; para
+ * cualquier otro rol no se renderiza. En Pendiente o Asignado es rojo lleno; en los demás estados queda en gris con
+ * `aria-disabled` (sigue siendo enfocable) y su texto de ayuda dentro, asociado con `aria-describedby`. Al pulsarlo solo emite `onDelete` (o
  * `onBlocked` si el paquete no es eliminable): no llama a la API ni abre el diálogo de confirmación.
  * @param {{ pkg: { shipmentNumber: string, status: string }, onDelete: (pkg: object) => void,
  *   onBlocked?: (pkg: object) => void }} props `pkg` llega con la forma del backend; `onDelete` lo recibe tal cual.
@@ -34,40 +34,49 @@ export default function DeletePackageButton({ pkg, onDelete, onBlocked }) {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-      <Button
-        variant={isDeletable ? 'contained' : 'outlined'}
-        disableElevation
-        startIcon={<DeleteOutlineOutlinedIcon />}
-        onClick={handleClick}
-        data-testid="delete-package-button"
-        aria-disabled={isDeletable ? undefined : 'true'}
-        aria-describedby={isDeletable ? undefined : hintId}
-        sx={{
-          borderRadius: RADIUS.sm,
-          px: 3,
-          minHeight: rem(48),
-          fontWeight: 600,
-          fontSize: FONT.md,
+    <Button
+      fullWidth
+      variant={isDeletable ? 'contained' : 'outlined'}
+      disableElevation
+      onClick={handleClick}
+      aria-label="Eliminar paquete"
+      data-testid="delete-package-button"
+      aria-disabled={isDeletable ? undefined : 'true'}
+      aria-describedby={isDeletable ? undefined : hintId}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 0.25,
+        py: 1.75,
+        px: 3,
+        textAlign: 'center',
+        borderRadius: RADIUS.md,
+        borderWidth: '1.5px',
+        color: isDeletable ? 'error.contrastText' : 'text.secondary',
+        bgcolor: isDeletable ? 'error.main' : 'background.paper',
+        borderColor: isDeletable ? 'error.main' : 'neutral.border',
+        cursor: isDeletable ? 'pointer' : 'not-allowed',
+        '&:hover': {
           borderWidth: '1.5px',
-          color: isDeletable ? 'error.contrastText' : 'text.secondary',
-          bgcolor: isDeletable ? 'error.main' : 'background.paper',
-          borderColor: isDeletable ? 'error.main' : 'neutral.border',
-          cursor: isDeletable ? 'pointer' : 'not-allowed',
-          '&:hover': {
-            borderWidth: '1.5px',
-            bgcolor: isDeletable ? 'error.dark' : 'background.paper',
-            borderColor: isDeletable ? 'error.dark' : 'neutral.border',
-          },
-        }}
-      >
+          bgcolor: isDeletable ? 'error.dark' : 'background.paper',
+          borderColor: isDeletable ? 'error.dark' : 'neutral.border',
+        },
+      }}
+    >
+      <Typography component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: FONT.lg, fontWeight: 700, color: 'inherit' }}>
+        <DeleteOutlineOutlinedIcon fontSize="small" />
         Eliminar paquete
-      </Button>
-      {!isDeletable && (
-        <Typography id={hintId} sx={{ fontSize: FONT.xs, color: 'text.secondary' }}>
+      </Typography>
+      {isDeletable ? (
+        <Typography component="span" sx={{ fontSize: FONT.sm, fontWeight: 500, color: 'inherit' }}>
+          Solo se puede eliminar un paquete que aún no fue despachado (Pendiente o Asignado).
+        </Typography>
+      ) : (
+        <Typography id={hintId} component="span" sx={{ fontSize: FONT.sm, fontWeight: 500, color: 'inherit' }}>
           No eliminable en “{getPackageStatusMeta(pkg.status).label}”
         </Typography>
       )}
-    </Box>
+    </Button>
   );
 }

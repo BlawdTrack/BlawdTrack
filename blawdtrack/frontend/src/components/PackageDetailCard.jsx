@@ -137,14 +137,14 @@ function EvidenceBlock({ pkg }) {
 /**
  * Ficha de consulta de un paquete (solo lectura): encabezado verde con el número de envío, la orden y el estado real,
  * el avance del paquete, la tarjeta "Datos de la entrega" (cliente, dirección, horario, mensajero, artículos y, si está
- * entregado, la evidencia) y, al lado, lo que se pase en `aside` (el seguimiento). Al pie, si hay `actions`, la zona
- * para eliminar el paquete.
+ * entregado, la evidencia) y, al lado, lo que se pase en `aside` (el seguimiento). Al pie, si hay `actions`, el
+ * botón para eliminar el paquete, que ocupa todo el ancho.
  *
  * Todos los datos vienen del `PackageDetailResponse` del backend; los campos opcionales sin información se muestran
  * como "No disponible" / "No especificado" en vez de inventar valores.
  *
  * @param {{ pkg: object, actions?: import('react').ReactNode, notice?: string, aside?: import('react').ReactNode }} props
- *   `pkg` es el detalle devuelto por el backend; `actions`, si se pasa, se muestra en la zona "Eliminar paquete" (por
+ *   `pkg` es el detalle devuelto por el backend; `actions`, si se pasa, se muestra al pie (por
  *   ejemplo, el botón de HU-012); `notice`, si se pasa, es una leyenda que se abre desde un ! junto al número de envío;
  *   `aside` es el contenido de la columna derecha (historial y comprobante).
  */
@@ -288,33 +288,7 @@ export default function PackageDetailCard({ pkg, actions = null, notice = null, 
         {aside && <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>{aside}</Box>}
       </Box>
 
-      {actions && (
-        <Paper
-          elevation={0}
-          component="section"
-          aria-label="Eliminar paquete"
-          sx={{
-            ...CARD_SX,
-            borderColor: 'error.main',
-            bgcolor: 'error.light',
-            px: { xs: 2.5, md: 3.25 },
-            py: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 2,
-          }}
-        >
-          <Box>
-            <Typography sx={{ fontSize: FONT.lg, fontWeight: 700, color: 'error.text' }}>Eliminar paquete</Typography>
-            <Typography sx={{ fontSize: FONT.sm, color: 'error.text' }}>
-              Solo se puede eliminar un paquete que aún no fue despachado (Pendiente o Asignado).
-            </Typography>
-          </Box>
-          {actions}
-        </Paper>
-      )}
+      {actions}
     </Box>
   );
 }
