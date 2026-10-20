@@ -175,6 +175,7 @@ describe('ImportPreviewView', () => {
     render(<ImportPreviewView preview={previewOf()} />);
 
     const alert = screen.getByRole('alert');
+    expect(alert).toBe(screen.getByTestId('import-summary'));
     expect(alert).toHaveTextContent('2 registros con errores y 1 duplicado en zoho.xlsx');
     expect(alert).toHaveTextContent('Se excluyen de la importación');
     expect(screen.getByTestId('import-count-read')).toHaveTextContent('6');

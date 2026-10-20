@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU011-02 Duplicado dentro del archivo</description>
+   <name>TC-HU011-02_Duplicado_dentro_del_archivo</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>6ead748b-65be-450e-8565-be429f7f3298</testCaseGuid>
+</TestCaseEntity>

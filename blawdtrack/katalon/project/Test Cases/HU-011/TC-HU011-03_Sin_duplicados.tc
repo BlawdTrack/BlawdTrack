@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU011-03 Sin duplicados</description>
+   <name>TC-HU011-03_Sin_duplicados</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>865b898b-495d-477c-84ba-e04e88883e6a</testCaseGuid>
+</TestCaseEntity>
