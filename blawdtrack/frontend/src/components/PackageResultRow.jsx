@@ -2,13 +2,31 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Box, Link, Typography } from '@mui/material';
 import { packageDetailPath } from '../config/routes';
 import { FONT } from '../theme';
+import { splitAddressLink } from '../utils/addressLink';
 import { displayValue, formatPackageSchedule } from '../utils/packageFormat';
+import MapLinkButton from './MapLinkButton';
 import PackageStatusBadge from './PackageStatusBadge';
 import StatusRow from './StatusRow';
 
 const COLUMN_SX = { flex: '1 1 170px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25 };
 
 const isFilled = (value) => value !== null && value !== undefined && String(value).trim() !== '';
+
+/** Dirección: el texto y, si traía pegado un enlace de Waze o Maps, un botón que lo abre. */
+function Address({ address }) {
+  const { text, link } = splitAddressLink(address);
+
+  return (
+    <>
+      {(text || !link) && (
+        <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary', overflowWrap: 'anywhere' }}>
+          {link ? text : displayValue(address)}
+        </Typography>
+      )}
+      {link && <MapLinkButton link={link} />}
+    </>
+  );
+}
 
 /** Número de envío: enlace a la ficha del paquete (HU-013), o texto si la fila no trae número. */
 function ShipmentNumber({ shipmentNumber }) {
@@ -49,9 +67,7 @@ export function PackageResultRow({ pkg }) {
         <Typography component="span" sx={{ fontSize: FONT.md, color: 'text.primary' }}>
           {displayValue(pkg?.customerName)}
         </Typography>
-        <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary', overflowWrap: 'anywhere' }}>
-          {displayValue(pkg?.address)}
-        </Typography>
+        <Address address={pkg?.address} />
         {isFilled(pkg?.phone) && (
           <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
             {pkg.phone}

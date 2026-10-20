@@ -32,4 +32,20 @@ describe('PackageResultRow', () => {
     expect(screen.getByText('Horario: 8:00 am - 12:00 pm')).toBeInTheDocument();
     expect(screen.getByText('Pendiente')).toBeInTheDocument();
   });
+
+  it('muestra el texto de la dirección y un botón Maps cuando trae un enlace pegado', () => {
+    render(
+      <MemoryRouter>
+        <ul>
+          <PackageResultRow
+            pkg={{ id: 1, shipmentNumber: 'BG-1', customerName: 'Ana', address: 'Desamparados\nhttps://maps.app.goo.gl/hkVWJQqKTxnoWTDh7', status: 'PENDING' }}
+          />
+        </ul>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Desamparados')).toBeInTheDocument();
+    expect(screen.queryByText(/maps\.app\.goo\.gl/)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Abrir ubicación en Maps' })).toHaveAttribute('href', 'https://maps.app.goo.gl/hkVWJQqKTxnoWTDh7');
+  });
 });
