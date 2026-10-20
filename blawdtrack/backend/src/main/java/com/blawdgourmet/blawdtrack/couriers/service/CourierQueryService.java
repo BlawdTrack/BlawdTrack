@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.model.AuditCategory;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierDeactivationEntry;
 import com.blawdgourmet.blawdtrack.couriers.dto.CourierGeneralHistoryEntry;
@@ -22,12 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CourierQueryService {
 
-    private static final List<String> COURIER_AUDIT_ACTIONS = List.of(
-            AuditAction.COURIER_CREATED.getCode(),
-            AuditAction.COURIER_UPDATED.getCode(),
-            AuditAction.COURIER_DEACTIVATED.getCode(),
-            AuditAction.COURIER_ACTIVATED.getCode(),
-            AuditAction.COURIER_PASSWORD_CHANGED.getCode());
+    private static final List<String> COURIER_AUDIT_ACTIONS = AuditAction.codesOf(AuditCategory.COURIER);
 
     private final CourierRepository couriers;
     private final AuditLogRepository auditLogs;

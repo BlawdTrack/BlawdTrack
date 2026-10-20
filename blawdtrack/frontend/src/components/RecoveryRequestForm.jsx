@@ -51,6 +51,7 @@ export function RecoveryRequestForm({ request }) {
         fullWidth
         variant="contained"
         disabled={loading}
+        data-testid="recovery-submit"
         endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
         sx={AUTH_BUTTON_SX}
       >

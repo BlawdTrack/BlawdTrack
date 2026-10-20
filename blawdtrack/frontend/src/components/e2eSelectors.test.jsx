@@ -2,9 +2,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import EditFormActions from './EditFormActions';
 import FormActions from './FormActions';
+import { NewPasswordForm } from './NewPasswordForm';
+import { NewPasswordInvalidLink, NewPasswordSuccess } from './NewPasswordOutcomes';
+import PackageProofCard from './PackageProofCard';
 import PackageLoadMore from './PackageLoadMore';
 import PackageSearchSummary from './PackageSearchSummary';
 import PreviewCounters from './preview/PreviewCounters';
+import { RecoveryEmailSent } from './RecoveryEmailSent';
+import { RecoveryRequestForm } from './RecoveryRequestForm';
 import StatCard from './StatCard';
 import StatusRow from './StatusRow';
 
@@ -58,5 +63,46 @@ describe('selectores de las pruebas de extremo a extremo', () => {
     ['form-submit', 'form-discard', 'edit-save', 'edit-discard'].forEach((id) => {
       expect(screen.getByTestId(id)).toBeInTheDocument();
     });
+  });
+
+  it('la recuperación de contraseña', () => {
+    const request = {
+      email: '', emailError: '', loading: false, sentEmail: 'a@b.test', resendWait: { running: false, remaining: 0 },
+      onEmailChange: vi.fn(), onSubmit: vi.fn(), onResend: vi.fn(), onUseAnotherEmail: vi.fn(),
+    };
+    const reset = {
+      newPassword: '', confirmPassword: '', loading: false, error: null, historyRejected: false,
+      confirmMismatch: false, canSubmit: true, onNewPasswordChange: vi.fn(), onConfirmPasswordChange: vi.fn(),
+      onSubmit: vi.fn(),
+    };
+    render(
+      <>
+        <RecoveryRequestForm request={request} />
+        <RecoveryEmailSent request={request} />
+        <NewPasswordForm reset={reset} />
+        <NewPasswordSuccess />
+        <NewPasswordInvalidLink rejected />
+      </>
+    );
+
+    [
+      'recovery-submit', 'recovery-email-sent', 'recovery-resend', 'recovery-use-another', 'new-password-submit',
+      'new-password-success', 'new-password-go-login', 'new-password-invalid-link', 'new-password-request-link',
+    ].forEach((id) => {
+      expect(screen.getByTestId(id)).toBeInTheDocument();
+    });
+  });
+
+  it('el comprobante de entrega', () => {
+    const delivered = { status: 'DELIVERED', shipmentNumber: 'E2E-ENTR-01', deliveryPhotoUrl: 'https://cdn.test/foto.png' };
+    const { rerender } = render(<PackageProofCard pkg={delivered} entries={[]} />);
+
+    ['package-proof-card', 'package-proof-summary', 'delivery-photo', 'delivery-photo-image'].forEach((id) => {
+      expect(screen.getByTestId(id)).toBeInTheDocument();
+    });
+
+    rerender(<PackageProofCard pkg={{ status: 'PENDING' }} entries={[]} />);
+
+    expect(screen.getByTestId('package-proof-empty')).toBeInTheDocument();
   });
 });
