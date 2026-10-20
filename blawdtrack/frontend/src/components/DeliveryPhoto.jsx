@@ -44,7 +44,7 @@ export function DeliveryPhoto({ photoUrl, shipmentNumber }) {
   const handleRetry = () => setRetryNonce((nonce) => nonce + 1);
 
   return (
-  <Box sx={PHOTO_FRAME_SX}>
+  <Box data-testid="delivery-photo" sx={PHOTO_FRAME_SX}>
     {/* Sin fotografía registrada: marcador de posición explícito, que no
         afirma que exista evidencia fotográfica. */}
     {photoUrl === null && (
@@ -74,7 +74,7 @@ export function DeliveryPhoto({ photoUrl, shipmentNumber }) {
         <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.5 }}>
           No fue posible cargar la fotografía de la entrega. Inténtalo de nuevo.
         </Typography>
-        <Button variant="outlined" onClick={handleRetry} sx={{ minHeight: TOUCH_TARGET, px: 3 }}>
+        <Button variant="outlined" onClick={handleRetry} data-testid="delivery-photo-retry" sx={{ minHeight: TOUCH_TARGET, px: 3 }}>
           Reintentar
         </Button>
       </Box>
@@ -83,6 +83,7 @@ export function DeliveryPhoto({ photoUrl, shipmentNumber }) {
     {photoUrl !== null && photoState !== PHOTO_STATE.ERROR && (
       <Box
         component="img"
+        data-testid="delivery-photo-image"
         key={retryNonce}
         src={photoUrl}
         alt={`Fotografía de la entrega del paquete ${shipmentNumber ?? ''}`.trim()}

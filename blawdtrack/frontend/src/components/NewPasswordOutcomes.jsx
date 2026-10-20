@@ -12,14 +12,14 @@ import { PASSWORD_RESET_MESSAGES } from '../utils/passwordResetErrors';
  */
 export function NewPasswordSuccess({ onGoToLogin }) {
   return (
-    <Box role="status" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box role="status" data-testid="new-password-success" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <AuthStateHeader
         icon={CheckCircleOutlinedIcon}
         tone="success"
         title="¡Contraseña actualizada!"
         description="Ya puedes iniciar sesión con tu nueva contraseña."
       />
-      <Button fullWidth variant="contained" onClick={() => onGoToLogin?.()} sx={AUTH_BUTTON_SX}>
+      <Button fullWidth variant="contained" onClick={() => onGoToLogin?.()} data-testid="new-password-go-login" sx={AUTH_BUTTON_SX}>
         Ir a iniciar sesión
       </Button>
     </Box>
@@ -32,14 +32,14 @@ export function NewPasswordSuccess({ onGoToLogin }) {
  */
 export function NewPasswordInvalidLink({ rejected, onRequestNewLink }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box data-testid="new-password-invalid-link" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <AuthStateHeader icon={LinkOffOutlinedIcon} tone="error" title="Enlace no válido" />
       {/* StatusMessage ya expone role="alert". */}
       <StatusMessage
         severity="error"
         message={rejected ? PASSWORD_RESET_MESSAGES.rejectedToken : PASSWORD_RESET_MESSAGES.missingToken}
       />
-      <Button fullWidth variant="contained" onClick={() => onRequestNewLink?.()} sx={AUTH_BUTTON_SX}>
+      <Button fullWidth variant="contained" onClick={() => onRequestNewLink?.()} data-testid="new-password-request-link" sx={AUTH_BUTTON_SX}>
         Solicitar un enlace nuevo
       </Button>
     </Box>
