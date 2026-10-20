@@ -38,7 +38,7 @@ describe('PackageDetailCard: acciones al pie (HU-012 / T05)', () => {
     const onDelete = renderCardWithDeleteButton(role);
 
     const card = screen.getByRole('region', { name: 'Ficha del paquete BG-2026-00125' });
-    await userEvent.click(within(card).getByRole('button', { name: 'Eliminar' }));
+    await userEvent.click(within(card).getByRole('button', { name: 'Eliminar paquete' }));
 
     expect(onDelete).toHaveBeenCalledWith(PKG);
   });
@@ -47,7 +47,7 @@ describe('PackageDetailCard: acciones al pie (HU-012 / T05)', () => {
     renderCardWithDeleteButton(ROLES.COURIER);
 
     expect(screen.getByRole('region', { name: 'Ficha del paquete BG-2026-00125' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Eliminar paquete' })).not.toBeInTheDocument();
   });
 });
 
