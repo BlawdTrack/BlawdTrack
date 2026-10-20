@@ -1,7 +1,9 @@
 import { Box, Link, Paper, Typography } from '@mui/material';
 import BrandLogo from './BrandLogo';
+import MapLinkButton from './MapLinkButton';
 import { LABEL_SX } from './formStyles';
 import { getPackageStatusMeta } from '../config/packageStatus';
+import { splitAddressLink } from '../utils/addressLink';
 import { CARD_PATTERN_SX, FONT, RADIUS, rem } from '../theme';
 
 const NO_DISPONIBLE = 'No disponible';
@@ -19,6 +21,18 @@ function InfoBlock({ label, sx, children }) {
         {label}
       </Typography>
       {children}
+    </Box>
+  );
+}
+
+/** Dirección de entrega: el texto y, si traía pegado un enlace de Waze o Maps, un botón que lo abre. */
+function AddressValue({ address }) {
+  const { text, link } = splitAddressLink(address);
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+      {(text || !link) && <Typography sx={VALUE_SX}>{text || NO_DISPONIBLE}</Typography>}
+      {link && <MapLinkButton link={link} />}
     </Box>
   );
 }
@@ -213,7 +227,7 @@ export default function PackageDetailCard({ pkg, actions = null }) {
         </InfoBlock>
 
         <InfoBlock label="Dirección de entrega">
-          <Typography sx={VALUE_SX}>{pkg.address || NO_DISPONIBLE}</Typography>
+          <AddressValue address={pkg.address} />
         </InfoBlock>
 
         <InfoBlock label="Horario de preferencia">

@@ -50,3 +50,27 @@ describe('PackageDetailCard: acciones al pie (HU-012 / T05)', () => {
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
   });
 });
+
+describe('PackageDetailCard: dirección con enlace de mapa', () => {
+  const card = () => screen.getByRole('region', { name: 'Ficha del paquete BG-2026-00125' });
+
+  it('muestra el texto de la dirección y un botón que abre el enlace de Maps pegado en ella', () => {
+    const pkg = { ...PKG, address: 'Desamparados\nhttps://maps.app.goo.gl/hkVWJQqKTxnoWTDh7' };
+    renderWithProviders(<PackageDetailCard pkg={pkg} />, { user: userWithRole(ROLES.SALES_ADMIN) });
+
+    expect(within(card()).getByText('Desamparados')).toBeInTheDocument();
+    expect(within(card()).queryByText(/maps\.app\.goo\.gl/)).not.toBeInTheDocument();
+    const link = within(card()).getByRole('link', { name: 'Abrir ubicación en Maps' });
+    expect(link).toHaveAttribute('href', 'https://maps.app.goo.gl/hkVWJQqKTxnoWTDh7');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('una dirección de texto no lleva botón y una vacía dice "No disponible"', () => {
+    const { rerender } = renderWithProviders(<PackageDetailCard pkg={PKG} />, { user: userWithRole(ROLES.SALES_ADMIN) });
+    expect(within(card()).getByText('Atenas, Alajuela')).toBeInTheDocument();
+    expect(within(card()).queryByRole('link')).not.toBeInTheDocument();
+
+    rerender(<PackageDetailCard pkg={{ ...PKG, address: '' }} />);
+    expect(within(card()).getAllByText('No disponible').length).toBeGreaterThan(0);
+  });
+});
