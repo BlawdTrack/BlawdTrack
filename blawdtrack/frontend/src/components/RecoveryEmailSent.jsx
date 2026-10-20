@@ -15,7 +15,7 @@ export function RecoveryEmailSent({ request }) {
   const { sentEmail, loading, resendWait, onResend, onUseAnotherEmail } = request;
 
   return (
-    <Box role="status" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box role="status" data-testid="recovery-email-sent" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <AuthStateHeader
         icon={MarkEmailReadOutlinedIcon}
         tone="success"
@@ -39,6 +39,7 @@ export function RecoveryEmailSent({ request }) {
         variant="outlined"
         onClick={onResend}
         disabled={loading || resendWait.running}
+        data-testid="recovery-resend"
         sx={AUTH_BUTTON_SX}
       >
         {loading ? (
@@ -59,6 +60,7 @@ export function RecoveryEmailSent({ request }) {
         type="button"
         onClick={onUseAnotherEmail}
         underline="always"
+        data-testid="recovery-use-another"
         sx={{ ...LINK_BUTTON_SX, ...FOCUS_RING_SX, alignSelf: 'flex-start', minHeight: 44, fontSize: FONT.lg, fontWeight: 700, color: 'primary.main' }}
       >
         Usar otro correo

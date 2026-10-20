@@ -47,7 +47,7 @@ export default function PackageProofCard({ pkg, entries = [] }) {
       </Typography>
 
       {!isDelivered && (
-        <Typography sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.5 }}>
+        <Typography data-testid="package-proof-empty" sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.5 }}>
           El paquete aún no registra una entrega completada.
         </Typography>
       )}
@@ -57,6 +57,7 @@ export default function PackageProofCard({ pkg, entries = [] }) {
           <DeliveryPhoto photoUrl={photoUrl} shipmentNumber={pkg?.shipmentNumber} />
 
           <Typography
+            data-testid="package-proof-summary"
             sx={{
               fontSize: FONT.md,
               color: 'text.primary',

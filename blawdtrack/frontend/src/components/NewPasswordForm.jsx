@@ -78,7 +78,14 @@ export function NewPasswordForm({ reset }) {
 
       {error && <StatusMessage severity="error" message={error.message} />}
 
-      <Button type="submit" fullWidth variant="contained" disabled={loading || !canSubmit} sx={AUTH_BUTTON_SX}>
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        disabled={loading || !canSubmit}
+        data-testid="new-password-submit"
+        sx={AUTH_BUTTON_SX}
+      >
         {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Guardar nueva contraseña'}
       </Button>
     </Box>
