@@ -6,8 +6,6 @@ import com.kms.katalon.core.testobject.TestObject
 import com.kms.katalon.core.util.KeywordUtil
 import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
 
-import org.openqa.selenium.Keys
-
 import internal.GlobalVariable
 
 /**
@@ -98,26 +96,6 @@ public class Ui {
 	/** Cantidad de elementos con ese data-testid que hay en la página. */
 	static int countOf(String testId) {
 		return WebUI.findWebElements(byTestId(testId), 5).size()
-	}
-
-	/** Busca un paquete en Consultar paquetes por su número de envío. */
-	static void searchPackage(String term) {
-		// setText no vacia bien un campo de React: en la segunda busqueda el termino nuevo se pegaba al anterior
-		// (E2E-HU011-A01E2E-PEND-01) y no habia resultados. Se selecciona todo, se borra y se escribe el termino.
-		TestObject input = byTestId('package-search-input')
-		WebUI.click(input)
-		WebUI.sendKeys(input, Keys.chord(Keys.CONTROL, 'a'))
-		WebUI.sendKeys(input, Keys.BACK_SPACE)
-		WebUI.sendKeys(input, term)
-		WebUI.click(byTestId('package-search-submit'))
-
-		// Mientras busca, la lista anterior desaparece: se espera a que el resumen ya mencione el termino buscado y
-		// recien entonces a las filas, para no contar la lista vieja (ni una lista vacia por la carga).
-		TestObject summary = new TestObject('search-summary-' + term)
-		summary.addProperty('xpath', ConditionType.EQUALS, "//*[@data-testid='package-search-summary'][contains(., '" + term + "')]")
-		WebUI.waitForElementPresent(summary, 30)
-		WebUI.waitForElementPresent(byTestId('package-result-row'), 30)
-		KeywordUtil.logInfo("Resumen de la busqueda '" + term + "': " + WebUI.getText(byTestId('package-search-summary')))
 	}
 
 	static void evidence(String name) {

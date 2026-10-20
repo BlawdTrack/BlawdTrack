@@ -2,7 +2,7 @@
 
 Esta carpeta deja listo todo lo que se necesita **antes** de escribir los casos de Katalon: un entorno que se levanta
 y se reinicia con un comando, cuentas conocidas, datos de prueba, archivos de importación y selectores estables.
-El proyecto de Katalon Studio está en `project/` y hoy trae los 6 casos de la HU-011 (sección 16); las demás HU se agregan encima de esta base.
+El proyecto de Katalon Studio está en `project/` y hoy trae 5 casos de la HU-011 (sección 16); las demás HU se agregan encima de esta base.
 
 ## Contenido
 
@@ -280,7 +280,7 @@ El proyecto está en `katalon/project/` y cubre la TASK 336 (pruebas funcionales
 2. En el explorador abre `Test Suites/HU-011` y pulsa Run (Chrome). También se puede correr un caso suelto desde `Test Cases/HU-011`.
 3. Las capturas de evidencia quedan en `katalon\project\evidence` y el reporte de Katalon en `Reports/` (se puede exportar a HTML, CSV o PDF).
 
-Los casos `TC-HU011-01` y `TC-HU011-05` ejecutan solos `scripts\prepare-data.ps1` al empezar, así que se pueden repetir sin volver a levantar nada.
+El caso `TC-HU011-01` ejecuta solo `scripts\prepare-data.ps1` al empezar, así que se puede repetir sin volver a levantar nada. Ningún caso registra paquetes, por lo que no hace falta reiniciar los datos entre corridas.
 
 ### Casos
 
@@ -290,8 +290,7 @@ Los casos `TC-HU011-01` y `TC-HU011-05` ejecutan solos `scripts\prepare-data.ps1
 | TC-HU011-02 Duplicado dentro del archivo | `hu011-tc02-duplicado-en-archivo.csv` | `E2E-HU011-B01` repetido con otros datos: la primera fila queda válida y la copia se excluye como duplicada. |
 | TC-HU011-03 Sin duplicados | `importacion-valida.csv` | Avisa que todos los registros son válidos y se puede confirmar. |
 | TC-HU011-04 Conteos antes de confirmar | `importacion-con-duplicados.csv` | 4 leídos, 2 válidos y 2 duplicados, también en el botón de confirmar. |
-| TC-HU011-05 Importación con duplicados | `hu011-tc01-duplicado-base-datos.csv` | Al confirmar solo se guarda `E2E-HU011-A01`; `E2E-PEND-01` sigue una sola vez y conserva sus datos. |
-| TC-HU011-06 Rol sin permiso | (sin archivo) | El Mensajero vuelve a su inicio, no ve la importación y la API responde 403. |
+| TC-HU011-06 Rol sin permiso (el 05 se retiró de la suite) | (sin archivo) | El Mensajero vuelve a su inicio, no ve la importación y la API responde 403. |
 
 ### Estructura
 
