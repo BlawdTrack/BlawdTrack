@@ -2,7 +2,7 @@
 
 Esta carpeta deja listo todo lo que se necesita **antes** de escribir los casos de Katalon: un entorno que se levanta
 y se reinicia con un comando, cuentas conocidas, datos de prueba, archivos de importación y selectores estables.
-**Todavía no hay proyecto ni casos de Katalon**; se crean encima de esta base.
+El proyecto de Katalon Studio está en `project/` y hoy trae los 6 casos de la HU-011 (sección 16); las demás HU se agregan encima de esta base.
 
 ## Contenido
 1. [Por qué un entorno aparte y por qué Docker](#1-por-qué-un-entorno-aparte-y-por-qué-docker)
@@ -20,6 +20,7 @@ y se reinicia con un comando, cuentas conocidas, datos de prueba, archivos de im
 13. [Problemas frecuentes](#13-problemas-frecuentes)
 14. [Reglas del equipo](#14-reglas-del-equipo)
 15. [Estructura de la carpeta](#15-estructura-de-la-carpeta)
+16. [Proyecto de Katalon Studio (HU-011)](#16-proyecto-de-katalon-studio-hu-011)
 
 ---
 
@@ -145,7 +146,7 @@ En Katalon, un objeto de prueba se define con XPath o CSS, por ejemplo `//*[@dat
 | Inicio de sesión | `login-submit`, `login-forgot-password` |
 | Navegación | `nav-<ruta>` (por ejemplo `nav-/main-menu/paquetes/buscar`), `main-menu-link`, `logout-button` |
 | Formularios | `form-submit`, `form-discard`, `edit-save`, `edit-discard`, `confirm-dialog-confirm`, `confirm-dialog-cancel`, `leave-dialog-leave`, `leave-dialog-stay`, `document-search-submit`, `document-search-clear` |
-| Importación | `import-select-file`, `import-file-input`, `import-help-toggle`, `import-review`, `import-cancel`, `import-count-{read,valid,invalid,duplicate}`, `import-filter-{all,valid,invalid,duplicate}`, `import-row-{valid,invalid,duplicate}`, `import-confirm`, `import-load-another`, `import-result-{read,registered,invalid,duplicate}`, `import-result-another` |
+| Importación | `import-select-file`, `import-file-input`, `import-help-toggle`, `import-review`, `import-cancel`, `import-summary`, `import-count-{read,valid,invalid,duplicate}`, `import-filter-{all,valid,invalid,duplicate}`, `import-row-{valid,invalid,duplicate}`, `import-confirm`, `import-load-another`, `import-result-{read,registered,invalid,duplicate}`, `import-result-another` |
 | Búsqueda de paquetes | `package-search-input`, `package-search-clear`, `package-search-summary`, `package-search-empty-clear`, `package-result-row`, `package-load-more`, `package-load-more-count` |
 | Ficha del paquete | `package-detail-card`, `package-courier-name`, `package-history-list`, `package-history-entry`, `delete-package-button`, `delete-package-cancel`, `delete-package-confirm` |
 | Comprobante de entrega | `package-proof-card`, `package-proof-summary`, `package-proof-empty`, `delivery-photo`, `delivery-photo-image`, `delivery-photo-retry` |
@@ -230,3 +231,39 @@ katalon/
     fixtures/e2e-packages.sql       paquetes de prueba
     import-files/*.csv              archivos de importación
 ```
+
+## 16. Proyecto de Katalon Studio (HU-011)
+El proyecto está en `katalon/project/` y cubre la TASK 336 (pruebas funcionales de la HU-011).
+
+### Qué hace falta
+- Katalon Studio (edición gratuita) instalado y con sesión iniciada con una cuenta de Katalon.
+- Chrome instalado. Katalon Studio trae el controlador.
+- El entorno levantado con `scripts\up.ps1`. Como el frontend se construye dentro de la imagen, **vuelve a correr `up.ps1 -Fresh` después de actualizar el código** para que tenga los últimos `data-testid`.
+
+### Cómo abrirlo y correrlo
+1. En Katalon Studio: `File > Open Project` y elige la carpeta `katalon\project`. Si pide migrar el proyecto, acepta.
+2. En el explorador abre `Test Suites/HU-011` y pulsa Run (Chrome). También se puede correr un caso suelto desde `Test Cases/HU-011`.
+3. Las capturas de evidencia quedan en `katalon\project\evidence` y el reporte de Katalon en `Reports/` (se puede exportar a HTML, CSV o PDF).
+
+Los casos `TC-HU011-01` y `TC-HU011-05` ejecutan solos `scripts\prepare-data.ps1` al empezar, así que se pueden repetir sin volver a levantar nada.
+
+### Casos
+| Caso | Archivo de importación | Qué comprueba |
+|---|---|---|
+| TC-HU011-01 Duplicado contra la base de datos | `hu011-tc01-duplicado-base-datos.csv` | `E2E-PEND-01` (ya registrado) se resalta como duplicado y no cuenta entre los válidos. |
+| TC-HU011-02 Duplicado dentro del archivo | `hu011-tc02-duplicado-en-archivo.csv` | `E2E-HU011-B01` repetido con otros datos: la primera fila queda válida y la copia se excluye como duplicada. |
+| TC-HU011-03 Sin duplicados | `importacion-valida.csv` | Avisa que todos los registros son válidos y se puede confirmar. |
+| TC-HU011-04 Conteos antes de confirmar | `importacion-con-duplicados.csv` | 4 leídos, 2 válidos y 2 duplicados, también en el botón de confirmar. |
+| TC-HU011-05 Importación con duplicados | `hu011-tc01-duplicado-base-datos.csv` | Al confirmar solo se guarda `E2E-HU011-A01`; `E2E-PEND-01` sigue una sola vez y conserva sus datos. |
+| TC-HU011-06 Rol sin permiso | (sin archivo) | El Mensajero vuelve a su inicio, no ve la importación y la API responde 403. |
+
+### Estructura
+- `Keywords/com/blawd/Env.groovy`: rutas de los archivos y preparación de datos.
+- `Keywords/com/blawd/Ui.groovy`: inicio de sesión, subida del archivo, lectura de totales y comprobaciones. Los objetos se buscan por `data-testid`.
+- `Keywords/com/blawd/Api.groovy`: inicio de sesión y códigos HTTP del backend.
+- `Profiles/default.glbl`: direcciones y cuentas del entorno de pruebas (las de la sección 6).
+
+### Notas
+- El selector de archivo de la importación está oculto; `Ui.uploadAndReview` lo muestra desde la prueba antes de subir el archivo. La aplicación no cambia.
+- Los casos entran a la pantalla por su dirección (`/main-menu/paquetes/importar`). Si la sesión no se conserva al recargar, cámbialo por un clic en el menú (`nav-/main-menu/paquetes/importar`).
+- Los archivos del proyecto se escribieron sin abrir Katalon Studio: si al abrirlo marca algún error, corrígelo ahí y avisa para dejarlo en el repositorio.

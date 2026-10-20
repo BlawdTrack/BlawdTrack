@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+   <description>Pruebas funcionales de extremo a extremo de BlawdTrack (TASK 336).</description>
+   <name>BlawdTrack</name>
+   <tag></tag>
+   <UUID>1af36685-b17e-47e2-9e19-0feec3c59f07</UUID>
+   <migratedVersion>9.0.0</migratedVersion>
+   <pageLoadTimeout>30</pageLoadTimeout>
+   <ProjectType>WEB</ProjectType>
+</Project>

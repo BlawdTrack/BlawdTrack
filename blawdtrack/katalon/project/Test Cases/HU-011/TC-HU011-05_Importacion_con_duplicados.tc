@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU011-05 Importacion con duplicados</description>
+   <name>TC-HU011-05_Importacion_con_duplicados</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>26706a9d-8ef9-4847-be14-23ab3a4c536c</testCaseGuid>
+</TestCaseEntity>

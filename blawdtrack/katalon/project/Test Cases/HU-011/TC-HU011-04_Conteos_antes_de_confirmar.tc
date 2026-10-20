@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU011-04 Conteos antes de confirmar</description>
+   <name>TC-HU011-04_Conteos_antes_de_confirmar</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>82f37839-9192-4722-8eed-df53eeab5c11</testCaseGuid>
+</TestCaseEntity>
