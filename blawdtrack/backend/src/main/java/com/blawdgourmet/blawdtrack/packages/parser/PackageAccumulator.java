@@ -29,10 +29,18 @@ final class PackageAccumulator {
         accumulator.orderNumber = row.first(ZohoColumn.ORDER_NUMBER);
         accumulator.customerName = row.first(ZohoColumn.CUSTOMER_NAME);
         accumulator.address = addressFrom(row);
-        accumulator.phone = cleanPhone(firstNonBlank(
-                row.first(ZohoColumn.SHIPPING_PHONE), row.first(ZohoColumn.BILLING_PHONE)));
+        accumulator.phone = phoneFrom(row);
         accumulator.schedule = row.first(ZohoColumn.SCHEDULE);
         return accumulator;
+    }
+
+    /** {@code true} si la fila no contradice ningún dato del paquete (un dato vacío no contradice nada). */
+    boolean accepts(TableRow row) {
+        return !differs(orderNumber, row.first(ZohoColumn.ORDER_NUMBER))
+                && !differs(customerName, row.first(ZohoColumn.CUSTOMER_NAME))
+                && !differs(address, addressFrom(row))
+                && !differs(phone, phoneFrom(row))
+                && !differs(schedule, row.first(ZohoColumn.SCHEDULE));
     }
 
     void merge(TableRow row) {
@@ -41,9 +49,7 @@ final class PackageAccumulator {
         customerName = mergeField(customerName, row.first(ZohoColumn.CUSTOMER_NAME),
                 ZohoColumn.CUSTOMER_NAME, row);
         address = mergeField(address, addressFrom(row), ZohoColumn.SHIPPING_ADDRESS, row);
-        phone = mergeField(phone, cleanPhone(firstNonBlank(
-                        row.first(ZohoColumn.SHIPPING_PHONE), row.first(ZohoColumn.BILLING_PHONE))),
-                ZohoColumn.SHIPPING_PHONE, row);
+        phone = mergeField(phone, phoneFrom(row), ZohoColumn.SHIPPING_PHONE, row);
         schedule = mergeField(schedule, row.first(ZohoColumn.SCHEDULE), ZohoColumn.SCHEDULE, row);
     }
 
@@ -66,10 +72,21 @@ final class PackageAccumulator {
         if (current == null || current.isBlank()) {
             return incoming;
         }
-        if (!current.equals(incoming)) {
+        if (differs(current, incoming)) {
             throw row.error("El paquete repite " + column.label() + " con valores diferentes");
         }
         return current;
+    }
+
+    private static boolean differs(String current, String incoming) {
+        return incoming != null && !incoming.isBlank()
+                && current != null && !current.isBlank()
+                && !current.equals(incoming);
+    }
+
+    private static String phoneFrom(TableRow row) {
+        return cleanPhone(firstNonBlank(
+                row.first(ZohoColumn.SHIPPING_PHONE), row.first(ZohoColumn.BILLING_PHONE)));
     }
 
     private static String addressFrom(TableRow row) {

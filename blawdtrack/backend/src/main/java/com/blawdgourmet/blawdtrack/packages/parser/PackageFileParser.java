@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.packages.parser;
 
 import com.blawdgourmet.blawdtrack.packages.dto.ImportedPackage;
+import com.blawdgourmet.blawdtrack.packages.dto.ParsedPackageFile;
 import java.io.InputStream;
 import java.util.List;
 
@@ -10,5 +11,11 @@ import java.util.List;
  */
 public interface PackageFileParser {
 
-    List<ImportedPackage> parse(InputStream input, String fileName);
+    /** Lee el archivo y separa los paquetes que se conservan de las copias con datos contradictorios. */
+    ParsedPackageFile parseFile(InputStream input, String fileName);
+
+    /** Solo los paquetes que se conservan, sin las copias contradictorias. */
+    default List<ImportedPackage> parse(InputStream input, String fileName) {
+        return parseFile(input, fileName).packages();
+    }
 }

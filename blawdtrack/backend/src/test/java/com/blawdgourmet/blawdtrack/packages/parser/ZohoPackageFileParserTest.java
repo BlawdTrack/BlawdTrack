@@ -3,6 +3,8 @@ package com.blawdgourmet.blawdtrack.packages.parser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.blawdgourmet.blawdtrack.packages.dto.ImportedPackage;
+import com.blawdgourmet.blawdtrack.packages.dto.ImportedPackageItem;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -162,16 +164,56 @@ class ZohoPackageFileParserTest {
     }
 
     @Test
-    void rechazaDatosContradictoriosDentroDelMismoPaquete() {
+    void conservaElPrimerPaqueteYSeparaLaCopiaConDatosContradictorios() {
         String csv = """
                 Packing Number,SO Number,Customer Name,Item Name,Quantity Packed
                 ENV-1,SO-1,Cliente A,Alfajor,1
-                ENV-1,SO-2,Cliente A,Alfajor,1
+                ENV-2,SO-2,Cliente B,Alfajor,1
+                ENV-1,SO-9,Cliente Z,Galleta,2
+                ENV-1,SO-1,Cliente A,Brownie,3
                 """;
 
-        assertThatThrownBy(() -> parser.parse(stream(csv), "x.csv"))
-                .isInstanceOf(PackageFileParsingException.class)
-                .hasMessageContaining("Fila 3").hasMessageContaining("SO Number");
+        var file = parser.parseFile(stream(csv), "x.csv");
+
+        assertThat(file.packages()).extracting(ImportedPackage::shipmentNumber).containsExactly("ENV-1", "ENV-2");
+        assertThat(file.packages().getFirst().orderNumber()).isEqualTo("SO-1");
+        assertThat(file.packages().getFirst().items()).extracting(ImportedPackageItem::name)
+                .containsExactly("Alfajor", "Brownie");
+        assertThat(file.conflictingCopies()).singleElement().satisfies(copy -> {
+            assertThat(copy.shipmentNumber()).isEqualTo("ENV-1");
+            assertThat(copy.orderNumber()).isEqualTo("SO-9");
+            assertThat(copy.items()).extracting(ImportedPackageItem::name).containsExactly("Galleta");
+        });
+    }
+
+    @Test
+    void lasFilasContradictoriasEntreSiQuedanEnLaMismaCopia() {
+        String csv = """
+                Packing Number,SO Number,Customer Name,Item Name,Quantity Packed
+                ENV-1,SO-1,Cliente A,Alfajor,1
+                ENV-1,SO-9,Cliente Z,Galleta,2
+                ENV-1,SO-9,Cliente Z,Brownie,1
+                """;
+
+        var file = parser.parseFile(stream(csv), "x.csv");
+
+        assertThat(file.packages()).hasSize(1);
+        assertThat(file.conflictingCopies()).singleElement()
+                .satisfies(copy -> assertThat(copy.items()).hasSize(2));
+    }
+
+    @Test
+    void sinContradiccionesNoHayCopias() {
+        String csv = """
+                Packing Number,SO Number,Customer Name,Item Name,Quantity Packed
+                ENV-1,SO-1,Cliente A,Alfajor,1
+                ENV-1,SO-1,,Brownie,1
+                """;
+
+        var file = parser.parseFile(stream(csv), "x.csv");
+
+        assertThat(file.packages()).singleElement().satisfies(pack -> assertThat(pack.items()).hasSize(2));
+        assertThat(file.conflictingCopies()).isEmpty();
     }
 
     @Test
