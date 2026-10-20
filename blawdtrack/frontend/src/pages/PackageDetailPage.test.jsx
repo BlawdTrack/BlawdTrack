@@ -3,6 +3,7 @@ import { screen } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import PackageDetailPage from './PackageDetailPage';
 import { getPackageByShipmentNumber, getPackageHistory } from '../services/SearchPackageService';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../test-utils';
 import { ROUTES, packageDetailPath } from '../config/routes';
 
@@ -71,12 +72,15 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(getPackageByShipmentNumber).toHaveBeenCalledWith('BG-2026-00121');
   });
 
-  it('la ficha avisa que es de solo lectura y no ofrece un botón para volver a los resultados', async () => {
+  it('la leyenda de solo lectura vive en un ! junto al número de envío y no hay botón para volver a los resultados', async () => {
     getPackageByShipmentNumber.mockResolvedValue(packageDetail);
     render('BG-2026-00121');
     await screen.findByText('Mariela Solís Gómez');
 
-    expect(screen.getByText(/La ficha es de solo lectura/)).toBeInTheDocument();
+    expect(screen.queryByText(/La ficha es de solo lectura/)).not.toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.hover(screen.getByRole('button', { name: 'Aviso sobre la ficha' }));
+    expect(await screen.findByText(/La ficha es de solo lectura/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Volver a los resultados' })).not.toBeInTheDocument();
   });
 

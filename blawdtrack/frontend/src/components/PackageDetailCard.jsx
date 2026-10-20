@@ -1,5 +1,7 @@
 import { Box, Link, Paper, Typography } from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import BrandLogo from './BrandLogo';
+import HelpTip from './HelpTip';
 import MapLinkButton from './MapLinkButton';
 import { LABEL_SX } from './formStyles';
 import { getPackageStatusMeta } from '../config/packageStatus';
@@ -129,10 +131,11 @@ function EvidenceBlock({ pkg }) {
  * opcionales sin información se muestran como "No disponible" / "No
  * especificado" en vez de inventar valores.
  *
- * @param {{ pkg: object, actions?: import('react').ReactNode }} props `pkg` es el detalle devuelto por el
- *   backend; `actions`, si se pasa, se muestra al pie de la ficha (por ejemplo, el botón "Eliminar" de HU-012).
+ * @param {{ pkg: object, actions?: import('react').ReactNode, notice?: string }} props `pkg` es el detalle devuelto por el
+ *   backend; `actions`, si se pasa, se muestra al pie de la ficha (por ejemplo, el botón "Eliminar" de HU-012);
+ *   `notice`, si se pasa, es una leyenda que se abre desde un ! junto al número de envío.
  */
-export default function PackageDetailCard({ pkg, actions = null }) {
+export default function PackageDetailCard({ pkg, actions = null, notice = null }) {
   const status = getPackageStatusMeta(pkg.status);
   const items = Array.isArray(pkg.items) ? pkg.items : [];
 
@@ -179,12 +182,19 @@ export default function PackageDetailCard({ pkg, actions = null }) {
             <BrandLogo variant="isologo" sx={{ width: 30, p: 0 }} />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography
-              component="h2"
-              sx={{ fontSize: { xs: FONT.h3, md: FONT.h3 }, fontWeight: 700, lineHeight: 1.2, wordBreak: 'break-word' }}
-            >
-              {pkg.shipmentNumber}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography
+                component="h2"
+                sx={{ fontSize: { xs: FONT.h3, md: FONT.h3 }, fontWeight: 700, lineHeight: 1.2, wordBreak: 'break-word' }}
+              >
+                {pkg.shipmentNumber}
+              </Typography>
+              {notice && (
+                <HelpTip label="Aviso sobre la ficha" icon={ErrorOutlineIcon} sx={{ color: 'inherit', my: -1, ml: -0.5, '& svg': { fontSize: rem(22) } }}>
+                  {notice}
+                </HelpTip>
+              )}
+            </Box>
             <Typography sx={{ fontSize: FONT.md, color: 'primary.contrastText', opacity: 0.82, mt: 0.25, wordBreak: 'break-word' }}>
               {orderLine}
             </Typography>

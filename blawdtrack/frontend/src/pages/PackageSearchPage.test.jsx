@@ -13,7 +13,7 @@ vi.mock('../services/PackageService', () => ({
 vi.mock('../services/PackageDeletionService', () => ({ deletePackage: vi.fn() }));
 
 const salesAdmin = { id: 1, fullName: 'Celeste', email: 'celeste@blawdgourmet.com', role: ROLES.SALES_ADMIN };
-const renderPage = () => renderWithProviders(<PackageSearchPage />, { user: salesAdmin });
+const renderPage = (route = '/') => renderWithProviders(<PackageSearchPage />, { user: salesAdmin, route });
 
 describe('PackageSearchPage', () => {
   beforeEach(() => {
@@ -426,5 +426,13 @@ describe('PackageSearchPage', () => {
       expect(screen.getByText(/está en “Enviado”: ya no puede eliminarse/)).toBeInTheDocument();
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     });
+  });
+
+  it('muestra el aviso que deja la importación al llegar desde ahí', async () => {
+    searchPackages.mockResolvedValue({ content: [], totalElements: 0 });
+    renderPage({ pathname: '/', state: { notice: { message: '2 paquetes registrados de zoho.xlsx.', severity: 'success' } } });
+    await act(async () => {});
+
+    expect(screen.getByText('2 paquetes registrados de zoho.xlsx.')).toBeInTheDocument();
   });
 });

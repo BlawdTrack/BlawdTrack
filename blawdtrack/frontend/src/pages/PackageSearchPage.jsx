@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Alert } from '@mui/material';
 import PageContainer from '../components/PageContainer';
 import PageHeaderBar from '../components/PageHeaderBar';
@@ -41,12 +41,14 @@ const TABLE_PAGE_SX = { maxWidth: rem(1280) };
  */
 export function PackageSearchPage() {
   const navigate = useNavigate();
+  // Aviso que deja otra pantalla al llegar aquí (por ejemplo, la importación terminada).
+  const { state: locationState } = useLocation();
   const {
     term, setTerm, field, setField, status, setStatus, appliedTerm, isFiltering, statusCounts, search,
     searchExample, clearSearch, refresh, results, distributionResults, isLoading, errorMessage,
     canLoadMore, isLoadingMore, loadMore,
   } = usePackageSearch();
-  const { toast, notify, close: closeToast } = useToast();
+  const { toast, notify, close: closeToast } = useToast(locationState?.notice);
 
   const showFeedback = (feedback) => {
     if (feedback) notify(feedback.message, feedback.severity);

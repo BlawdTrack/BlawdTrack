@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import PageContainer from '../components/PageContainer';
@@ -7,12 +7,11 @@ import ImportSteps from '../components/import/ImportSteps';
 import ImportUploadStep from '../components/import/ImportUploadStep';
 import ImportConfirmActions from '../components/preview/ImportConfirmActions';
 import ImportPreviewView from '../components/preview/ImportPreviewView';
-import ImportResultView from '../components/preview/ImportResultView';
 import { usePackageFileSelection } from '../hooks/usePackageFileSelection';
 import { usePackageImportConfirmation } from '../hooks/usePackageImportConfirmation';
 import { usePackageImportPreview } from '../hooks/usePackageImportPreview';
 import { buildImportPreview } from '../utils/importPreview';
-import { buildImportResult } from '../utils/importResult';
+import { buildImportResult, importResultNotice } from '../utils/importResult';
 import { ROUTES } from '../config/routes';
 import { RADIUS, rem } from '../theme';
 
@@ -23,8 +22,8 @@ const REVIEW_PAGE_SX = { maxWidth: rem(1280) };
  * Importar paquetes (HU-010): una sola pantalla con los tres pasos de la importación. En el paso 1 el usuario elige el
  * archivo de Zoho Inventory (.xlsx o .csv), el navegador valida su formato y el backend lo lee sin registrarlo; con
  * éxito, la misma pantalla pasa al paso 2 y muestra los registros leídos (válidos, con errores y duplicados) antes de
- * importar. Desde ahí el usuario confirma y el paso 3 ("Listo") muestra el resultado con la cantidad importada. Solo
- * compone: la selección, la carga y la confirmación viven en sus hooks, los modelos los arman `buildImportPreview` y
+ * importar. Desde ahí el usuario confirma y, al terminar, la pantalla lo lleva sola a "Consultar paquetes" con un aviso
+ * de la cantidad importada. Solo compone: la selección, la carga y la confirmación viven en sus hooks, los modelos los arman `buildImportPreview` y
  * `buildImportResult`, y el diseño vive en `components/import` y `components/preview`.
  */
 export default function PackageImportPage() {
@@ -36,12 +35,17 @@ export default function PackageImportPage() {
   const result = useMemo(() => buildImportResult(confirmation.result), [confirmation.result]);
   const reviewing = isSuccess && preview && !result;
 
+  // Con la importación hecha se pasa directo a la lista, que muestra el aviso con la cantidad registrada.
+  useEffect(() => {
+    if (result) navigate(ROUTES.PACKAGE_SEARCH, { replace: true, state: { notice: importResultNotice(result) } });
+  }, [result, navigate]);
+
   const handleFile = (candidate) => {
     reset();
     select(candidate);
   };
 
-  // Vuelve al paso 1 con la zona de carga vacía, venga del paso 2 o del 3.
+  // Vuelve al paso 1 con la zona de carga vacía.
   const handleDiscard = () => {
     reset();
     confirmation.reset();
@@ -58,18 +62,14 @@ export default function PackageImportPage() {
     if (file && !isUploading) upload(file);
   };
 
-  let step = 1;
-  if (result) step = 3;
-  else if (reviewing) step = 2;
+  const step = reviewing ? 2 : 1;
 
   return (
     <>
       <PageHeaderBar title="Importar paquetes" />
 
-      <PageContainer sx={reviewing && !result ? REVIEW_PAGE_SX : undefined}>
+      <PageContainer sx={reviewing ? REVIEW_PAGE_SX : undefined}>
         <ImportSteps current={step} />
-
-        {result && <ImportResultView result={result} onImportAnother={handleDiscard} />}
 
         {reviewing && (
           <>

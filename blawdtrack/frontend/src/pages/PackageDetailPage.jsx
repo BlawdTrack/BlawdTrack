@@ -24,6 +24,8 @@ import {
 } from '../utils/packageDeletionMessages';
 import { FONT, TOUCH_TARGET } from '../theme';
 
+const READ_ONLY_NOTICE = 'La ficha es de solo lectura: no se puede editar el paquete, solo eliminarlo si aún no fue despachado.';
+
 /** Aviso mientras se consulta el paquete. */
 function LoadingCard() {
   return (
@@ -132,6 +134,7 @@ export function PackageDetailPage() {
           <>
             <PackageDetailCard
               pkg={pkg}
+              notice={READ_ONLY_NOTICE}
               // Sin permiso no se pasa nada: así la ficha no dibuja un pie vacío.
               actions={
                 canDeletePackages ? (
@@ -144,9 +147,6 @@ export function PackageDetailPage() {
               }
             />
             <PackageFollowUp pkg={pkg} />
-            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
-              La ficha es de solo lectura: no se puede editar el paquete, solo eliminarlo si aún no fue despachado.
-            </Typography>
           </>
         )}
       </PageContainer>
