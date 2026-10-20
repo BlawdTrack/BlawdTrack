@@ -63,6 +63,43 @@ describe('PackageSearchPage', () => {
     expect(within(table).getByText('Pendiente')).toBeInTheDocument();
   });
 
+  it('con más de una página muestra "Cargar más" y suma los paquetes siguientes a la lista', async () => {
+    const pkg = (id) => ({
+      id, shipmentNumber: `BG-2026-00${id}`, orderNumber: `ORD-${id}`, customerName: `Cliente ${id}`,
+      phone: '8888-9999', address: 'HEREDIA', status: 'PENDING', schedule: null,
+    });
+    searchPackages
+      .mockResolvedValueOnce({ content: [pkg(2)], page: 0, size: 1, totalElements: 2, totalPages: 2 })
+      .mockResolvedValueOnce({ content: [pkg(1)], page: 1, size: 1, totalElements: 2, totalPages: 2 });
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(screen.getByText('Mostrando 1 de 2 paquetes')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Cargar más paquetes' }));
+    });
+
+    const table = screen.getByRole('region', { name: 'Paquetes encontrados' });
+    expect(within(table).getByText('BG-2026-002')).toBeInTheDocument();
+    expect(within(table).getByText('BG-2026-001')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cargar más paquetes' })).not.toBeInTheDocument();
+  });
+
+  it('no muestra "Cargar más" cuando la lista cabe en una sola página', async () => {
+    searchPackages.mockResolvedValueOnce({
+      content: [{ id: 1, shipmentNumber: 'BG-2026-001', customerName: 'Luis', status: 'PENDING' }],
+      page: 0, size: 100, totalElements: 1, totalPages: 1,
+    });
+    render(<PackageSearchPage />, { wrapper: MemoryRouter });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(screen.queryByRole('button', { name: 'Cargar más paquetes' })).not.toBeInTheDocument();
+  });
+
   it('updates the table when the user types a search term without a dedicated button', async () => {
     const distributionPayload = {
       content: [{

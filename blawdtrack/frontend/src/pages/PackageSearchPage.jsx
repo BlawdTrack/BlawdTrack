@@ -1,6 +1,7 @@
 import { Alert } from '@mui/material';
 import PageContainer from '../components/PageContainer';
 import PageHeaderBar from '../components/PageHeaderBar';
+import PackageLoadMore from '../components/PackageLoadMore';
 import PackageResultsTable from '../components/PackageResultsTable';
 import PackageSearchBar from '../components/PackageSearchBar';
 import PackageSearchEmptyState from '../components/PackageSearchEmptyState';
@@ -13,12 +14,15 @@ import { normalizeSearchTerm } from '../utils/packageSearchTerm';
 const countOf = (page) => page?.totalElements ?? page?.content?.length ?? null;
 
 /**
- * Buscar paquetes (HU-014): búsqueda en vivo por número de envío, orden, cliente, dirección, teléfono, horario o
- * estado. Solo compone: la búsqueda vive en `usePackageSearch`, y el listado, el estado vacío y la barra son
+ * Buscar paquetes (HU-014): búsqueda en vivo por número de envío, orden, cliente, dirección, teléfono u horario.
+ * Solo compone: la búsqueda vive en `usePackageSearch`, y el listado, el "Cargar más", el estado vacío y la barra son
  * componentes con el diseño del resto de las pantallas.
  */
 export function PackageSearchPage() {
-  const { term, clearSearch, setTerm, results, distributionResults, isLoading, errorMessage } = usePackageSearch();
+  const {
+    term, clearSearch, setTerm, results, distributionResults, isLoading, errorMessage,
+    canLoadMore, isLoadingMore, loadMore,
+  } = usePackageSearch();
 
   return (
     <>
@@ -46,6 +50,14 @@ export function PackageSearchPage() {
         )}
 
         <PackageResultsTable packages={results?.content} />
+
+        <PackageLoadMore
+          shownCount={results?.content?.length ?? 0}
+          totalCount={countOf(results) ?? 0}
+          canLoadMore={canLoadMore}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMore}
+        />
       </PageContainer>
     </>
   );
