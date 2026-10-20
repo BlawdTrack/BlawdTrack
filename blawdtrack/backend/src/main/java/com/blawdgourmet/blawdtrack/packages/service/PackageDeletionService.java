@@ -3,7 +3,7 @@ package com.blawdgourmet.blawdtrack.packages.service;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageDeletionResponse;
 
-/** Eliminación de paquetes por parte del Administrador de Ventas (HU-012). */
+/** Eliminación de paquetes por parte del Administrador de Ventas o del Super Usuario (HU-012). */
 public interface PackageDeletionService {
 
     /**

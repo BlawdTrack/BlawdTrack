@@ -34,8 +34,8 @@ describe('PackageDetailCard: acciones al pie (HU-012 / T05)', () => {
     expect(within(card).queryByRole('button')).not.toBeInTheDocument();
   });
 
-  it('con el botón de eliminar, el Administrador de Ventas lo ve en la ficha y emite el paquete', async () => {
-    const onDelete = renderCardWithDeleteButton(ROLES.SALES_ADMIN);
+  it.each([ROLES.SALES_ADMIN, ROLES.SUPER_USER])('con el botón de eliminar, el rol %s lo ve en la ficha y emite el paquete', async (role) => {
+    const onDelete = renderCardWithDeleteButton(role);
 
     const card = screen.getByRole('region', { name: 'Ficha del paquete BG-2026-00125' });
     await userEvent.click(within(card).getByRole('button', { name: 'Eliminar' }));
@@ -43,8 +43,8 @@ describe('PackageDetailCard: acciones al pie (HU-012 / T05)', () => {
     expect(onDelete).toHaveBeenCalledWith(PKG);
   });
 
-  it.each([ROLES.SUPER_USER, ROLES.COURIER])('el rol %s ve la ficha sin el botón de eliminar', (role) => {
-    renderCardWithDeleteButton(role);
+  it('el Mensajero ve la ficha sin el botón de eliminar', () => {
+    renderCardWithDeleteButton(ROLES.COURIER);
 
     expect(screen.getByRole('region', { name: 'Ficha del paquete BG-2026-00125' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();

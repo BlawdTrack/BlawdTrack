@@ -12,6 +12,7 @@ import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,9 @@ public class PackageDeletionAuditServiceImpl implements PackageDeletionAuditServ
         Objects.requireNonNull(shipmentNumber, "shipmentNumber must not be null");
         Objects.requireNonNull(status, "status must not be null");
 
-        String details = "El Administrador de Ventas '%s' (documento %s) eliminó el paquete '%s' (estado: %s)."
+        String details = "El %s '%s' (documento %s) eliminó el paquete '%s' (estado: %s)."
                 .formatted(
+                        roleLabel(actor),
                         actor.nombreCompleto(),
                         actor.documentType() + "-" + actor.documentNumber(),
                         shipmentNumber,
@@ -49,5 +51,10 @@ public class PackageDeletionAuditServiceImpl implements PackageDeletionAuditServ
                 .build();
 
         auditLogRepository.save(auditLog);
+    }
+
+    /** Quién borró: el borrado lo hacen el Administrador de Ventas y el Super Usuario. */
+    private static String roleLabel(AuthenticatedUser actor) {
+        return RoleName.SUPER_USER.equals(actor.rol()) ? "Super Usuario" : "Administrador de Ventas";
     }
 }
