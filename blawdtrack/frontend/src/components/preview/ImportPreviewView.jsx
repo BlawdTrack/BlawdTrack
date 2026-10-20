@@ -63,7 +63,7 @@ export default function ImportPreviewView({ preview }) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.75 }}>
-      <StatusMessage severity={alert.severity} title={alert.title} message={alert.message} />
+      <StatusMessage severity={alert.severity} title={alert.title} message={alert.message} testId="import-summary" />
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75, flexWrap: 'wrap' }}>
         {preview.fileName && (

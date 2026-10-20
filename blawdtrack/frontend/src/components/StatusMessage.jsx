@@ -12,11 +12,12 @@ const VARIANTS = {
 };
 
 /**
- * @param {{ severity?: 'error'|'warning'|'success', message: string, title?: string }} props Aviso fijo
+ * @param {{ severity?: 'error'|'warning'|'success', message: string, title?: string, testId?: string }} props Aviso fijo
  *   dentro de un formulario. Los errores y avisos se anuncian de forma asertiva (`role="alert"`); el éxito,
  *   de forma cortés (`role="status"`). Con `title`, el aviso lleva una primera línea en negrita sobre el mensaje.
+ *   `testId` es el `data-testid` para las pruebas de extremo a extremo.
  */
-export function StatusMessage({ severity = 'error', message, title }) {
+export function StatusMessage({ severity = 'error', message, title, testId }) {
   const variant = VARIANTS[severity] || VARIANTS.error;
 
   // Errors and warnings interrupt (assertive); success is announced politely.
@@ -25,6 +26,7 @@ export function StatusMessage({ severity = 'error', message, title }) {
   return (
     <Box
       role={isUrgent ? 'alert' : 'status'}
+      data-testid={testId}
       aria-live={isUrgent ? 'assertive' : 'polite'}
       sx={{
         bgcolor: variant.bg,
