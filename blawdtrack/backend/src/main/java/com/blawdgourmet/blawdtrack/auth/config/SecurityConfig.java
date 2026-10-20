@@ -99,9 +99,13 @@ public class SecurityConfig {
                         // La comparacion de numeros de envio (HU-011) tambien la usa el Super Usuario.
                         .requestMatchers("/api/v1/packages/shipment-numbers/**")
                                 .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
-                        // La gestion de paquetes (incluida su eliminacion, HU-012) pertenece exclusivamente al
-                        // Administrador de Ventas. Esta regla se evalua antes del binding; @PreAuthorize en el
+                        // Eliminar un paquete (HU-012) es del Administrador de Ventas y del Super Usuario, que tiene
+                        // acceso a todas las funciones. Va ANTES de la regla de prefijo; @PreAuthorize en el
                         // controlador queda como segunda barrera.
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/packages/*")
+                                .hasAnyRole(RoleName.SALES_ADMIN, RoleName.SUPER_USER)
+                        // El resto de la gestion de paquetes pertenece al Administrador de Ventas. Esta regla se
+                        // evalua antes del binding de los parametros.
                         .requestMatchers("/api/v1/packages/**").hasRole(RoleName.SALES_ADMIN)
                         .anyRequest().authenticated()
                 )
