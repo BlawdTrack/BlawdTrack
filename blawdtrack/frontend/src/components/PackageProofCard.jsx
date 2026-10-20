@@ -29,6 +29,7 @@ export default function PackageProofCard({ pkg, entries = [] }) {
       elevation={0}
       component="section"
       aria-labelledby={TITLE_ID}
+      data-testid="package-proof-card"
       sx={{ ...CARD_SX, width: '100%', p: { xs: 2.5, md: 3.25 } }}
     >
       <Typography

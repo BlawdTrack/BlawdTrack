@@ -8,6 +8,8 @@ import PackageProofCard from './PackageProofCard';
 import PackageLoadMore from './PackageLoadMore';
 import PackageSearchSummary from './PackageSearchSummary';
 import PreviewFilters from './preview/PreviewFilters';
+import { RecoveryEmailSent } from './RecoveryEmailSent';
+import { RecoveryRequestForm } from './RecoveryRequestForm';
 import StatCard from './StatCard';
 import StatusRow from './StatusRow';
 
