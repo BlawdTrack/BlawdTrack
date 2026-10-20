@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import StatusMessage from '../StatusMessage';
-import PreviewCounters from './PreviewCounters';
 import PreviewFilters from './PreviewFilters';
 import PreviewRecordList from './PreviewRecordList';
-import { filterPreviewRows } from '../../utils/importPreview';
+import PreviewSearchField from './PreviewSearchField';
+import { filterPreviewRows, searchPreviewRows } from '../../utils/importPreview';
+import { FONT } from '../../theme';
 
 const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
 
@@ -38,20 +40,33 @@ function summaryAlert({ counts, duplicateCauses, fileName }) {
 }
 
 /**
- * Resultado de la validación de un archivo antes de importarlo: el aviso, los totales, los filtros y la lista de
- * registros con su resultado. El filtro activo es el único estado propio.
+ * Resultado de la validación de un archivo antes de importarlo: el aviso principal, el nombre del archivo, las pestañas con
+ * los totales, el buscador y la tabla de registros. El filtro activo y el texto
+ * buscado son el único estado propio.
  * @param {{ preview: object }} props Previsualización de `buildImportPreview`.
  */
 export default function ImportPreviewView({ preview }) {
   const [filter, setFilter] = useState('all');
+  const [query, setQuery] = useState('');
   const alert = summaryAlert(preview);
+  const rows = searchPreviewRows(filterPreviewRows(preview.rows, filter), query);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.75 }}>
       <StatusMessage severity={alert.severity} title={alert.title} message={alert.message} />
-      <PreviewCounters counts={preview.counts} />
-      <PreviewFilters counts={preview.counts} active={filter} onChange={setFilter} />
-      <PreviewRecordList rows={filterPreviewRows(preview.rows, filter)} />
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75, flexWrap: 'wrap' }}>
+        {preview.fileName && (
+          <Typography component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, fontSize: FONT.md, fontWeight: 700, color: 'text.primary' }}>
+            <InsertDriveFileOutlinedIcon sx={{ color: 'text.secondary' }} />
+            {preview.fileName}
+          </Typography>
+        )}
+        <PreviewFilters counts={preview.counts} active={filter} onChange={setFilter} />
+        <PreviewSearchField value={query} onChange={setQuery} />
+      </Box>
+
+      <PreviewRecordList rows={rows} totalCount={preview.counts.read} />
     </Box>
   );
 }

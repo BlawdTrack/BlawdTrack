@@ -169,9 +169,9 @@ describe('PackageImportPage (carga del archivo)', () => {
     const steps = within(screen.getByRole('list', { name: 'Pasos de la importación' })).getAllByRole('listitem');
     expect(steps[1]).toHaveAttribute('aria-current', 'step');
     expect(screen.getByRole('alert')).toHaveTextContent('1 registro con errores y 1 duplicado en paquetes.xlsx');
-    expect(screen.getByRole('list', { name: 'Totales de la previsualización' })).toBeInTheDocument();
+    expect(screen.getByTestId('import-count-read')).toBeInTheDocument();
     expect(list.getAllByRole('listitem')).toHaveLength(4);
-    expect(list.getByText('Entrega: 9:00 a. m. – 4:00 p. m.')).toBeInTheDocument();
+    expect(list.getByText('9:00 a. m. – 4:00 p. m.')).toBeInTheDocument();
     expect(list.getByText('El campo teléfono es obligatorio')).toBeInTheDocument();
     expect(list.getByText('Ya registrado en la base de datos')).toBeInTheDocument();
     expect(screen.queryByLabelText('Archivo de paquetes de Zoho Inventory')).not.toBeInTheDocument();
@@ -180,7 +180,7 @@ describe('PackageImportPage (carga del archivo)', () => {
     expect(screen.queryByRole('link', { name: /duplicados/i })).not.toBeInTheDocument();
   });
 
-  it('"Cargar otro archivo" vuelve al paso 1, con la zona de carga vacía', async () => {
+  it('"Cambiar archivo" vuelve al paso 1, con la zona de carga vacía', async () => {
     previewPackageImport.mockResolvedValue(preview);
     const user = setup();
     renderPage();
@@ -188,7 +188,7 @@ describe('PackageImportPage (carga del archivo)', () => {
     await user.click(submitButton());
     await records();
 
-    await user.click(screen.getByRole('button', { name: 'Cargar otro archivo' }));
+    await user.click(screen.getByRole('button', { name: 'Cambiar archivo' }));
 
     expect(screen.getByText('Arrastra aquí el archivo de Zoho Inventory')).toBeInTheDocument();
     expect(screen.queryByText('paquetes.xlsx')).not.toBeInTheDocument();
@@ -332,7 +332,7 @@ describe('PackageImportPage (confirmar la importación, pasos 2 y 3)', () => {
     await user.click(confirmButton());
 
     expect(await screen.findByRole('button', { name: /Importando/ })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Cargar otro archivo' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Cambiar archivo' })).toBeDisabled();
   });
 
   it('si el backend falla muestra el error de la confirmación y deja volver a intentar', async () => {

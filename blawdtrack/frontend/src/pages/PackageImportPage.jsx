@@ -73,6 +73,7 @@ export default function PackageImportPage() {
             <ImportPreviewView preview={preview} />
             <ImportConfirmActions
               validCount={preview.counts.valid}
+              excludedCount={preview.counts.invalid + preview.counts.duplicate}
               hasFile={Boolean(file)}
               isConfirming={confirmation.isConfirming}
               errorMessage={confirmation.errorMessage}

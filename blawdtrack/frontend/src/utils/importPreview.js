@@ -114,3 +114,21 @@ export function buildImportPreview(preview) {
 export function filterPreviewRows(rows, filterId) {
   return filterId === 'all' ? rows : rows.filter((row) => row.status === filterId);
 }
+
+const SEARCHABLE_FIELDS = [...TEXT_FIELDS, 'deliveryRange'];
+
+/**
+ * Filas cuyo texto contiene lo que el usuario escribió en "Buscar en el archivo": sin distinguir mayúsculas ni
+ * tildes y en cualquiera de los datos que muestra la fila.
+ * @param {Array<object>} rows
+ * @param {string} query Texto escrito; vacío deja todas las filas.
+ */
+export function searchPreviewRows(rows, query) {
+  const needle = normalizeForSearch(query);
+  if (!needle) return rows;
+  return rows.filter((row) => normalizeForSearch(SEARCHABLE_FIELDS.map((field) => row[field] ?? '').join(' ')).includes(needle));
+}
+
+function normalizeForSearch(value) {
+  return String(value ?? '').normalize('NFD').replace(/\p{M}+/gu, '').toLowerCase().trim();
+}

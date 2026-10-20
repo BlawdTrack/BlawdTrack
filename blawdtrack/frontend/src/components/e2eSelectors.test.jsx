@@ -4,7 +4,7 @@ import EditFormActions from './EditFormActions';
 import FormActions from './FormActions';
 import PackageLoadMore from './PackageLoadMore';
 import PackageSearchSummary from './PackageSearchSummary';
-import PreviewCounters from './preview/PreviewCounters';
+import PreviewFilters from './preview/PreviewFilters';
 import StatCard from './StatCard';
 import StatusRow from './StatusRow';
 
@@ -26,7 +26,7 @@ describe('selectores de las pruebas de extremo a extremo', () => {
   });
 
   it('los contadores de la previsualización de la importación', () => {
-    render(<ul><PreviewCounters counts={{ read: 10, valid: 6, invalid: 3, duplicate: 1 }} /></ul>);
+    render(<PreviewFilters counts={{ read: 10, valid: 6, invalid: 3, duplicate: 1 }} active="all" onChange={() => {}} />);
 
     expect(screen.getByTestId('import-count-read')).toHaveTextContent('10');
     expect(screen.getByTestId('import-count-valid')).toHaveTextContent('6');
