@@ -1,0 +1,6 @@
+Packing Number,SO Number,Customer Name,Shipping Address,Shipping Phone,Notes,Item Name,Quantity Packed
+E2E-IMP-001,SO-IMP-001,Cliente Uno,"San Jose, Escazu",88001001,,Alfajor de cafe,2
+E2E-IMP-001,SO-IMP-001,Cliente Uno,"San Jose, Escazu",88001001,,Caja Blawd,1
+E2E-IMP-002,SO-IMP-002,Cliente Dos,"Heredia, Barva",88001002,Antes de las 3 p.m.,Brownie,4
+E2E-IMP-003,SO-IMP-003,Cliente Tres,"Alajuela, Atenas",88001003,Después de las dos de la tarde,Galleta,6
+E2E-IMP-004,SO-IMP-004,Cliente Cuatro,"Cartago, Paraiso",88001004,De 10 a 2,Alfajor,1

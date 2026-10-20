@@ -12,14 +12,16 @@ const TONES = {
  * Fila de una lista de resultados: se resalta con el tono de su estado (advertencia o error) y sigue en una fila
  * normal si no tiene tono. Se dibuja como elemento de lista: va dentro de un `ul`. El resaltado no debe ser lo
  * único que dice el estado: el contenido lleva su etiqueta.
- * @param {{ tone?: 'none'|'warning'|'error', children: import('react').ReactNode }} props
+ * @param {{ tone?: 'none'|'warning'|'error', testId?: string, children: import('react').ReactNode }} props
+ *   `testId` es el `data-testid` de la fila, para localizarla en las pruebas de extremo a extremo.
  */
-export default function StatusRow({ tone = 'none', children }) {
+export default function StatusRow({ tone = 'none', testId, children }) {
   const { bg, border, bar } = TONES[tone] ?? TONES.none;
 
   return (
     <Box
       component="li"
+      data-testid={testId}
       sx={{
         listStyle: 'none',
         display: 'flex',

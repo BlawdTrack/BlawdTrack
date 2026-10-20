@@ -31,7 +31,7 @@ export default function ImportUploadStep({ file, alertMessage = null, alertSever
           borderColor: 'neutral.border',
         }}
       >
-        <Button type="button" variant="text" color="inherit" onClick={onCancel} disabled={isUploading} sx={{ fontWeight: 700, color: 'text.secondary' }}>
+        <Button type="button" variant="text" color="inherit" data-testid="import-cancel" onClick={onCancel} disabled={isUploading} sx={{ fontWeight: 700, color: 'text.secondary' }}>
           Cancelar
         </Button>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -39,6 +39,7 @@ export default function ImportUploadStep({ file, alertMessage = null, alertSever
           <Button
             type="submit"
             variant="contained"
+            data-testid="import-review"
             disabled={isUploading || !file}
             endIcon={isUploading ? null : <ArrowForwardOutlinedIcon />}
             sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm, boxShadow: 'none', gap: 1 }}

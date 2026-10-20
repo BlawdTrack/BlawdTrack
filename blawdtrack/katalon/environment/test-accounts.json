@@ -1,0 +1,25 @@
+{
+  "_nota": "Cuentas del entorno de pruebas de extremo a extremo. Son de un entorno desechable (docker-compose.e2e.yml); no existen en ningún otro lugar. El Super Usuario lo siembra el DataSeeder del backend; las otras dos las crea scripts/prepare-data.ps1 por la API.",
+  "superUser": {
+    "email": "superadmin@blawdgourmet.com",
+    "password": "ultra_gorGon_1!"
+  },
+  "salesAdmin": {
+    "documentType": "CEDULA",
+    "documentNumber": "900000001",
+    "fullName": "Ventas E2E",
+    "email": "ventas.e2e@blawdgourmet.test",
+    "phone": "88880001",
+    "password": "Katalon2026"
+  },
+  "courier": {
+    "documentType": "CEDULA",
+    "documentNumber": "900000002",
+    "fullName": "Mensajero E2E",
+    "email": "mensajero.e2e@blawdgourmet.test",
+    "phone": "88880002",
+    "schedule": "08:00 a 17:00",
+    "maxPackageWeightKg": 50,
+    "password": "Katalon2026"
+  }
+}

@@ -20,6 +20,7 @@ export default function SidebarModuleLink({ group, collapsed = false }) {
       <Box
         component={NavLink}
         to={group.path}
+        data-testid={`nav-${group.path}`}
         aria-label={group.title}
         sx={{
           alignSelf: collapsed ? 'center' : 'stretch',

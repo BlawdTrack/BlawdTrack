@@ -13,6 +13,7 @@ export default function FormActions({ submitLabel, submittingLabel, isSubmitting
       <Button
         type="submit"
         variant="contained"
+        data-testid="form-submit"
         disabled={isSubmitting || submitDisabled}
         sx={{ fontWeight: 600, px: 4, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm, gap: 1.2, boxShadow: 'none' }}
       >
@@ -32,6 +33,7 @@ export default function FormActions({ submitLabel, submittingLabel, isSubmitting
         type="button"
         variant="outlined"
         onClick={onDiscard}
+        data-testid="form-discard"
         disabled={isSubmitting}
         sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
       >
