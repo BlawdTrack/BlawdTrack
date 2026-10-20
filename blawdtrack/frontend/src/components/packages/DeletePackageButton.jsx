@@ -4,7 +4,7 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import { useCanDeletePackages } from '../../hooks/useCanDeletePackages';
 import { isPackageDeletable } from '../../config/packageStates';
 import { getPackageStatusMeta } from '../../config/packageStatus';
-import { RADIUS, FONT, TOUCH_TARGET } from '../../theme';
+import { RADIUS, FONT, rem } from '../../theme';
 
 /**
  * Botón "Eliminar" de un paquete (HU-012). Solo existe para el Administrador de Ventas y el Súper Usuario; para
@@ -45,10 +45,10 @@ export default function DeletePackageButton({ pkg, onDelete, onBlocked }) {
         aria-describedby={isDeletable ? undefined : hintId}
         sx={{
           borderRadius: RADIUS.sm,
-          px: 2.5,
-          minHeight: TOUCH_TARGET,
+          px: 3,
+          minHeight: rem(48),
           fontWeight: 600,
-          fontSize: FONT.sm,
+          fontSize: FONT.md,
           borderWidth: '1.5px',
           color: isDeletable ? 'error.contrastText' : 'text.secondary',
           bgcolor: isDeletable ? 'error.main' : 'background.paper',

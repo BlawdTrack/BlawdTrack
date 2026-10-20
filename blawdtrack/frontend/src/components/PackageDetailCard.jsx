@@ -295,7 +295,8 @@ export default function PackageDetailCard({ pkg, actions = null, notice = null, 
           aria-label="Eliminar paquete"
           sx={{
             ...CARD_SX,
-            borderColor: 'error.border',
+            borderColor: 'error.main',
+            bgcolor: 'error.light',
             px: { xs: 2.5, md: 3.25 },
             py: 2,
             display: 'flex',
@@ -306,8 +307,8 @@ export default function PackageDetailCard({ pkg, actions = null, notice = null, 
           }}
         >
           <Box>
-            <Typography sx={{ fontSize: FONT.lg, fontWeight: 600 }}>Eliminar paquete</Typography>
-            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: FONT.lg, fontWeight: 700, color: 'error.text' }}>Eliminar paquete</Typography>
+            <Typography sx={{ fontSize: FONT.sm, color: 'error.text' }}>
               Solo se puede eliminar un paquete que aún no fue despachado (Pendiente o Asignado).
             </Typography>
           </Box>
