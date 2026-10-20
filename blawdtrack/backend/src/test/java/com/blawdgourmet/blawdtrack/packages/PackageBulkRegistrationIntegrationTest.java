@@ -1,10 +1,13 @@
 package com.blawdgourmet.blawdtrack.packages;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
@@ -46,6 +49,7 @@ class PackageBulkRegistrationIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private RoleRepository roleRepository;
     @Autowired private DeliveryPackageRepository packageRepository;
+    @Autowired private AuditLogRepository auditLogRepository;
 
     private final AtomicInteger sequence = new AtomicInteger();
 
@@ -108,6 +112,47 @@ class PackageBulkRegistrationIntegrationTest {
         DeliveryPackage stored = find(shipmentNumber);
         assertThat(stored.getDeliveryStartTime()).as(shipmentNumber).isEqualTo(start);
         assertThat(stored.getDeliveryEndTime()).as(shipmentNumber).isEqualTo(end);
+    }
+
+    @Test
+    void elAltaDeCadaPaqueteEsElPrimerEventoDeSuLineaDeTiempo() throws Exception {
+        mvc.perform(multipart(ENDPOINT)
+                        .file(file(CSV))
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.registeredRecordsCount").value(3));
+
+        var registros = auditLogRepository.findByActionOrderByTimestampDescIdDesc(
+                AuditAction.PACKAGE_CREATED.getCode());
+        assertThat(registros).hasSize(3);
+        assertThat(registros).allSatisfy(registro -> {
+            assertThat(registro.getActor().getFullName()).isEqualTo("Actor T266");
+            assertThat(registro.getTimestamp()).isNotNull();
+            assertThat(registro.getPreviousStatus()).isNull();
+            assertThat(registro.getNewStatus()).isEqualTo(PackageStatus.PENDING.name());
+        });
+
+        mvc.perform(get("/api/v1/packages/ENV-266-1/history")
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].action").value("REGISTRAR_PAQUETE"))
+                .andExpect(jsonPath("$[0].actorName").value("Actor T266"))
+                .andExpect(jsonPath("$[0].newStatus").value("PENDING"))
+                .andExpect(jsonPath("$[0].timestamp").isNotEmpty());
+    }
+
+    @Test
+    void losPaquetesNoRegistradosNoDejanAltaEnLaAuditoria() throws Exception {
+        packageRepository.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-266-4").build());
+
+        mvc.perform(multipart(ENDPOINT)
+                        .file(file(CSV))
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isCreated());
+
+        assertThat(auditLogRepository.findByActionOrderByTimestampDescIdDesc(
+                AuditAction.PACKAGE_CREATED.getCode())).hasSize(2);
     }
 
     @Test

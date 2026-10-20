@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.packages.controller;
 
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.dto.CompareShipmentNumbersRequest;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportPreviewResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportExecutionResponse;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,10 +62,11 @@ public class PackageImportValidationController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('" + PermissionCode.PACKAGE_IMPORT + "')")
     public PackageImportExecutionResponse importPackages(
-            @RequestPart("file") MultipartFile file) {
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal AuthenticatedUser actor) {
         requireFile(file);
         try (InputStream input = file.getInputStream()) {
-            return importExecutionUseCase.execute(input, file.getOriginalFilename());
+            return importExecutionUseCase.execute(input, file.getOriginalFilename(), actor);
         } catch (IOException exception) {
             throw new InvalidPackageUploadException(
                     "No se pudo abrir el archivo recibido", exception);
