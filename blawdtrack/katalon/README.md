@@ -145,7 +145,7 @@ En Katalon, un objeto de prueba se define con XPath o CSS, por ejemplo `//*[@dat
 | Inicio de sesión | `login-submit`, `login-forgot-password` |
 | Navegación | `nav-<ruta>` (por ejemplo `nav-/main-menu/paquetes/buscar`), `main-menu-link`, `logout-button` |
 | Formularios | `form-submit`, `form-discard`, `edit-save`, `edit-discard`, `confirm-dialog-confirm`, `confirm-dialog-cancel`, `leave-dialog-leave`, `leave-dialog-stay`, `document-search-submit`, `document-search-clear` |
-| Importación | `import-select-file`, `import-file-input`, `import-review`, `import-cancel`, `import-count-{read,valid,invalid,duplicate}`, `import-filter-{all,valid,invalid,duplicate}`, `import-row-{valid,invalid,duplicate}`, `import-confirm`, `import-load-another`, `import-result-{read,registered,invalid,duplicate}`, `import-result-another` |
+| Importación | `import-select-file`, `import-file-input`, `import-help-toggle`, `import-review`, `import-cancel`, `import-count-{read,valid,invalid,duplicate}`, `import-filter-{all,valid,invalid,duplicate}`, `import-row-{valid,invalid,duplicate}`, `import-confirm`, `import-load-another`, `import-result-{read,registered,invalid,duplicate}`, `import-result-another` |
 | Búsqueda de paquetes | `package-search-input`, `package-search-clear`, `package-search-summary`, `package-search-empty-clear`, `package-result-row`, `package-load-more`, `package-load-more-count` |
 | Ficha del paquete | `package-detail-card`, `package-courier-name`, `package-history-list`, `package-history-entry`, `delete-package-button`, `delete-package-cancel`, `delete-package-confirm` |
 | Comprobante de entrega | `package-proof-card`, `package-proof-summary`, `package-proof-empty`, `delivery-photo`, `delivery-photo-image`, `delivery-photo-retry` |

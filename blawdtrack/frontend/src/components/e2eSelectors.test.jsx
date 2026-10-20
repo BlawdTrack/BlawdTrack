@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import EditFormActions from './EditFormActions';
 import FormActions from './FormActions';
+import ImportFileHelp from './import/ImportFileHelp';
 import { NewPasswordForm } from './NewPasswordForm';
 import { NewPasswordInvalidLink, NewPasswordSuccess } from './NewPasswordOutcomes';
 import PackageProofCard from './PackageProofCard';
@@ -50,6 +51,12 @@ describe('selectores de las pruebas de extremo a extremo', () => {
     render(<PackageSearchSummary term="" matchCount={250} totalCount={250} />);
 
     expect(screen.getByTestId('package-search-summary')).toHaveTextContent('250 paquetes');
+  });
+
+  it('la ayuda del archivo de importación', () => {
+    render(<ImportFileHelp />);
+
+    expect(screen.getByTestId('import-help-toggle')).toBeInTheDocument();
   });
 
   it('los botones de los formularios de creación y de edición', () => {
