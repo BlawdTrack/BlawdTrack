@@ -147,4 +147,112 @@ describe('usePackageSearch', () => {
     expect(result.current.errorMessage).toMatch(/error inesperado/i);
     expect(result.current.isLoading).toBe(false);
   });
+
+  describe('loadMore', () => {
+    const page = (ids, pageNumber, totalPages = 3) => ({
+      content: ids.map((id) => ({ id, shipmentNumber: `ENV-${id}` })),
+      page: pageNumber,
+      size: 2,
+      totalElements: 6,
+      totalPages,
+    });
+
+    it('trae la página siguiente de la lista completa y la suma a la ya cargada', async () => {
+      searchPackages
+        .mockResolvedValueOnce(page([6, 5], 0))
+        .mockResolvedValueOnce(page([4, 3], 1));
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      expect(result.current.canLoadMore).toBe(true);
+
+      await act(async () => {
+        result.current.loadMore();
+      });
+
+      expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: '', page: 1 }));
+      expect(result.current.results.content.map((pkg) => pkg.id)).toEqual([6, 5, 4, 3]);
+      expect(result.current.isLoadingMore).toBe(false);
+      expect(result.current.canLoadMore).toBe(true);
+    });
+
+    it('no ofrece más páginas cuando la última ya se cargó', async () => {
+      searchPackages.mockResolvedValueOnce(page([2, 1], 0, 1));
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(result.current.canLoadMore).toBe(false);
+    });
+
+    it('con un término trae la página siguiente de esa búsqueda, no de la lista completa', async () => {
+      searchPackages
+        .mockResolvedValueOnce(page([6, 5], 0))
+        .mockResolvedValueOnce(page([4, 2], 0))
+        .mockResolvedValueOnce(page([1, 0], 1));
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      act(() => {
+        result.current.setTerm('limon');
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+
+      await act(async () => {
+        result.current.loadMore();
+      });
+
+      expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'limon', page: 1 }));
+      expect(result.current.results.content.map((pkg) => pkg.id)).toEqual([4, 2, 1, 0]);
+      expect(result.current.distributionResults.content).toHaveLength(2);
+    });
+
+    it('descarta la página pedida si antes llega otra búsqueda', async () => {
+      let resolveMore;
+      searchPackages
+        .mockResolvedValueOnce(page([6, 5], 0))
+        .mockReturnValueOnce(new Promise((resolve) => { resolveMore = resolve; }));
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      act(() => {
+        result.current.loadMore();
+      });
+      expect(result.current.isLoadingMore).toBe(true);
+
+      act(() => {
+        result.current.setTerm('limon');
+      });
+      await act(async () => {
+        resolveMore(page([4, 3], 1));
+      });
+
+      expect(result.current.isLoadingMore).toBe(false);
+      expect(result.current.distributionResults.content.map((pkg) => pkg.id)).toEqual([6, 5]);
+    });
+
+    it('muestra el error si falla y deja intentar de nuevo', async () => {
+      searchPackages
+        .mockResolvedValueOnce(page([6, 5], 0))
+        .mockRejectedValueOnce({ response: { status: 500 } });
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      await act(async () => {
+        result.current.loadMore();
+      });
+
+      expect(result.current.errorMessage).toMatch(/error inesperado/i);
+      expect(result.current.isLoadingMore).toBe(false);
+      expect(result.current.canLoadMore).toBe(true);
+    });
+  });
 });
