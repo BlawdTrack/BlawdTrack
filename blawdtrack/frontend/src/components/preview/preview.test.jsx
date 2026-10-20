@@ -3,7 +3,6 @@ import { render, screen, within, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import StatusRow from '../StatusRow';
 import ImportPreviewView from './ImportPreviewView';
-import PreviewCounters from './PreviewCounters';
 import PreviewFilters from './PreviewFilters';
 import PreviewRecordList from './PreviewRecordList';
 import PreviewRecordRow from './PreviewRecordRow';
@@ -62,24 +61,50 @@ describe('PreviewRecordRow', () => {
     renderRow(validRow);
 
     const row = screen.getByRole('listitem');
-    ['BG-1', 'Orden ZI-1', 'Ana Mora', 'Moravia', '8712-0094', 'Horario: De 9 a 4', 'Entrega: 9:00 a. m. – 4:00 p. m.', 'Válido'].forEach((text) =>
+    ['BG-1', 'Orden ZI-1', 'Ana Mora', 'Moravia', '8712-0094', '9:00 a. m. – 4:00 p. m.', 'Válido'].forEach((text) =>
       expect(within(row).getByText(text)).toBeInTheDocument()
     );
+    expect(within(row).getByTitle('Original: De 9 a 4')).toHaveTextContent('9:00 a. m. – 4:00 p. m.');
   });
 
-  it('un válido sin rango del backend dice "Sin calcular" en vez de inventarlo', () => {
+  it('no repite el número de orden cuando es el mismo que el de envío (Órdenes de venta)', () => {
+    renderRow({ ...validRow, shipmentNumber: 'SO-1', orderNumber: 'SO-1' });
+
+    expect(screen.getByText('SO-1')).toBeInTheDocument();
+    expect(screen.queryByText('Orden SO-1')).not.toBeInTheDocument();
+  });
+
+  it('una dirección que es solo un enlace de Waze se muestra como botón que abre en otra pestaña', () => {
+    renderRow({ ...validRow, address: 'https://waze.com/ul/hd1u0mmj97' });
+
+    const link = screen.getByRole('link', { name: 'Abrir ubicación en Waze' });
+    expect(link).toHaveAttribute('href', 'https://waze.com/ul/hd1u0mmj97');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+    expect(screen.queryByText('https://waze.com/ul/hd1u0mmj97')).not.toBeInTheDocument();
+  });
+
+  it('una dirección con el enlace de Google Maps pegado muestra el texto y el botón Maps', () => {
+    renderRow({ ...validRow, address: 'Desamparados\nhttps://maps.app.goo.gl/hkVWJQqKTxnoWTDh7' });
+
+    const row = screen.getByRole('listitem');
+    expect(within(row).getByText('Desamparados')).toBeInTheDocument();
+    expect(within(row).queryByText(/maps\.app\.goo\.gl/)).not.toBeInTheDocument();
+    expect(within(row).getByRole('link', { name: 'Abrir ubicación en Maps' })).toHaveAttribute('href', 'https://maps.app.goo.gl/hkVWJQqKTxnoWTDh7');
+  });
+
+  it('un válido sin rango del backend muestra el horario del archivo en vez de inventar uno', () => {
     renderRow({ ...validRow, deliveryRange: null });
 
-    expect(screen.getByText('Entrega: Sin calcular')).toBeInTheDocument();
+    expect(screen.getByText('De 9 a 4')).toBeInTheDocument();
   });
 
-  it('un registro con errores lleva la etiqueta "Error", el motivo y no muestra rango de entrega', () => {
+  it('un registro con errores lleva la etiqueta "Con error" y el motivo', () => {
     renderRow(invalidRow);
 
     const row = screen.getByRole('listitem');
-    expect(within(row).getByText('Error')).toBeInTheDocument();
+    expect(within(row).getByText('Con error')).toBeInTheDocument();
     expect(within(row).getByText('El campo teléfono es obligatorio')).toBeInTheDocument();
-    expect(within(row).queryByText(/Entrega:/)).not.toBeInTheDocument();
   });
 
   it('sin número de envío lo dice en vez de dejar el espacio vacío', () => {
@@ -95,26 +120,13 @@ describe('PreviewRecordRow', () => {
     expect(within(row).getByText('BG-9')).toBeInTheDocument();
     expect(within(row).getByText('Duplicado')).toBeInTheDocument();
     expect(within(row).getByText('Ya registrado en la base de datos')).toBeInTheDocument();
-    expect(within(row).queryByText(/Horario:|Entrega:|Orden/)).not.toBeInTheDocument();
+    expect(within(row).queryByText(/Orden/)).not.toBeInTheDocument();
   });
 
   it('un estado desconocido se trata como error', () => {
     renderRow({ ...invalidRow, status: 'otro' });
 
-    expect(screen.getByText('Error')).toBeInTheDocument();
-  });
-});
-
-describe('PreviewCounters', () => {
-  it('muestra los cuatro totales con su leyenda', () => {
-    render(<PreviewCounters counts={counts} />);
-
-    const list = within(screen.getByRole('list', { name: 'Totales de la previsualización' }));
-    expect(list.getAllByRole('listitem')).toHaveLength(4);
-    expect(list.getByText('6').parentElement).toHaveTextContent('registros leídos');
-    expect(list.getByText('3').parentElement).toHaveTextContent('válidos');
-    expect(list.getByText('2').parentElement).toHaveTextContent('con errores');
-    expect(list.getByText('1').parentElement).toHaveTextContent('duplicados');
+    expect(screen.getByText('Con error')).toBeInTheDocument();
   });
 });
 
@@ -141,19 +153,19 @@ describe('PreviewFilters', () => {
 });
 
 describe('PreviewRecordList', () => {
-  it('cuenta los registros que muestra, en singular y en plural', () => {
-    const { rerender } = render(<PreviewRecordList rows={[validRow]} />);
-    expect(screen.getByText('1 registro')).toBeInTheDocument();
+  it('dice cuántos registros muestra de cuántos hay, en singular y en plural', () => {
+    const { rerender } = render(<PreviewRecordList rows={[validRow]} totalCount={1} />);
+    expect(screen.getByText(/Mostrando/)).toHaveTextContent('Mostrando 1 de 1 registro');
 
-    rerender(<PreviewRecordList rows={[validRow, invalidRow, duplicateRow]} />);
-    expect(screen.getByText('3 registros')).toBeInTheDocument();
+    rerender(<PreviewRecordList rows={[validRow, invalidRow, duplicateRow]} totalCount={6} />);
+    expect(screen.getByText(/Mostrando/)).toHaveTextContent('Mostrando 3 de 6 registros');
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 
-  it('si el filtro no deja registros lo dice', () => {
-    render(<PreviewRecordList rows={[]} />);
+  it('si el filtro o la búsqueda no dejan registros lo dice', () => {
+    render(<PreviewRecordList rows={[]} totalCount={6} />);
 
-    expect(screen.getByText('No hay registros en este grupo.')).toBeInTheDocument();
+    expect(screen.getByText('Ningún registro coincide.')).toBeInTheDocument();
     expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
   });
 });
@@ -165,8 +177,9 @@ describe('ImportPreviewView', () => {
     const alert = screen.getByRole('alert');
     expect(alert).toHaveTextContent('2 registros con errores y 1 duplicado en zoho.xlsx');
     expect(alert).toHaveTextContent('Se excluyen de la importación');
-    expect(screen.getByRole('list', { name: 'Totales de la previsualización' })).toBeInTheDocument();
-    expect(screen.getAllByRole('listitem').length).toBeGreaterThan(4);
+    expect(screen.getByTestId('import-count-read')).toHaveTextContent('6');
+    expect(screen.getByTestId('import-count-valid')).toHaveTextContent('3');
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 
   it('explica qué tipo de duplicados hay: ya registrados y repetidos en el archivo', () => {
@@ -193,6 +206,20 @@ describe('ImportPreviewView', () => {
 
     await user.click(screen.getByRole('button', { name: /Todos/ }));
     expect(records()).toHaveLength(3);
+  });
+
+  it('busca dentro del archivo sin distinguir mayúsculas ni tildes y se combina con el filtro', async () => {
+    const user = userEvent.setup();
+    render(<ImportPreviewView preview={previewOf()} />);
+    const records = () => within(screen.getByRole('region', { name: 'Registros del archivo' })).getAllByRole('listitem');
+
+    await user.type(screen.getByRole('searchbox', { name: 'Buscar en el archivo' }), 'MORÁVIA');
+    expect(records()).toHaveLength(1);
+    expect(within(records()[0]).getByText('BG-1')).toBeInTheDocument();
+    expect(screen.getByText(/Mostrando/)).toHaveTextContent('Mostrando 1 de 6 registros');
+
+    await user.click(screen.getByRole('button', { name: /Duplicados/ }));
+    expect(screen.getByText('Ningún registro coincide.')).toBeInTheDocument();
   });
 
   it('usa el singular con un solo registro con errores', () => {

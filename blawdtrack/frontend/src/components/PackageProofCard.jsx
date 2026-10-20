@@ -6,11 +6,6 @@ import { FONT } from '../theme';
 
 const TITLE_ID = 'package-proof-title';
 
-// Medida tomada de la referencia visual: la tarjeta se mantiene compacta en
-// escritorio (≈350 px) y toma el ancho disponible en pantallas pequeñas sin
-// desbordarse.
-const CARD_MAX_WIDTH = 350;
-
 /**
  * Tarjeta "Comprobante de entrega" de la pantalla de consulta (solo lectura).
  * Muestra la fotografía real registrada para la entrega del paquete consultado
@@ -35,7 +30,7 @@ export default function PackageProofCard({ pkg, entries = [] }) {
       component="section"
       aria-labelledby={TITLE_ID}
       data-testid="package-proof-card"
-      sx={{ ...CARD_SX, width: '100%', maxWidth: CARD_MAX_WIDTH, p: { xs: 2.5, md: 3.75 } }}
+      sx={{ ...CARD_SX, width: '100%', p: { xs: 2.5, md: 3.25 } }}
     >
       <Typography
         id={TITLE_ID}

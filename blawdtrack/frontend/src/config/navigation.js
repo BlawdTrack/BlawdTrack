@@ -123,15 +123,30 @@ export const NAVIGATION_GROUPS = [
     id: 'package-management',
     title: 'Gestión de paquetes',
     shortTitle: 'Gestión',
-    // Un módulo de una sola pantalla (por ahora solo la búsqueda): su `path` es el de la pantalla.
-    path: ROUTES.PACKAGE_SEARCH,
+    path: ROUTES.MODULE_PACKAGE_MANAGEMENT,
     items: [
       {
         id: 'package-search',
-        label: 'Buscar paquetes',
-        description: 'Busca un paquete por número de envío, orden, cliente, dirección, teléfono, horario o estado.',
-        actionLabel: 'Buscar',
+        label: 'Consultar paquetes',
+        description: 'Busca por cualquier dato, filtra por estado, abre el detalle, genera el QR o elimina un paquete.',
+        actionLabel: 'Ver todos los paquetes',
         path: ROUTES.PACKAGE_SEARCH,
+        roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
+      },
+      {
+        id: 'package-pending',
+        label: 'Pendientes de asignación',
+        description: 'Los paquetes que aún no tienen mensajero, del más antiguo al más reciente, listos para asignar.',
+        actionLabel: 'Ver pendientes',
+        path: null,
+        roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
+      },
+      {
+        id: 'package-export',
+        label: 'Exportar a Excel',
+        description: 'Descarga el listado de paquetes con los filtros que elijas: fecha, estado o mensajero.',
+        actionLabel: 'Descargar listado',
+        path: null,
         roles: [ROLES.SUPER_USER, ROLES.SALES_ADMIN],
       },
     ],
@@ -266,13 +281,17 @@ export function isGroupActive(group, pathname) {
 
 /**
  * Menú al que lleva la flecha junto al título desde `pathname`: la pantalla de una función vuelve al menú que la
- * lista (su submenú, o su grupo si no tiene) y el menú de un submenú vuelve al de su grupo. El menú de un grupo no
+ * lista (su submenú, o su grupo si no tiene), la ficha de un paquete vuelve a Consultar paquetes y el menú de un
+ * submenú vuelve al de su grupo. El menú de un grupo no
  * tiene flecha: para salir de ahí está el enlace al menú principal. La pantalla de un módulo de una sola pantalla
  * tampoco (no tiene menú al que volver).
  * @param {string} pathname Ruta actual.
  * @returns {{ to: string, label: string } | null}
  */
 export function getParentMenu(pathname) {
+  // La ficha de un paquete cuelga de la lista de resultados: la flecha vuelve a ella, no al menú del módulo.
+  if (pathname.startsWith(`${ROUTES.PACKAGE_SEARCH}/`)) return { to: ROUTES.PACKAGE_SEARCH, label: 'Consultar paquetes' };
+
   const group = NAVIGATION_GROUPS.find((candidate) => candidate.submenus?.some((submenu) => submenu.path === pathname));
   if (group) return { to: group.path, label: group.title };
 

@@ -1,82 +1,104 @@
 import { Box, Typography } from '@mui/material';
-import PackageStatusChip from '../PackageStatusChip';
-import StatusRow from '../StatusRow';
+import MapLinkButton from '../MapLinkButton';
+import { PREVIEW_GRID_SX } from './previewGrid';
 import { PREVIEW_STATUS } from '../../utils/importPreview';
+import { splitAddressLink } from '../../utils/addressLink';
 import { FONT } from '../../theme';
 
-// Cómo se resalta y se etiqueta cada resultado: tono de la fila, etiqueta y color de las notas.
+// Cómo se resalta y se etiqueta cada resultado: tono de la fila, etiqueta, color del punto y de las notas.
 const BY_STATUS = {
-  [PREVIEW_STATUS.VALID]: { tone: 'none', chip: 'valid', noteColor: 'text.secondary' },
-  [PREVIEW_STATUS.INVALID]: { tone: 'error', chip: 'error', noteColor: 'error.text' },
-  [PREVIEW_STATUS.DUPLICATE]: { tone: 'warning', chip: 'duplicate', noteColor: 'warning.text' },
+  [PREVIEW_STATUS.VALID]: { label: 'Válido', bg: 'transparent', bar: 'transparent', color: 'success.main', noteColor: 'text.secondary' },
+  [PREVIEW_STATUS.INVALID]: { label: 'Con error', bg: 'error.light', bar: 'error.main', color: 'error.main', noteColor: 'error.text' },
+  [PREVIEW_STATUS.DUPLICATE]: { label: 'Duplicado', bg: 'warning.light', bar: 'warning.main', color: 'warning.text', noteColor: 'warning.text' },
 };
 
-const COLUMN_SX = { flex: '1 1 170px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.25 };
+const CELL_SX = { minWidth: 0, fontSize: FONT.md, color: 'text.primary', py: { xs: 0.25, md: 1.25 } };
+// La dirección puede ser larga: en la tabla ocupa hasta dos líneas y el resto queda en el texto que aparece al pasar el cursor.
+const CLAMP_SX = { display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: { md: 2 }, overflow: 'hidden', overflowWrap: 'anywhere', lineHeight: 1.35 };
+// En el celular las filas se apilan sin encabezado de columnas: el teléfono y el horario llevan su nombre delante.
+const mobileLabel = (text) => ({ '&::before': { content: `"${text}"`, display: { md: 'none' }, color: 'text.secondary' } });
+const ELLIPSIS_SX = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: { md: 'nowrap' } };
 
-function IdentityColumn({ row }) {
+function StatusCell({ row, status }) {
   return (
-    <Box sx={{ ...COLUMN_SX, flex: '1 1 140px' }}>
-      <Typography component="span" sx={{ fontSize: FONT.md, fontWeight: 700, color: row.shipmentNumber ? 'text.primary' : 'text.secondary' }}>
-        {row.shipmentNumber ?? 'Sin número de envío'}
+    <Box sx={CELL_SX}>
+      <Typography
+        component="span"
+        sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.9, fontSize: FONT.md, fontWeight: 600, color: status.color }}
+      >
+        <Box aria-hidden="true" component="span" sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'currentColor', flex: 'none' }} />
+        {status.label}
       </Typography>
-      {row.orderNumber && (
-        <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
-          Orden {row.orderNumber}
+      {row.notes.map((note) => (
+        <Typography key={note} component="span" sx={{ display: 'block', fontSize: FONT.sm, color: status.noteColor, lineHeight: 1.4 }}>
+          {note}
         </Typography>
-      )}
+      ))}
     </Box>
   );
 }
 
-function CustomerColumn({ row }) {
-  if (!(row.customerName || row.address || row.phone)) return null;
-  return (
-    <Box sx={COLUMN_SX}>
-      {row.customerName && <Typography component="span" sx={{ fontSize: FONT.md, color: 'text.primary' }}>{row.customerName}</Typography>}
-      {row.address && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{row.address}</Typography>}
-      {row.phone && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>{row.phone}</Typography>}
-    </Box>
-  );
-}
+// La dirección del archivo suele traer pegado un enlace de Waze o Maps: se muestra el texto y, debajo, un botón que lo abre.
+function AddressCell({ address }) {
+  const { text, link } = splitAddressLink(address);
 
-function ScheduleColumn({ row, isValid }) {
-  if (!(row.schedule || isValid)) return null;
   return (
-    <Box sx={COLUMN_SX}>
-      {row.schedule && <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>Horario: {row.schedule}</Typography>}
-      {isValid && (
-        <Typography component="span" sx={{ fontSize: FONT.sm, fontWeight: 600, color: row.deliveryRange ? 'text.primary' : 'text.secondary' }}>
-          Entrega: {row.deliveryRange ?? 'Sin calcular'}
-        </Typography>
-      )}
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: link && text ? 0.5 : 0 }}>
+      {(text || !link) && <Box component="span" title={text || undefined} sx={CLAMP_SX}>{text || '—'}</Box>}
+      {link && <MapLinkButton link={link} />}
     </Box>
   );
 }
 
 /**
- * Fila de un registro del archivo en la previsualización: número de envío y orden, cliente, dirección y teléfono,
- * horario y rango de entrega calculado (solo en los válidos) y su resultado con las notas. Los registros con
- * errores y los duplicados van resaltados, y el resultado lleva siempre su etiqueta con texto.
+ * Fila de un registro del archivo en la tabla de previsualización: estado (con las notas del error o del duplicado),
+ * número de envío (y de orden), cliente, dirección (un botón Waze/Maps si es un enlace), teléfono y horario (el
+ * rango de entrega calculado si lo hay, con el texto original al pasar el cursor). Los registros con errores y los
+ * duplicados van resaltados, y el estado lleva siempre su etiqueta con texto.
  * @param {{ row: object }} props Fila de `buildImportPreview`.
  */
 export default function PreviewRecordRow({ row }) {
-  const { tone, chip, noteColor } = BY_STATUS[row.status] ?? BY_STATUS[PREVIEW_STATUS.INVALID];
-  const isValid = row.status === PREVIEW_STATUS.VALID;
+  const status = BY_STATUS[row.status] ?? BY_STATUS[PREVIEW_STATUS.INVALID];
 
   return (
-    <StatusRow tone={tone} testId={`import-row-${row.status}`}>
-      <IdentityColumn row={row} />
-      <CustomerColumn row={row} />
-      <ScheduleColumn row={row} isValid={isValid} />
+    <Box
+      component="li"
+      data-testid={`import-row-${row.status}`}
+      sx={{
+        ...PREVIEW_GRID_SX,
+        listStyle: 'none',
+        py: { xs: 1.25, md: 0 },
+        minHeight: 48,
+        bgcolor: status.bg,
+        borderBottom: '1px solid',
+        borderColor: 'neutral.border',
+        borderLeft: '4px solid',
+        borderLeftColor: status.bar,
+        '&:hover': { bgcolor: row.status === PREVIEW_STATUS.VALID ? 'neutral.surface' : status.bg },
+      }}
+    >
+      <StatusCell row={row} status={status} />
 
-      <Box sx={{ ...COLUMN_SX, flex: '1 1 200px', alignItems: 'flex-start', gap: 0.75 }}>
-        <PackageStatusChip kind={chip} />
-        {row.notes.map((note) => (
-          <Typography key={note} component="span" sx={{ fontSize: FONT.sm, color: noteColor, lineHeight: 1.4 }}>
-            {note}
+      <Box sx={CELL_SX}>
+        <Typography component="span" sx={{ display: 'block', fontSize: FONT.md, fontWeight: 700, color: row.shipmentNumber ? 'text.primary' : 'text.secondary' }}>
+          {row.shipmentNumber ?? 'Sin número de envío'}
+        </Typography>
+        {row.orderNumber && row.orderNumber !== row.shipmentNumber && (
+          <Typography component="span" sx={{ display: 'block', fontSize: FONT.sm, color: 'text.secondary' }}>
+            Orden {row.orderNumber}
           </Typography>
-        ))}
+        )}
       </Box>
-    </StatusRow>
+
+      <Box sx={{ ...CELL_SX, ...ELLIPSIS_SX }} title={row.customerName ?? undefined}>{row.customerName ?? '—'}</Box>
+      <Box sx={CELL_SX}><AddressCell address={row.address} /></Box>
+      <Box sx={{ ...CELL_SX, whiteSpace: { md: 'nowrap' }, ...mobileLabel('Tel. ') }}>{row.phone ?? '—'}</Box>
+      <Box
+        sx={{ ...CELL_SX, whiteSpace: { md: 'nowrap' }, ...mobileLabel('Horario: ') }}
+        title={row.schedule ? `Original: ${row.schedule}` : undefined}
+      >
+        {row.deliveryRange ?? row.schedule ?? '—'}
+      </Box>
+    </Box>
   );
 }

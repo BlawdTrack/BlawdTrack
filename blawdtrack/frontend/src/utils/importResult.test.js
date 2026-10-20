@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildImportResult } from './importResult';
+import { buildImportResult, importResultNotice } from './importResult';
 
 describe('buildImportResult', () => {
   it.each([[null], [undefined], ['texto'], [42]])('devuelve null si no hay una respuesta utilizable (%s)', (value) => {
@@ -34,6 +34,26 @@ describe('buildImportResult', () => {
       fileName: '',
       counts: { read: 0, registered: 0, invalid: 0, duplicate: 0 },
       registeredShipmentNumbers: [],
+    });
+  });
+});
+
+describe('importResultNotice', () => {
+  it('avisa cuántos paquetes se registraron y de qué archivo', () => {
+    expect(importResultNotice({ fileName: 'zoho.xlsx', counts: { registered: 3 } })).toEqual({
+      message: '3 paquetes registrados de zoho.xlsx. Los registros con errores y los duplicados se excluyeron.',
+      severity: 'success',
+    });
+  });
+
+  it('usa el singular con un solo paquete', () => {
+    expect(importResultNotice({ fileName: '', counts: { registered: 1 } }).message).toMatch(/^1 paquete registrado\./);
+  });
+
+  it('con cero registrados lo avisa en advertencia', () => {
+    expect(importResultNotice({ fileName: 'zoho.xlsx', counts: { registered: 0 } })).toEqual({
+      message: 'No se registró ningún paquete: el archivo zoho.xlsx no tenía registros válidos.',
+      severity: 'warning',
     });
   });
 });

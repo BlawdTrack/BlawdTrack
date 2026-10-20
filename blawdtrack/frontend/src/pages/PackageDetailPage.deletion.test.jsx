@@ -45,7 +45,7 @@ async function showPackage(role = ROLES.SALES_ADMIN, pkg = PENDING_PACKAGE) {
 
 async function openDeleteDialog() {
   const card = await showPackage();
-  await userEvent.click(within(card).getByRole('button', { name: 'Eliminar' }));
+  await userEvent.click(within(card).getByRole('button', { name: 'Eliminar paquete' }));
   return screen.findByRole('alertdialog', { name: 'Eliminar paquete' });
 }
 
@@ -68,7 +68,7 @@ describe('PackageDetailPage: eliminar desde la ficha (HU-012 / T06)', () => {
   it('el Súper Usuario ve "Eliminar" en la ficha y abre la confirmación', async () => {
     const card = await showPackage(ROLES.SUPER_USER);
 
-    await userEvent.click(within(card).getByRole('button', { name: 'Eliminar' }));
+    await userEvent.click(within(card).getByRole('button', { name: 'Eliminar paquete' }));
 
     expect(await screen.findByRole('alertdialog', { name: 'Eliminar paquete' })).toBeInTheDocument();
   });
@@ -76,7 +76,7 @@ describe('PackageDetailPage: eliminar desde la ficha (HU-012 / T06)', () => {
   it('el Mensajero ve la ficha sin el botón de eliminar', async () => {
     const card = await showPackage(ROLES.COURIER);
 
-    expect(within(card).queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
+    expect(within(card).queryByRole('button', { name: 'Eliminar paquete' })).not.toBeInTheDocument();
   });
 
   it('Cancelar cierra sin llamar al servicio y la ficha sigue', async () => {
@@ -100,8 +100,8 @@ describe('PackageDetailPage: eliminar desde la ficha (HU-012 / T06)', () => {
     expect(deletePackage).toHaveBeenCalledWith('BG-2026-00125');
     expect(screen.queryByRole('region', { name: 'Ficha del paquete BG-2026-00125' })).not.toBeInTheDocument();
     expect(screen.getByText('Paquete eliminado')).toBeInTheDocument();
-    // Hay dos "Volver a la búsqueda" (el de arriba y el del aviso): el foco va al del aviso.
-    const [, backInNotice] = screen.getAllByRole('button', { name: 'Volver a la búsqueda' });
+    // El foco va al "Volver a la búsqueda" del aviso.
+    const backInNotice = screen.getByRole('button', { name: 'Volver a la búsqueda' });
     await waitFor(() => expect(backInNotice).toHaveFocus());
   });
 
@@ -145,7 +145,7 @@ describe('PackageDetailPage: mensajes de resultado (HU-012 / T07)', () => {
   it('pulsar el botón de un paquete no eliminable muestra el aviso sin abrir el diálogo', async () => {
     const card = await showPackage(ROLES.SALES_ADMIN, { ...PENDING_PACKAGE, status: 'DELIVERED' });
 
-    await userEvent.click(within(card).getByRole('button', { name: 'Eliminar' }));
+    await userEvent.click(within(card).getByRole('button', { name: 'Eliminar paquete' }));
 
     expect(await screen.findByText('El paquete BG-2026-00125 está en “Entregado”: ya no puede eliminarse.')).toBeInTheDocument();
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();

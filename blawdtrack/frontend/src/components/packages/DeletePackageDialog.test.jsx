@@ -27,6 +27,13 @@ describe('DeletePackageDialog (HU-012 / T06)', () => {
     expect(screen.getByText('Paola Herrera Sánchez · Atenas, Alajuela')).toBeInTheDocument();
   });
 
+  it('con un enlace de mapa pegado en la dirección muestra el texto y el botón Maps', () => {
+    renderDialog({ pkg: { ...PKG, address: 'Desamparados\nhttps://maps.app.goo.gl/hkVWJQqKTxnoWTDh7' } });
+
+    expect(screen.getByText('Paola Herrera Sánchez · Desamparados')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Abrir ubicación en Maps' })).toHaveAttribute('href', 'https://maps.app.goo.gl/hkVWJQqKTxnoWTDh7');
+  });
+
   it('sin paquete está cerrado', () => {
     renderDialog({ pkg: null });
 

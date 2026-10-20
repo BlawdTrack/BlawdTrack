@@ -9,7 +9,7 @@ describe('PackageSearchEmptyState', () => {
     render(<PackageSearchEmptyState term="Limon" onClear={onClear} />);
 
     expect(screen.getByText('Sin resultados para “Limon”')).toBeInTheDocument();
-    expect(screen.getByText('Revisa el número de envío o prueba con otro criterio: orden, cliente, dirección, teléfono u horario de preferencia.')).toBeInTheDocument();
+    expect(screen.getByText(/Revisa la ortografía o prueba con menos letras/)).toBeInTheDocument();
 
     const button = screen.getByRole('button', { name: 'Limpiar búsqueda' });
     fireEvent.click(button);
@@ -23,5 +23,18 @@ describe('PackageSearchEmptyState', () => {
     render(<PackageSearchEmptyState term={longTerm} onClear={() => {}} />);
 
     expect(screen.getByText(`Sin resultados para “${longTerm}”`)).toBeInTheDocument();
+  });
+
+  it('un término con forma de número de envío dice que ese paquete no existe', () => {
+    render(<PackageSearchEmptyState term="BG-2026-999" onClear={() => {}} />);
+
+    expect(screen.getByText('Paquete no encontrado')).toBeInTheDocument();
+    expect(screen.getByText(/No existe el número de envío “BG-2026-999”/)).toBeInTheDocument();
+  });
+
+  it('un filtro de estado sin término dice que no hay paquetes en ese estado', () => {
+    render(<PackageSearchEmptyState term="" statusLabel="Entregado" onClear={() => {}} />);
+
+    expect(screen.getByText('Sin paquetes en estado “Entregado”')).toBeInTheDocument();
   });
 });

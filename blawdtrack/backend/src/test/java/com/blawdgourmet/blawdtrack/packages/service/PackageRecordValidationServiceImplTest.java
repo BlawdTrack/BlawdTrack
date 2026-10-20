@@ -32,7 +32,7 @@ class PackageRecordValidationServiceImplTest {
                     .isEqualTo(DefaultDeliverySchedulePolicy.DEFAULT_SCHEDULE);
             assertThat(invalid.issues())
                     .extracting(issue -> issue.field())
-                    .containsExactly("orderNumber", "address", "phone");
+                    .containsExactly("orderNumber", "address");
         });
     }
 
@@ -52,6 +52,17 @@ class PackageRecordValidationServiceImplTest {
     }
 
     @Test
+    void aceptaUnPaqueteSinTelefono() {
+        ImportedPackage withoutPhone = packageData(
+                "ENV-1", "SO-1", "Cliente Uno", "Heredia", null, "De 10 a 2");
+
+        var result = service.validate(List.of(withoutPhone));
+
+        assertThat(result.invalidRecords()).isEmpty();
+        assertThat(result.validRecords()).containsExactly(withoutPhone);
+    }
+
+    @Test
     void informaTodosLosCamposObligatoriosAusentesEnUnMismoRegistro() {
         ImportedPackage emptyPackage = packageData(null, "", " ", null, "", null);
 
@@ -62,7 +73,7 @@ class PackageRecordValidationServiceImplTest {
             assertThat(invalid.issues())
                     .extracting(issue -> issue.field())
                     .containsExactly(
-                            "shipmentNumber", "orderNumber", "customerName", "address", "phone");
+                            "shipmentNumber", "orderNumber", "customerName", "address");
             assertThat(invalid.issues())
                     .extracting(issue -> issue.message())
                     .allMatch(message -> message.endsWith("es obligatorio"));

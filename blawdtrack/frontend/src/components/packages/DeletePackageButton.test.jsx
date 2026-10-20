@@ -17,19 +17,19 @@ describe('DeletePackageButton (HU-012 / T05)', () => {
   it('no existe en el DOM para el Mensajero', () => {
     renderButton({ role: ROLES.COURIER });
 
-    expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Eliminar paquete' })).not.toBeInTheDocument();
   });
 
   it('existe para el Súper Usuario, que accede a todas las funciones', () => {
     renderButton({ role: ROLES.SUPER_USER });
 
-    expect(screen.getByRole('button', { name: 'Eliminar' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Eliminar paquete' })).toBeInTheDocument();
   });
 
   it('no existe en el DOM sin sesión', () => {
     renderWithProviders(<DeletePackageButton pkg={{ shipmentNumber: 'BG-1', status: 'PENDING' }} onDelete={vi.fn()} />);
 
-    expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Eliminar paquete' })).not.toBeInTheDocument();
   });
 
   it.each(['PENDING', 'ASSIGNED'])(
@@ -37,7 +37,7 @@ describe('DeletePackageButton (HU-012 / T05)', () => {
     async (status) => {
       const { pkg, onDelete } = renderButton({ status });
 
-      const button = screen.getByRole('button', { name: 'Eliminar' });
+      const button = screen.getByRole('button', { name: 'Eliminar paquete' });
       expect(button).not.toHaveAttribute('aria-disabled');
       expect(button).not.toHaveAttribute('aria-describedby');
       expect(screen.queryByText(/No eliminable/)).not.toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('DeletePackageButton (HU-012 / T05)', () => {
   ])('en %s queda aria-disabled con su texto de ayuda y no emite onDelete', async (status, label) => {
     const { onDelete } = renderButton({ status });
 
-    const button = screen.getByRole('button', { name: 'Eliminar' });
+    const button = screen.getByRole('button', { name: 'Eliminar paquete' });
     const hint = screen.getByText(`No eliminable en “${label}”`);
     expect(button).toHaveAttribute('aria-disabled', 'true');
     expect(button).not.toBeDisabled();
@@ -74,7 +74,7 @@ describe('DeletePackageButton (HU-012 / T05)', () => {
 
     await userEvent.tab();
 
-    expect(screen.getByRole('button', { name: 'Eliminar' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Eliminar paquete' })).toHaveFocus();
   });
 
   it('el botón no eliminable emite onBlocked con el paquete, y no onDelete (T07)', async () => {
@@ -85,7 +85,7 @@ describe('DeletePackageButton (HU-012 / T05)', () => {
       user: userWithRole(ROLES.SALES_ADMIN),
     });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar paquete' }));
 
     expect(onBlocked).toHaveBeenCalledWith(pkg);
     expect(onDelete).not.toHaveBeenCalled();
@@ -98,7 +98,7 @@ describe('DeletePackageButton (HU-012 / T05)', () => {
       user: userWithRole(ROLES.SALES_ADMIN),
     });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar paquete' }));
 
     expect(onBlocked).not.toHaveBeenCalled();
   });

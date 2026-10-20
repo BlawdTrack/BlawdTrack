@@ -7,9 +7,10 @@ import { FONT, rem } from '../theme';
  * en el celular, y el resto del tiempo no ocupa espacio. Es el lugar de las explicaciones que no hace falta
  * leer cada vez.
  * @param {{ label: string, children: import('react').ReactNode, sx?: object }} props `label` es el nombre
- *   accesible del icono (por ejemplo, "¿Cuándo se puede desactivar a un mensajero?") y `children` la leyenda.
+ *   accesible del icono (por ejemplo, "¿Cuándo se puede desactivar a un mensajero?") y `children` la leyenda;
+ *   `icon` cambia el dibujo (por defecto ⓘ).
  */
-export default function HelpTip({ label, children, sx }) {
+export default function HelpTip({ label, children, sx, icon: Icon = InfoOutlinedIcon }) {
   return (
     <Tooltip
       arrow
@@ -19,7 +20,7 @@ export default function HelpTip({ label, children, sx }) {
       slotProps={{ tooltip: { sx: { fontSize: FONT.sm, lineHeight: 1.5, maxWidth: rem(340), p: 1.5 } } }}
     >
       <IconButton aria-label={label} sx={{ width: 44, height: 44, my: '0', color: 'text.secondary', ...sx }}>
-        <InfoOutlinedIcon fontSize="small" />
+        <Icon fontSize="small" />
       </IconButton>
     </Tooltip>
   );

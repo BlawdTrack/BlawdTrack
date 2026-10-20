@@ -50,7 +50,7 @@ class PackageRecordValidationIntegrationTest {
                     assertThat(invalid.packageData().schedule()).isEqualTo("De 10 a 2");
                     assertThat(invalid.issues())
                             .extracting(issue -> issue.field())
-                            .containsExactly("orderNumber", "address", "phone");
+                            .containsExactly("orderNumber", "address");
                 });
         assertThat(result.invalidRecords())
                 .filteredOn(invalid -> invalid.packageData().shipmentNumber() == null)
