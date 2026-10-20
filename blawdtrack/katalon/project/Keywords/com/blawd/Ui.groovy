@@ -56,12 +56,18 @@ public class Ui {
 		return Integer.parseInt(WebUI.getText(byTestId('import-count-' + name)).trim())
 	}
 
+	/** Compara dos valores y deja en el log qué se comparaba, para identificar la comprobación que falla. */
+	static void verifyEquals(String what, Object actual, Object expected) {
+		KeywordUtil.logInfo(what + ': actual=' + actual + ', esperado=' + expected)
+		WebUI.verifyEqual(actual, expected, FailureHandling.CONTINUE_ON_FAILURE)
+	}
+
 	/** Compara los cuatro totales de la previsualización: leídos, válidos, con errores y duplicados. */
 	static void verifyCounts(int read, int valid, int invalid, int duplicate) {
-		WebUI.verifyEqual(count('read'), read, FailureHandling.CONTINUE_ON_FAILURE)
-		WebUI.verifyEqual(count('valid'), valid, FailureHandling.CONTINUE_ON_FAILURE)
-		WebUI.verifyEqual(count('invalid'), invalid, FailureHandling.CONTINUE_ON_FAILURE)
-		WebUI.verifyEqual(count('duplicate'), duplicate, FailureHandling.CONTINUE_ON_FAILURE)
+		verifyEquals('total leidos', count('read'), read)
+		verifyEquals('total validos', count('valid'), valid)
+		verifyEquals('total con errores', count('invalid'), invalid)
+		verifyEquals('total duplicados', count('duplicate'), duplicate)
 	}
 
 	/** Texto visible de todas las filas con ese data-testid, unido en un solo texto. */
@@ -90,13 +96,6 @@ public class Ui {
 	/** Cantidad de elementos con ese data-testid que hay en la página. */
 	static int countOf(String testId) {
 		return WebUI.findWebElements(byTestId(testId), 5).size()
-	}
-
-	/** Busca un paquete en Consultar paquetes por su número de envío. */
-	static void searchPackage(String term) {
-		WebUI.setText(byTestId('package-search-input'), term)
-		WebUI.click(byTestId('package-search-submit'))
-		WebUI.waitForElementPresent(byTestId('package-result-row'), 30)
 	}
 
 	static void evidence(String name) {

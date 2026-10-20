@@ -4,7 +4,27 @@
    <name>BlawdTrack</name>
    <tag></tag>
    <UUID>1af36685-b17e-47e2-9e19-0feec3c59f07</UUID>
-   <migratedVersion>9.0.0</migratedVersion>
+   <freeLicense>false</freeLicense>
+   <migratedVersion>5.9.0</migratedVersion>
    <pageLoadTimeout>30</pageLoadTimeout>
-   <ProjectType>WEB</ProjectType>
+   <sourceContent>
+      <sourceFolderList>
+         <sourceFolderConfiguration>
+            <url>Include/scripts/groovy</url>
+         </sourceFolderConfiguration>
+      </sourceFolderList>
+      <systemFolderList>
+         <systemFolderConfiguration>
+            <url>Include/scripts/groovy</url>
+         </systemFolderConfiguration>
+         <systemFolderConfiguration>
+            <url>Include/features</url>
+         </systemFolderConfiguration>
+         <systemFolderConfiguration>
+            <url>Include/config</url>
+         </systemFolderConfiguration>
+      </systemFolderList>
+   </sourceContent>
+   <timeStampInProperties>true</timeStampInProperties>
+   <type>GENERIC</type>
 </Project>

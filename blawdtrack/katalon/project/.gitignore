@@ -11,3 +11,5 @@ tmp/
 
 # Capturas de evidencia de las ejecuciones
 evidence/
+.cache/
+console.properties
