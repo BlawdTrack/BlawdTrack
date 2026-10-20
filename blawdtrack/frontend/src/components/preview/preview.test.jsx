@@ -193,6 +193,19 @@ describe('ImportPreviewView', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Duplicados: 2 ya registrados en la base de datos y 2 repetidos en el archivo.');
   });
 
+  it.each([
+    ['ya registrados', [{ shipmentNumber: 'BG-5', occurrences: 1, reasons: ['ALREADY_REGISTERED'] }], 'Ya existen en el sistema, así que no hace falta importarlos de nuevo.'],
+    ['repetidos en el archivo', [{ shipmentNumber: 'BG-7', occurrences: 2, reasons: ['DUPLICATED_IN_FILE'] }], 'deja una sola fila por número de envío y vuelve a cargar el archivo.'],
+    ['de ambos tipos', [
+      { shipmentNumber: 'BG-5', occurrences: 1, reasons: ['ALREADY_REGISTERED'] },
+      { shipmentNumber: 'BG-7', occurrences: 2, reasons: ['DUPLICATED_IN_FILE'] },
+    ], 'Los ya registrados existen en el sistema; para importar los repetidos, deja una sola fila por número de envío'],
+  ])('con duplicados %s sugiere qué hacer', (_, duplicates, advice) => {
+    render(<ImportPreviewView preview={previewOf({ duplicates, duplicateRecordsCount: 3 })} />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent(advice);
+  });
+
   it('filtra la lista al elegir un grupo y vuelve a mostrar todo con "Todos"', async () => {
     const user = userEvent.setup();
     render(<ImportPreviewView preview={previewOf()} />);

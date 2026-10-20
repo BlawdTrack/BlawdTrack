@@ -2,12 +2,29 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, within, fireEvent, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FileDropzone from './FileDropzone';
+import ImportFileHelp from './ImportFileHelp';
 import ImportSteps from './ImportSteps';
 import SelectedFileCard from './SelectedFileCard';
 
 const fileOf = (name, content = 'contenido') => new File([content], name);
 
 afterEach(() => cleanup());
+
+describe('ImportFileHelp', () => {
+  it('ofrece la ayuda cerrada y, al abrirla, explica formato, columnas y duplicados', async () => {
+    const user = userEvent.setup();
+    render(<ImportFileHelp />);
+
+    const toggle = screen.getByRole('button', { name: '¿Cómo debe ser el archivo?' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(/Columnas obligatorias: "SO Number"/)).toBeVisible();
+    expect(screen.getByText(/se marca como duplicado y no se importa/)).toBeVisible();
+  });
+});
 
 describe('FileDropzone', () => {
   it('invita a arrastrar o elegir el archivo y muestra los formatos admitidos', () => {
