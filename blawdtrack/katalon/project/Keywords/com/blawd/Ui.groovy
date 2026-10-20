@@ -6,6 +6,8 @@ import com.kms.katalon.core.testobject.TestObject
 import com.kms.katalon.core.util.KeywordUtil
 import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
 
+import org.openqa.selenium.Keys
+
 import internal.GlobalVariable
 
 /**
@@ -100,7 +102,13 @@ public class Ui {
 
 	/** Busca un paquete en Consultar paquetes por su número de envío. */
 	static void searchPackage(String term) {
-		WebUI.setText(byTestId('package-search-input'), term)
+		// setText no vacia bien un campo de React: en la segunda busqueda el termino nuevo se pegaba al anterior
+		// (E2E-HU011-A01E2E-PEND-01) y no habia resultados. Se selecciona todo, se borra y se escribe el termino.
+		TestObject input = byTestId('package-search-input')
+		WebUI.click(input)
+		WebUI.sendKeys(input, Keys.chord(Keys.CONTROL, 'a'))
+		WebUI.sendKeys(input, Keys.BACK_SPACE)
+		WebUI.sendKeys(input, term)
 		WebUI.click(byTestId('package-search-submit'))
 
 		// Mientras busca, la lista anterior desaparece: se espera a que el resumen ya mencione el termino buscado y
