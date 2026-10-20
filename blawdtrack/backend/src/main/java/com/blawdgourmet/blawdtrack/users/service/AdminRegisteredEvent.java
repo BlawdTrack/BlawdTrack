@@ -1,7 +1,7 @@
 package com.blawdgourmet.blawdtrack.users.service;
 
 /**
- * Evento que {@link AdminService#registrarAdministrador} publica al crear un administrador (HU-006). Quien lo
+ * Evento que {@link AdminRegistrationService#registrarAdministrador} publica al crear un administrador (HU-006). Quien lo
  * escucha, después de confirmar la transacción, envía el correo con la contraseña temporal; así {@code users}
  * no depende del módulo de correo.
  * <p>

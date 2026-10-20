@@ -25,7 +25,10 @@ import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationRequest;
 import com.blawdgourmet.blawdtrack.users.dto.AdminRegistrationResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminSummaryResponse;
 import com.blawdgourmet.blawdtrack.users.dto.AdminUpdateRequest;
-import com.blawdgourmet.blawdtrack.users.service.AdminService;
+import com.blawdgourmet.blawdtrack.users.service.AdminDeletionService;
+import com.blawdgourmet.blawdtrack.users.service.AdminQueryService;
+import com.blawdgourmet.blawdtrack.users.service.AdminRegistrationService;
+import com.blawdgourmet.blawdtrack.users.service.AdminUpdateService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,12 +43,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final AdminService adminService;
+    private final AdminRegistrationService registrationService;
+    private final AdminQueryService queryService;
+    private final AdminUpdateService updateService;
+    private final AdminDeletionService deletionService;
 
     @GetMapping
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<List<AdminSummaryResponse>> listar() {
-        return ResponseEntity.ok(adminService.list());
+        return ResponseEntity.ok(queryService.list());
     }
 
     @PostMapping
@@ -54,20 +60,20 @@ public class AdminController {
             @Valid @RequestBody AdminRegistrationRequest request,
             @AuthenticationPrincipal AuthenticatedUser actor) {
 
-        AdminRegistrationResponse respuesta = adminService.registrarAdministrador(request, actor);
+        AdminRegistrationResponse respuesta = registrationService.registrarAdministrador(request, actor);
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
     @GetMapping("/audit-log")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<List<AdminAuditLogResponse>> listarAuditoria() {
-        return ResponseEntity.ok(adminService.getAuditLog());
+        return ResponseEntity.ok(queryService.getAuditLog());
     }
 
     @GetMapping("/{documentType}/{documentNumber}")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<AdminDetailResponse> buscar(@Valid AdminDocumentRequest request) {
-        return ResponseEntity.ok(adminService.findAdministrator(request.documentType(), request.documentNumber()));
+        return ResponseEntity.ok(queryService.findAdministrator(request.documentType(), request.documentNumber()));
     }
 
     @PatchMapping("/{documentType}/{documentNumber}")
@@ -76,14 +82,14 @@ public class AdminController {
             @Valid AdminDocumentRequest document,
             @Valid @RequestBody AdminUpdateRequest request,
             @AuthenticationPrincipal AuthenticatedUser actor) {
-        return ResponseEntity.ok(adminService.updateAdministrator(
+        return ResponseEntity.ok(updateService.updateAdministrator(
                 document.documentType(), document.documentNumber(), request, actor));
     }
 
     @GetMapping("/{documentType}/{documentNumber}/history")
     @PreAuthorize("hasRole('" + RoleName.SUPER_USER + "')")
     public ResponseEntity<List<AdminAuditLogResponse>> historial(@Valid AdminDocumentRequest request) {
-        return ResponseEntity.ok(adminService.getAdministratorHistory(request.documentType(), request.documentNumber()));
+        return ResponseEntity.ok(queryService.getAdministratorHistory(request.documentType(), request.documentNumber()));
     }
 
     @GetMapping("/{documentType}/{documentNumber}/deletion-eligibility")
@@ -91,7 +97,7 @@ public class AdminController {
     public ResponseEntity<AdminDeletionEligibilityResponse> validateDeletionEligibility(
             @Valid AdminDocumentRequest request) {
         return ResponseEntity.ok(
-                adminService.validateDeletionEligibility(request.documentType(), request.documentNumber()));
+                deletionService.validateDeletionEligibility(request.documentType(), request.documentNumber()));
     }
 
     @DeleteMapping("/{documentType}/{documentNumber}")
@@ -100,6 +106,6 @@ public class AdminController {
             @Valid AdminDocumentRequest request,
             @AuthenticationPrincipal AuthenticatedUser actor) {
         return ResponseEntity.ok(
-                adminService.deleteAdministrator(request.documentType(), request.documentNumber(), actor));
+                deletionService.deleteAdministrator(request.documentType(), request.documentNumber(), actor));
     }
 }

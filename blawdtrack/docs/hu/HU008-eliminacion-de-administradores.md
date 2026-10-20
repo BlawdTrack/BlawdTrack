@@ -80,7 +80,7 @@ sequenceDiagram
 | Clase | Rol |
 |---|---|
 | `users.controller.AdminController` | Endpoints de listado, elegibilidad y eliminación. |
-| `users.service.AdminService`, `impl.AdminServiceImpl` | `validateDeletionEligibility` y `deleteAdministrator`. |
+| `users.service.AdminDeletionService` | `validateDeletionEligibility` y `deleteAdministrator`. |
 | `users.dto.AdminDocumentRequest` | Enlaza y valida el tipo y número de documento de la ruta. |
 | `users.dto.AdminDeletionEligibilityResponse`, `AdminDeletionResponse`, `AdminSummaryResponse` | Respuestas. |
 | `users.service.AdminNotFoundException`, `users.exception.AdminSessionActiveException` | Errores de negocio (404 y 409). |
