@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import BackButton from '../components/BackButton';
 import EmptyState from '../components/EmptyState';
 import PackageDetailCard from '../components/PackageDetailCard';
 import PackageFollowUp from '../components/PackageFollowUp';
@@ -104,10 +103,6 @@ export function PackageDetailPage() {
       <PageHeaderBar title="Ficha del paquete" />
 
       <PageContainer>
-        <Box>
-          <BackButton onClick={backToSearch}>Volver a los resultados</BackButton>
-        </Box>
-
         {state === PACKAGE_LOOKUP_STATE.LOADING && <LoadingCard />}
 
         {state === PACKAGE_LOOKUP_STATE.NOT_FOUND && <StatusMessage severity="warning" message={message} />}

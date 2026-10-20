@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
 import PackageDetailPage from './PackageDetailPage';
 import { getPackageByShipmentNumber, getPackageHistory } from '../services/SearchPackageService';
 import { renderWithProviders } from '../test-utils';
@@ -72,16 +71,13 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(getPackageByShipmentNumber).toHaveBeenCalledWith('BG-2026-00121');
   });
 
-  it('"Volver a los resultados" lleva a la pantalla de búsqueda y la ficha avisa que es de solo lectura', async () => {
+  it('la ficha avisa que es de solo lectura y no ofrece un botón para volver a los resultados', async () => {
     getPackageByShipmentNumber.mockResolvedValue(packageDetail);
-    const user = userEvent.setup();
     render('BG-2026-00121');
     await screen.findByText('Mariela Solís Gómez');
 
     expect(screen.getByText(/La ficha es de solo lectura/)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Volver a los resultados' }));
-
-    expect(screen.getByText('Pantalla de búsqueda')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Volver a los resultados' })).not.toBeInTheDocument();
   });
 
   it('muestra la ficha con los datos reales del backend cuando la consulta tiene éxito', async () => {
