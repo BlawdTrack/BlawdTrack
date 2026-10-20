@@ -18,6 +18,16 @@ function duplicateCausesText({ alreadyRegistered, duplicatedInFile }) {
   return parts.length ? ` Duplicados: ${parts.join(' y ')}.` : '';
 }
 
+// Qué hacer con los duplicados, según su causa: lo ya registrado existe en el sistema; lo repetido se corrige en el archivo.
+function duplicateAdviceText({ alreadyRegistered, duplicatedInFile }) {
+  if (alreadyRegistered && duplicatedInFile) {
+    return ' Los ya registrados existen en el sistema; para importar los repetidos, deja una sola fila por número de envío y vuelve a cargar el archivo.';
+  }
+  if (alreadyRegistered) return ' Ya existen en el sistema, así que no hace falta importarlos de nuevo.';
+  if (duplicatedInFile) return ' Para importarlos, deja una sola fila por número de envío y vuelve a cargar el archivo.';
+  return '';
+}
+
 // El aviso principal: éxito si todo se puede importar, error si nada, advertencia si una parte se excluye.
 function summaryAlert({ counts, duplicateCauses, fileName }) {
   const excluded = counts.invalid + counts.duplicate;
@@ -35,7 +45,7 @@ function summaryAlert({ counts, duplicateCauses, fileName }) {
   return {
     severity: 'warning',
     title: `${parts.join(' y ')}${inFile}`,
-    message: `Se excluyen de la importación.${duplicateCausesText(duplicateCauses)} Los demás registros se pueden importar sin cambios.`,
+    message: `Se excluyen de la importación.${duplicateCausesText(duplicateCauses)}${duplicateAdviceText(duplicateCauses)} Los demás registros se pueden importar sin cambios.`,
   };
 }
 

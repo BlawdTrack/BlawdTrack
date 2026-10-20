@@ -2,6 +2,7 @@ import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import StatusMessage from '../StatusMessage';
 import FileDropzone from './FileDropzone';
+import ImportFileHelp from './ImportFileHelp';
 import SelectedFileCard from './SelectedFileCard';
 import { FONT, RADIUS } from '../../theme';
 
@@ -16,6 +17,7 @@ export default function ImportUploadStep({ file, alertMessage = null, alertSever
   return (
     <>
       <FileDropzone onFile={onFile} disabled={isUploading} />
+      <ImportFileHelp />
       {file && <SelectedFileCard file={file} onRemove={onRemove} disabled={isUploading} />}
       {alertMessage && <StatusMessage severity={alertSeverity} message={alertMessage} />}
 
