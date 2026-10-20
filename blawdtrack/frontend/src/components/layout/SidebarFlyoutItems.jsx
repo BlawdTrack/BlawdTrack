@@ -18,6 +18,7 @@ export function FlyoutMenuItem({ item, active, onClick }) {
   return (
     <MenuItem
       {...(item.path ? { component: NavLink, to: item.path, end: true } : {})}
+      data-testid={item.path ? `nav-${item.path}` : undefined}
       disabled={!item.path}
       selected={active}
       onClick={onClick}

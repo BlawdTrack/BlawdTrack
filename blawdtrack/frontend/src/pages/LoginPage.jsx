@@ -146,6 +146,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
             component="button"
             type="button"
             onClick={() => onForgotPassword?.()}
+            data-testid="login-forgot-password"
             underline="hover"
             sx={{ ...LINK_BUTTON_SX, alignSelf: 'center', mt: 0.5, color: 'secondary.text', fontWeight: 700, fontSize: FONT.md }}
           >
@@ -158,6 +159,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           fullWidth
           variant="contained"
           size="large"
+          data-testid="login-submit"
           disabled={loading}
           endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
           sx={AUTH_BUTTON_SX}

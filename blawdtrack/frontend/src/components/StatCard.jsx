@@ -12,15 +12,17 @@ const TONES = {
 
 /**
  * Tarjeta con una cifra grande y su leyenda, para los totales de una pantalla.
- * @param {{ value: number|string, label: string, tone?: 'neutral'|'success'|'warning'|'error' }} props
+ * @param {{ value: number|string, label: string, tone?: 'neutral'|'success'|'warning'|'error',
+ *   testId?: string }} props `testId` es el `data-testid` de la tarjeta, para las pruebas de extremo a extremo.
  *   Se dibuja como elemento de lista: va dentro de un `ul`.
  */
-export default function StatCard({ value, label, tone = 'neutral' }) {
+export default function StatCard({ value, label, tone = 'neutral', testId }) {
   const { border, value: valueColor } = TONES[tone] ?? TONES.neutral;
 
   return (
     <Paper
       component="li"
+      data-testid={testId}
       elevation={0}
       sx={{ ...CARD_SX, borderColor: border, p: 2.25, display: 'flex', flexDirection: 'column', gap: 0.5, listStyle: 'none' }}
     >

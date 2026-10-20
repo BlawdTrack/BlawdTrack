@@ -105,10 +105,10 @@ export default function DestructiveConfirmDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1.5 }}>
-        <Button onClick={onClose} disabled={isLoading} sx={CANCEL_SX}>
+        <Button onClick={onClose} disabled={isLoading} sx={CANCEL_SX} data-testid="confirm-dialog-cancel">
           Cancelar
         </Button>
-        <Button onClick={onConfirm} disabled={isLoading} variant="contained" sx={CONFIRM_SX}>
+        <Button onClick={onConfirm} disabled={isLoading} variant="contained" sx={CONFIRM_SX} data-testid="confirm-dialog-confirm">
           {isLoading ? loadingLabel : confirmLabel}
         </Button>
       </DialogActions>

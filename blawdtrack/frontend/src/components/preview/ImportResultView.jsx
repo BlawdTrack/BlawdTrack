@@ -33,10 +33,10 @@ export default function ImportResultView({ result, onImportAnother }) {
         aria-label="Totales de la importación"
         sx={{ display: 'grid', gap: 1.75, m: 0, p: 0, gridTemplateColumns: `repeat(auto-fit, minmax(${rem(150)}, 1fr))` }}
       >
-        <StatCard value={counts.read} label="registros leídos" />
-        <StatCard value={counts.registered} label="importados" tone="success" />
-        <StatCard value={counts.invalid} label="con errores" tone="error" />
-        <StatCard value={counts.duplicate} label="duplicados" tone="warning" />
+        <StatCard value={counts.read} label="registros leídos" testId="import-result-read" />
+        <StatCard value={counts.registered} label="importados" tone="success" testId="import-result-registered" />
+        <StatCard value={counts.invalid} label="con errores" tone="error" testId="import-result-invalid" />
+        <StatCard value={counts.duplicate} label="duplicados" tone="warning" testId="import-result-duplicate" />
       </Box>
 
       {registeredShipmentNumbers.length > 0 && (
@@ -55,7 +55,7 @@ export default function ImportResultView({ result, onImportAnother }) {
       )}
 
       <Box sx={{ '& button': { width: { xs: '100%', sm: 'auto' } } }}>
-        <Button variant="contained" onClick={onImportAnother}>
+        <Button variant="contained" onClick={onImportAnother} data-testid="import-result-another">
           Importar otro archivo
         </Button>
       </Box>

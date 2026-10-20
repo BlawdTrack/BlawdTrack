@@ -12,6 +12,7 @@ export default function EditFormActions({ submitting, onDiscard }) {
       <Button
         type="submit"
         variant="contained"
+        data-testid="edit-save"
         disabled={submitting}
         sx={{ fontWeight: 600, px: 4, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
       >
@@ -21,6 +22,7 @@ export default function EditFormActions({ submitting, onDiscard }) {
         type="button"
         variant="outlined"
         onClick={onDiscard}
+        data-testid="edit-discard"
         disabled={submitting}
         sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
       >

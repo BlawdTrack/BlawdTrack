@@ -92,6 +92,7 @@ export default function SidebarUserFooter({ fullName, email = '', roleLabel, onL
       <Button
         fullWidth
         onClick={onLogout}
+        data-testid="logout-button"
         startIcon={<LogoutOutlinedIcon fontSize="small" />}
         sx={{
           color: 'rgba(255,255,255,.85)',

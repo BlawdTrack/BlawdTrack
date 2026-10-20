@@ -21,6 +21,7 @@ export default function PreviewFilters({ counts, active, onChange }) {
             component="button"
             type="button"
             aria-pressed={isActive}
+            data-testid={`import-filter-${id}`}
             label={`${label} (${quantityOf[id]})`}
             onClick={() => onChange(id)}
             sx={{

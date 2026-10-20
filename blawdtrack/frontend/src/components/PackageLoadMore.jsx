@@ -12,13 +12,14 @@ export function PackageLoadMore({ shownCount, totalCount, canLoadMore, isLoading
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
-      <Typography role="status" aria-live="polite" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+      <Typography role="status" aria-live="polite" data-testid="package-load-more-count" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
         Mostrando {shownCount} de {totalCount} paquetes
       </Typography>
       <Button
         type="button"
         variant="outlined"
         onClick={onLoadMore}
+        data-testid="package-load-more"
         disabled={isLoadingMore}
         startIcon={isLoadingMore ? <CircularProgress size={16} /> : null}
         sx={{ minHeight: TOUCH_TARGET, px: 3 }}

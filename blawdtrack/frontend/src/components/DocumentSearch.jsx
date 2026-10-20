@@ -47,6 +47,7 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
       variant="contained"
       disableElevation
       onClick={search.search}
+      data-testid="document-search-submit"
       startIcon={stacked ? <SearchOutlinedIcon /> : undefined}
       sx={{ flex: stacked ? 1 : { xs: '1 1 100%', sm: '0 0 auto' }, px: stacked ? undefined : 3.5, minHeight: stacked ? 44 : 52, fontWeight: 600, borderRadius: RADIUS.sm }}
     >
@@ -55,7 +56,7 @@ export default function DocumentSearch({ search, variant = 'inline' }) {
   );
 
   const clearButton = search.isFiltering && (
-    <Button onClick={search.clear} sx={{ flex: '0 0 auto', color: 'text.secondary', fontWeight: 600, px: 1.5 }}>
+    <Button onClick={search.clear} data-testid="document-search-clear" sx={{ flex: '0 0 auto', color: 'text.secondary', fontWeight: 600, px: 1.5 }}>
       Limpiar
     </Button>
   );

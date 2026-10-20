@@ -81,6 +81,7 @@ export default function FileDropzone({ onFile, disabled = false }) {
         disabled={disabled}
         startIcon={<InsertDriveFileOutlinedIcon />}
         onClick={() => inputRef.current?.click()}
+        data-testid="import-select-file"
         sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm }}
       >
         Seleccionar archivo
@@ -99,6 +100,7 @@ export default function FileDropzone({ onFile, disabled = false }) {
       <input
         ref={inputRef}
         type="file"
+        data-testid="import-file-input"
         accept={PACKAGE_FILE_ACCEPT}
         aria-label="Archivo de paquetes de Zoho Inventory"
         disabled={disabled}

@@ -13,7 +13,7 @@ export function PackageSearchEmptyState({ term, onClear }) {
       title={`Sin resultados para “${term}”`}
       description="Revisa el número de envío o prueba con otro criterio: orden, cliente, dirección, teléfono u horario de preferencia."
     >
-      <Button type="button" variant="contained" onClick={onClear}>
+      <Button type="button" variant="contained" onClick={onClear} data-testid="package-search-empty-clear">
         Limpiar búsqueda
       </Button>
     </EmptyState>

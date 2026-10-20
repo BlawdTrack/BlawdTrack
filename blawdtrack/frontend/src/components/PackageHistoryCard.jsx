@@ -116,7 +116,7 @@ export default function PackageHistoryCard({ state, entries = [], message = null
         )}
 
         {state === PACKAGE_HISTORY_STATE.SUCCESS && entries.length > 0 && (
-          <Box component="ol" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+          <Box component="ol" data-testid="package-history-list" sx={{ listStyle: 'none', m: 0, p: 0 }}>
             {entries.map((entry, index) => {
               const isLast = index === entries.length - 1;
               const meta = historyEntryMeta(entry);
@@ -124,6 +124,7 @@ export default function PackageHistoryCard({ state, entries = [], message = null
               return (
                 <Box
                   component="li"
+                  data-testid="package-history-entry"
                   key={`${entry.timestamp ?? 'sin-fecha'}-${entry.action ?? 'evento'}-${index}`}
                   sx={{ position: 'relative', pl: CONTENT_OFFSET, pb: isLast ? 0 : 3 }}
                 >

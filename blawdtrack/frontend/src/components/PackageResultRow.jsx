@@ -35,7 +35,7 @@ export function PackageResultRow({ pkg }) {
   const schedule = formatPackageSchedule(pkg?.schedule);
 
   return (
-    <StatusRow>
+    <StatusRow testId="package-result-row">
       <Box sx={{ ...COLUMN_SX, flex: '1 1 140px' }}>
         <ShipmentNumber shipmentNumber={pkg?.shipmentNumber} />
         {isFilled(pkg?.orderNumber) && (
