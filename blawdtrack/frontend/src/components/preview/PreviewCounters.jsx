@@ -14,10 +14,10 @@ export default function PreviewCounters({ counts }) {
       aria-label="Totales de la previsualización"
       sx={{ display: 'grid', gap: 1.75, m: 0, p: 0, gridTemplateColumns: `repeat(auto-fit, minmax(${rem(150)}, 1fr))` }}
     >
-      <StatCard value={counts.read} label="registros leídos" />
-      <StatCard value={counts.valid} label="válidos" tone="success" />
-      <StatCard value={counts.invalid} label="con errores" tone="error" />
-      <StatCard value={counts.duplicate} label="duplicados" tone="warning" />
+      <StatCard value={counts.read} label="registros leídos" testId="import-count-read" />
+      <StatCard value={counts.valid} label="válidos" tone="success" testId="import-count-valid" />
+      <StatCard value={counts.invalid} label="con errores" tone="error" testId="import-count-invalid" />
+      <StatCard value={counts.duplicate} label="duplicados" tone="warning" testId="import-count-duplicate" />
     </Box>
   );
 }

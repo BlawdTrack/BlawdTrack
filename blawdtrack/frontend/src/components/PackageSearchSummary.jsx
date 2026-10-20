@@ -10,7 +10,7 @@ export default function PackageSearchSummary({ term, matchCount, totalCount }) {
   if (totalCount === null || matchCount === null) return null;
 
   return (
-    <Typography role="status" aria-live="polite" sx={{ mt: 1.5, fontSize: FONT.sm, color: 'text.secondary' }}>
+    <Typography role="status" aria-live="polite" data-testid="package-search-summary" sx={{ mt: 1.5, fontSize: FONT.sm, color: 'text.secondary' }}>
       {term ? (
         <>{matchCount} de {totalCount} paquetes coinciden con &ldquo;{term}&rdquo;</>
       ) : (

@@ -68,7 +68,7 @@ export default function SidebarNavItem({ item }) {
   }
 
   return (
-    <NavLink to={item.path} end className="sidebar-nav-link" style={{ textDecoration: 'none' }}>
+    <NavLink to={item.path} end className="sidebar-nav-link" style={{ textDecoration: 'none' }} data-testid={`nav-${item.path}`}>
       {({ isActive }) => <ItemContent label={item.label} active={isActive} disabled={false} />}
     </NavLink>
   );

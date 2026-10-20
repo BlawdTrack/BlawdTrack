@@ -37,6 +37,7 @@ export default function DeletePackageButton({ pkg, onDelete, onBlocked }) {
       <Button
         variant="outlined"
         onClick={handleClick}
+        data-testid="delete-package-button"
         aria-disabled={isDeletable ? undefined : 'true'}
         aria-describedby={isDeletable ? undefined : hintId}
         sx={{

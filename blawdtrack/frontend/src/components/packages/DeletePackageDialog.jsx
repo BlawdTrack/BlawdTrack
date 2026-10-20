@@ -82,6 +82,7 @@ export default function DeletePackageDialog({ pkg, isDeleting, onCancel, onConfi
               autoFocus
               variant="outlined"
               onClick={onCancel}
+              data-testid="delete-package-cancel"
               disabled={isDeleting}
               sx={{ ...ACTION_BUTTON_SX, color: 'primary.main', borderWidth: '1.5px', borderColor: 'neutral.borderStrong' }}
             >
@@ -91,6 +92,7 @@ export default function DeletePackageDialog({ pkg, isDeleting, onCancel, onConfi
               variant="contained"
               color="error"
               onClick={onConfirm}
+              data-testid="delete-package-confirm"
               loading={isDeleting}
               loadingPosition="start"
               sx={{ ...ACTION_BUTTON_SX, boxShadow: 'none', '&:hover': { boxShadow: 'none' } }}

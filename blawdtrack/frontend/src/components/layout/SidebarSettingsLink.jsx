@@ -45,6 +45,7 @@ export default function SidebarSettingsLink({ settings, collapsed = false }) {
         <Box
           component={NavLink}
           to={settings.path}
+          data-testid={`nav-${settings.path}`}
           aria-label={settings.title}
           sx={linkSx(active, collapsed)}
         >

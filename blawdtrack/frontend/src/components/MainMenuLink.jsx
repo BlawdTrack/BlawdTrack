@@ -20,6 +20,7 @@ function Link() {
     <Button
       component={RouterLink}
       to={(user && getHomeRoute(user.role)) || ROUTES.MAIN_MENU}
+      data-testid="main-menu-link"
       startIcon={<HomeOutlinedIcon />}
       sx={{
         flex: '0 0 auto',

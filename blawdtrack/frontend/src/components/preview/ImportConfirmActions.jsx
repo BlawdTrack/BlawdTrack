@@ -22,6 +22,7 @@ export default function ImportConfirmActions({ validCount, hasFile, isConfirming
         <Button
           variant="contained"
           onClick={onConfirm}
+          data-testid="import-confirm"
           disabled={!canConfirm || isConfirming}
           aria-busy={isConfirming}
           sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm, boxShadow: 'none', fontSize: FONT.md }}
@@ -35,7 +36,7 @@ export default function ImportConfirmActions({ validCount, hasFile, isConfirming
             `Confirmar importación${validCount > 0 ? ` de ${plural(validCount)}` : ''}`
           )}
         </Button>
-        <Button variant="outlined" onClick={onLoadAnother} disabled={isConfirming}>
+        <Button variant="outlined" onClick={onLoadAnother} disabled={isConfirming} data-testid="import-load-another">
           Cargar otro archivo
         </Button>
       </Box>

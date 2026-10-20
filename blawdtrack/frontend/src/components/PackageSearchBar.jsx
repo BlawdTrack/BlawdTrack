@@ -36,11 +36,11 @@ export function PackageSearchBar({ value, onChange, onClear, isLoading, maxLengt
                 </InputAdornment>
               ) : null,
             },
-            htmlInput: { 'aria-label': 'Buscar paquetes', maxLength },
+            htmlInput: { 'aria-label': 'Buscar paquetes', 'data-testid': 'package-search-input', maxLength },
           }}
           sx={{ ...INPUT_SX, flex: '1 1 300px' }}
         />
-        <Button type="button" variant="outlined" onClick={onClear}>
+        <Button type="button" variant="outlined" onClick={onClear} data-testid="package-search-clear">
           Limpiar
         </Button>
       </Box>

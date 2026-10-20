@@ -64,7 +64,7 @@ export default function PreviewRecordRow({ row }) {
   const isValid = row.status === PREVIEW_STATUS.VALID;
 
   return (
-    <StatusRow tone={tone}>
+    <StatusRow tone={tone} testId={`import-row-${row.status}`}>
       <IdentityColumn row={row} />
       <CustomerColumn row={row} />
       <ScheduleColumn row={row} isValid={isValid} />

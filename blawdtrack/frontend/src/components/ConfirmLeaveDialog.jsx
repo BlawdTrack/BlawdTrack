@@ -25,10 +25,10 @@ export default function ConfirmLeaveDialog({ open, onStay, onLeave }) {
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2, gap: 1, flexWrap: 'wrap' }}>
-        <Button onClick={onLeave} sx={{ color: 'error.main', fontWeight: 600 }}>
+        <Button onClick={onLeave} sx={{ color: 'error.main', fontWeight: 600 }} data-testid="leave-dialog-leave">
           Salir sin guardar
         </Button>
-        <Button onClick={onStay} variant="contained" autoFocus sx={{ fontWeight: 600 }}>
+        <Button onClick={onStay} variant="contained" autoFocus sx={{ fontWeight: 600 }} data-testid="leave-dialog-stay">
           Seguir editando
         </Button>
       </DialogActions>

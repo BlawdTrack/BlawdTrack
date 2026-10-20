@@ -43,11 +43,11 @@ function CourierBlock({ courier }) {
     <InfoBlock label="Mensajero asignado">
       {courier ? (
         <>
-          <Typography sx={VALUE_SX}>{courier.fullName || NO_DISPONIBLE}</Typography>
+          <Typography sx={VALUE_SX} data-testid="package-courier-name">{courier.fullName || NO_DISPONIBLE}</Typography>
           {detail && <Typography sx={SECONDARY_SX}>{detail}</Typography>}
         </>
       ) : (
-        <Typography sx={VALUE_SX}>Sin mensajero asignado</Typography>
+        <Typography sx={VALUE_SX} data-testid="package-courier-name">Sin mensajero asignado</Typography>
       )}
     </InfoBlock>
   );
@@ -129,6 +129,7 @@ export default function PackageDetailCard({ pkg, actions = null }) {
       elevation={0}
       component="section"
       aria-label={`Ficha del paquete ${pkg.shipmentNumber}`}
+      data-testid="package-detail-card"
       sx={{ ...CARD_PATTERN_SX, borderRadius: RADIUS.md, overflow: 'hidden', boxShadow: 1, border: '1px solid', borderColor: 'neutral.border' }}
     >
       {/* Cabecera verde */}
