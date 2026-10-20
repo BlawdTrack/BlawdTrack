@@ -36,12 +36,6 @@
       <testCaseId>Test Cases/HU-011/TC-HU011-04_Conteos_antes_de_confirmar</testCaseId>
    </testCaseLink>
    <testCaseLink>
-      <guid>d6500ed1-9f32-4f06-b8a1-2a38b5efd338</guid>
-      <isReuseDriver>false</isReuseDriver>
-      <isRun>true</isRun>
-      <testCaseId>Test Cases/HU-011/TC-HU011-05_Importacion_con_duplicados</testCaseId>
-   </testCaseLink>
-   <testCaseLink>
       <guid>d401d9e4-6308-49cc-8a30-19cba67e6bdd</guid>
       <isReuseDriver>false</isReuseDriver>
       <isRun>true</isRun>

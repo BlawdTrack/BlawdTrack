@@ -13,7 +13,7 @@ try {
 
 	Ui.verifyCounts(4, 4, 0, 0)
 	Ui.verifyContains(WebUI.getText(Ui.byTestId('import-summary')), 'son válidos y se pueden importar')
-	WebUI.verifyEqual(Ui.countOf('import-row-duplicate'), 0, FailureHandling.CONTINUE_ON_FAILURE)
+	Ui.verifyEquals('filas con data-testid import-row-duplicate', Ui.countOf('import-row-duplicate'), 0)
 
 	// Sigue normal: se puede confirmar la importacion (no se confirma para no registrar los paquetes).
 	WebUI.verifyElementClickable(Ui.byTestId('import-confirm'), FailureHandling.CONTINUE_ON_FAILURE)

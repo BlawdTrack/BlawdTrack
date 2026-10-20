@@ -22,8 +22,8 @@ try {
 
 	// La seguridad real la aplica el backend: acceso denegado (403) a la previsualizacion y a la importacion.
 	String token = Api.tokenFor(GlobalVariable.courierEmail, GlobalVariable.courierPassword)
-	WebUI.verifyEqual(Api.statusOf('POST', '/api/v1/packages/import/preview', token, '{}'), 403, FailureHandling.CONTINUE_ON_FAILURE)
-	WebUI.verifyEqual(Api.statusOf('POST', '/api/v1/packages/import', token, '{}'), 403, FailureHandling.CONTINUE_ON_FAILURE)
+	Ui.verifyEquals('HTTP POST /api/v1/packages/import/preview', Api.statusOf('POST', '/api/v1/packages/import/preview', token, '{}'), 403)
+	Ui.verifyEquals('HTTP POST /api/v1/packages/import', Api.statusOf('POST', '/api/v1/packages/import', token, '{}'), 403)
 }
 finally {
 	WebUI.closeBrowser()

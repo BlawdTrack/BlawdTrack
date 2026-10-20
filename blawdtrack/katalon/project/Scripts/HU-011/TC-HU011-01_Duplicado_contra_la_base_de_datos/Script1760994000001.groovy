@@ -14,7 +14,7 @@ try {
 	Ui.uploadAndReview('hu011-tc01-duplicado-base-datos.csv')
 
 	// Se resalta: una sola fila de duplicado, con el numero y la causa.
-	WebUI.verifyEqual(Ui.countOf('import-row-duplicate'), 1, FailureHandling.CONTINUE_ON_FAILURE)
+	Ui.verifyEquals('filas con data-testid import-row-duplicate', Ui.countOf('import-row-duplicate'), 1)
 	String duplicateRow = Ui.textOf('import-row-duplicate')
 	Ui.verifyContains(duplicateRow, 'Duplicado')
 	Ui.verifyContains(duplicateRow, 'E2E-PEND-01')
