@@ -10,27 +10,26 @@ vi.mock('../services/PackageService', () => ({
 describe('usePackageSearch', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it('loads the distribution immediately and waits to debounce typed searches', async () => {
+  it('loads the distribution immediately and does not search while typing', async () => {
     searchPackages.mockResolvedValue({ content: [], page: 0, size: 100, totalElements: 0, totalPages: 0 });
 
     const { result } = renderHook(() => usePackageSearch());
 
     expect(searchPackages).toHaveBeenCalledTimes(1);
     expect(searchPackages).toHaveBeenCalledWith(expect.objectContaining({ term: '' }));
-    await act(async () => {
-      vi.advanceTimersByTime(299);
-    });
-    expect(searchPackages).toHaveBeenCalledTimes(1);
 
+    act(() => {
+      result.current.setTerm('paquete');
+    });
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1);
+      await vi.advanceTimersByTimeAsync(1000);
     });
 
     expect(searchPackages).toHaveBeenCalledTimes(1);
@@ -38,23 +37,53 @@ describe('usePackageSearch', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('coalesces a burst of changes into a single request and ignores trailing spaces', async () => {
+  it('searches once when search is called, trimming the term and sending the chosen field', async () => {
     searchPackages.mockResolvedValue({ content: [], page: 0, size: 100, totalElements: 0, totalPages: 0 });
 
     const { result } = renderHook(() => usePackageSearch());
 
     act(() => {
       result.current.setTerm('  paquete  ');
-      result.current.setTerm('  paquete  ');
-      result.current.setTerm('paquete  ');
+      result.current.setField('customerName');
     });
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+    act(() => {
+      result.current.search();
     });
+    await act(async () => {});
 
     expect(searchPackages).toHaveBeenCalledTimes(2);
-    expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'paquete' }));
+    expect(searchPackages).toHaveBeenLastCalledWith(
+      expect.objectContaining({ term: 'paquete', field: 'customerName' })
+    );
+    expect(result.current.appliedTerm).toBe('paquete');
+  });
+
+  it('searching with an empty term goes back to the distribution list', async () => {
+    searchPackages
+      .mockResolvedValueOnce({ content: [{ id: 'distribution' }], totalElements: 1 })
+      .mockResolvedValueOnce({ content: [{ id: 'found' }], totalElements: 1 });
+    const { result } = renderHook(() => usePackageSearch());
+    await act(async () => {});
+
+    act(() => {
+      result.current.setTerm('limon');
+    });
+    act(() => {
+      result.current.search();
+    });
+    await act(async () => {});
+    expect(result.current.results.content[0].id).toBe('found');
+
+    act(() => {
+      result.current.setTerm('   ');
+    });
+    act(() => {
+      result.current.search();
+    });
+
+    expect(result.current.appliedTerm).toBe('');
+    expect(result.current.results.content[0].id).toBe('distribution');
+    expect(result.current.isLoading).toBe(false);
   });
 
   it('runs the same search again after clearing it', async () => {
@@ -64,9 +93,10 @@ describe('usePackageSearch', () => {
     act(() => {
       result.current.setTerm('limon');
     });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+    act(() => {
+      result.current.search();
     });
+    await act(async () => {});
 
     act(() => {
       result.current.clearSearch();
@@ -74,9 +104,10 @@ describe('usePackageSearch', () => {
     act(() => {
       result.current.setTerm('limon');
     });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+    act(() => {
+      result.current.search();
     });
+    await act(async () => {});
 
     expect(searchPackages).toHaveBeenCalledTimes(3);
     expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'limon' }));
@@ -93,9 +124,10 @@ describe('usePackageSearch', () => {
     act(() => {
       result.current.setTerm('limon');
     });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+    act(() => {
+      result.current.search();
     });
+    await act(async () => {});
     expect(result.current.isLoading).toBe(true);
 
     act(() => {
@@ -104,10 +136,11 @@ describe('usePackageSearch', () => {
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.errorMessage).toBeNull();
+    expect(result.current.term).toBe('');
     expect(result.current.results).toEqual({ content: [{ id: 'distribution' }], totalElements: 1 });
   });
 
-  it('keeps the previous results while a newer query is in flight and ignores old responses', async () => {
+  it('ignores the response of an older search when a newer one was made', async () => {
     searchPackages
       .mockResolvedValueOnce({ content: [], totalElements: 0 })
       .mockImplementationOnce(() => new Promise((resolve) => {
@@ -122,27 +155,30 @@ describe('usePackageSearch', () => {
     act(() => {
       result.current.setTerm('viejo');
     });
-
+    act(() => {
+      result.current.search();
+    });
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(50);
     });
     act(() => {
       result.current.setTerm('nuevo');
     });
+    act(() => {
+      result.current.search();
+    });
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(400);
+      await vi.advanceTimersByTimeAsync(600);
     });
 
     expect(result.current.results).toEqual({ content: [{ id: 'new' }], page: 0, size: 100, totalElements: 1, totalPages: 1 });
   });
 
-  it('stores the error message when the request fails and ignores cancellation errors', async () => {
+  it('stores the error message when the request fails', async () => {
     searchPackages.mockRejectedValueOnce({ response: { status: 500 } });
     const { result } = renderHook(() => usePackageSearch());
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
-    });
+    await act(async () => {});
 
     expect(result.current.errorMessage).toMatch(/error inesperado/i);
     expect(result.current.isLoading).toBe(false);
@@ -199,9 +235,10 @@ describe('usePackageSearch', () => {
       act(() => {
         result.current.setTerm('limon');
       });
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(300);
+      act(() => {
+        result.current.search();
       });
+      await act(async () => {});
 
       await act(async () => {
         result.current.loadMore();
@@ -216,7 +253,8 @@ describe('usePackageSearch', () => {
       let resolveMore;
       searchPackages
         .mockResolvedValueOnce(page([6, 5], 0))
-        .mockReturnValueOnce(new Promise((resolve) => { resolveMore = resolve; }));
+        .mockReturnValueOnce(new Promise((resolve) => { resolveMore = resolve; }))
+        .mockResolvedValueOnce(page([9], 0, 1));
       const { result } = renderHook(() => usePackageSearch());
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -228,6 +266,9 @@ describe('usePackageSearch', () => {
 
       act(() => {
         result.current.setTerm('limon');
+      });
+      act(() => {
+        result.current.search();
       });
       await act(async () => {
         resolveMore(page([4, 3], 1));

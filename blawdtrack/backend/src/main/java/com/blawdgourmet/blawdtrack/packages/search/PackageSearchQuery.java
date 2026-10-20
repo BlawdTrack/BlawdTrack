@@ -1,4 +1,5 @@
 package com.blawdgourmet.blawdtrack.packages.search;
 
-public record PackageSearchQuery(String term, String page, String size) {
+/** {@code field} limita la búsqueda a un solo campo del paquete; vacío o desconocido busca en todos. */
+public record PackageSearchQuery(String term, String field, String page, String size) {
 }

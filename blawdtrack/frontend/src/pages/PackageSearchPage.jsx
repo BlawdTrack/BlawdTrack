@@ -9,18 +9,18 @@ import PackageSearchSummary from '../components/PackageSearchSummary';
 import { MAX_SEARCH_TERM_LENGTH } from '../config/packageSearch';
 import usePackageSearch from '../hooks/usePackageSearch';
 import { hasNoSearchMatches } from '../utils/packageSearchState';
-import { normalizeSearchTerm } from '../utils/packageSearchTerm';
 
 const countOf = (page) => page?.totalElements ?? page?.content?.length ?? null;
 
 /**
- * Buscar paquetes (HU-014): búsqueda en vivo por número de envío, orden, cliente, dirección, teléfono u horario.
+ * Buscar paquetes (HU-014): búsqueda por número de envío, orden, cliente, dirección, teléfono u horario, con el mismo
+ * buscador que "Roles y permisos" (campo + Buscar).
  * Solo compone: la búsqueda vive en `usePackageSearch`, y el listado, el "Cargar más", el estado vacío y la barra son
  * componentes con el diseño del resto de las pantallas.
  */
 export function PackageSearchPage() {
   const {
-    term, clearSearch, setTerm, results, distributionResults, isLoading, errorMessage,
+    term, setTerm, field, setField, appliedTerm, search, clearSearch, results, distributionResults, isLoading, errorMessage,
     canLoadMore, isLoadingMore, loadMore,
   } = usePackageSearch();
 
@@ -32,12 +32,16 @@ export function PackageSearchPage() {
         <PackageSearchBar
           value={term}
           onChange={setTerm}
+          field={field}
+          onFieldChange={setField}
+          onSearch={search}
           onClear={clearSearch}
           isLoading={isLoading}
+          isFiltering={appliedTerm !== ''}
           maxLength={MAX_SEARCH_TERM_LENGTH}
         >
           <PackageSearchSummary
-            term={normalizeSearchTerm(term)}
+            term={appliedTerm}
             matchCount={countOf(results)}
             totalCount={countOf(distributionResults)}
           />
@@ -45,8 +49,8 @@ export function PackageSearchPage() {
 
         {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
-        {hasNoSearchMatches({ term, results, isLoading, errorMessage }) && (
-          <PackageSearchEmptyState term={normalizeSearchTerm(term)} onClear={clearSearch} />
+        {hasNoSearchMatches({ term: appliedTerm, results, isLoading, errorMessage }) && (
+          <PackageSearchEmptyState term={appliedTerm} onClear={clearSearch} />
         )}
 
         <PackageResultsTable packages={results?.content} />

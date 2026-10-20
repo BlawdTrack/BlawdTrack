@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import {
+  ALL_FIELDS,
   DEFAULT_PAGE,
-  SEARCH_DEBOUNCE_MS,
   SEARCH_PAGE_SIZE,
 } from '../config/packageSearch';
 import { searchPackages } from '../services/PackageService';
@@ -18,15 +18,19 @@ const isCancelled = (error) => Boolean(
 );
 
 /**
- * Orquesta la búsqueda en vivo de paquetes con debounce, cancelación y manejo de errores. La lista se trae de a
- * `SEARCH_PAGE_SIZE` paquetes; `loadMore` suma la página siguiente de lo que se está viendo (la lista completa o
- * los resultados del término).
- * @returns {{ term: string, setTerm: Function, clearSearch: Function, results: object|null,
- *   distributionResults: object|null, isLoading: boolean, errorMessage: string|null, canLoadMore: boolean,
- *   isLoadingMore: boolean, loadMore: Function }}
+ * Orquesta la búsqueda de paquetes: el término y el campo se escriben libremente y la búsqueda se hace al pulsar
+ * "Buscar" (o Enter), igual que en "Roles y permisos"; "Limpiar" vuelve a la lista de distribución. Cancela la
+ * petición anterior y maneja los errores. La lista se trae de a `SEARCH_PAGE_SIZE` paquetes; `loadMore` suma la
+ * página siguiente de lo que se está viendo (la lista completa o los resultados de la búsqueda).
+ * @returns {{ term: string, setTerm: Function, field: string, setField: Function, appliedTerm: string,
+ *   search: Function, clearSearch: Function, results: object|null, distributionResults: object|null,
+ *   isLoading: boolean, errorMessage: string|null, canLoadMore: boolean, isLoadingMore: boolean,
+ *   loadMore: Function }}
  */
 export function usePackageSearch() {
   const [term, setTerm] = useState('');
+  const [field, setField] = useState(ALL_FIELDS);
+  const [applied, setApplied] = useState(null);
   const [results, setResults] = useState(null);
   const [distributionResults, setDistributionResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +39,6 @@ export function usePackageSearch() {
   const distributionControllerRef = useRef(null);
   const currentControllerRef = useRef(null);
   const loadMoreControllerRef = useRef(null);
-  const lastRequestedTermRef = useRef(null);
   const requestSequenceRef = useRef(0);
   const loadMoreSequenceRef = useRef(0);
 
@@ -46,7 +49,7 @@ export function usePackageSearch() {
     }
   };
 
-  // Una página pedida con "Cargar más" ya no sirve si cambia lo que se está viendo (otro término, o limpiar).
+  // Una página pedida con "Cargar más" ya no sirve si cambia lo que se está viendo (otra búsqueda, o limpiar).
   // No toca el estado: al terminar la petición cancelada, su `finally` apaga el indicador de carga.
   const cancelLoadMore = () => {
     loadMoreControllerRef.current?.abort();
@@ -54,12 +57,57 @@ export function usePackageSearch() {
     loadMoreSequenceRef.current += 1;
   };
 
+  const search = () => {
+    cancelCurrentRequest();
+    cancelLoadMore();
+    const requestId = ++requestSequenceRef.current;
+    const normalizedTerm = normalizeSearchTerm(term);
+    setResults(null);
+    setErrorMessage(null);
+
+    if (!normalizedTerm) {
+      setApplied(null);
+      setIsLoading(false);
+      return;
+    }
+
+    const next = { term: normalizedTerm, field };
+    const controller = new AbortController();
+    currentControllerRef.current = controller;
+    setApplied(next);
+    setIsLoading(true);
+
+    searchPackages({
+      term: next.term,
+      field: next.field,
+      page: DEFAULT_PAGE,
+      size: SEARCH_PAGE_SIZE,
+      signal: controller.signal,
+    })
+      .then((payload) => {
+        if (requestSequenceRef.current === requestId) {
+          setResults(payload ?? null);
+        }
+      })
+      .catch((error) => {
+        if (requestSequenceRef.current === requestId && !isCancelled(error)) {
+          setErrorMessage(normalizePackageSearchError(error).globalMessage);
+        }
+      })
+      .finally(() => {
+        if (requestSequenceRef.current === requestId) {
+          currentControllerRef.current = null;
+          setIsLoading(false);
+        }
+      });
+  };
+
   const clearSearch = () => {
     cancelCurrentRequest();
     cancelLoadMore();
     requestSequenceRef.current += 1;
-    lastRequestedTermRef.current = null;
     setTerm('');
+    setApplied(null);
     setResults(null);
     setIsLoading(false);
     setErrorMessage(null);
@@ -91,8 +139,8 @@ export function usePackageSearch() {
     };
   }, []);
 
-  const activeTerm = normalizeSearchTerm(term);
-  const effectiveResults = activeTerm ? results : distributionResults;
+  const appliedTerm = applied?.term ?? '';
+  const effectiveResults = applied ? results : distributionResults;
   const canLoadMore = !isLoading && hasMorePages(effectiveResults);
 
   const loadMore = () => {
@@ -102,13 +150,14 @@ export function usePackageSearch() {
 
     const controller = new AbortController();
     const requestId = ++loadMoreSequenceRef.current;
-    const setPages = activeTerm ? setResults : setDistributionResults;
+    const setPages = applied ? setResults : setDistributionResults;
     loadMoreControllerRef.current = controller;
     setErrorMessage(null);
     setIsLoadingMore(true);
 
     searchPackages({
-      term: activeTerm,
+      term: appliedTerm,
+      field: applied?.field,
       page: effectiveResults.page + 1,
       size: SEARCH_PAGE_SIZE,
       signal: controller.signal,
@@ -132,83 +181,6 @@ export function usePackageSearch() {
       });
   };
 
-  useEffect(() => {
-    const normalizedTerm = normalizeSearchTerm(term);
-
-    if (!normalizedTerm) {
-      cancelCurrentRequest();
-      cancelLoadMore();
-      requestSequenceRef.current += 1;
-      lastRequestedTermRef.current = null;
-      return undefined;
-    }
-
-    if (normalizedTerm === lastRequestedTermRef.current) {
-      return undefined;
-    }
-
-    cancelCurrentRequest();
-    cancelLoadMore();
-    requestSequenceRef.current += 1;
-    setResults(null);
-    const timeoutId = setTimeout(() => {
-      const nextTerm = normalizeSearchTerm(term);
-
-      if (nextTerm === lastRequestedTermRef.current) {
-        return;
-      }
-
-      const controller = new AbortController();
-      const requestId = ++requestSequenceRef.current;
-
-      cancelCurrentRequest();
-      currentControllerRef.current = controller;
-      lastRequestedTermRef.current = nextTerm;
-
-      setErrorMessage(null);
-      setIsLoading(true);
-
-      searchPackages({
-        term: nextTerm,
-        page: DEFAULT_PAGE,
-        size: SEARCH_PAGE_SIZE,
-        signal: controller.signal,
-      })
-        .then((payload) => {
-          if (requestSequenceRef.current !== requestId) {
-            return;
-          }
-
-          setResults(payload ?? null);
-          setErrorMessage(null);
-        })
-        .catch((error) => {
-          if (requestSequenceRef.current !== requestId) {
-            return;
-          }
-
-          if (isCancelled(error)) {
-            return;
-          }
-
-          const normalized = normalizePackageSearchError(error);
-          setErrorMessage(normalized.globalMessage);
-        })
-        .finally(() => {
-          if (requestSequenceRef.current !== requestId) {
-            return;
-          }
-
-          currentControllerRef.current = null;
-          setIsLoading(false);
-        });
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [term]);
-
   useEffect(() => () => {
     distributionControllerRef.current?.abort();
     cancelCurrentRequest();
@@ -220,6 +192,10 @@ export function usePackageSearch() {
   return {
     term,
     setTerm,
+    field,
+    setField,
+    appliedTerm,
+    search,
     clearSearch,
     results: effectiveResults,
     distributionResults,

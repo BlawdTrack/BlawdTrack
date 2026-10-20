@@ -30,4 +30,21 @@ describe('PackageService', () => {
       signal,
     });
   });
+
+  it('sends the field only when the search is limited to one and there is a term', async () => {
+    axiosClient.get.mockResolvedValue({ data: {} });
+
+    await searchPackages({ term: 'ana', field: 'customerName' });
+    expect(axiosClient.get).toHaveBeenLastCalledWith('/v1/packages/search', {
+      params: { term: 'ana', field: 'customerName', page: 0, size: 100 },
+      signal: undefined,
+    });
+
+    await searchPackages({ term: 'ana', field: 'all' });
+    await searchPackages({ term: '', field: 'phone' });
+    expect(axiosClient.get.mock.calls.slice(-2).map(([, config]) => config.params)).toEqual([
+      { term: 'ana', page: 0, size: 100 },
+      { page: 0, size: 100 },
+    ]);
+  });
 });

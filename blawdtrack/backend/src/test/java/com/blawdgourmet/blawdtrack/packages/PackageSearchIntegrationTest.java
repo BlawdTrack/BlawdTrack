@@ -108,6 +108,25 @@ class PackageSearchIntegrationTest {
     }
 
     @Test
+    void fieldLimitsTheSearchToThatFieldAndUnknownFieldsSearchEverywhere() throws Exception {
+        mvc.perform(get(SEARCH_URL).param("term", "rojas").param("field", "customerName")
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].shipmentNumber").value("ENV-00001"));
+
+        mvc.perform(get(SEARCH_URL).param("term", "rojas").param("field", "phone")
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0));
+
+        mvc.perform(get(SEARCH_URL).param("term", "rojas").param("field", "desconocido")
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
     void blankTermReturnsAllPackagesAndResponseIsPaged() throws Exception {
         mvc.perform(get(SEARCH_URL).param("term", "")
                         .header("Authorization", bearer(RoleName.SALES_ADMIN)))

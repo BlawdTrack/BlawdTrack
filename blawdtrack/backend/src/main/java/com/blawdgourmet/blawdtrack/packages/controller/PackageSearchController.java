@@ -28,8 +28,9 @@ public class PackageSearchController {
     @PreAuthorize(SEARCH_ROLE)
     public ResponseEntity<PageResponse<PackageSearchResponse>> search(
             @RequestParam(name = "term", required = false) String term,
+            @RequestParam(name = "field", required = false) String field,
             @RequestParam(name = "page", required = false) String page,
             @RequestParam(name = "size", required = false) String size) {
-        return ResponseEntity.ok(searchService.search(new PackageSearchQuery(term, page, size)));
+        return ResponseEntity.ok(searchService.search(new PackageSearchQuery(term, field, page, size)));
     }
 }

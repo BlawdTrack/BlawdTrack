@@ -42,9 +42,17 @@ public class PackageSearchServiceImpl implements PackageSearchService {
     public PageResponse<PackageSearchResponse> search(PackageSearchQuery query) {
         Pageable pageable = pageRequestFactory.create(query.page(), query.size());
         Page<DeliveryPackage> packages = specificationFactory
-            .<DeliveryPackage>create(query.term(), SEARCH_FIELDS)
+            .<DeliveryPackage>create(query.term(), fieldsFor(query.field()))
             .map(specification -> repository.findAll(specification, pageable))
                 .orElseGet(() -> repository.findAll(pageable));
         return PageResponse.from(packages.map(mapper::toResponse));
+    }
+
+    private static List<PartialMatchField> fieldsFor(String field) {
+        return SEARCH_FIELDS.stream()
+                .filter(candidate -> candidate.attributeName().equals(field))
+                .findFirst()
+                .map(List::of)
+                .orElse(SEARCH_FIELDS);
     }
 }

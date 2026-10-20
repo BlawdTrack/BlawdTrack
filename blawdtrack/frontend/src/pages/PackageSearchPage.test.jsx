@@ -11,14 +11,14 @@ vi.mock('../services/PackageService', () => ({
 describe('PackageSearchPage', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it('fires the search automatically after the debounce and shows the error alert', async () => {
+  it('loads the distribution list on mount and shows the error alert', async () => {
     searchPackages.mockRejectedValueOnce({ response: { status: 500 } });
     render(<PackageSearchPage />, { wrapper: MemoryRouter });
 
@@ -100,7 +100,7 @@ describe('PackageSearchPage', () => {
     expect(screen.queryByRole('button', { name: 'Cargar más paquetes' })).not.toBeInTheDocument();
   });
 
-  it('updates the table when the user types a search term without a dedicated button', async () => {
+  it('updates the table when the user presses Buscar', async () => {
     const distributionPayload = {
       content: [{
         id: 1,
@@ -137,9 +137,10 @@ describe('PackageSearchPage', () => {
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     searchPackages.mockResolvedValueOnce(searchPayload);
     fireEvent.change(input, { target: { value: 'Limon' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(0);
     });
 
     const table = screen.getByRole('region', { name: 'Paquetes encontrados' });
@@ -165,9 +166,10 @@ describe('PackageSearchPage', () => {
 
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     fireEvent.change(input, { target: { value: 'Limon' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(0);
     });
 
     expect(screen.queryByRole('region', { name: 'Paquetes encontrados' })).toBeNull();
@@ -200,13 +202,16 @@ describe('PackageSearchPage', () => {
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     fireEvent.change(input, { target: { value: 'Heredia' } });
     expect(input).toHaveValue('Heredia');
-    fireEvent.click(screen.getByRole('button', { name: 'Limpiar' }));
-    expect(input).toHaveValue('');
+    expect(screen.queryByRole('button', { name: 'Limpiar' })).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent('46 paquetes en la lista de distribución');
 
     searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
     fireEvent.change(input, { target: { value: 'Limon' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(0);
     });
     expect(screen.getByRole('status')).toHaveTextContent('0 de 46 paquetes coinciden con “Limon”');
 
@@ -227,9 +232,10 @@ describe('PackageSearchPage', () => {
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
     fireEvent.change(input, { target: { value: 'Limon' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(0);
     });
 
     expect(screen.getByText('Sin resultados para “Limon”')).toBeInTheDocument();
@@ -256,17 +262,19 @@ describe('PackageSearchPage', () => {
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     searchPackages.mockImplementation(() => new Promise(() => {}));
     fireEvent.change(input, { target: { value: 'Limon' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(0);
     });
     expect(screen.queryByText(/Sin resultados para/i)).not.toBeInTheDocument();
 
     searchPackages.mockRejectedValueOnce({ response: { status: 500 } });
     fireEvent.change(input, { target: { value: 'Mango' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(0);
     });
     expect(screen.queryByText(/Sin resultados para/i)).not.toBeInTheDocument();
   });
@@ -282,9 +290,10 @@ describe('PackageSearchPage', () => {
     const input = screen.getByRole('textbox', { name: 'Buscar paquetes' });
     searchPackages.mockResolvedValueOnce({ content: [], totalElements: 0 });
     fireEvent.change(input, { target: { value: 'Limon' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(0);
     });
 
     expect(screen.getByText('Sin resultados para “Limon”')).toBeInTheDocument();
