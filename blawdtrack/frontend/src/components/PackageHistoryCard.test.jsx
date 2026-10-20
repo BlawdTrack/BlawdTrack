@@ -53,6 +53,22 @@ describe('PackageHistoryCard', () => {
     expect(screen.getByText('17/09/2026 · 08:30')).toBeInTheDocument();
   });
 
+  it('presenta el alta de la importación (REGISTRAR_PAQUETE) como "Registrado como Pendiente" con fecha, hora y responsable', () => {
+    const alta = [{
+      timestamp: '2026-10-19T09:05:00',
+      action: 'REGISTRAR_PAQUETE',
+      details: 'Registro al importar',
+      actorName: 'Ana Ventas',
+      previousStatus: 'DESCONOCIDO',
+      newStatus: 'PENDING',
+    }];
+
+    render(<PackageHistoryCard state={PACKAGE_HISTORY_STATE.SUCCESS} entries={alta} />);
+
+    expect(screen.getByText('Registrado como Pendiente')).toBeInTheDocument();
+    expect(screen.getByText('19/10/2026 · 09:05 · Ana Ventas')).toBeInTheDocument();
+  });
+
   it('muestra el mensaje de historial vacío', () => {
     render(
       <PackageHistoryCard
