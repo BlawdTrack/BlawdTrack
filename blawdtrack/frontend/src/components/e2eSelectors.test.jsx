@@ -7,7 +7,7 @@ import { NewPasswordInvalidLink, NewPasswordSuccess } from './NewPasswordOutcome
 import PackageProofCard from './PackageProofCard';
 import PackageLoadMore from './PackageLoadMore';
 import PackageSearchSummary from './PackageSearchSummary';
-import PreviewCounters from './preview/PreviewCounters';
+import PreviewFilters from './preview/PreviewFilters';
 import { RecoveryEmailSent } from './RecoveryEmailSent';
 import { RecoveryRequestForm } from './RecoveryRequestForm';
 import StatCard from './StatCard';
@@ -31,7 +31,7 @@ describe('selectores de las pruebas de extremo a extremo', () => {
   });
 
   it('los contadores de la previsualización de la importación', () => {
-    render(<ul><PreviewCounters counts={{ read: 10, valid: 6, invalid: 3, duplicate: 1 }} /></ul>);
+    render(<PreviewFilters counts={{ read: 10, valid: 6, invalid: 3, duplicate: 1 }} active="all" onChange={() => {}} />);
 
     expect(screen.getByTestId('import-count-read')).toHaveTextContent('10');
     expect(screen.getByTestId('import-count-valid')).toHaveTextContent('6');

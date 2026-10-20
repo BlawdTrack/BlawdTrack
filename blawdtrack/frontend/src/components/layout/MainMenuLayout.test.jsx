@@ -126,7 +126,8 @@ describe('MainMenuLayout sidebar', () => {
       'Reportes y notificaciones',
       'Operación de mensajero',
     ];
-    const implementedLinks = ['Importación de paquetes', 'Gestión de paquetes'];
+    // Gestión de paquetes tiene varias funciones: se abre como un menú (botón), igual que Gestión de usuarios.
+    const implementedLinks = ['Importación de paquetes'];
     const items = names.map((name) => bar.getByRole(implementedLinks.includes(name) ? 'link' : 'button', { name }));
 
     items.slice(1).forEach((item, index) =>

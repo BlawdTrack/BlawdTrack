@@ -12,6 +12,7 @@ const tree = (
     <Route path={ROUTES.MODULE_COURIERS} element={<ModuleMenuPage groupId="couriers" />} />
     <Route path={ROUTES.MODULE_ADMINS} element={<ModuleMenuPage groupId="admins" />} />
     <Route path={ROUTES.MODULE_SETTINGS} element={<ModuleMenuPage groupId="settings" />} />
+    <Route path={ROUTES.MODULE_PACKAGE_MANAGEMENT} element={<ModuleMenuPage groupId="package-management" />} />
   </Routes>
 );
 
@@ -58,6 +59,19 @@ describe('ModuleMenuPage', () => {
     expect(screen.getByRole('link', { name: /Crear administrador/ })).toHaveAttribute('href', ROUTES.ADMIN_CREATE);
     expect(screen.getByRole('link', { name: /Actualizar administrador/ })).toHaveAttribute('href', ROUTES.ADMIN_UPDATE);
     expect(screen.getByRole('link', { name: /Eliminar administrador/ })).toHaveAttribute('href', ROUTES.ADMIN_DELETE);
+  });
+
+  it('lists the three functions of Gestión de paquetes: the search is a link, the other two are "Próximamente"', () => {
+    renderWithProviders(tree, { route: ROUTES.MODULE_PACKAGE_MANAGEMENT, user: superUser });
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Gestión de paquetes' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Consultar paquetes/ })).toHaveAttribute('href', ROUTES.PACKAGE_SEARCH);
+    ['Pendientes de asignación', 'Exportar a Excel'].forEach((title) => {
+      const heading = screen.getByRole('heading', { name: title });
+      expect(heading.closest('a')).toBeNull();
+      expect(heading.closest('[aria-disabled="true"]')).not.toBeNull();
+    });
+    expect(screen.getAllByText('Próximamente')).toHaveLength(2);
   });
 
   it('goes back to the main menu when the role has no such module', () => {

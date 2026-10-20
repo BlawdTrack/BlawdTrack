@@ -7,12 +7,13 @@ import java.util.stream.Collectors;
 
 /**
  * Catálogo único de columnas y alias aceptados en las exportaciones de Zoho
- * Inventory (HU010, task 263).
+ * Inventory (HU010, task 263). El número de envío es opcional: la exportación de Órdenes de venta no trae
+ * Packing Number y se usa el número de orden en su lugar.
  */
 enum ZohoColumn {
-    SHIPMENT_NUMBER(true, "Packing Number", "Package Number", "Shipment Number",
+    SHIPMENT_NUMBER(false, "Packing Number", "Package Number", "Shipment Number",
             "Numero de envio", "Numero de paquete"),
-    ORDER_NUMBER(true, "SO Number", "Sales Order Number", "Order Number", "Numero de orden"),
+    ORDER_NUMBER(true, "SO Number", "SalesOrder Number", "Sales Order Number", "Order Number", "Numero de orden"),
     CUSTOMER_NAME(true, "Customer Name", "Cliente"),
     SHIPPING_ADDRESS(false, "Shipping Address", "Direccion de envio", "Direccion"),
     SHIPPING_CITY(false, "Shipping City", "Ciudad de envio"),
@@ -21,11 +22,11 @@ enum ZohoColumn {
     SHIPPING_CODE(false, "Shipping Code", "Codigo postal de envio"),
     SHIPPING_PHONE(false, "Shipping Phone", "Telefono de envio", "Phone", "Telefono"),
     BILLING_PHONE(false, "Billing Phone", "Telefono de facturacion"),
-    SCHEDULE(false, "Schedule", "Delivery Schedule", "Shipping Schedule", "Shipping Hours",
+    SCHEDULE(false, "Schedule", "CF.Rango de horas de entrega", "Delivery Schedule", "Shipping Schedule", "Shipping Hours",
             "Delivery Time", "Horario", "Notes"),
     ITEM_ID(false, "PackageItemID", "Package Item ID", "Item ID"),
     ITEM_NAME(false, "Item Name", "Articulo", "Nombre del articulo"),
-    QUANTITY(false, "Quantity Packed", "Quantity", "Cantidad"),
+    QUANTITY(false, "Quantity Packed", "QuantityPacked", "Quantity", "Cantidad"),
     SKU(false, "SKU"),
     ITEM_PRICE(false, "Item Price", "Unit Price", "Precio");
 
@@ -47,6 +48,10 @@ enum ZohoColumn {
 
     List<String> aliases() {
         return aliases;
+    }
+
+    boolean isPresentIn(List<String> headers) {
+        return headers.stream().map(HeaderNormalizer::normalize).anyMatch(aliases::contains);
     }
 
     static void validateRequiredHeaders(List<String> headers) {

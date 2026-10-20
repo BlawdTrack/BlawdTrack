@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
 import PackageDetailPage from './PackageDetailPage';
 import { getPackageByShipmentNumber, getPackageHistory } from '../services/SearchPackageService';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../test-utils';
 import { ROUTES, packageDetailPath } from '../config/routes';
 
@@ -72,15 +72,16 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(getPackageByShipmentNumber).toHaveBeenCalledWith('BG-2026-00121');
   });
 
-  it('"Volver a la búsqueda" lleva a la pantalla de búsqueda', async () => {
+  it('la leyenda de solo lectura vive en un ! junto al número de envío y no hay botón para volver a los resultados', async () => {
     getPackageByShipmentNumber.mockResolvedValue(packageDetail);
-    const user = userEvent.setup();
     render('BG-2026-00121');
     await screen.findByText('Mariela Solís Gómez');
 
-    await user.click(screen.getByRole('button', { name: 'Volver a la búsqueda' }));
-
-    expect(screen.getByText('Pantalla de búsqueda')).toBeInTheDocument();
+    expect(screen.queryByText(/La ficha es de solo lectura/)).not.toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.hover(screen.getByRole('button', { name: 'Aviso sobre la ficha' }));
+    expect(await screen.findByText(/La ficha es de solo lectura/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Volver a los resultados' })).not.toBeInTheDocument();
   });
 
   it('muestra la ficha con los datos reales del backend cuando la consulta tiene éxito', async () => {
@@ -95,7 +96,8 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(screen.getByText('María José Solano')).toBeInTheDocument();
     expect(screen.getByText('7012-3344 · 6:00 am – 2:00 pm')).toBeInTheDocument();
     // El estado sale del dato real, no fijo.
-    expect(screen.getByText('Entregado')).toBeInTheDocument();
+    expect(screen.getAllByText('Entregado').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('package-progress-DELIVERED')).toHaveAttribute('aria-current', 'step');
     expect(screen.getByText('Orden ZI-88301')).toBeInTheDocument();
     // Se muestran los artículos y la evidencia de entrega del backend.
     expect(screen.getByText('Caja de chocolates')).toBeInTheDocument();
@@ -182,15 +184,17 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(getPackageHistory).toHaveBeenCalledWith('BG-2026-00121');
   });
 
-  it('muestra el comprobante de entrega solo cuando el paquete está entregado', async () => {
+  it('el comprobante de entrega está siempre y avisa que aún no hay entrega mientras el paquete no se entregue', async () => {
     getPackageByShipmentNumber.mockResolvedValue(packageDetail);
     const { unmount } = render('BG-2026-00121');
     expect(await screen.findByText('COMPROBANTE DE ENTREGA')).toBeInTheDocument();
+    expect(screen.queryByText('El paquete aún no registra una entrega completada.')).toBeNull();
     unmount();
 
     getPackageByShipmentNumber.mockResolvedValue({ ...packageDetail, status: 'IN_TRANSIT' });
     render('BG-2026-00121');
     await screen.findByText('Mariela Solís Gómez');
-    expect(screen.queryByText('COMPROBANTE DE ENTREGA')).toBeNull();
+    expect(screen.getByText('COMPROBANTE DE ENTREGA')).toBeInTheDocument();
+    expect(screen.getByText('El paquete aún no registra una entrega completada.')).toBeInTheDocument();
   });
 });

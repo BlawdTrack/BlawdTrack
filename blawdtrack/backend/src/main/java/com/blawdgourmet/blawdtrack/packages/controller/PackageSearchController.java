@@ -1,5 +1,7 @@
 package com.blawdgourmet.blawdtrack.packages.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,8 +30,16 @@ public class PackageSearchController {
     @PreAuthorize(SEARCH_ROLE)
     public ResponseEntity<PageResponse<PackageSearchResponse>> search(
             @RequestParam(name = "term", required = false) String term,
+            @RequestParam(name = "field", required = false) String field,
+            @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "page", required = false) String page,
             @RequestParam(name = "size", required = false) String size) {
-        return ResponseEntity.ok(searchService.search(new PackageSearchQuery(term, page, size)));
+        return ResponseEntity.ok(searchService.search(new PackageSearchQuery(term, field, status, page, size)));
+    }
+
+    @GetMapping("/status-counts")
+    @PreAuthorize(SEARCH_ROLE)
+    public ResponseEntity<Map<String, Long>> statusCounts() {
+        return ResponseEntity.ok(searchService.countByStatus());
     }
 }

@@ -60,8 +60,9 @@ export default function ModuleMenuPage({ groupId }) {
           sx={{
             display: 'grid',
             gap: 3,
-            // Una columna en móvil y, desde escritorio, una columna por función (hasta tres) para que queden lado a lado.
-            gridTemplateColumns: { xs: '1fr', md: `repeat(${Math.min(cards.length, 3)}, 1fr)` },
+            // Una columna en móvil y, desde escritorio, siempre tres: así las tarjetas de todos los menús miden lo
+            // mismo, tenga el menú una función o tres.
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
           }}
         >
           {cards.map(({ id, ...card }) => (

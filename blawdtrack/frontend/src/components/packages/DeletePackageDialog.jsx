@@ -1,5 +1,7 @@
 import { useId, useState } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { splitAddressLink } from '../../utils/addressLink';
+import MapLinkButton from '../MapLinkButton';
 import { FONT, RADIUS, rem } from '../../theme';
 
 const ACTION_BUTTON_SX = { borderRadius: RADIUS.sm, px: 2.5, fontWeight: 600, fontSize: FONT.md };
@@ -22,6 +24,7 @@ export default function DeletePackageDialog({ pkg, isDeleting, onCancel, onConfi
   if (pkg && pkg !== shownPkg) {
     setShownPkg(pkg);
   }
+  const address = splitAddressLink(shownPkg?.address);
 
   const handleClose = () => {
     if (!isDeleting) onCancel();
@@ -68,8 +71,9 @@ export default function DeletePackageDialog({ pkg, isDeleting, onCancel, onConfi
                 {shownPkg.shipmentNumber}
               </Typography>
               <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary', lineHeight: 1.45, mt: 0.5, overflowWrap: 'anywhere' }}>
-                {shownPkg.customerName} · {shownPkg.address}
+                {[shownPkg.customerName, address.text].filter(Boolean).join(' · ')}
               </Typography>
+              {address.link && <Box sx={{ display: 'flex', mt: 1 }}><MapLinkButton link={address.link} /></Box>}
             </Box>
             <Typography id={descriptionId} sx={{ fontSize: FONT.md, color: 'text.secondary', lineHeight: 1.55 }}>
               El paquete desaparece del sistema y de la lista visible para el mensajero. La acción queda en auditoría

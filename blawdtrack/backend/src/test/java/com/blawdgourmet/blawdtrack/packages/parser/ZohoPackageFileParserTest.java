@@ -43,6 +43,26 @@ class ZohoPackageFileParserTest {
     }
 
     @Test
+    void usaElNumeroDeOrdenComoPaqueteEnLaExportacionDeOrdenesDeVentaSinPackingNumber() {
+        String csv = """
+                SalesOrder Number,Customer Name,Item Name,QuantityPacked,Notes,Shipping Address,Shipping Phone,CF.Rango de horas de entrega
+                SO-01004,Emanuel Villegas,Blawd Box,2.0,,San Jose,+506-87054218,9 am a 12 pm
+                SO-01004,Emanuel Villegas,Alfajor de Guayaba,3.0,,San Jose,+506-87054218,9 am a 12 pm
+                SO-01004,Emanuel Villegas,Envio a domicilio,0.0,,San Jose,+506-87054218,9 am a 12 pm
+                SO-01005,Miguel Jimenez,Tri Blawd,1.0,pago contra entrega,Waze,+506-70477601,12 pm a 3 pm
+                """;
+
+        var result = parser.parse(stream(csv), "Orden_de_venta.csv");
+
+        assertThat(result).hasSize(2);
+        assertThat(result.getFirst().shipmentNumber()).isEqualTo("SO-01004");
+        assertThat(result.getFirst().orderNumber()).isEqualTo("SO-01004");
+        assertThat(result.getFirst().items()).hasSize(2);
+        assertThat(result.getFirst().schedule()).isEqualTo("9 am a 12 pm");
+        assertThat(result.get(1).schedule()).isEqualTo("12 pm a 3 pm");
+    }
+
+    @Test
     void leeXlsxYConvierteUnHorarioNumericoATextoSinPerderLosArticulos() throws Exception {
         byte[] xlsx;
         try (var workbook = new XSSFWorkbook(); var output = new ByteArrayOutputStream()) {

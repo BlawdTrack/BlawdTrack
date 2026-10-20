@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.blawdgourmet.blawdtrack.auth.security.JwtService;
 import com.blawdgourmet.blawdtrack.auth.security.UserPrincipal;
 import com.blawdgourmet.blawdtrack.packages.model.DeliveryPackage;
+import com.blawdgourmet.blawdtrack.packages.model.PackageStatus;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageSearchRepository;
 import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import com.blawdgourmet.blawdtrack.common.model.DocumentType;
@@ -105,6 +106,60 @@ class PackageSearchIntegrationTest {
                     .andExpect(jsonPath("$.totalElements").value(1))
                     .andExpect(jsonPath("$.content[0].shipmentNumber").value(search[1]));
         }
+    }
+
+    @Test
+    void fieldLimitsTheSearchToThatFieldAndUnknownFieldsSearchEverywhere() throws Exception {
+        mvc.perform(get(SEARCH_URL).param("term", "rojas").param("field", "customerName")
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].shipmentNumber").value("ENV-00001"));
+
+        mvc.perform(get(SEARCH_URL).param("term", "rojas").param("field", "phone")
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0));
+
+        mvc.perform(get(SEARCH_URL).param("term", "rojas").param("field", "desconocido")
+                        .header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void statusFiltersTheListAloneOrTogetherWithTheTermAndUnknownStatusesAreIgnored() throws Exception {
+        DeliveryPackage shipped = packages.findAll().stream()
+                .filter(pkg -> pkg.getShipmentNumber().equals("ENV-00002")).findFirst().orElseThrow();
+        shipped.setStatus(PackageStatus.SHIPPED);
+        packages.saveAndFlush(shipped);
+        String token = bearer(RoleName.SALES_ADMIN);
+
+        mvc.perform(get(SEARCH_URL).param("status", "SHIPPED").header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].shipmentNumber").value("ENV-00002"));
+        mvc.perform(get(SEARCH_URL).param("status", "PENDING").param("term", "cliente").header("Authorization", token))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].shipmentNumber").value("ENV-00001"));
+        mvc.perform(get(SEARCH_URL).param("status", "SHIPPED").param("term", "rojas").header("Authorization", token))
+                .andExpect(jsonPath("$.totalElements").value(0));
+        mvc.perform(get(SEARCH_URL).param("status", "inventado").header("Authorization", token))
+                .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
+    @Test
+    void statusCountsListEveryStatusWithZeroWhereThereAreNoPackages() throws Exception {
+        mvc.perform(get(SEARCH_URL.replace("/search", "/status-counts")).header("Authorization", bearer(RoleName.SALES_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.PENDING").value(2))
+                .andExpect(jsonPath("$.ASSIGNED").value(0))
+                .andExpect(jsonPath("$.SHIPPED").value(0))
+                .andExpect(jsonPath("$.IN_TRANSIT").value(0))
+                .andExpect(jsonPath("$.DELIVERED").value(0))
+                .andExpect(jsonPath("$.NOT_DELIVERED").value(0));
+        mvc.perform(get(SEARCH_URL.replace("/search", "/status-counts")).header("Authorization", bearer(RoleName.COURIER)))
+                .andExpect(status().isForbidden());
     }
 
     @Test

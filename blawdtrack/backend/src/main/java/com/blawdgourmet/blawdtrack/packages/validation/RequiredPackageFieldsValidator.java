@@ -15,8 +15,7 @@ public class RequiredPackageFieldsValidator implements PackageRecordValidator {
             new RequiredField("shipmentNumber", "número de envío", ImportedPackage::shipmentNumber),
             new RequiredField("orderNumber", "número de orden", ImportedPackage::orderNumber),
             new RequiredField("customerName", "nombre del cliente", ImportedPackage::customerName),
-            new RequiredField("address", "dirección de entrega", ImportedPackage::address),
-            new RequiredField("phone", "teléfono", ImportedPackage::phone)
+            new RequiredField("address", "dirección de entrega", ImportedPackage::address)
     );
 
     @Override

@@ -42,15 +42,17 @@ class PackageSearchServiceImplTest {
     }
 
     @Test
-    void blankTermUsesUnfilteredRepositorySearchAndMapsThePage() {
+    void blankTermListsEveryPackageAndMapsThePage() {
         DeliveryPackage entity = packageEntity();
         Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "id"));
-        when(repository.findAll(any(Pageable.class)))
+        when(repository.findAll(org.mockito.ArgumentMatchers.<Specification<DeliveryPackage>>any(),
+            any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(entity), pageable, 1));
 
-        var response = service.search(new PackageSearchQuery("  ", null, null));
+        var response = service.search(new PackageSearchQuery("  ", null, null, null, null));
 
-        verify(repository).findAll(any(Pageable.class));
+        verify(repository).findAll(org.mockito.ArgumentMatchers.<Specification<DeliveryPackage>>any(),
+            any(Pageable.class));
         assertThat(response.content()).hasSize(1);
         assertThat(response.content().get(0).shipmentNumber()).isEqualTo("ENV-00001");
         assertThat(response.page()).isZero();
@@ -66,7 +68,7 @@ class PackageSearchServiceImplTest {
             any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(entity), pageable, 11));
 
-        var response = service.search(new PackageSearchQuery("order", "2", "5"));
+        var response = service.search(new PackageSearchQuery("order", null, null, "2", "5"));
 
         verify(repository).findAll(org.mockito.ArgumentMatchers.<Specification<DeliveryPackage>>any(),
             any(Pageable.class));

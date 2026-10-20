@@ -1,27 +1,50 @@
 import { Box, Paper, Typography } from '@mui/material';
 import PreviewRecordRow from './PreviewRecordRow';
+import { PREVIEW_GRID_SX } from './previewGrid';
 import { CARD_SX } from '../formStyles';
-import { FONT } from '../../theme';
+import { FONT, RADIUS } from '../../theme';
+
+const COLUMNS = ['Estado', 'Envío', 'Cliente', 'Dirección', 'Teléfono', 'Horario'];
 
 /**
- * Tarjeta "Registros del archivo": un encabezado con la cantidad que se muestra y una fila por registro. Si el filtro
- * activo no deja ninguno, lo dice en vez de quedar vacía.
- * @param {{ rows: Array<object> }} props Filas ya filtradas de `buildImportPreview`.
+ * Tabla "Registros del archivo": un encabezado de columnas que se queda fijo al desplazar, una fila por registro y, al
+ * pie, cuántos se muestran de cuántos hay (se listan todos, sin paginar). Si el filtro o la búsqueda no dejan ninguno,
+ * lo dice en vez de quedar vacía.
+ * @param {{ rows: Array<object>, totalCount: number }} props `rows` ya filtradas de `buildImportPreview` y
+ *   `totalCount` el total de registros del archivo.
  */
-export default function PreviewRecordList({ rows }) {
+export default function PreviewRecordList({ rows, totalCount }) {
   return (
-    <Paper component="section" aria-labelledby="preview-records-title" elevation={0} sx={{ ...CARD_SX, overflow: 'hidden' }}>
-      <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 2 }}>
-        <Typography id="preview-records-title" component="h2" sx={{ fontFamily: 'Poppins', fontWeight: 600, fontSize: FONT.lg, color: 'primary.main' }}>
-          Registros del archivo
-        </Typography>
-        <Typography component="span" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
-          {rows.length === 1 ? '1 registro' : `${rows.length} registros`}
-        </Typography>
+    <Paper component="section" aria-label="Registros del archivo" elevation={0} sx={{ ...CARD_SX, borderRadius: RADIUS.md }}>
+      <Box
+        aria-hidden="true"
+        sx={{
+          ...PREVIEW_GRID_SX,
+          display: { xs: 'none', md: 'grid' },
+          position: 'sticky',
+          top: 0,
+          zIndex: 1,
+          height: 40,
+          borderTopLeftRadius: RADIUS.md,
+          borderTopRightRadius: RADIUS.md,
+          pl: 'calc(16px + 4px)',
+          bgcolor: 'neutral.surface',
+          borderBottom: '1px solid',
+          borderColor: 'neutral.border',
+          fontSize: FONT.xs,
+          fontWeight: 700,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          color: 'text.secondary',
+        }}
+      >
+        {COLUMNS.map((column) => <span key={column}>{column}</span>)}
       </Box>
 
       {rows.length === 0 ? (
-        <Typography sx={{ px: 3, pb: 3, fontSize: FONT.md, color: 'text.secondary' }}>No hay registros en este grupo.</Typography>
+        <Typography sx={{ px: 3, py: 3.5, textAlign: 'center', fontSize: FONT.md, color: 'text.secondary' }}>
+          Ningún registro coincide.
+        </Typography>
       ) : (
         <Box component="ul" sx={{ m: 0, p: 0 }}>
           {rows.map((row) => (
@@ -29,6 +52,10 @@ export default function PreviewRecordList({ rows }) {
           ))}
         </Box>
       )}
+
+      <Typography aria-live="polite" sx={{ px: 2, py: 1.25, fontSize: FONT.sm, color: 'text.secondary' }}>
+        Mostrando <b>{rows.length}</b> de {totalCount} {totalCount === 1 ? 'registro' : 'registros'}
+      </Typography>
     </Paper>
   );
 }

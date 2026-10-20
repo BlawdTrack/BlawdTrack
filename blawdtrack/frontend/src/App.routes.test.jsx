@@ -39,6 +39,7 @@ const SCREENS = {
   [ROUTES.MODULE_COURIERS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_ADMINS]: 'Pantalla menú de módulo',
   [ROUTES.MODULE_SETTINGS]: 'Pantalla menú de módulo',
+  [ROUTES.MODULE_PACKAGE_MANAGEMENT]: 'Pantalla menú de módulo',
   [ROUTES.PACKAGE_IMPORT]: 'Pantalla importar paquetes',
   [ROUTES.PACKAGE_SEARCH]: 'Pantalla búsqueda de paquetes',
   [ROUTES.PACKAGE_DETAIL]: 'Pantalla ficha del paquete',
@@ -57,7 +58,7 @@ const SCREENS = {
 
 // Rutas que comparten el Súper Usuario y el Administrador de Ventas (ambos usan el menú lateral); el resto
 // de las rutas protegidas es de un solo rol.
-const SHARED_ROUTES = [ROUTES.MAIN_MENU, ROUTES.PACKAGE_IMPORT, ROUTES.PACKAGE_SEARCH, ROUTES.PACKAGE_DETAIL];
+const SHARED_ROUTES = [ROUTES.MAIN_MENU, ROUTES.MODULE_PACKAGE_MANAGEMENT, ROUTES.PACKAGE_IMPORT, ROUTES.PACKAGE_SEARCH, ROUTES.PACKAGE_DETAIL];
 
 // Ajustes y restablecer la propia contraseña los usan los tres roles (el mensajero también tiene el menú lateral).
 const ALL_ROLES_ROUTES = [ROUTES.MODULE_SETTINGS, ROUTES.PASSWORD_RESET_OWN];
@@ -71,6 +72,7 @@ const ALLOWED_ROUTES = {
     ROUTES.MODULE_COURIERS,
     ROUTES.MODULE_ADMINS,
     ROUTES.MODULE_SETTINGS,
+    ROUTES.MODULE_PACKAGE_MANAGEMENT,
     ROUTES.PACKAGE_IMPORT,
     ROUTES.PACKAGE_SEARCH,
     ROUTES.PACKAGE_DETAIL,
@@ -86,6 +88,7 @@ const ALLOWED_ROUTES = {
   [ROLES.SALES_ADMIN]: [
     ROUTES.MAIN_MENU,
     ROUTES.MODULE_SETTINGS,
+    ROUTES.MODULE_PACKAGE_MANAGEMENT,
     ROUTES.PACKAGE_IMPORT,
     ROUTES.PACKAGE_SEARCH,
     ROUTES.PACKAGE_DETAIL,
