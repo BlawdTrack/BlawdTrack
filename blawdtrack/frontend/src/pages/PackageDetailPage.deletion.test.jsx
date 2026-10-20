@@ -100,8 +100,8 @@ describe('PackageDetailPage: eliminar desde la ficha (HU-012 / T06)', () => {
     expect(deletePackage).toHaveBeenCalledWith('BG-2026-00125');
     expect(screen.queryByRole('region', { name: 'Ficha del paquete BG-2026-00125' })).not.toBeInTheDocument();
     expect(screen.getByText('Paquete eliminado')).toBeInTheDocument();
-    // Hay dos "Volver a la búsqueda" (el de arriba y el del aviso): el foco va al del aviso.
-    const [, backInNotice] = screen.getAllByRole('button', { name: 'Volver a la búsqueda' });
+    // El de arriba dice "Volver a los resultados" y el del aviso "Volver a la búsqueda": el foco va al del aviso.
+    const backInNotice = screen.getByRole('button', { name: 'Volver a la búsqueda' });
     await waitFor(() => expect(backInNotice).toHaveFocus());
   });
 

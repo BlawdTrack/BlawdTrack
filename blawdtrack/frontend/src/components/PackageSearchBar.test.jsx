@@ -9,6 +9,7 @@ const renderBar = (props = {}) => render(
     field="all"
     onFieldChange={() => {}}
     onSearch={() => {}}
+    onExample={() => {}}
     onClear={() => {}}
     isLoading={false}
     maxLength={100}
@@ -67,6 +68,7 @@ describe('PackageSearchBar', () => {
         field="all"
         onFieldChange={() => {}}
         onSearch={() => {}}
+        onExample={() => {}}
         onClear={handleClear}
         isLoading={false}
         isFiltering
@@ -91,6 +93,7 @@ describe('PackageSearchBar', () => {
         field="all"
         onFieldChange={() => {}}
         onSearch={() => {}}
+        onExample={() => {}}
         onClear={() => {}}
         isLoading
       />

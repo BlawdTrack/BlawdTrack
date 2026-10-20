@@ -72,13 +72,14 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(getPackageByShipmentNumber).toHaveBeenCalledWith('BG-2026-00121');
   });
 
-  it('"Volver a la búsqueda" lleva a la pantalla de búsqueda', async () => {
+  it('"Volver a los resultados" lleva a la pantalla de búsqueda y la ficha avisa que es de solo lectura', async () => {
     getPackageByShipmentNumber.mockResolvedValue(packageDetail);
     const user = userEvent.setup();
     render('BG-2026-00121');
     await screen.findByText('Mariela Solís Gómez');
 
-    await user.click(screen.getByRole('button', { name: 'Volver a la búsqueda' }));
+    expect(screen.getByText(/La ficha es de solo lectura/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Volver a los resultados' }));
 
     expect(screen.getByText('Pantalla de búsqueda')).toBeInTheDocument();
   });

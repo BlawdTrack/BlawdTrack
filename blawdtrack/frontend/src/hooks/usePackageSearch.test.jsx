@@ -1,16 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { usePackageSearch } from './usePackageSearch';
-import { searchPackages } from '../services/PackageService';
+import { fetchStatusCounts, searchPackages } from '../services/PackageService';
 
 vi.mock('../services/PackageService', () => ({
   searchPackages: vi.fn(),
+  fetchStatusCounts: vi.fn(),
 }));
 
 describe('usePackageSearch', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.resetAllMocks();
+    fetchStatusCounts.mockResolvedValue({ PENDING: 3, ASSIGNED: 1, SHIPPED: 0, IN_TRANSIT: 0, DELIVERED: 2, NOT_DELIVERED: 0 });
   });
 
   afterEach(() => {
@@ -182,6 +184,121 @@ describe('usePackageSearch', () => {
 
     expect(result.current.errorMessage).toMatch(/error inesperado/i);
     expect(result.current.isLoading).toBe(false);
+  });
+
+  describe('estado, ejemplos y recarga', () => {
+    const empty = { content: [], page: 0, size: 100, totalElements: 0, totalPages: 0 };
+
+    it('trae los conteos por estado al montar', async () => {
+      searchPackages.mockResolvedValue(empty);
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {});
+
+      expect(fetchStatusCounts).toHaveBeenCalledTimes(1);
+      expect(result.current.statusCounts).toEqual({ PENDING: 3, ASSIGNED: 1, SHIPPED: 0, IN_TRANSIT: 0, DELIVERED: 2, NOT_DELIVERED: 0 });
+    });
+
+    it('elegir un estado filtra al instante, sin término, y volver a "Todos" regresa a la lista completa', async () => {
+      searchPackages.mockResolvedValue(empty);
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {});
+
+      act(() => {
+        result.current.setStatus('DELIVERED');
+      });
+      await act(async () => {});
+
+      expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: '', status: 'DELIVERED' }));
+      expect(result.current.isFiltering).toBe(true);
+      expect(result.current.appliedTerm).toBe('');
+
+      act(() => {
+        result.current.setStatus('all');
+      });
+      expect(result.current.isFiltering).toBe(false);
+    });
+
+    it('un estado elegido se combina con la búsqueda aplicada y con el siguiente "Buscar"', async () => {
+      searchPackages.mockResolvedValue(empty);
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {});
+      act(() => {
+        result.current.setTerm('limon');
+      });
+      act(() => {
+        result.current.search();
+      });
+      await act(async () => {});
+
+      act(() => {
+        result.current.setStatus('PENDING');
+      });
+      await act(async () => {});
+
+      expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'limon', status: 'PENDING' }));
+    });
+
+    it('un ejemplo busca su término en todos los campos', async () => {
+      searchPackages.mockResolvedValue(empty);
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {});
+
+      act(() => {
+        result.current.searchExample('Heredia');
+      });
+      await act(async () => {});
+
+      expect(result.current.term).toBe('Heredia');
+      expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'Heredia', field: 'all' }));
+    });
+
+    it('limpiar quita también el estado elegido', async () => {
+      searchPackages.mockResolvedValue(empty);
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {});
+      act(() => {
+        result.current.setStatus('DELIVERED');
+      });
+      await act(async () => {});
+
+      act(() => {
+        result.current.clearSearch();
+      });
+
+      expect(result.current.status).toBe('all');
+      expect(result.current.isFiltering).toBe(false);
+    });
+
+    it('refresh vuelve a pedir la lista, los conteos y la búsqueda aplicada', async () => {
+      searchPackages.mockResolvedValue(empty);
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {});
+      act(() => {
+        result.current.setStatus('PENDING');
+      });
+      await act(async () => {});
+      searchPackages.mockClear();
+      fetchStatusCounts.mockClear();
+
+      act(() => {
+        result.current.refresh();
+      });
+      await act(async () => {});
+
+      expect(fetchStatusCounts).toHaveBeenCalledTimes(1);
+      expect(searchPackages).toHaveBeenCalledWith(expect.objectContaining({ term: '' }));
+      expect(searchPackages).toHaveBeenCalledWith(expect.objectContaining({ status: 'PENDING' }));
+    });
+
+    it('si fallan los conteos las pestañas siguen funcionando sin número', async () => {
+      fetchStatusCounts.mockRejectedValue(new Error('x'));
+      searchPackages.mockResolvedValue(empty);
+      const { result } = renderHook(() => usePackageSearch());
+      await act(async () => {});
+
+      expect(result.current.statusCounts).toBeNull();
+      expect(result.current.errorMessage).toBeNull();
+    });
   });
 
   describe('loadMore', () => {

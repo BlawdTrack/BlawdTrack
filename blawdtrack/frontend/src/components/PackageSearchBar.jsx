@@ -1,22 +1,22 @@
 import { Box, Button, MenuItem, Paper, TextField, Typography } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import { MAX_SEARCH_TERM_LENGTH, SEARCH_FIELD_OPTIONS } from '../config/packageSearch';
+import { MAX_SEARCH_TERM_LENGTH, SEARCH_EXAMPLES, SEARCH_FIELD_OPTIONS } from '../config/packageSearch';
 import HelpTip from './HelpTip';
 import { CARD_SX, INPUT_SX } from './formStyles';
-import { FONT, RADIUS, rem } from '../theme';
+import { FONT, RADIUS, TOUCH_TARGET, rem } from '../theme';
 
 const SEARCH_LABEL_ID = 'package-search-label';
 
 /**
  * Tarjeta de búsqueda de paquetes, con el mismo diseño que la de "Roles y permisos": título con ayuda (?), el
- * selector "Buscar por", el campo, "Buscar" (o Enter) y "Limpiar", y debajo "Buscando..." y el resumen que pasa la
- * pantalla.
+ * selector "Buscar por", el campo, "Buscar" (o Enter) y "Limpiar", y debajo "Buscando...", unos ejemplos clicables (solo
+ * mientras no hay una búsqueda aplicada) y lo que pasa la pantalla (las pestañas de estado y el resumen).
  * @param {{ value: string, onChange: Function, field: string, onFieldChange: Function, onSearch: Function,
- *   onClear: Function, isLoading: boolean, isFiltering?: boolean, maxLength?: number,
- *   children?: import('react').ReactNode }} props
+ *   onExample: (example: string) => void, onClear: Function, isLoading: boolean, isFiltering?: boolean,
+ *   maxLength?: number, children?: import('react').ReactNode }} props
  */
 export function PackageSearchBar({
-  value, onChange, field, onFieldChange, onSearch, onClear, isLoading, isFiltering = false,
+  value, onChange, field, onFieldChange, onSearch, onExample, onClear, isLoading, isFiltering = false,
   maxLength = MAX_SEARCH_TERM_LENGTH, children,
 }) {
   const placeholder = SEARCH_FIELD_OPTIONS.find((option) => option.value === field)?.placeholder;
@@ -36,7 +36,7 @@ export function PackageSearchBar({
         Paquete a buscar
         <HelpTip label="¿Cómo puedo buscar paquetes?">
           Elige en qué campo buscar (o todos), escribe parte del dato y pulsa Buscar. Sin texto se muestra la lista
-          de distribución completa.
+          de distribución completa; con las pestañas de estado la filtras sin escribir nada.
         </HelpTip>
       </Typography>
 
@@ -95,6 +95,40 @@ export function PackageSearchBar({
           </Button>
         )}
       </Box>
+
+      {!isFiltering && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Typography component="span" sx={{ fontSize: FONT.xs, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+            Ejemplos
+          </Typography>
+          {SEARCH_EXAMPLES.map((example) => (
+            <Box
+              key={example}
+              component="button"
+              type="button"
+              onClick={() => onExample(example)}
+              data-testid="package-search-example"
+              sx={{
+                minHeight: TOUCH_TARGET,
+                px: 1.75,
+                fontFamily: 'inherit',
+                fontSize: FONT.sm,
+                fontWeight: 600,
+                color: 'primary.main',
+                bgcolor: 'background.paper',
+                border: '1.5px dashed',
+                borderColor: 'neutral.borderStrong',
+                borderRadius: RADIUS.lg,
+                cursor: 'pointer',
+                '&:hover': { borderStyle: 'solid', borderColor: 'primary.main' },
+                '&:focus-visible': { outline: '3px solid', outlineColor: 'primary.main', outlineOffset: 2 },
+              }}
+            >
+              {example}
+            </Box>
+          ))}
+        </Box>
+      )}
 
       {isLoading && (
         <Typography role="status" sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>Buscando...</Typography>

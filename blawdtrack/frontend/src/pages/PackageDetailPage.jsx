@@ -105,7 +105,7 @@ export function PackageDetailPage() {
 
       <PageContainer>
         <Box>
-          <BackButton onClick={backToSearch}>Volver a la búsqueda</BackButton>
+          <BackButton onClick={backToSearch}>Volver a los resultados</BackButton>
         </Box>
 
         {state === PACKAGE_LOOKUP_STATE.LOADING && <LoadingCard />}
@@ -149,6 +149,9 @@ export function PackageDetailPage() {
               }
             />
             <PackageFollowUp pkg={pkg} />
+            <Typography sx={{ fontSize: FONT.sm, color: 'text.secondary' }}>
+              La ficha es de solo lectura: no se puede editar el paquete, solo eliminarlo si aún no fue despachado.
+            </Typography>
           </>
         )}
       </PageContainer>

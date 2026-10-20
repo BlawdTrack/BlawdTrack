@@ -2,10 +2,11 @@ import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import {
   ALL_FIELDS,
+  ALL_STATUSES,
   DEFAULT_PAGE,
   SEARCH_PAGE_SIZE,
 } from '../config/packageSearch';
-import { searchPackages } from '../services/PackageService';
+import { fetchStatusCounts, searchPackages } from '../services/PackageService';
 import { normalizePackageSearchError } from '../utils/packageSearchErrors';
 import { appendPage, hasMorePages } from '../utils/packageSearchPages';
 import { normalizeSearchTerm } from '../utils/packageSearchTerm';
@@ -19,24 +20,30 @@ const isCancelled = (error) => Boolean(
 
 /**
  * Orquesta la búsqueda de paquetes: el término y el campo se escriben libremente y la búsqueda se hace al pulsar
- * "Buscar" (o Enter), igual que en "Roles y permisos"; "Limpiar" vuelve a la lista de distribución. Cancela la
- * petición anterior y maneja los errores. La lista se trae de a `SEARCH_PAGE_SIZE` paquetes; `loadMore` suma la
- * página siguiente de lo que se está viendo (la lista completa o los resultados de la búsqueda).
- * @returns {{ term: string, setTerm: Function, field: string, setField: Function, appliedTerm: string,
- *   search: Function, clearSearch: Function, results: object|null, distributionResults: object|null,
- *   isLoading: boolean, errorMessage: string|null, canLoadMore: boolean, isLoadingMore: boolean,
- *   loadMore: Function }}
+ * "Buscar" (o Enter), igual que en "Roles y permisos"; los ejemplos y las pestañas de estado buscan al instante.
+ * "Limpiar" vuelve a la lista de distribución. Cancela la petición anterior y maneja los errores. La lista se trae de a
+ * `SEARCH_PAGE_SIZE` paquetes; `loadMore` suma la página siguiente de lo que se está viendo (la lista completa, o los
+ * resultados de la búsqueda o del filtro de estado). `refresh` vuelve a pedir lo que se ve y los conteos (por ejemplo,
+ * tras eliminar un paquete).
+ * @returns {{ term: string, setTerm: Function, field: string, setField: Function, status: string,
+ *   setStatus: Function, appliedTerm: string, isFiltering: boolean, statusCounts: Record<string, number>|null,
+ *   search: Function, searchExample: Function, clearSearch: Function, refresh: Function, results: object|null,
+ *   distributionResults: object|null, isLoading: boolean, errorMessage: string|null, canLoadMore: boolean,
+ *   isLoadingMore: boolean, loadMore: Function }}
  */
 export function usePackageSearch() {
   const [term, setTerm] = useState('');
   const [field, setField] = useState(ALL_FIELDS);
+  const [status, setStatusValue] = useState(ALL_STATUSES);
   const [applied, setApplied] = useState(null);
   const [results, setResults] = useState(null);
   const [distributionResults, setDistributionResults] = useState(null);
+  const [statusCounts, setStatusCounts] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const distributionControllerRef = useRef(null);
+  const countsControllerRef = useRef(null);
   const currentControllerRef = useRef(null);
   const loadMoreControllerRef = useRef(null);
   const requestSequenceRef = useRef(0);
@@ -57,33 +64,56 @@ export function usePackageSearch() {
     loadMoreSequenceRef.current += 1;
   };
 
-  const search = () => {
+  const loadDistribution = () => {
+    distributionControllerRef.current?.abort();
+    const controller = new AbortController();
+    distributionControllerRef.current = controller;
+
+    searchPackages({ term: '', page: DEFAULT_PAGE, size: SEARCH_PAGE_SIZE, signal: controller.signal })
+      .then((payload) => {
+        setDistributionResults(payload ?? null);
+        setErrorMessage(null);
+      })
+      .catch((error) => {
+        if (!isCancelled(error)) {
+          setErrorMessage(normalizePackageSearchError(error).globalMessage);
+        }
+      });
+  };
+
+  // Los conteos de las pestañas son un adorno: si fallan, las pestañas se muestran sin número.
+  const loadStatusCounts = () => {
+    countsControllerRef.current?.abort();
+    const controller = new AbortController();
+    countsControllerRef.current = controller;
+
+    fetchStatusCounts({ signal: controller.signal })
+      .then((payload) => setStatusCounts(payload ?? null))
+      .catch(() => {});
+  };
+
+  // Aplica una búsqueda (término, campo y estado). Sin término ni estado vuelve a la lista de distribución.
+  const runSearch = (next) => {
     cancelCurrentRequest();
     cancelLoadMore();
     const requestId = ++requestSequenceRef.current;
-    const normalizedTerm = normalizeSearchTerm(term);
+    const normalizedTerm = normalizeSearchTerm(next.term);
     setResults(null);
     setErrorMessage(null);
 
-    if (!normalizedTerm) {
+    if (!normalizedTerm && next.status === ALL_STATUSES) {
       setApplied(null);
       setIsLoading(false);
       return;
     }
 
-    const next = { term: normalizedTerm, field };
+    const request = { term: normalizedTerm, field: next.field, status: next.status };
     const controller = new AbortController();
     currentControllerRef.current = controller;
-    setApplied(next);
+    setApplied(request);
     setIsLoading(true);
 
-    searchPackages({
-      term: next.term,
-      field: next.field,
-      page: DEFAULT_PAGE,
-      size: SEARCH_PAGE_SIZE,
-      signal: controller.signal,
-    })
+    searchPackages({ ...request, page: DEFAULT_PAGE, size: SEARCH_PAGE_SIZE, signal: controller.signal })
       .then((payload) => {
         if (requestSequenceRef.current === requestId) {
           setResults(payload ?? null);
@@ -102,40 +132,46 @@ export function usePackageSearch() {
       });
   };
 
+  const search = () => runSearch({ term, field, status });
+
+  // Un ejemplo escribe su término y busca en todos los campos, sin tocar el estado elegido.
+  const searchExample = (example) => {
+    setTerm(example);
+    setField(ALL_FIELDS);
+    runSearch({ term: example, field: ALL_FIELDS, status });
+  };
+
+  // Elegir un estado filtra al instante lo que se está viendo: la búsqueda aplicada, o la lista completa.
+  const setStatus = (nextStatus) => {
+    setStatusValue(nextStatus);
+    runSearch({ term: applied?.term ?? '', field: applied?.field ?? field, status: nextStatus });
+  };
+
   const clearSearch = () => {
     cancelCurrentRequest();
     cancelLoadMore();
     requestSequenceRef.current += 1;
     setTerm('');
+    setStatusValue(ALL_STATUSES);
     setApplied(null);
     setResults(null);
     setIsLoading(false);
     setErrorMessage(null);
   };
 
-  useEffect(() => {
-    const controller = new AbortController();
-    distributionControllerRef.current = controller;
+  const refresh = () => {
+    loadStatusCounts();
+    loadDistribution();
+    if (applied) runSearch(applied);
+  };
 
-    searchPackages({
-      term: '',
-      page: DEFAULT_PAGE,
-      size: SEARCH_PAGE_SIZE,
-      signal: controller.signal,
-    })
-      .then((payload) => {
-        setDistributionResults(payload ?? null);
-        setErrorMessage(null);
-      })
-      .catch((error) => {
-        if (!isCancelled(error)) {
-          setErrorMessage(normalizePackageSearchError(error).globalMessage);
-        }
-      });
+  useEffect(() => {
+    loadDistribution();
+    loadStatusCounts();
 
     return () => {
-      controller.abort();
-      distributionControllerRef.current = null;
+      distributionControllerRef.current?.abort();
+      countsControllerRef.current?.abort();
     };
   }, []);
 
@@ -158,6 +194,7 @@ export function usePackageSearch() {
     searchPackages({
       term: appliedTerm,
       field: applied?.field,
+      status: applied?.status,
       page: effectiveResults.page + 1,
       size: SEARCH_PAGE_SIZE,
       signal: controller.signal,
@@ -182,7 +219,6 @@ export function usePackageSearch() {
   };
 
   useEffect(() => () => {
-    distributionControllerRef.current?.abort();
     cancelCurrentRequest();
     loadMoreControllerRef.current?.abort();
     loadMoreSequenceRef.current += 1;
@@ -194,9 +230,15 @@ export function usePackageSearch() {
     setTerm,
     field,
     setField,
+    status,
+    setStatus,
     appliedTerm,
+    isFiltering: applied !== null,
+    statusCounts,
     search,
+    searchExample,
     clearSearch,
+    refresh,
     results: effectiveResults,
     distributionResults,
     isLoading,
