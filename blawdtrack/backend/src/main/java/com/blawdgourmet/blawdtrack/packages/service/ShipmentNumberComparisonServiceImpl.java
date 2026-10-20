@@ -4,10 +4,10 @@ import com.blawdgourmet.blawdtrack.packages.dto.DuplicateShipmentNumberReason;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberComparisonResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.ShipmentNumberRowResult;
 import com.blawdgourmet.blawdtrack.packages.repository.DeliveryPackageRepository;
+import com.blawdgourmet.blawdtrack.packages.validation.ShipmentNumberNormalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class ShipmentNumberComparisonServiceImpl implements ShipmentNumberCompar
     @Override
     @Transactional(readOnly = true)
     public ShipmentNumberComparisonResponse compare(List<String> shipmentNumbers) {
-        List<String> normalized = shipmentNumbers.stream().map(this::normalize).toList();
+        List<String> normalized = shipmentNumbers.stream().map(ShipmentNumberNormalizer::normalize).toList();
 
         Map<String, List<Integer>> rowsByNumber = new LinkedHashMap<>();
         for (int index = 0; index < normalized.size(); index++) {
@@ -73,9 +73,5 @@ public class ShipmentNumberComparisonServiceImpl implements ShipmentNumberCompar
         return new ShipmentNumberComparisonResponse(rows.size(), valid,
                 alreadyRegistered + duplicatedInFile, alreadyRegistered, duplicatedInFile,
                 List.copyOf(rows));
-    }
-
-    private String normalize(String shipmentNumber) {
-        return shipmentNumber.trim().toUpperCase(Locale.ROOT);
     }
 }
