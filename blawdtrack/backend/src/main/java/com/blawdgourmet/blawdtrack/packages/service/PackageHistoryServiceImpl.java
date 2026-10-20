@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.model.AuditCategory;
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageHistoryEntry;
@@ -24,12 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PackageHistoryServiceImpl implements PackageHistoryService {
 
-    private static final Collection<String> PACKAGE_ACTIONS = List.of(
-            AuditAction.PACKAGE_CREATED.getCode(),
-            AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
-            AuditAction.PACKAGE_ASSIGNED.getCode(),
-            AuditAction.PACKAGE_UNASSIGNED.getCode()
-    );
+    private static final Collection<String> PACKAGE_ACTIONS = AuditAction.codesOf(AuditCategory.PACKAGE);
 
     private final AuditLogRepository auditLogRepository;
     private final DeliveryPackageRepository packageRepository;

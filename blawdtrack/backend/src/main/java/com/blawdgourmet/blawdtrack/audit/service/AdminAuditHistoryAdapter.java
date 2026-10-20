@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.blawdgourmet.blawdtrack.audit.model.AuditAction;
+import com.blawdgourmet.blawdtrack.audit.model.AuditCategory;
 import com.blawdgourmet.blawdtrack.audit.model.AuditLog;
 import com.blawdgourmet.blawdtrack.audit.repository.AuditLogRepository;
 import com.blawdgourmet.blawdtrack.users.dto.AdminAuditLogResponse;
@@ -18,15 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminAuditHistoryAdapter implements AdminAuditHistory {
 
-    // "ELIMINAR_ADMINISTRADOR" refleja AuditServiceImpl.ACCION_ELIMINAR_ADMINISTRADOR (aún no está en el enum
-    // AuditAction: se escribe directo en registrarEliminacionAdministrador en vez de pasar por logAction).
-    private static final List<String> ADMIN_AUDIT_ACTIONS = List.of(
-            AuditAction.ADMIN_CREATED.getCode(),
-            AuditAction.ADMIN_UPDATED.getCode(),
-            AuditAction.ADMIN_ACTIVATED.getCode(),
-            AuditAction.ADMIN_DEACTIVATED.getCode(),
-            AuditAction.ADMIN_PASSWORD_CHANGED.getCode(),
-            "ELIMINAR_ADMINISTRADOR");
+    private static final List<String> ADMIN_AUDIT_ACTIONS = AuditAction.codesOf(AuditCategory.ADMIN);
 
     private final AuditLogRepository auditLogRepository;
 
