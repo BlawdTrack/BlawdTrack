@@ -1,6 +1,6 @@
 package com.blawdgourmet.blawdtrack.packages.parser;
 
-import com.blawdgourmet.blawdtrack.packages.dto.ImportedPackage;
+import com.blawdgourmet.blawdtrack.packages.dto.ParsedPackageFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -25,7 +25,7 @@ public class ZohoPackageFileParser implements PackageFileParser {
     }
 
     @Override
-    public List<ImportedPackage> parse(InputStream input, String fileName) {
+    public ParsedPackageFile parseFile(InputStream input, String fileName) {
         if (input == null) {
             throw new PackageFileParsingException("El archivo es obligatorio");
         }
