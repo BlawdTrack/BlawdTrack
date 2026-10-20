@@ -1,5 +1,6 @@
 package com.blawdgourmet.blawdtrack.packages.service;
 
+import com.blawdgourmet.blawdtrack.common.security.AuthenticatedUser;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageBulkRegistrationResult;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportExecutionResponse;
 import com.blawdgourmet.blawdtrack.packages.dto.PackageImportPreviewResponse;
@@ -19,10 +20,10 @@ public class PackageImportExecutionService implements PackageImportExecutionUseC
 
     @Override
     @PreAuthorize("hasAuthority('" + PermissionCode.PACKAGE_IMPORT + "')")
-    public PackageImportExecutionResponse execute(InputStream input, String fileName) {
+    public PackageImportExecutionResponse execute(InputStream input, String fileName, AuthenticatedUser actor) {
         PackageImportPreviewResponse preview = previewService.preview(input, fileName);
         PackageBulkRegistrationResult registration =
-                bulkRegistrationUseCase.registerValidPackages(preview.importablePackages());
+                bulkRegistrationUseCase.registerValidPackages(preview.importablePackages(), actor);
 
         return new PackageImportExecutionResponse(
                 preview.fileName(),

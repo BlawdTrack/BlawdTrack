@@ -14,9 +14,10 @@ const DOT_TOP = rem(5);
 const CONTENT_OFFSET = `calc(${DOT} + ${rem(14)})`;
 const TITLE_ID = 'package-history-title';
 
-// Etiquetas propias de los eventos de asignación (auditoría del paquete), que no
+// Etiquetas propias del alta y de los eventos de asignación (auditoría del paquete), que no
 // son estados del catálogo pero sí forman parte de la trazabilidad.
 const ACTION_LABELS = {
+  REGISTRAR_PAQUETE: 'Registrado como Pendiente',
   ASIGNAR_PAQUETE: 'Asignado',
   DESASIGNAR_PAQUETE: 'Mensajero desasignado',
 };

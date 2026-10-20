@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class PackageHistoryServiceImpl implements PackageHistoryService {
 
     private static final Collection<String> PACKAGE_ACTIONS = List.of(
+            AuditAction.PACKAGE_CREATED.getCode(),
             AuditAction.PACKAGE_STATUS_CHANGED.getCode(),
             AuditAction.PACKAGE_ASSIGNED.getCode(),
             AuditAction.PACKAGE_UNASSIGNED.getCode()
