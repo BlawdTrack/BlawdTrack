@@ -16,18 +16,10 @@ import { LINK_BUTTON_SX } from '../components/formStyles';
 import { FIELD_LABEL_SX, FIELD_SX, AUTH_BUTTON_SX } from '../components/authStyles';
 import { FONT, fontPx } from '../theme';
 import AuthSplitLayout from '../components/AuthSplitLayout';
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+import { validateEmail } from '../utils/emailRules';
 
 function validateForm(data) {
-  const errors = { email: '', password: '' };
-
-  if (!data.email.trim()) {
-    errors.email = 'El correo electrónico es obligatorio.';
-  } else if (!EMAIL_REGEX.test(data.email.trim())) {
-    errors.email = 'Ingresa un correo electrónico con un formato válido.';
-  }
+  const errors = { email: validateEmail(data.email), password: '' };
 
   if (!data.password) {
     errors.password = 'La contraseña es obligatoria.';

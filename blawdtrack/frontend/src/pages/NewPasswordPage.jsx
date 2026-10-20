@@ -1,39 +1,10 @@
-import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-} from '@mui/material';
-import { confirmPasswordReset } from '../services/PasswordRecoveryService';
-import { StatusMessage } from '../components/StatusMessage';
+import { Box } from '@mui/material';
 import AuthSplitLayout from '../components/AuthSplitLayout';
+import NewPasswordForm from '../components/NewPasswordForm';
+import { NewPasswordInvalidLink, NewPasswordSuccess } from '../components/NewPasswordOutcomes';
 import RecoveryProgress from '../components/RecoveryProgress';
-import PasswordField from '../components/PasswordField';
-import { FIELD_LABEL_SX, FIELD_SX, AUTH_BUTTON_SX } from '../components/authStyles';
-import AuthStateHeader from '../components/AuthStateHeader';
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import LinkOffOutlinedIcon from '@mui/icons-material/LinkOffOutlined';
-import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
-import { PasswordRequirements } from '../components/PasswordRequirements';
-import { meetsClientPasswordRules } from '../utils/passwordRules';
-
-// Textos propios del frontend (no se muestra el `message` crudo del backend,
-// que viene en otro idioma). Los tres primeros son los del mockup (`savePwd`).
-const RULES_ERROR_MESSAGE = 'La contraseña no cumple todos los requisitos de la lista.';
-const MISMATCH_ERROR_MESSAGE = 'Las contraseñas no coinciden.';
-const REUSED_ERROR_MESSAGE =
-  'No puedes reutilizar ninguna de tus últimas 3 contraseñas. Elige una diferente.';
-const VALIDATION_ERROR_MESSAGE =
-  'La contraseña no cumple los requisitos. Usa al menos 8 caracteres, con letras y números.';
-const CONNECTION_ERROR_MESSAGE =
-  'No pudimos conectar con el servidor. Revisa tu conexión a internet e intenta de nuevo.';
-const GENERIC_ERROR_MESSAGE = 'No se pudo actualizar la contraseña. Intenta de nuevo en unos minutos.';
-const MISSING_TOKEN_MESSAGE =
-  'Este enlace está incompleto. Solicita uno nuevo para restablecer tu contraseña.';
-const REJECTED_TOKEN_MESSAGE =
-  'Este enlace no es válido o ya expiró. Solicita uno nuevo para restablecer tu contraseña.';
+import usePasswordResetConfirmation from '../hooks/usePasswordResetConfirmation';
 
 const BRAND_TITLE = (
   <>
@@ -53,206 +24,25 @@ const BRAND_SUBTITLE = 'Te enviamos un enlace de un solo uso al correo de tu cue
 //    (valor por defecto de MAIL_LINK_URL en el backend; ver EmailService).
 //  - El contrato de POST /v1/auth/password-reset/confirm está en
 //    PasswordRecoveryService.confirmPasswordReset.
-function submitState(newPassword, confirmPassword) {
-  const confirmMismatch = confirmPassword !== '' && newPassword !== confirmPassword;
-  const canSubmit = meetsClientPasswordRules(newPassword) && confirmPassword !== '' && !confirmMismatch;
-  return { confirmMismatch, canSubmit };
-}
 
 /**
- * Pantalla "Crear nueva contraseña" (HU-002). Se abre desde el enlace del correo (`/recovery?token=...`),
- * valida la contraseña con `PasswordRequirements` y confirma con `confirmPasswordReset`. Tiene tres
- * vistas: formulario, éxito y "enlace no válido" (token ausente, usado o vencido).
+ * Pantalla "Crear nueva contraseña" (HU-002). Se abre desde el enlace del correo (`/recovery?token=...`) y solo
+ * compone: el estado y el envío viven en `usePasswordResetConfirmation`, y cada vista (formulario, éxito y "enlace no
+ * válido", por token ausente, usado o vencido) es un componente.
  * @param {{ onGoToLogin: Function, onRequestNewLink: Function }} props
  */
 export function NewPasswordPage({ onGoToLogin, onRequestNewLink }) {
   const [searchParams] = useSearchParams();
   const token = (searchParams.get('token') ?? '').trim();
-
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // { message, field? }
-  const [historyRejected, setHistoryRejected] = useState(false);
-  const [tokenRejected, setTokenRejected] = useState(false);
-  const [succeeded, setSucceeded] = useState(false);
-
-  const clearFeedback = () => {
-    if (error) setError(null);
-  };
-
-  const handleNewPasswordChange = (event) => {
-    setNewPassword(event.target.value);
-    clearFeedback();
-    // La regla 4 solo se marcó como no cumplida para la contraseña rechazada;
-    // con otra contraseña vuelve a "pendiente".
-    setHistoryRejected(false);
-  };
-
-  const handleConfirmPasswordChange = (event) => {
-    setConfirmPassword(event.target.value);
-    clearFeedback();
-  };
-
-  // Traduce el rechazo del backend a la vista que corresponde: enlace vencido, contraseña reutilizada, etc.
-  const applyConfirmError = (err) => {
-    const code = err.response?.data?.code;
-    if (!err.response) {
-      setError({ message: CONNECTION_ERROR_MESSAGE });
-    } else if (code === 'TOKEN_INVALIDO') {
-      setTokenRejected(true);
-    } else if (code === 'CONTRASENA_REUTILIZADA') {
-      // Esto sí lo confirmó el backend: la regla 4 pasa a "no cumplida".
-      setHistoryRejected(true);
-      setError({ message: REUSED_ERROR_MESSAGE, field: 'newPassword' });
-    } else {
-      setError(
-        code === 'VALIDATION_ERROR'
-          ? { message: VALIDATION_ERROR_MESSAGE, field: 'newPassword' }
-          : { message: GENERIC_ERROR_MESSAGE }
-      );
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (loading) return;
-
-    if (!meetsClientPasswordRules(newPassword)) {
-      setError({ message: RULES_ERROR_MESSAGE, field: 'newPassword' });
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError({ message: MISMATCH_ERROR_MESSAGE, field: 'confirmPassword' });
-      return;
-    }
-
-    setError(null);
-    setLoading(true);
-    try {
-      await confirmPasswordReset(token, newPassword);
-      // La contraseña ya no se necesita en memoria.
-      setNewPassword('');
-      setConfirmPassword('');
-      setSucceeded(true);
-    } catch (err) {
-      applyConfirmError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Solo UI: la coincidencia se avisa en vivo bajo la confirmación y el botón se habilita cuando todo es válido.
-  const { confirmMismatch, canSubmit } = submitState(newPassword, confirmPassword);
+  const reset = usePasswordResetConfirmation(token);
 
   let content;
-  if (succeeded) {
-    content = (
-      <Box
-        role="status"
-        sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
-      >
-        <AuthStateHeader
-          icon={CheckCircleOutlinedIcon}
-          tone="success"
-          title="¡Contraseña actualizada!"
-          description="Ya puedes iniciar sesión con tu nueva contraseña."
-        />
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={() => onGoToLogin?.()}
-          sx={AUTH_BUTTON_SX}
-        >
-          Ir a iniciar sesión
-        </Button>
-      </Box>
-    );
-  } else if (!token || tokenRejected) {
-    content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <AuthStateHeader icon={LinkOffOutlinedIcon} tone="error" title="Enlace no válido" />
-        {/* StatusMessage ya expone role="alert". */}
-        <StatusMessage
-          severity="error"
-          message={tokenRejected ? REJECTED_TOKEN_MESSAGE : MISSING_TOKEN_MESSAGE}
-        />
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={() => onRequestNewLink?.()}
-          sx={AUTH_BUTTON_SX}
-        >
-          Solicitar un enlace nuevo
-        </Button>
-      </Box>
-    );
+  if (reset.succeeded) {
+    content = <NewPasswordSuccess onGoToLogin={onGoToLogin} />;
+  } else if (!token || reset.tokenRejected) {
+    content = <NewPasswordInvalidLink rejected={reset.tokenRejected} onRequestNewLink={onRequestNewLink} />;
   } else {
-    content = (
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        noValidate
-        sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
-      >
-        <AuthStateHeader
-          icon={LockResetOutlinedIcon}
-          title="Crear nueva contraseña"
-          description="Elige una contraseña segura que no hayas usado antes."
-        />
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography component="label" htmlFor="new-password" sx={FIELD_LABEL_SX}>
-              Nueva contraseña
-            </Typography>
-            <PasswordField
-              id="new-password"
-              visibilityLabel="nueva contraseña"
-              fullWidth
-              required
-              name="newPassword"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              value={newPassword}
-              onChange={handleNewPasswordChange}
-              disabled={loading}
-              error={error?.field === 'newPassword'}
-              sx={FIELD_SX}
-            />
-          </Box>
-
-          <PasswordRequirements password={newPassword} historyRejected={historyRejected} />
-        </Box>
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Typography component="label" htmlFor="confirm-password" sx={FIELD_LABEL_SX}>
-            Confirmar contraseña
-          </Typography>
-          <PasswordField
-            id="confirm-password"
-            visibilityLabel="confirmación de contraseña"
-            fullWidth
-            required
-            name="confirmPassword"
-            placeholder="••••••••"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-            disabled={loading}
-            error={confirmMismatch || error?.field === 'confirmPassword'}
-            helperText={confirmMismatch ? MISMATCH_ERROR_MESSAGE : undefined}
-            sx={FIELD_SX}
-          />
-        </Box>
-
-        {error && <StatusMessage severity="error" message={error.message} />}
-
-        <Button type="submit" fullWidth variant="contained" disabled={loading || !canSubmit} sx={AUTH_BUTTON_SX}>
-          {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Guardar nueva contraseña'}
-        </Button>
-      </Box>
-    );
+    content = <NewPasswordForm reset={reset} />;
   }
 
   return (
