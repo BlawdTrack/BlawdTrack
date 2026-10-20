@@ -14,7 +14,10 @@ import { usePackageImportPreview } from '../hooks/usePackageImportPreview';
 import { buildImportPreview } from '../utils/importPreview';
 import { buildImportResult } from '../utils/importResult';
 import { ROUTES } from '../config/routes';
-import { RADIUS } from '../theme';
+import { RADIUS, rem } from '../theme';
+
+// La tabla de revisión necesita más ancho que el resto de las pantallas para mostrar sus seis columnas completas.
+const REVIEW_PAGE_SX = { maxWidth: rem(1280) };
 
 /**
  * Importar paquetes (HU-010): una sola pantalla con los tres pasos de la importación. En el paso 1 el usuario elige el
@@ -63,7 +66,7 @@ export default function PackageImportPage() {
     <>
       <PageHeaderBar title="Importar paquetes" />
 
-      <PageContainer>
+      <PageContainer sx={reviewing && !result ? REVIEW_PAGE_SX : undefined}>
         <ImportSteps current={step} />
 
         {result && <ImportResultView result={result} onImportAnother={handleDiscard} />}

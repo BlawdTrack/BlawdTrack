@@ -15,7 +15,7 @@ const COLUMNS = ['Estado', 'Envío', 'Cliente', 'Dirección', 'Teléfono', 'Hora
  */
 export default function PreviewRecordList({ rows, totalCount }) {
   return (
-    <Paper component="section" aria-label="Registros del archivo" elevation={0} sx={{ ...CARD_SX, overflow: 'hidden', borderRadius: RADIUS.md }}>
+    <Paper component="section" aria-label="Registros del archivo" elevation={0} sx={{ ...CARD_SX, borderRadius: RADIUS.md }}>
       <Box
         aria-hidden="true"
         sx={{
@@ -25,6 +25,8 @@ export default function PreviewRecordList({ rows, totalCount }) {
           top: 0,
           zIndex: 1,
           height: 40,
+          borderTopLeftRadius: RADIUS.md,
+          borderTopRightRadius: RADIUS.md,
           pl: 'calc(16px + 4px)',
           bgcolor: 'neutral.surface',
           borderBottom: '1px solid',

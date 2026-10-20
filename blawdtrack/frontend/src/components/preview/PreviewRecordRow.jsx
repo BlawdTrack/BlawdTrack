@@ -13,6 +13,10 @@ const BY_STATUS = {
 };
 
 const CELL_SX = { minWidth: 0, fontSize: FONT.md, color: 'text.primary', py: { xs: 0.25, md: 1.25 } };
+// La dirección puede ser larga: en la tabla ocupa hasta dos líneas y el resto queda en el texto que aparece al pasar el cursor.
+const CLAMP_SX = { display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: { md: 2 }, overflow: 'hidden', overflowWrap: 'anywhere', lineHeight: 1.35 };
+// En el celular las filas se apilan sin encabezado de columnas: el teléfono y el horario llevan su nombre delante.
+const mobileLabel = (text) => ({ '&::before': { content: `"${text}"`, display: { md: 'none' }, color: 'text.secondary' } });
 const ELLIPSIS_SX = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: { md: 'nowrap' } };
 
 function StatusCell({ row, status }) {
@@ -64,7 +68,7 @@ function AddressCell({ address }) {
       </Link>
     );
   }
-  return <Box component="span" title={address ?? undefined} sx={ELLIPSIS_SX}>{address ?? '—'}</Box>;
+  return <Box component="span" title={address ?? undefined} sx={CLAMP_SX}>{address ?? '—'}</Box>;
 }
 
 /**
@@ -109,9 +113,9 @@ export default function PreviewRecordRow({ row }) {
 
       <Box sx={{ ...CELL_SX, ...ELLIPSIS_SX }} title={row.customerName ?? undefined}>{row.customerName ?? '—'}</Box>
       <Box sx={CELL_SX}><AddressCell address={row.address} /></Box>
-      <Box sx={CELL_SX}>{row.phone ?? '—'}</Box>
+      <Box sx={{ ...CELL_SX, whiteSpace: { md: 'nowrap' }, ...mobileLabel('Tel. ') }}>{row.phone ?? '—'}</Box>
       <Box
-        sx={{ ...CELL_SX, whiteSpace: { md: 'nowrap' } }}
+        sx={{ ...CELL_SX, whiteSpace: { md: 'nowrap' }, ...mobileLabel('Horario: ') }}
         title={row.schedule ? `Original: ${row.schedule}` : undefined}
       >
         {row.deliveryRange ?? row.schedule ?? '—'}
