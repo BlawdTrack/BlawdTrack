@@ -1,6 +1,7 @@
 package com.blawdgourmet.blawdtrack.users.dto;
 
 import com.blawdgourmet.blawdtrack.common.model.DocumentType;
+import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.model.UserStatus;
 
 /**
@@ -16,4 +17,16 @@ public record AdminDetailResponse(
         String phone,
         UserStatus status
 ) {
+
+    public static AdminDetailResponse from(User admin) {
+        return new AdminDetailResponse(
+                admin.getId(),
+                admin.getDocumentType(),
+                admin.getDocumentNumber(),
+                admin.getFullName(),
+                admin.getEmail(),
+                admin.getPhone(),
+                admin.getStatus()
+        );
+    }
 }
