@@ -98,7 +98,10 @@ Write-Host '3/3 Cargando los paquetes de prueba...'
 $header = "SET @admin_email = '$($admin.email)'; SET @courier_email = '$($courier.email)';`n"
 $sql = $header + (Get-Content -Raw -Encoding UTF8 -Path $FixtureFile)
 # MYSQL_PWD evita el aviso de "contrasena en la linea de comandos", que Windows PowerShell 5.1 trata como error.
+$ErrorActionPreference = 'Continue'
 $sql | docker exec -i -e "MYSQL_PWD=$DbPassword" $MySqlContainer mysql -uroot --default-character-set=utf8mb4 blawdtrack
-if ($LASTEXITCODE -ne 0) { throw "No se pudieron cargar los paquetes de prueba (mysql salio con $LASTEXITCODE)." }
+$mysqlExit = $LASTEXITCODE
+$ErrorActionPreference = 'Stop'
+if ($mysqlExit -ne 0) { throw "No se pudieron cargar los paquetes de prueba (mysql salio con $mysqlExit)." }
 
 Write-Host 'Listo. Cuentas y paquetes de prueba preparados.'

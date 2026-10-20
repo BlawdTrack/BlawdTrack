@@ -17,8 +17,13 @@ $ErrorActionPreference = 'Stop'
 $compose = Join-Path $PSScriptRoot '..\environment\docker-compose.e2e.yml'
 $accounts = Get-Content -Raw -Encoding UTF8 -Path (Join-Path $PSScriptRoot '..\environment\test-accounts.json') | ConvertFrom-Json
 
+# Docker escribe avisos y el progreso por stderr: en PowerShell 5.1 eso se vuelve un error con 'Stop', asi que los
+# comandos de docker corren con 'Continue' y se juzgan por su codigo de salida.
+$ErrorActionPreference = 'Continue'
 docker info *> $null
-if ($LASTEXITCODE -ne 0) { throw 'Docker no responde. Enciende Docker Desktop y vuelve a intentarlo.' }
+$dockerReady = $LASTEXITCODE -eq 0
+$ErrorActionPreference = 'Stop'
+if (-not $dockerReady) { throw 'Docker no responde. Enciende Docker Desktop y vuelve a intentarlo.' }
 
 if ($Fresh) {
     Write-Host 'Borrando el entorno anterior...'
@@ -31,8 +36,11 @@ $bytes = New-Object 'byte[]' 48
 $env:JWT_SECRET = [Convert]::ToBase64String($bytes)
 
 Write-Host 'Levantando el entorno (la primera vez tarda varios minutos mientras se construyen las imagenes)...'
+$ErrorActionPreference = 'Continue'
 docker compose -f $compose up -d --build
-if ($LASTEXITCODE -ne 0) { throw 'docker compose up fallo.' }
+$composeExit = $LASTEXITCODE
+$ErrorActionPreference = 'Stop'
+if ($composeExit -ne 0) { throw 'docker compose up fallo.' }
 
 Write-Host 'Esperando a que el backend responda...'
 $body = @{ email = $accounts.superUser.email; password = $accounts.superUser.password } | ConvertTo-Json
