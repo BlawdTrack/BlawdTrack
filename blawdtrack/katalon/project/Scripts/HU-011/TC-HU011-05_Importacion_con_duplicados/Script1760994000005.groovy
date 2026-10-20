@@ -23,11 +23,11 @@ try {
 
 	// El paquete nuevo se guardo una vez.
 	Ui.searchPackage('E2E-HU011-A01')
-	WebUI.verifyEqual(Ui.countOf('package-result-row'), 1, FailureHandling.CONTINUE_ON_FAILURE)
+	Ui.verifyEquals('filas con data-testid package-result-row', Ui.countOf('package-result-row'), 1)
 
 	// El duplicado sigue una sola vez y conserva sus datos (no se pisan con los del archivo).
 	Ui.searchPackage('E2E-PEND-01')
-	WebUI.verifyEqual(Ui.countOf('package-result-row'), 1, FailureHandling.CONTINUE_ON_FAILURE)
+	Ui.verifyEquals('filas con data-testid package-result-row', Ui.countOf('package-result-row'), 1)
 	Ui.verifyNotContains(Ui.textOf('package-result-row'), 'Cliente Ya Registrado')
 
 	Ui.evidence('TC-HU011-05_busqueda_del_duplicado')

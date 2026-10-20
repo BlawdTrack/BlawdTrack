@@ -12,7 +12,7 @@ try {
 	Ui.openImportPage()
 	Ui.uploadAndReview('hu011-tc02-duplicado-en-archivo.csv')
 
-	WebUI.verifyEqual(Ui.countOf('import-row-duplicate'), 1, FailureHandling.CONTINUE_ON_FAILURE)
+	Ui.verifyEquals('filas con data-testid import-row-duplicate', Ui.countOf('import-row-duplicate'), 1)
 	String duplicateRow = Ui.textOf('import-row-duplicate')
 	Ui.verifyContains(duplicateRow, 'E2E-HU011-B01')
 	Ui.verifyContains(duplicateRow, 'Repetido en el archivo')
