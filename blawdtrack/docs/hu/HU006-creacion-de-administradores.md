@@ -73,7 +73,7 @@ seis campos obligatorios y conexión con la API) está en las ramas `feature/hu0
 | Clase | Rol |
 |---|---|
 | `users.controller.AdminController` | `POST /api/v1/admins` (también lista y elimina). |
-| `users.service.AdminService`, `impl.AdminServiceImpl` | `registrarAdministrador`. |
+| `users.service.AdminRegistrationService` | `registrarAdministrador`. |
 | `users.service.AdminUniquenessValidator` | Unicidad de documento y correo. |
 | `users.dto.AdminRegistrationRequest`, `AdminRegistrationResponse` | Contrato. |
 | `users.validation.DocumentHolder`, `ValidDocument`, `DocumentValidator`, `DocumentNormalizer` | Formato y normalización del documento. |
