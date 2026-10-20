@@ -5,6 +5,7 @@ y se reinicia con un comando, cuentas conocidas, datos de prueba, archivos de im
 El proyecto de Katalon Studio está en `project/` y hoy trae los 6 casos de la HU-011 (sección 16); las demás HU se agregan encima de esta base.
 
 ## Contenido
+
 1. [Por qué un entorno aparte y por qué Docker](#1-por-qué-un-entorno-aparte-y-por-qué-docker)
 2. [Requisitos](#2-requisitos)
 3. [Uso rápido](#3-uso-rápido)
@@ -25,25 +26,31 @@ El proyecto de Katalon Studio está en `project/` y hoy trae los 6 casos de la H
 ---
 
 ## 1. Por qué un entorno aparte y por qué Docker
+
 Katalon solo necesita una URL; Docker no es obligatorio para Katalon. Se usa para que **el entorno al que apuntan las
 pruebas sea siempre el mismo**:
 
 - Las HU borran paquetes (HU-012), importan archivos (HU-010 y HU-011) y necesitan más de 100 paquetes (HU-014). Con la
   base de desarrollo los datos cambiarían en cada corrida y los resultados no se podrían repetir, además de arriesgar
   datos reales de trabajo.
+
 - **Un comando** (`up.ps1`) deja todo listo en cualquier equipo y en la integración continua, sin instalar MySQL, Java 21
   ni Node.
+
 - Usa **MySQL real con las migraciones de Flyway**, que es lo que corre en producción. Las pruebas del backend usan H2 y
   no ven problemas propios de MySQL.
+
 - **Es desechable**: `down.ps1` o `up.ps1 -Fresh` borran la base y se parte siempre del mismo estado.
 - **Convive con el entorno de desarrollo**: usa puertos propios (5174, 8081, 8025, 3307).
 - **Mailpit** captura los correos (enlace de recuperación de contraseña, contraseñas temporales) sin enviar correos
   reales.
+
 - El `JWT_SECRET` se genera en cada arranque y no se guarda en ningún archivo.
 
 Costos: requiere Docker Desktop y memoria, y la primera construcción tarda varios minutos.
 
 ## 2. Requisitos
+
 - **Docker Desktop encendido** (probado con Docker 28).
 - **Windows PowerShell 5.1** (con el que se probaron los scripts; los archivos `.ps1` son solo ASCII a propósito).
 - Puertos libres: 5174, 8081, 8025, 1025 y 3307.
@@ -52,26 +59,31 @@ Costos: requiere Docker Desktop y memoria, y la primera construcción tarda vari
   usa `katalonc` (Katalon Runtime Engine). **Por confirmar:** qué licencia tiene el equipo para eso.
 
 ## 3. Uso rápido
+
 ```powershell
 cd <ruta-del-repo>\blawdtrack\katalon\scripts
 .\up.ps1 -Fresh     # construye, levanta, espera al backend y carga cuentas y datos
 ```
-Cuando termina imprime las direcciones. Abre http://localhost:5174 e inicia sesión con una de las cuentas de la
+
+Cuando termina imprime las direcciones. Abre <http://localhost:5174> e inicia sesión con una de las cuentas de la
 sección 6. Para apagar y borrar la base:
+
 ```powershell
 .\down.ps1
 ```
 
 ## 4. Los scripts
+
 Todos están en `katalon/scripts/` y se ejecutan desde esa carpeta.
 
 | Script | Para qué | Notas |
-|---|---|---|
+| --- | --- | --- |
 | `up.ps1` | Construye las imágenes, levanta MySQL, Mailpit, backend y frontend, espera a que el backend responda y ejecuta `prepare-data.ps1`. | `-Fresh` borra antes la base. `-TimeoutSeconds` (240 por defecto) es lo que espera al backend. La primera vez tarda varios minutos. |
 | `prepare-data.ps1` | Crea o reutiliza las cuentas y recarga los paquetes de prueba. | Se puede repetir las veces que haga falta. `-SkipFixtures` solo prepara las cuentas. Úsalo **antes de cada corrida de Katalon** para partir de datos limpios. |
 | `down.ps1` | Apaga el entorno y borra la base. | El siguiente `up.ps1` empieza de cero. |
 
 Comandos útiles de Docker (con el entorno levantado):
+
 ```powershell
 docker ps                                   # contenedores del entorno (blawdtrack-e2e-*)
 docker logs blawdtrack-e2e-backend          # registros del backend
@@ -80,21 +92,23 @@ docker exec -it -e MYSQL_PWD=e2e-root blawdtrack-e2e-mysql mysql -uroot blawdtra
 ```
 
 ## 5. Direcciones y puertos
+
 | Servicio | URL | Para qué |
-|---|---|---|
-| Frontend | http://localhost:5174 | Pruebas de interfaz (Web UI). |
-| Backend | http://localhost:8081 | Pruebas de API (Web Service), por ejemplo `POST /api/v1/auth/login`. |
-| Correos (Mailpit) | http://localhost:8025 | Ver los correos enviados; la API de Mailpit está en `/api/v1/messages`. |
+| --- | --- | --- |
+| Frontend | <http://localhost:5174> | Pruebas de interfaz (Web UI). |
+| Backend | <http://localhost:8081> | Pruebas de API (Web Service), por ejemplo `POST /api/v1/auth/login`. |
+| Correos (Mailpit) | <http://localhost:8025> | Ver los correos enviados; la API de Mailpit está en `/api/v1/messages`. |
 | MySQL | `localhost:3307` (usuario `root`, contraseña `e2e-root`) | Consultar o preparar datos. |
 
 El enlace de recuperación de contraseña de los correos apunta a `http://localhost:5174/recovery`.
 
 ## 6. Cuentas de prueba
+
 Están en `environment/test-accounts.json` y las crea `prepare-data.ps1` por la API. Son cuentas desechables de este
 entorno; no son credenciales reales.
 
 | Rol | Correo | Contraseña |
-|---|---|---|
+| --- | --- | --- |
 | Súper Usuario (lo siembra el backend) | `superadmin@blawdgourmet.com` | `ultra_gorGon_1!` |
 | Administrador de Ventas | `ventas.e2e@blawdgourmet.test` | `Katalon2026` |
 | Mensajero | `mensajero.e2e@blawdgourmet.test` | `Katalon2026` |
@@ -105,13 +119,14 @@ Regla del equipo: el Súper Usuario tiene acceso a todos los módulos y todas la
 > vuelve a correr `prepare-data.ps1` para restaurarlas.
 
 ## 7. Datos de prueba (paquetes)
+
 `environment/fixtures/e2e-packages.sql` se aplica solo a la base de este entorno (nunca lo carga la aplicación) y se
 puede repetir: borra todo lo que empieza con `E2E-` y lo vuelve a crear. Existe porque en `develop` ningún flujo
 asigna, despacha ni entrega paquetes, así que sin él no se podrían probar la línea de tiempo completa, la evidencia
 de entrega ni la eliminación según el estado.
 
 | Número de envío | Estado | Para qué sirve |
-|---|---|---|
+| --- | --- | --- |
 | `E2E-PEND-01` | Pendiente | Eliminable; ficha con un solo evento. |
 | `E2E-ASIG-01` | Asignado | Eliminable; muestra el nombre del mensajero. |
 | `E2E-ENV-01` | Despachado | No eliminable. |
@@ -125,10 +140,11 @@ de entrega ni la eliminación según el estado.
 Si una prueba borra un paquete, `prepare-data.ps1` lo recrea.
 
 ## 8. Archivos de importación
+
 En `environment/import-files/` hay tres CSV con el formato de Zoho. Resultado esperado en la previsualización:
 
 | Archivo | Válidos | Inválidos | Duplicados | Para qué |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `importacion-valida.csv` | 4 | 0 | 0 | Importación correcta, con horarios de entrega variados (09-16, 09-14, 14-16, 10-14). |
 | `importacion-con-errores.csv` | 1 | 4 | 0 | Campos obligatorios vacíos. |
 | `importacion-con-duplicados.csv` | 2 | 0 | 2 | `E2E-PEND-01` ya está registrado (necesita haber corrido `prepare-data.ps1`); `E2E-DUP-001` viene dos veces con datos distintos (se conserva el primero y la copia queda como duplicado en el archivo); `E2E-DUP-002` viene en dos filas con los mismos datos y se agrupa en un solo paquete. |
@@ -137,12 +153,13 @@ Los paquetes que se importan empiezan con `E2E-`, así que el siguiente `prepare
 se puede importar otra vez.
 
 ## 9. Selectores (`data-testid`)
+
 Los campos de texto ya tienen `id` o `aria-label`. Para botones, contadores, filas y diálogos se añadió `data-testid`.
 En Katalon, un objeto de prueba se define con XPath o CSS, por ejemplo `//*[@data-testid='import-confirm']` o
 `[data-testid="import-confirm"]`.
 
 | Zona | `data-testid` |
-|---|---|
+| --- | --- |
 | Inicio de sesión | `login-submit`, `login-forgot-password` |
 | Navegación | `nav-<ruta>` (por ejemplo `nav-/main-menu/paquetes/buscar`), `main-menu-link`, `logout-button` |
 | Formularios | `form-submit`, `form-discard`, `edit-save`, `edit-discard`, `confirm-dialog-confirm`, `confirm-dialog-cancel`, `leave-dialog-leave`, `leave-dialog-stay`, `document-search-submit`, `document-search-clear` |
@@ -153,25 +170,32 @@ En Katalon, un objeto de prueba se define con XPath o CSS, por ejemplo `//*[@dat
 | Recuperar contraseña (HU-002) | `recovery-submit`, `recovery-email-sent`, `recovery-resend`, `recovery-use-another`, `new-password-submit`, `new-password-success`, `new-password-go-login`, `new-password-invalid-link`, `new-password-request-link` |
 
 Notas:
+
 - `import-file-input` es el `<input type="file">`: con Katalon se sube el archivo con `uploadFile` o `sendKeys` sobre
   ese elemento.
+
 - `src/components/e2eSelectors.test.jsx` (en `frontend/`) fija los principales: si un refactor los quita, esa prueba
   falla antes de que se rompan los casos de Katalon. **Si agregas un `data-testid`, agrégalo también a esta tabla.**
 
 ## 10. Cómo armar los casos en Katalon
+
 Recomendación de organización (aún no creada):
 
 - **Una suite por HU** (por ejemplo `HU-010`, `HU-011`…) más una suite de humo con inicio de sesión y navegación.
 - **Dos capas:** casos de **API** (Web Service) para reglas y respuestas, y casos de **interfaz** (Web UI) para los
   flujos que ve la persona. La API es más rápida y estable; la interfaz solo para lo que importa visualmente.
+
 - **Perfiles** (Profiles) con las direcciones de la sección 5 y las cuentas de la sección 6, en vez de escribirlas en
   cada caso.
+
 - **Objetos de prueba** por `data-testid`, nunca por texto ni por clases de MUI (cambian).
 - **Inicio de sesión por API:** `POST http://localhost:8081/api/v1/auth/login` con `{"email": "...", "password": "..."}`
   devuelve un `token` que se envía como `Authorization: Bearer <token>`. Sirve para preparar datos sin pasar por la
   pantalla.
+
 - **Antes de cada corrida:** `prepare-data.ps1` (o `up.ps1 -Fresh` si quieres base nueva). Los casos que modifican
   datos deben poder repetirse con eso.
+
 - **Esperas:** la lista de paquetes y la previsualización cargan por red; usa esperas por elemento, no pausas fijas.
 - **Correo:** para recuperación de contraseña, consulta `http://localhost:8025/api/v1/messages` y toma el enlace del
   último mensaje.
@@ -180,8 +204,9 @@ Endpoints de paquetes que usan las HU (bajo `/api/v1/packages`): `GET /search`, 
 `GET /{numero}/history`, `DELETE /{numero}`, `POST /import` y la previsualización de importación.
 
 ## 11. Qué datos usar para cada HU
+
 | HU | Qué se prueba | Cuenta | Datos |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | HU-010 | Previsualización con horario de entrega | Administrador de Ventas o Súper Usuario | `importacion-valida.csv` |
 | HU-011 | Duplicados y errores | Ventas o Súper Usuario | `importacion-con-duplicados.csv`, `importacion-con-errores.csv`; `E2E-PEND-01` como paquete ya registrado |
 | HU-012 | Eliminar paquetes (solo Pendiente/Asignado) | Ventas o Súper Usuario | `E2E-DEL-*` para borrar; `E2E-ENV-01`, `E2E-TRANS-01`, `E2E-ENTR-01` para comprobar que no se puede |
@@ -190,16 +215,20 @@ Endpoints de paquetes que usan las HU (bajo `/api/v1/packages`): `GET /search`, 
 | Acceso | Qué ve cada rol | Las tres | — |
 
 ## 12. Qué no se puede probar todavía
+
 - En `develop` ningún flujo escribe eventos de la línea de tiempo después del registro (asignar, despachar,
   entregar), ni la evidencia de entrega. Esos casos se prueban **solo con los datos del fixture**, no generándolos
   desde la aplicación.
+
 - Los criterios escritos de las HU todavía no mencionan que el Súper Usuario accede a todo; los casos se basan en la
   regla del equipo.
+
 - No se verificó la ejecución con `katalonc` ni en integración continua.
 
 ## 13. Problemas frecuentes
+
 | Síntoma | Causa y solución |
-|---|---|
+| --- | --- |
 | `Docker no responde` | Docker Desktop no está encendido. Enciéndelo y espera a que diga "running". |
 | El backend no responde en 240 segundos | Revisa `docker logs blawdtrack-e2e-backend`. Si el equipo anda justo de memoria, sube `-TimeoutSeconds`. |
 | Puerto ocupado (5174, 8081, 8025, 3307) | Cierra lo que lo use o cambia el puerto en `environment/docker-compose.e2e.yml`. No uses 3306, 8080 ni 5173: son los de desarrollo. |
@@ -210,15 +239,18 @@ Endpoints de paquetes que usan las HU (bajo `/api/v1/packages`): `GET /search`, 
 | Los scripts fallan con caracteres raros | Los `.ps1` son solo ASCII y los demás archivos usan saltos de línea LF (`.gitattributes`); no los guardes con otra codificación. |
 
 ## 14. Reglas del equipo
+
 - **No agregues datos de demostración a la aplicación.** Los datos de prueba viven solo en `environment/fixtures/` y los
   carga únicamente `prepare-data.ps1`.
+
 - Las contraseñas de `test-accounts.json` son solo de este entorno desechable; nunca uses credenciales reales aquí.
 - No guardes el `JWT_SECRET` ni otros secretos en la carpeta.
 - Si cambias el comportamiento de una pantalla, revisa que sus `data-testid` sigan existiendo y actualiza la sección 9.
 - Los archivos nuevos de scripts deben ser compatibles con Windows PowerShell 5.1 (sin `&&`, sin `?.`, solo ASCII).
 
 ## 15. Estructura de la carpeta
-```
+
+```text
 katalon/
   README.md                         esta guía
   .gitattributes                    saltos de línea LF para Docker y SQL
@@ -233,14 +265,17 @@ katalon/
 ```
 
 ## 16. Proyecto de Katalon Studio (HU-011)
+
 El proyecto está en `katalon/project/` y cubre la TASK 336 (pruebas funcionales de la HU-011).
 
 ### Qué hace falta
+
 - Katalon Studio (edición gratuita) instalado y con sesión iniciada con una cuenta de Katalon.
 - Chrome instalado. Katalon Studio trae el controlador.
 - El entorno levantado con `scripts\up.ps1`. Como el frontend se construye dentro de la imagen, **vuelve a correr `up.ps1 -Fresh` después de actualizar el código** para que tenga los últimos `data-testid`.
 
 ### Cómo abrirlo y correrlo
+
 1. En Katalon Studio: `File > Open Project` y elige la carpeta `katalon\project`. Si pide migrar el proyecto, acepta.
 2. En el explorador abre `Test Suites/HU-011` y pulsa Run (Chrome). También se puede correr un caso suelto desde `Test Cases/HU-011`.
 3. Las capturas de evidencia quedan en `katalon\project\evidence` y el reporte de Katalon en `Reports/` (se puede exportar a HTML, CSV o PDF).
@@ -248,8 +283,9 @@ El proyecto está en `katalon/project/` y cubre la TASK 336 (pruebas funcionales
 Los casos `TC-HU011-01` y `TC-HU011-05` ejecutan solos `scripts\prepare-data.ps1` al empezar, así que se pueden repetir sin volver a levantar nada.
 
 ### Casos
+
 | Caso | Archivo de importación | Qué comprueba |
-|---|---|---|
+| --- | --- | --- |
 | TC-HU011-01 Duplicado contra la base de datos | `hu011-tc01-duplicado-base-datos.csv` | `E2E-PEND-01` (ya registrado) se resalta como duplicado y no cuenta entre los válidos. |
 | TC-HU011-02 Duplicado dentro del archivo | `hu011-tc02-duplicado-en-archivo.csv` | `E2E-HU011-B01` repetido con otros datos: la primera fila queda válida y la copia se excluye como duplicada. |
 | TC-HU011-03 Sin duplicados | `importacion-valida.csv` | Avisa que todos los registros son válidos y se puede confirmar. |
@@ -258,12 +294,14 @@ Los casos `TC-HU011-01` y `TC-HU011-05` ejecutan solos `scripts\prepare-data.ps1
 | TC-HU011-06 Rol sin permiso | (sin archivo) | El Mensajero vuelve a su inicio, no ve la importación y la API responde 403. |
 
 ### Estructura
+
 - `Keywords/com/blawd/Env.groovy`: rutas de los archivos y preparación de datos.
 - `Keywords/com/blawd/Ui.groovy`: inicio de sesión, subida del archivo, lectura de totales y comprobaciones. Los objetos se buscan por `data-testid`.
 - `Keywords/com/blawd/Api.groovy`: inicio de sesión y códigos HTTP del backend.
 - `Profiles/default.glbl`: direcciones y cuentas del entorno de pruebas (las de la sección 6).
 
 ### Notas
+
 - El selector de archivo de la importación está oculto; `Ui.uploadAndReview` lo muestra desde la prueba antes de subir el archivo. La aplicación no cambia.
 - Los casos entran a la pantalla por su dirección (`/main-menu/paquetes/importar`). Si la sesión no se conserva al recargar, cámbialo por un clic en el menú (`nav-/main-menu/paquetes/importar`).
 - Los archivos del proyecto se escribieron sin abrir Katalon Studio: si al abrirlo marca algún error, corrígelo ahí y avisa para dejarlo en el repositorio.
