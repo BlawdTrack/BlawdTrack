@@ -22,7 +22,10 @@ import {
   getDeletionResultMessage,
   shouldReloadAfter,
 } from '../utils/packageDeletionMessages';
-import { FONT, TOUCH_TARGET } from '../theme';
+import { FONT, TOUCH_TARGET, rem } from '../theme';
+
+// La ficha lleva dos columnas (datos y seguimiento), así que necesita más ancho que el resto de las pantallas.
+const DETAIL_PAGE_SX = { maxWidth: rem(1120) };
 
 const READ_ONLY_NOTICE = 'La ficha es de solo lectura: no se puede editar el paquete, solo eliminarlo si aún no fue despachado.';
 
@@ -55,8 +58,8 @@ function LookupError({ message, retryable, loading, onRetry }) {
  * de envío de la ruta y lo muestra de solo lectura. El Administrador de Ventas puede eliminarlo desde aquí (HU-012): el
  * botón abre una confirmación y, si el backend lo elimina, la ficha da paso a un aviso con el camino de vuelta a la
  * búsqueda. El resultado se informa con un aviso flotante; tras un 409 o un 404 el paquete se vuelve a consultar para
- * mostrar su estado real. El Súper Usuario ve la ficha sin el botón. Bajo la ficha va el seguimiento del paquete: su
- * historial de estados y, si ya se entregó, el comprobante.
+ * mostrar su estado real. El Súper Usuario ve la ficha sin el botón. Al lado de los datos va el seguimiento: su
+ * historial de estados y el comprobante de entrega.
  */
 export function PackageDetailPage() {
   const { shipmentNumber } = useParams();
@@ -104,7 +107,7 @@ export function PackageDetailPage() {
     <>
       <PageHeaderBar title="Ficha del paquete" />
 
-      <PageContainer>
+      <PageContainer sx={DETAIL_PAGE_SX}>
         {state === PACKAGE_LOOKUP_STATE.LOADING && <LoadingCard />}
 
         {state === PACKAGE_LOOKUP_STATE.NOT_FOUND && <StatusMessage severity="warning" message={message} />}
@@ -131,10 +134,10 @@ export function PackageDetailPage() {
         )}
 
         {!deleted && state === PACKAGE_LOOKUP_STATE.SUCCESS && pkg && (
-          <>
-            <PackageDetailCard
+          <PackageDetailCard
               pkg={pkg}
               notice={READ_ONLY_NOTICE}
+              aside={<PackageFollowUp pkg={pkg} />}
               // Sin permiso no se pasa nada: así la ficha no dibuja un pie vacío.
               actions={
                 canDeletePackages ? (
@@ -146,8 +149,6 @@ export function PackageDetailPage() {
                 ) : null
               }
             />
-            <PackageFollowUp pkg={pkg} />
-          </>
         )}
       </PageContainer>
 

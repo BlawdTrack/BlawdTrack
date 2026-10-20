@@ -20,9 +20,6 @@ export const STATUS_FILTER_OPTIONS = [
   { value: 'NOT_DELIVERED', label: 'No entregado' },
 ];
 
-/** Ejemplos clicables bajo el buscador: cada uno busca ese término en todos los campos. */
-export const SEARCH_EXAMPLES = ['BG-2026-001', 'Heredia', '8:00 am'];
-
 /** Campos por los que se puede buscar; `value` es el que entiende el parámetro `field` del backend. */
 export const SEARCH_FIELD_OPTIONS = [
   { value: ALL_FIELDS, label: 'Todos los campos', placeholder: 'Ej. ENV-00123, Ana, Heredia o 8888-8888' },

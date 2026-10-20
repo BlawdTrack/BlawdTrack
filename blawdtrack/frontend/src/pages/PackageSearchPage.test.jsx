@@ -311,7 +311,7 @@ describe('PackageSearchPage', () => {
     expect(screen.queryByText('Sin resultados para “Limon”')).not.toBeInTheDocument();
   });
 
-  describe('filtro por estado, ejemplos, eliminar y estados vacíos', () => {
+  describe('filtro por estado, eliminar y estados vacíos', () => {
     const pkg = (id, status, extra = {}) => ({
       id, shipmentNumber: `BG-2026-00${id}`, orderNumber: `ORD-${id}`, customerName: `Cliente ${id}`,
       phone: '8888-9999', address: 'HEREDIA', status, schedule: null, ...extra,
@@ -354,20 +354,6 @@ describe('PackageSearchPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Limpiar búsqueda' }));
       expect(screen.queryByText('Sin paquetes en estado “En tránsito”')).not.toBeInTheDocument();
       expect(screen.getByTestId('package-status-all')).toHaveAttribute('aria-pressed', 'true');
-    });
-
-    it('un ejemplo busca su término en todos los campos al instante', async () => {
-      searchPackages
-        .mockResolvedValueOnce({ content: [pkg(1, 'PENDING')], totalElements: 1 })
-        .mockResolvedValueOnce({ content: [pkg(1, 'PENDING')], totalElements: 1 });
-      renderPage();
-      await settle();
-
-      fireEvent.click(screen.getByRole('button', { name: 'Heredia' }));
-      await settle();
-
-      expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'Heredia', field: 'all' }));
-      expect(screen.getByRole('textbox', { name: 'Buscar paquetes' })).toHaveValue('Heredia');
     });
 
     it('sin paquetes en la lista explica qué hacer y lleva a la importación', async () => {

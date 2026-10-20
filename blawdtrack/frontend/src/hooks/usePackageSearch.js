@@ -27,7 +27,7 @@ const isCancelled = (error) => Boolean(
  * tras eliminar un paquete).
  * @returns {{ term: string, setTerm: Function, field: string, setField: Function, status: string,
  *   setStatus: Function, appliedTerm: string, isFiltering: boolean, statusCounts: Record<string, number>|null,
- *   search: Function, searchExample: Function, clearSearch: Function, refresh: Function, results: object|null,
+ *   search: Function, clearSearch: Function, refresh: Function, results: object|null,
  *   distributionResults: object|null, isLoading: boolean, errorMessage: string|null, canLoadMore: boolean,
  *   isLoadingMore: boolean, loadMore: Function }}
  */
@@ -134,13 +134,6 @@ export function usePackageSearch() {
 
   const search = () => runSearch({ term, field, status });
 
-  // Un ejemplo escribe su término y busca en todos los campos, sin tocar el estado elegido.
-  const searchExample = (example) => {
-    setTerm(example);
-    setField(ALL_FIELDS);
-    runSearch({ term: example, field: ALL_FIELDS, status });
-  };
-
   // Elegir un estado filtra al instante lo que se está viendo: la búsqueda aplicada, o la lista completa.
   const setStatus = (nextStatus) => {
     setStatusValue(nextStatus);
@@ -236,7 +229,6 @@ export function usePackageSearch() {
     isFiltering: applied !== null,
     statusCounts,
     search,
-    searchExample,
     clearSearch,
     refresh,
     results: effectiveResults,

@@ -186,7 +186,7 @@ describe('usePackageSearch', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  describe('estado, ejemplos y recarga', () => {
+  describe('estado y recarga', () => {
     const empty = { content: [], page: 0, size: 100, totalElements: 0, totalPages: 0 };
 
     it('trae los conteos por estado al montar', async () => {
@@ -236,20 +236,6 @@ describe('usePackageSearch', () => {
       await act(async () => {});
 
       expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'limon', status: 'PENDING' }));
-    });
-
-    it('un ejemplo busca su término en todos los campos', async () => {
-      searchPackages.mockResolvedValue(empty);
-      const { result } = renderHook(() => usePackageSearch());
-      await act(async () => {});
-
-      act(() => {
-        result.current.searchExample('Heredia');
-      });
-      await act(async () => {});
-
-      expect(result.current.term).toBe('Heredia');
-      expect(searchPackages).toHaveBeenLastCalledWith(expect.objectContaining({ term: 'Heredia', field: 'all' }));
     });
 
     it('limpiar quita también el estado elegido', async () => {

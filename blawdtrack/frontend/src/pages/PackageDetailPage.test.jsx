@@ -96,7 +96,8 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(screen.getByText('María José Solano')).toBeInTheDocument();
     expect(screen.getByText('7012-3344 · 6:00 am – 2:00 pm')).toBeInTheDocument();
     // El estado sale del dato real, no fijo.
-    expect(screen.getByText('Entregado')).toBeInTheDocument();
+    expect(screen.getAllByText('Entregado').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('package-progress-DELIVERED')).toHaveAttribute('aria-current', 'step');
     expect(screen.getByText('Orden ZI-88301')).toBeInTheDocument();
     // Se muestran los artículos y la evidencia de entrega del backend.
     expect(screen.getByText('Caja de chocolates')).toBeInTheDocument();
@@ -183,15 +184,17 @@ describe('PackageDetailPage (HU-013)', () => {
     expect(getPackageHistory).toHaveBeenCalledWith('BG-2026-00121');
   });
 
-  it('muestra el comprobante de entrega solo cuando el paquete está entregado', async () => {
+  it('el comprobante de entrega está siempre y avisa que aún no hay entrega mientras el paquete no se entregue', async () => {
     getPackageByShipmentNumber.mockResolvedValue(packageDetail);
     const { unmount } = render('BG-2026-00121');
     expect(await screen.findByText('COMPROBANTE DE ENTREGA')).toBeInTheDocument();
+    expect(screen.queryByText('El paquete aún no registra una entrega completada.')).toBeNull();
     unmount();
 
     getPackageByShipmentNumber.mockResolvedValue({ ...packageDetail, status: 'IN_TRANSIT' });
     render('BG-2026-00121');
     await screen.findByText('Mariela Solís Gómez');
-    expect(screen.queryByText('COMPROBANTE DE ENTREGA')).toBeNull();
+    expect(screen.getByText('COMPROBANTE DE ENTREGA')).toBeInTheDocument();
+    expect(screen.getByText('El paquete aún no registra una entrega completada.')).toBeInTheDocument();
   });
 });

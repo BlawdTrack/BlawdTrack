@@ -45,7 +45,7 @@ export function PackageSearchPage() {
   const { state: locationState } = useLocation();
   const {
     term, setTerm, field, setField, status, setStatus, appliedTerm, isFiltering, statusCounts, search,
-    searchExample, clearSearch, refresh, results, distributionResults, isLoading, errorMessage,
+    clearSearch, refresh, results, distributionResults, isLoading, errorMessage,
     canLoadMore, isLoadingMore, loadMore,
   } = usePackageSearch();
   const { toast, notify, close: closeToast } = useToast(locationState?.notice);
@@ -75,7 +75,6 @@ export function PackageSearchPage() {
           field={field}
           onFieldChange={setField}
           onSearch={search}
-          onExample={searchExample}
           onClear={clearSearch}
           isLoading={isLoading}
           isFiltering={isFiltering}
