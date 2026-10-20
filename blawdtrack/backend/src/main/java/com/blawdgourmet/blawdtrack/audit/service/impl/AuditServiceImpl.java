@@ -22,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuditServiceImpl implements AuditService {
 
-    private static final String ACCION_CREAR_ADMINISTRADOR = "CREAR_ADMINISTRADOR";
-    private static final String ACCION_ELIMINAR_ADMINISTRADOR = "ELIMINAR_ADMINISTRADOR";
     private static final int MAX_DETAILS_LENGTH = 500;
 
     private final AuditLogRepository auditLogRepository;
@@ -62,7 +60,7 @@ public class AuditServiceImpl implements AuditService {
         AuditLog registro = AuditLog.builder()
                 .actor(actorReferencia)
                 .usuarioAfectado(null)
-                .action(ACCION_ELIMINAR_ADMINISTRADOR)
+                .action(AuditAction.ADMIN_DELETED.getCode())
                 .details(detalle)
                 .timestamp(LocalDateTime.now())
                 .build();
