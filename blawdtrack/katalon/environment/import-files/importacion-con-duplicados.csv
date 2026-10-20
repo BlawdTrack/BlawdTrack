@@ -1,0 +1,6 @@
+Packing Number,SO Number,Customer Name,Shipping Address,Shipping Phone,Notes,Item Name,Quantity Packed
+E2E-PEND-01,SO-DUP-001,Cliente Ya Registrado,"San Jose, Escazu",88003001,,Alfajor,1
+E2E-DUP-001,SO-DUP-002,Cliente Original,"Heredia, Barva",88003002,,Brownie,1
+E2E-DUP-001,SO-DUP-999,Cliente Distinto,"Cartago, Paraiso",88003999,,Galleta,2
+E2E-DUP-002,SO-DUP-003,Cliente Dos Lineas,"Alajuela, Atenas",88003003,,Alfajor,1
+E2E-DUP-002,SO-DUP-003,Cliente Dos Lineas,"Alajuela, Atenas",88003003,,Caja Blawd,1

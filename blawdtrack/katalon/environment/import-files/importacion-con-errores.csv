@@ -1,0 +1,6 @@
+Packing Number,SO Number,Customer Name,Shipping Address,Shipping Phone,Notes,Item Name,Quantity Packed
+E2E-ERR-001,SO-ERR-001,Cliente Valido,"San Jose, Moravia",88002001,,Alfajor,1
+E2E-ERR-002,,Cliente Sin Orden,"San Jose, Tibas",88002002,,Brownie,1
+E2E-ERR-003,SO-ERR-003,,"San Jose, Curridabat",88002003,,Galleta,1
+E2E-ERR-004,SO-ERR-004,Cliente Sin Direccion,,88002004,,Alfajor,1
+E2E-ERR-005,SO-ERR-005,Cliente Sin Telefono,"Heredia, Flores",,,Brownie,1
