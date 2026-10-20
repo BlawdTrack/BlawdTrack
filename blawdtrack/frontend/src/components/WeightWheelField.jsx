@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { INPUT_SX } from './formStyles';
 import { Box, TextField } from '@mui/material';
-import { Wheel, WheelPopover } from './TimeWheelField';
+import Wheel from './Wheel';
+import WheelPopover from './WheelPopover';
 
 const WEIGHTS = Array.from({ length: 800 }, (_, i) => String(i + 1));
 
