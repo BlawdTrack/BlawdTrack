@@ -96,6 +96,12 @@ public class Ui {
 	static void searchPackage(String term) {
 		WebUI.setText(byTestId('package-search-input'), term)
 		WebUI.click(byTestId('package-search-submit'))
+
+		// Mientras busca, la lista anterior desaparece: se espera a que el resumen ya mencione el termino buscado y
+		// recien entonces a las filas, para no contar la lista vieja (ni una lista vacia por la carga).
+		TestObject summary = new TestObject('search-summary-' + term)
+		summary.addProperty('xpath', ConditionType.EQUALS, "//*[@data-testid='package-search-summary'][contains(., '" + term + "')]")
+		WebUI.waitForElementPresent(summary, 30)
 		WebUI.waitForElementPresent(byTestId('package-result-row'), 30)
 	}
 
