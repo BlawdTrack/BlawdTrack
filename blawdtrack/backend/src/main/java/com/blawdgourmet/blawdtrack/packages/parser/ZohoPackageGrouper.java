@@ -24,9 +24,10 @@ final class ZohoPackageGrouper {
 
     ParsedPackageFile group(TableData table) {
         ZohoColumn.validateRequiredHeaders(table.headers());
+        boolean hasShipmentColumn = ZohoColumn.SHIPMENT_NUMBER.isPresentIn(table.headers());
         Map<String, List<PackageAccumulator>> groupsByShipment = new LinkedHashMap<>();
         for (TableRow row : table.rows()) {
-            String shipmentNumber = normalizeShipmentNumber(row.first(ZohoColumn.SHIPMENT_NUMBER));
+            String shipmentNumber = normalizeShipmentNumber(shipmentNumberOf(row, hasShipmentColumn));
             String groupingKey = shipmentNumber == null
                     ? "__missing_shipment_row_" + row.number()
                     : shipmentNumber;
@@ -63,6 +64,9 @@ final class ZohoPackageGrouper {
             throw row.error("El nombre del articulo es obligatorio");
         }
         BigDecimal quantity = decimal(quantityText, ZohoColumn.QUANTITY, row, true);
+        if (quantity.signum() == 0) {
+            return null;
+        }
         BigDecimal price = decimal(row.first(ZohoColumn.ITEM_PRICE), ZohoColumn.ITEM_PRICE, row, false);
         return new ImportedPackageItem(blankToNull(itemId), name, quantity,
                 blankToNull(row.first(ZohoColumn.SKU)), price);
@@ -86,6 +90,16 @@ final class ZohoPackageGrouper {
         } catch (NumberFormatException exception) {
             throw row.error("El campo " + column.label() + " debe ser numerico: " + value);
         }
+    }
+
+    /**
+     * Si el archivo no trae la columna Packing Number (exportación de Órdenes de venta) el paquete se identifica
+     * por su número de orden; si la trae y la celda está vacía, el registro se informa como inválido.
+     */
+    private static String shipmentNumberOf(TableRow row, boolean hasShipmentColumn) {
+        return hasShipmentColumn
+                ? row.first(ZohoColumn.SHIPMENT_NUMBER)
+                : row.first(ZohoColumn.ORDER_NUMBER);
     }
 
     private static String normalizeShipmentNumber(String value) {
