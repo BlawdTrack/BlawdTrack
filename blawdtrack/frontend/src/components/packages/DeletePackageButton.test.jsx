@@ -14,10 +14,16 @@ function renderButton({ role = ROLES.SALES_ADMIN, status = 'PENDING', onDelete =
 }
 
 describe('DeletePackageButton (HU-012 / T05)', () => {
-  it.each([ROLES.SUPER_USER, ROLES.COURIER])('no existe en el DOM para el rol %s', (role) => {
-    renderButton({ role });
+  it('no existe en el DOM para el Mensajero', () => {
+    renderButton({ role: ROLES.COURIER });
 
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
+  });
+
+  it('existe para el Súper Usuario, que accede a todas las funciones', () => {
+    renderButton({ role: ROLES.SUPER_USER });
+
+    expect(screen.getByRole('button', { name: 'Eliminar' })).toBeInTheDocument();
   });
 
   it('no existe en el DOM sin sesión', () => {

@@ -71,6 +71,31 @@ class PackageDeletionIntegrationTest {
     }
 
     @Test
+    void cuandoEliminaElSuperUsuarioLaAuditoriaLoIdentificaComoTal() throws Exception {
+        User superUser = users.saveAndFlush(User.builder()
+                .documentType(DocumentType.CEDULA)
+                .documentNumber("9-3200-0001")
+                .fullName("Super usuario de prueba")
+                .email("super-delete-package@example.test")
+                .passwordHash("hash")
+                .status(UserStatus.ACTIVE)
+                .role(roles.findByName(RoleName.SUPER_USER).orElseThrow())
+                .build());
+        packages.saveAndFlush(paquete("ENV-INT-SU", PackageStatus.PENDING));
+
+        mvc.perform(delete(URL + "ENV-INT-SU").header("Authorization", "Bearer " + token(superUser)))
+                .andExpect(status().isOk());
+
+        List<AuditLog> registros = auditLogs.findByActionOrderByTimestampDescIdDesc(DELETE_AUDIT);
+        assertThat(registros).hasSize(1);
+        assertThat(registros.get(0).getActor().getId()).isEqualTo(superUser.getId());
+        assertThat(registros.get(0).getTimestamp()).isNotNull();
+        assertThat(registros.get(0).getDetails())
+                .startsWith("El Super Usuario 'Super usuario de prueba'")
+                .contains("ENV-INT-SU");
+    }
+
+    @Test
     void aceptaElNumeroDeEnvioEnMinusculas() throws Exception {
         User admin = salesAdmin("minusculas");
         packages.saveAndFlush(paquete("ENV-INT-2", PackageStatus.PENDING));

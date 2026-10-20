@@ -6,8 +6,8 @@ import { getPackageStatusMeta } from '../../config/packageStatus';
 import { RADIUS, FONT, TOUCH_TARGET } from '../../theme';
 
 /**
- * Botón "Eliminar" de un paquete (HU-012). Solo existe para el Administrador de Ventas; para cualquier otro rol no
- * se renderiza. En Pendiente o Asignado es un botón rojo de contorno; en los demás estados queda en gris con
+ * Botón "Eliminar" de un paquete (HU-012). Solo existe para el Administrador de Ventas y el Súper Usuario; para
+ * cualquier otro rol no se renderiza. En Pendiente o Asignado es un botón rojo de contorno; en los demás estados queda en gris con
  * `aria-disabled` (sigue siendo enfocable) y un texto de ayuda asociado. Al pulsarlo solo emite `onDelete` (o
  * `onBlocked` si el paquete no es eliminable): no llama a la API ni abre el diálogo de confirmación.
  * @param {{ pkg: { shipmentNumber: string, status: string }, onDelete: (pkg: object) => void,

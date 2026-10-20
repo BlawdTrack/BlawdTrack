@@ -65,8 +65,16 @@ describe('PackageDetailPage: eliminar desde la ficha (HU-012 / T06)', () => {
     expect(within(dialog).getByRole('button', { name: 'Cancelar' })).toHaveFocus();
   });
 
-  it('el Súper Usuario ve la ficha sin el botón de eliminar', async () => {
+  it('el Súper Usuario ve "Eliminar" en la ficha y abre la confirmación', async () => {
     const card = await showPackage(ROLES.SUPER_USER);
+
+    await userEvent.click(within(card).getByRole('button', { name: 'Eliminar' }));
+
+    expect(await screen.findByRole('alertdialog', { name: 'Eliminar paquete' })).toBeInTheDocument();
+  });
+
+  it('el Mensajero ve la ficha sin el botón de eliminar', async () => {
+    const card = await showPackage(ROLES.COURIER);
 
     expect(within(card).queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument();
   });

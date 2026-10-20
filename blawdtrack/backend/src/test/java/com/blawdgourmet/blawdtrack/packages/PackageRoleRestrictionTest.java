@@ -35,9 +35,9 @@ import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 
 /**
- * HU-012 / T02 (#118): la eliminacion de paquetes (DELETE /api/v1/packages/{numeroEnvio}) es
- * exclusiva del rol Administrador de Ventas. Un usuario autenticado con otro rol recibe 403 y
- * una solicitud sin token recibe 401.
+ * HU-012 / T02 (#118): la eliminacion de paquetes (DELETE /api/v1/packages/{numeroEnvio}) es del
+ * Administrador de Ventas y del Super Usuario. Un usuario autenticado con otro rol (Mensajero) recibe
+ * 403 y una solicitud sin token recibe 401.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -75,10 +75,14 @@ class PackageRoleRestrictionTest {
     }
 
     @Test
-    void superUsuarioRecibe403() throws Exception {
+    void superUsuarioEliminaElPaquete() throws Exception {
+        packages.saveAndFlush(DeliveryPackage.builder().shipmentNumber("ENV-0001").build());
+
         mvc.perform(delete(DELETE_URL).header("Authorization", "Bearer " + token(RoleName.SUPER_USER)))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Paquete eliminado correctamente."));
+
+        assertThat(packages.findByShipmentNumber("ENV-0001")).isEmpty();
     }
 
     @Test
@@ -113,10 +117,10 @@ class PackageRoleRestrictionTest {
     }
 
     @Test
-    void preAuthorizeRechazaAlSuperUsuario() {
+    void preAuthorizePermiteAlSuperUsuario() {
         autenticarComo(RoleName.SUPER_USER);
-        assertThatThrownBy(() -> controller.deletePackage("ENV-0001", null))
-                .isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> controller.deletePackage("ENV-NO-EXISTE", null))
+                .isInstanceOf(PackageNotFoundException.class);
     }
 
     @Test

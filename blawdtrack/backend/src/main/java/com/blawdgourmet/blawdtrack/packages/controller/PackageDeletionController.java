@@ -15,8 +15,8 @@ import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Eliminación de paquetes (HU-012). Solo delega en el servicio. Es exclusiva del rol Administrador
- * de Ventas (T02): {@code SecurityConfig} la exige para {@code /api/v1/packages/**} y
+ * Eliminación de paquetes (HU-012). Solo delega en el servicio. Es del rol Administrador de Ventas y del
+ * Super Usuario (T02): {@code SecurityConfig} la exige para {@code DELETE /api/v1/packages/*} y
  * {@code @PreAuthorize} la refuerza como segunda barrera.
  */
 @RestController
@@ -27,7 +27,7 @@ public class PackageDeletionController {
     private final PackageDeletionService deletionService;
 
     @DeleteMapping("/{shipmentNumber}")
-    @PreAuthorize("hasRole('" + RoleName.SALES_ADMIN + "')")
+    @PreAuthorize("hasAnyRole('" + RoleName.SALES_ADMIN + "', '" + RoleName.SUPER_USER + "')")
     public PackageDeletionResponse deletePackage(
             @PathVariable String shipmentNumber,
             @AuthenticationPrincipal AuthenticatedUser actor) {

@@ -17,9 +17,9 @@ describe('packageStates (HU-012)', () => {
 });
 
 describe('canDeletePackages', () => {
-  it('solo el Administrador de Ventas puede eliminar paquetes', () => {
+  it('solo el Administrador de Ventas y el Súper Usuario pueden eliminar paquetes', () => {
     expect(canDeletePackages(ROLES.SALES_ADMIN)).toBe(true);
-    expect(canDeletePackages(ROLES.SUPER_USER)).toBe(false);
+    expect(canDeletePackages(ROLES.SUPER_USER)).toBe(true);
     expect(canDeletePackages(ROLES.COURIER)).toBe(false);
     expect(canDeletePackages(undefined)).toBe(false);
   });
