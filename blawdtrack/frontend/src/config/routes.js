@@ -10,6 +10,7 @@ export const ROUTES = {
   MODULE_COURIERS: '/main-menu/mensajeros',
   MODULE_ADMINS: '/main-menu/administradores',
   MODULE_SETTINGS: '/main-menu/ajustes',
+  MODULE_PACKAGE_MANAGEMENT: '/main-menu/gestion-paquetes',
   // Mismo flujo que PASSWORD_RECOVERY, pero dentro del menú principal para un
   // usuario ya logueado (mantiene la barra lateral visible). Lo usan el Súper Usuario y el Administrador de Ventas.
   PASSWORD_RESET_OWN: '/main-menu/restablecer-contrasena',

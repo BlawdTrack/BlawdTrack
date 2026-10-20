@@ -79,8 +79,8 @@ describe('MainMenuPage', () => {
       expect(heading.parentElement.closest('[aria-disabled="true"]')).not.toBeNull();
     });
     expect(screen.getAllByText('Próximamente')).toHaveLength(3);
-    // Gestión de paquetes ya existe: su tarjeta enlaza a la búsqueda.
-    expect(screen.getByRole('heading', { level: 3, name: 'Gestión de paquetes' }).closest('a')).toHaveAttribute('href', ROUTES.PACKAGE_SEARCH);
+    // Gestión de paquetes ya existe: su tarjeta enlaza a su menú de funciones.
+    expect(screen.getByRole('heading', { level: 3, name: 'Gestión de paquetes' }).closest('a')).toHaveAttribute('href', ROUTES.MODULE_PACKAGE_MANAGEMENT);
   });
 
   it('says the module is coming soon when the cursor is over a future card', async () => {

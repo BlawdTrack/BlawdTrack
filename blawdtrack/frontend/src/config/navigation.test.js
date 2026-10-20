@@ -186,18 +186,19 @@ describe('single-screen modules', () => {
     expect(NAVIGATION_MENUS.map((m) => m.id)).not.toContain('packages');
   });
 
-  it('treats Gestión de paquetes the same way: its only screen is the package search', () => {
+  it('gives Gestión de paquetes a menu page with its three functions: only the search exists so far', () => {
     const management = NAVIGATION_GROUPS.find((g) => g.id === 'package-management');
 
-    expect(management.path).toBe(ROUTES.PACKAGE_SEARCH);
-    expect(management.items.map((i) => i.id)).toEqual(['package-search']);
-    expect(management.items[0].roles).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]);
-    expect(isSingleScreenMenu(management)).toBe(true);
-    expect(NAVIGATION_MENUS.map((m) => m.id)).not.toContain('package-management');
+    expect(management.path).toBe(ROUTES.MODULE_PACKAGE_MANAGEMENT);
+    expect(management.items.map((i) => i.id)).toEqual(['package-search', 'package-pending', 'package-export']);
+    expect(management.items.map((i) => i.path)).toEqual([ROUTES.PACKAGE_SEARCH, null, null]);
+    management.items.forEach((item) => expect(item.roles).toEqual([ROLES.SUPER_USER, ROLES.SALES_ADMIN]));
+    expect(isSingleScreenMenu(management)).toBe(false);
+    expect(NAVIGATION_MENUS).toContain(management);
   });
 
   it('keeps a menu page for every module with several functions, and for settings', () => {
-    NAVIGATION_GROUPS.filter((g) => !['packages', 'package-management'].includes(g.id)).forEach((group) => {
+    NAVIGATION_GROUPS.filter((g) => g.id !== 'packages').forEach((group) => {
       expect(isSingleScreenMenu(group)).toBe(false);
       expect(NAVIGATION_MENUS).toContain(group);
     });
@@ -209,7 +210,7 @@ describe('isModuleScreen', () => {
   it('is true on every module menu and on every function screen, including nested and related paths', () => {
     NAVIGATION_MENUS.forEach((menu) => {
       expect(isModuleScreen(menu.path)).toBe(true);
-      menu.items.forEach((item) => expect(isModuleScreen(item.path)).toBe(true));
+      menu.items.filter((item) => item.path).forEach((item) => expect(isModuleScreen(item.path)).toBe(true));
     });
     expect(isModuleScreen(`${ROUTES.COURIER_UPDATE}/1-0345-0678`)).toBe(true);
     expect(isModuleScreen(ROUTES.PACKAGE_IMPORT)).toBe(true);
