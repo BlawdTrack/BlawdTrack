@@ -295,6 +295,7 @@ Los casos `TC-HU011-01` y `TC-HU011-05` ejecutan solos `scripts\prepare-data.ps1
 
 ### Estructura
 
+- `Test Cases/HU-011/` (definición de cada caso) y `Scripts/HU-011/<caso>/Script*.groovy` (su código). Katalon exige esa carpeta `Scripts/`: si el código está junto al `.tc`, el caso se ejecuta como "Skipped" sin ningún error.
 - `Keywords/com/blawd/Env.groovy`: rutas de los archivos y preparación de datos.
 - `Keywords/com/blawd/Ui.groovy`: inicio de sesión, subida del archivo, lectura de totales y comprobaciones. Los objetos se buscan por `data-testid`.
 - `Keywords/com/blawd/Api.groovy`: inicio de sesión y códigos HTTP del backend.
