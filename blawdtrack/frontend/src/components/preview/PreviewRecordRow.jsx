@@ -2,7 +2,7 @@ import { Box, Link, Typography } from '@mui/material';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import { PREVIEW_GRID_SX } from './previewGrid';
 import { PREVIEW_STATUS } from '../../utils/importPreview';
-import { describeAddressLink } from '../../utils/addressLink';
+import { splitAddressLink } from '../../utils/addressLink';
 import { FONT, RADIUS } from '../../theme';
 
 // Cómo se resalta y se etiqueta cada resultado: tono de la fila, etiqueta, color del punto y de las notas.
@@ -38,37 +38,46 @@ function StatusCell({ row, status }) {
   );
 }
 
+function MapLinkButton({ link }) {
+  return (
+    <Link
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      underline="none"
+      title={link.href}
+      aria-label={`Abrir ubicación en ${link.label}`}
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        gap: 0.6,
+        minHeight: 32,
+        px: 1.25,
+        borderRadius: RADIUS.lg,
+        bgcolor: 'neutral.surface',
+        color: 'primary.main',
+        fontSize: FONT.sm,
+        fontWeight: 600,
+        '&:hover': { bgcolor: 'neutral.border' },
+      }}
+    >
+      <PlaceOutlinedIcon sx={{ fontSize: FONT.md }} />
+      {link.label}
+    </Link>
+  );
+}
+
+// La dirección del archivo suele traer pegado un enlace de Waze o Maps: se muestra el texto y, debajo, un botón que lo abre.
 function AddressCell({ address }) {
-  const link = describeAddressLink(address);
-  if (link) {
-    return (
-      <Link
-        href={link.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        underline="none"
-        title={link.href}
-        aria-label={`Abrir ubicación en ${link.label}`}
-        sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 0.6,
-          minHeight: 32,
-          px: 1.25,
-          borderRadius: RADIUS.lg,
-          bgcolor: 'neutral.surface',
-          color: 'primary.main',
-          fontSize: FONT.sm,
-          fontWeight: 600,
-          '&:hover': { bgcolor: 'neutral.border' },
-        }}
-      >
-        <PlaceOutlinedIcon sx={{ fontSize: FONT.md }} />
-        {link.label}
-      </Link>
-    );
-  }
-  return <Box component="span" title={address ?? undefined} sx={CLAMP_SX}>{address ?? '—'}</Box>;
+  const { text, link } = splitAddressLink(address);
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: link && text ? 0.5 : 0 }}>
+      {(text || !link) && <Box component="span" title={text || undefined} sx={CLAMP_SX}>{text || '—'}</Box>}
+      {link && <MapLinkButton link={link} />}
+    </Box>
+  );
 }
 
 /**

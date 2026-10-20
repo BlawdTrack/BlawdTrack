@@ -74,7 +74,7 @@ describe('PreviewRecordRow', () => {
     expect(screen.queryByText('Orden SO-1')).not.toBeInTheDocument();
   });
 
-  it('una dirección que es un enlace de Waze o Maps se muestra como botón que abre en otra pestaña', () => {
+  it('una dirección que es solo un enlace de Waze se muestra como botón que abre en otra pestaña', () => {
     renderRow({ ...validRow, address: 'https://waze.com/ul/hd1u0mmj97' });
 
     const link = screen.getByRole('link', { name: 'Abrir ubicación en Waze' });
@@ -82,6 +82,15 @@ describe('PreviewRecordRow', () => {
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
     expect(screen.queryByText('https://waze.com/ul/hd1u0mmj97')).not.toBeInTheDocument();
+  });
+
+  it('una dirección con el enlace de Google Maps pegado muestra el texto y el botón Maps', () => {
+    renderRow({ ...validRow, address: 'Desamparados\nhttps://maps.app.goo.gl/hkVWJQqKTxnoWTDh7' });
+
+    const row = screen.getByRole('listitem');
+    expect(within(row).getByText('Desamparados')).toBeInTheDocument();
+    expect(within(row).queryByText(/maps\.app\.goo\.gl/)).not.toBeInTheDocument();
+    expect(within(row).getByRole('link', { name: 'Abrir ubicación en Maps' })).toHaveAttribute('href', 'https://maps.app.goo.gl/hkVWJQqKTxnoWTDh7');
   });
 
   it('un válido sin rango del backend muestra el horario del archivo en vez de inventar uno', () => {

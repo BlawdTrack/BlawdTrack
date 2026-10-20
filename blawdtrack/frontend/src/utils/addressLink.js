@@ -1,4 +1,5 @@
-const LINK_PATTERN = /^https?:\/\/\S+$/i;
+const URL_PATTERN = /https?:\/\/[^\s]+/i;
+const TRAILING_PUNCTUATION = /[.,;:!?)\]]+$/;
 
 // Cada servicio de mapas que llega en los archivos de Zoho, por el servidor del enlace.
 const MAP_SERVICES = [
@@ -9,24 +10,33 @@ const MAP_SERVICES = [
   },
 ];
 
-/**
- * Si la dirección de un paquete es un enlace a un mapa (Waze o Google Maps), devuelve el enlace y el nombre corto con
- * el que se muestra; así la tabla no se llena de URLs largas.
- * @param {string|null|undefined} address Dirección tal como viene en el archivo.
- * @returns {{ href: string, label: string }|null} `null` si no es un enlace http(s).
- */
-export function describeAddressLink(address) {
-  const text = (address ?? '').trim();
-  if (!LINK_PATTERN.test(text)) return null;
-
+function labelOf(href) {
   try {
-    const { hostname } = new URL(text);
-    const host = hostname.toLowerCase();
-    const service = MAP_SERVICES.find(({ matches }) => matches(host));
-    return { href: text, label: service ? service.label : 'Enlace' };
+    const host = new URL(href).hostname.toLowerCase();
+    return MAP_SERVICES.find(({ matches }) => matches(host))?.label ?? 'Enlace';
   } catch {
     return null;
   }
 }
 
-export default describeAddressLink;
+/**
+ * Separa la dirección de un paquete en su texto y el enlace a un mapa (Waze o Google Maps) que suele venir pegado
+ * dentro de ella, para mostrar el texto y un botón corto en vez de la URL larga. Solo se reconocen enlaces http(s).
+ * @param {string|null|undefined} address Dirección tal como viene en el archivo.
+ * @returns {{ text: string, link: { href: string, label: string }|null }} `text` es la dirección sin el enlace
+ *   (puede quedar vacío) y `link` es `null` si no hay un enlace válido.
+ */
+export function splitAddressLink(address) {
+  const original = (address ?? '').trim();
+  const found = URL_PATTERN.exec(original);
+  if (!found) return { text: original, link: null };
+
+  const href = found[0].replace(TRAILING_PUNCTUATION, '');
+  const label = labelOf(href);
+  if (!label) return { text: original, link: null };
+
+  const text = original.replace(found[0], ' ').replace(/\s+/g, ' ').trim();
+  return { text, link: { href, label } };
+}
+
+export default splitAddressLink;
