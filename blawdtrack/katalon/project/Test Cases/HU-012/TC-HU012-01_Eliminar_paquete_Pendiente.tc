@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU012-01 Eliminar paquete Pendiente</description>
+   <name>TC-HU012-01_Eliminar_paquete_Pendiente</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>ef10c1de-1a5b-4d04-ae75-7b378d055ce6</testCaseGuid>
+</TestCaseEntity>

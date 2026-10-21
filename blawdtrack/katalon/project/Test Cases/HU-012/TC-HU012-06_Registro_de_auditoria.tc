@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU012-06 Registro de auditoria</description>
+   <name>TC-HU012-06_Registro_de_auditoria</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>26e15129-c5e4-4401-a7da-85f999595ab9</testCaseGuid>
+</TestCaseEntity>
