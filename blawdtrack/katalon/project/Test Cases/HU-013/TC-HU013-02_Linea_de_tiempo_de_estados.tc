@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-02 Linea de tiempo de estados</description>
+   <name>TC-HU013-02_Linea_de_tiempo_de_estados</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>fb908096-4cf3-4c8d-9c93-2a886d9709ed</testCaseGuid>
+</TestCaseEntity>
