@@ -2,7 +2,7 @@
 
 Esta carpeta deja listo todo lo que se necesita **antes** de escribir los casos de Katalon: un entorno que se levanta
 y se reinicia con un comando, cuentas conocidas, datos de prueba, archivos de importación y selectores estables.
-El proyecto de Katalon Studio está en `project/` y hoy trae 5 casos de la HU-011 (sección 16); las demás HU se agregan encima de esta base.
+El proyecto de Katalon Studio está en `project/` y hoy trae 5 casos de la HU-011 (sección 16) y 7 de la HU-012 (sección 17); las demás HU se agregan encima de esta base.
 
 ## Contenido
 
@@ -22,6 +22,7 @@ El proyecto de Katalon Studio está en `project/` y hoy trae 5 casos de la HU-01
 14. [Reglas del equipo](#14-reglas-del-equipo)
 15. [Estructura de la carpeta](#15-estructura-de-la-carpeta)
 16. [Proyecto de Katalon Studio (HU-011)](#16-proyecto-de-katalon-studio-hu-011)
+17. [Pruebas de la HU-012 (eliminar paquetes)](#17-pruebas-de-la-hu-012-eliminar-paquetes)
 
 ---
 
@@ -305,3 +306,32 @@ El caso `TC-HU011-01` ejecuta solo `scripts\prepare-data.ps1` al empezar, así q
 - El selector de archivo de la importación está oculto; `Ui.uploadAndReview` lo muestra desde la prueba antes de subir el archivo. La aplicación no cambia.
 - Los casos entran a la pantalla por su dirección (`/main-menu/paquetes/importar`). Si la sesión no se conserva al recargar, cámbialo por un clic en el menú (`nav-/main-menu/paquetes/importar`).
 - Los archivos del proyecto se escribieron sin abrir Katalon Studio: si al abrirlo marca algún error, corrígelo ahí y avisa para dejarlo en el repositorio.
+
+## 17. Pruebas de la HU-012 (eliminar paquetes)
+
+Cubren la TASK 339 (pruebas funcionales de la HU-012). Están en `Test Cases/HU-012/` y la suite es `Test Suites/HU-012`.
+Se abren y se corren igual que los de la HU-011 (sección 16).
+
+### Casos
+
+| Caso | Paquete | Qué comprueba |
+| --- | --- | --- |
+| TC-HU012-01 Eliminar paquete Pendiente | `E2E-DEL-P1` | Desde la lista: pide confirmar, muestra "Paquete … eliminado correctamente." y la fila desaparece; la API responde 404. |
+| TC-HU012-02 Eliminar paquete Asignado | `E2E-DEL-A1` | Desde la ficha (con el mensajero asignado): mensaje de éxito y "ya no está en el sistema ni en la lista del mensajero"; la API responde 404 y la base ya no lo tiene. |
+| TC-HU012-03 Cancelar en el diálogo | `E2E-DEL-P2` | "Cancelar" y Esc cierran el diálogo sin eliminar; el paquete sigue en la lista. |
+| TC-HU012-04 Paquete Enviado o posterior | `E2E-ENV-01`, `E2E-TRANS-01`, `E2E-NOENT-01` | Botón en gris con "No eliminable en …"; al pulsarlo avisa que ya no puede eliminarse y no abre el diálogo; la API responde 409. |
+| TC-HU012-05 Paquete Entregado | `E2E-ENTR-01` | Lo mismo desde la lista y desde la ficha; la API responde 409. |
+| TC-HU012-06 Registro de auditoría | `E2E-DEL-P3` | Tras eliminar, hay un registro `ELIMINAR_PAQUETE` con fecha, hora y la cuenta del Administrador de Ventas. |
+| TC-HU012-07 Rol sin permiso | `E2E-DEL-A2` | El Mensajero vuelve a su inicio, no ve "Eliminar", la API responde 403 y el paquete sigue. |
+
+### Notas
+
+- Los casos que eliminan (01, 02 y 06) ejecutan `scripts\prepare-data.ps1` al empezar, así que se pueden repetir sin
+  volver a levantar nada. Cada caso usa su propio paquete, de modo que el orden de la suite no importa.
+
+- **Lo que la interfaz todavía no muestra se comprueba en la base** del entorno de pruebas (con `docker exec`, igual
+  que `prepare-data.ps1`): la lista del mensajero llega con la HU-022 (TC-HU012-02) y la pantalla de auditoría de
+  paquetes con la HU-028 (TC-HU012-06). `Keywords/com/blawd/Packages.groovy` tiene esas consultas.
+
+- Los avisos flotantes no tienen `data-testid`: `Packages.verifyMessage` los reconoce por `role="status"` y su texto.
+- Desde #155 el Súper Usuario también puede eliminar; el único rol sin permiso es el Mensajero.
