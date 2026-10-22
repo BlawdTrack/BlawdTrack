@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU012-04 Paquete Enviado o posterior</description>
+   <name>TC-HU012-04_Paquete_Enviado_o_posterior</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>648d90bf-420d-4824-93e9-ccd22d296700</testCaseGuid>
+</TestCaseEntity>

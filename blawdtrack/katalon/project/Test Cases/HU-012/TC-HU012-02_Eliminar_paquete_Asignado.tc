@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU012-02 Eliminar paquete Asignado</description>
+   <name>TC-HU012-02_Eliminar_paquete_Asignado</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>48572426-951a-41f2-8537-f4e4af24d24b</testCaseGuid>
+</TestCaseEntity>
