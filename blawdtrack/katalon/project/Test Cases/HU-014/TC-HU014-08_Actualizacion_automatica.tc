@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Modifica el término sin pulsar Buscar y verifica que los resultados se actualicen solos.</description>
+   <name>TC-HU014-08_Actualizacion_automatica</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>d985261d-3b7a-4cca-8849-9d4701d48317</testCaseGuid>
+</TestCaseEntity>

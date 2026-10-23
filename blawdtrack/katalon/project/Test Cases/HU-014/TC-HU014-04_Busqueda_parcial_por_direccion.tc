@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Busca paquetes con una coincidencia parcial en la dirección de entrega.</description>
+   <name>TC-HU014-04_Busqueda_parcial_por_direccion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>a577a52d-a202-46c1-8cab-3faef118d4b2</testCaseGuid>
+</TestCaseEntity>

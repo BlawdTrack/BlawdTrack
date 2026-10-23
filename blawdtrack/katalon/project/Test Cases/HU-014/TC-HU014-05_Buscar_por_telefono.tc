@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Busca un paquete por el teléfono real del cliente.</description>
+   <name>TC-HU014-05_Buscar_por_telefono</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>ebfb70e9-70a4-4cc0-a5ed-866d034eeb49</testCaseGuid>
+</TestCaseEntity>

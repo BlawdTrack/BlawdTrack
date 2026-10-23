@@ -165,7 +165,7 @@ En Katalon, un objeto de prueba se define con XPath o CSS, por ejemplo `//*[@dat
 | Navegación | `nav-<ruta>` (por ejemplo `nav-/main-menu/paquetes/buscar`), `main-menu-link`, `logout-button` |
 | Formularios | `form-submit`, `form-discard`, `edit-save`, `edit-discard`, `confirm-dialog-confirm`, `confirm-dialog-cancel`, `leave-dialog-leave`, `leave-dialog-stay`, `document-search-submit`, `document-search-clear` |
 | Importación | `import-select-file`, `import-file-input`, `import-help-toggle`, `import-review`, `import-cancel`, `import-summary`, `import-count-{read,valid,invalid,duplicate}`, `import-filter-{all,valid,invalid,duplicate}`, `import-row-{valid,invalid,duplicate}`, `import-confirm`, `import-load-another`, `import-result-{read,registered,invalid,duplicate}`, `import-result-another` |
-| Búsqueda de paquetes | `package-search-input`, `package-search-clear`, `package-search-summary`, `package-search-empty-clear`, `package-result-row`, `package-load-more`, `package-load-more-count` |
+| Búsqueda de paquetes | `package-search-field`, `package-search-input`, `package-search-submit`, `package-search-clear`, `package-search-summary`, `package-search-empty-title`, `package-search-empty-clear`, `package-result-row`, `package-load-more`, `package-load-more-count` |
 | Ficha del paquete | `package-detail-card`, `package-courier-name`, `package-history-list`, `package-history-entry`, `delete-package-button`, `delete-package-cancel`, `delete-package-confirm` |
 | Comprobante de entrega | `package-proof-card`, `package-proof-summary`, `package-proof-empty`, `delivery-photo`, `delivery-photo-image`, `delivery-photo-retry` |
 | Recuperar contraseña (HU-002) | `recovery-submit`, `recovery-email-sent`, `recovery-resend`, `recovery-use-another`, `new-password-submit`, `new-password-success`, `new-password-go-login`, `new-password-invalid-link`, `new-password-request-link` |
@@ -212,7 +212,7 @@ Endpoints de paquetes que usan las HU (bajo `/api/v1/packages`): `GET /search`, 
 | HU-011 | Duplicados y errores | Ventas o Súper Usuario | `importacion-con-duplicados.csv`, `importacion-con-errores.csv`; `E2E-PEND-01` como paquete ya registrado |
 | HU-012 | Eliminar paquetes (solo Pendiente/Asignado) | Ventas o Súper Usuario | `E2E-DEL-*` para borrar; `E2E-ENV-01`, `E2E-TRANS-01`, `E2E-ENTR-01` para comprobar que no se puede |
 | HU-013 | Línea de tiempo de la ficha | Cualquiera con acceso | `E2E-ENTR-01` (completa) y un paquete recién importado (evento "Registrado como Pendiente") |
-| HU-014 | "Cargar más" | Ventas o Súper Usuario | `E2E-BULK-001..120` (la interfaz pide 100 por página) |
+| HU-014 | Búsqueda por envío, orden, cliente, dirección, teléfono y horario; resultados vacíos, actualización automática, limpieza y permisos | Administrador de Ventas; Mensajero para denegación | `E2E-PEND-01` y `E2E-ASIG-01` |
 | Acceso | Qué ve cada rol | Las tres | — |
 
 ## 12. Qué no se puede probar todavía
@@ -265,9 +265,9 @@ katalon/
     import-files/*.csv              archivos de importación
 ```
 
-## 16. Proyecto de Katalon Studio (HU-011)
+## 16. Proyecto de Katalon Studio (HU-011 y HU-014)
 
-El proyecto está en `katalon/project/` y cubre la TASK 336 (pruebas funcionales de la HU-011).
+El proyecto está en `katalon/project/` y contiene pruebas funcionales para HU-011 y HU-014.
 
 ### Qué hace falta
 
@@ -278,8 +278,21 @@ El proyecto está en `katalon/project/` y cubre la TASK 336 (pruebas funcionales
 ### Cómo abrirlo y correrlo
 
 1. En Katalon Studio: `File > Open Project` y elige la carpeta `katalon\project`. Si pide migrar el proyecto, acepta.
-2. En el explorador abre `Test Suites/HU-011` y pulsa Run (Chrome). También se puede correr un caso suelto desde `Test Cases/HU-011`.
+2. En el explorador abre `Test Suites/HU-011` o `Test Suites/HU-014` y pulsa Run (Chrome). También se puede correr un caso suelto desde `Test Cases/HU-011` o `Test Cases/HU-014`.
 3. Las capturas de evidencia quedan en `katalon\project\evidence` y el reporte de Katalon en `Reports/` (se puede exportar a HTML, CSV o PDF).
+
+Los diez casos HU-014 recrean los fixtures al iniciar y generan capturas PNG en `katalon\project\evidence`:
+
+| Caso | Evidencia |
+| --- | --- |
+| `TC-HU014-01` a `TC-HU014-06` | Una captura individual para cada criterio de búsqueda; el primero también valida los datos básicos del paquete. |
+| `TC-HU014-07` | Mensaje al buscar texto sin coincidencias. |
+| `TC-HU014-08` | Actualización al cambiar el término sin pulsar un botón. |
+| `TC-HU014-09` | Listado completo restaurado al limpiar. |
+| `TC-HU014-10` | Acceso denegado al Mensajero. |
+
+`TC-HU014-08` refleja literalmente el criterio de aceptación de actualización automática. Actualmente el buscador solo
+aplica el término al pulsar "Buscar" o Enter, por lo que este caso debe fallar hasta que ese comportamiento se implemente.
 
 El caso `TC-HU011-01` ejecuta solo `scripts\prepare-data.ps1` al empezar, así que se puede repetir sin volver a levantar nada. Ningún caso registra paquetes, por lo que no hace falta reiniciar los datos entre corridas.
 

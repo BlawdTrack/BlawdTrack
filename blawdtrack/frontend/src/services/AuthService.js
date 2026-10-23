@@ -1,4 +1,4 @@
-import axiosClient from '../api/axiosClient';
+﻿import axiosClient from '../api/axiosClient';
 
 // El endpoint real de HU-001 (POST /api/v1/auth/login) ya está en develop,
 // así que se quitaron los datos de prueba (mocks/authMock.js, mocks/mockUsers.js).
@@ -29,5 +29,7 @@ export const checkSession = async () => {
  * @param {string} token
  */
 export const logout = async (token) => {
-  await axiosClient.post('/v1/auth/logout', null, { headers: { Authorization: `Bearer ${token}` } });
+  await axiosClient.post('/v1/auth/logout', null, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };

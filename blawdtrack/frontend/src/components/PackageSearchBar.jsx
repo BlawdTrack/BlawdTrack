@@ -45,7 +45,12 @@ export function PackageSearchBar({
           select
           value={field}
           onChange={(event) => onFieldChange(event.target.value)}
-          slotProps={{ htmlInput: { 'aria-label': 'Buscar por', 'data-testid': 'package-search-field' } }}
+          slotProps={{
+            select: {
+              'aria-label': 'Buscar por',
+              SelectDisplayProps: { 'data-testid': 'package-search-field' },
+            },
+          }}
           sx={{ flex: { xs: '1 1 100%', sm: `0 0 ${rem(190)}` }, minWidth: { sm: 160 }, ...INPUT_SX }}
         >
           {SEARCH_FIELD_OPTIONS.map((option) => (

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Busca texto inexistente y valida el mensaje de que no hay resultados.</description>
+   <name>TC-HU014-07_Sin_coincidencias</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>7041c1ef-f572-451e-9b17-2b49494fb89e</testCaseGuid>
+</TestCaseEntity>

@@ -1,4 +1,4 @@
-// Puente entre el interceptor de axios (fuera de React) y el AuthProvider
+﻿// Puente entre el interceptor de axios (fuera de React) y el AuthProvider
 // (T17). El interceptor no puede usar hooks, así que solo avisa a un
 // "handler" que el AuthProvider registra al montarse; el provider limpia la
 // sesión y la redirección al login la hace ProtectedRoute al ver user = null.

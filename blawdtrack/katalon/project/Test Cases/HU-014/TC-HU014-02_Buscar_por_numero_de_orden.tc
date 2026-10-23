@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Busca un paquete por su número de orden real.</description>
+   <name>TC-HU014-02_Buscar_por_numero_de_orden</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>61331d42-e6d1-44c1-ad3e-f53e8fd0dc4f</testCaseGuid>
+</TestCaseEntity>

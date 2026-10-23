@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   handleUnauthorizedResponse,
   isSessionExpiredResponse,
@@ -59,7 +59,7 @@ describe('sessionExpiry - qué cuenta como sesión expirada (T17)', () => {
   });
 
   it('un 401 de una petición con un token que ya no es el actual NO cuenta', () => {
-    expect(isSessionExpiredResponse(buildError({ authorization: 'Bearer token-viejo' }))).toBe(false);
+    expect(isSessionExpiredResponse(buildError({ authorization: 'Bearer otra-token' }))).toBe(false);
   });
 
   it('sin token guardado (sesión ya limpiada) NO cuenta', () => {
