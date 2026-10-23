@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-03 Paquete con mensajero asignado</description>
+   <name>TC-HU013-03_Paquete_con_mensajero_asignado</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>770ffaee-94e7-49c2-9e0e-9ebd5ed66bd9</testCaseGuid>
+</TestCaseEntity>

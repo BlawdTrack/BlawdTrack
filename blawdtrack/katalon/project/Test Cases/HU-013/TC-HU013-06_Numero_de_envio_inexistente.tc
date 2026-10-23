@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-06 Numero de envio inexistente</description>
+   <name>TC-HU013-06_Numero_de_envio_inexistente</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>0f614f3e-6ef8-447d-907f-145d7b3b4174</testCaseGuid>
+</TestCaseEntity>

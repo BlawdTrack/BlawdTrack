@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-01 Consultar paquete por su numero de envio</description>
+   <name>TC-HU013-01_Consultar_paquete_por_su_numero</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>68c451b4-d6f7-4f4b-88cf-f069e372009e</testCaseGuid>
+</TestCaseEntity>
