@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-04 Paquete sin mensajero asignado</description>
+   <name>TC-HU013-04_Paquete_sin_mensajero_asignado</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>4a3b641a-5c33-4f17-9b06-ebef9957fd15</testCaseGuid>
+</TestCaseEntity>

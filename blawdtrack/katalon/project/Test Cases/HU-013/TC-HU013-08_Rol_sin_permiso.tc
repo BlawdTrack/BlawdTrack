@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-08 Rol sin permiso de consulta</description>
+   <name>TC-HU013-08_Rol_sin_permiso</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>39d03b77-9151-4b89-9ae9-e90f6bf45725</testCaseGuid>
+</TestCaseEntity>

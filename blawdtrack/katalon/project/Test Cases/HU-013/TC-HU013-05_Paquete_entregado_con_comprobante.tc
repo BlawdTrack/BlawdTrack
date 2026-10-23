@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-05 Paquete entregado con comprobante</description>
+   <name>TC-HU013-05_Paquete_entregado_con_comprobante</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>8e9a26e4-d06b-48b9-95df-5044a1ad7095</testCaseGuid>
+</TestCaseEntity>
