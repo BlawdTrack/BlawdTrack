@@ -41,6 +41,33 @@ public class Ui {
 		WebUI.waitForElementPresent(byTestId('import-select-file'), 30)
 	}
 
+	static void openPackageSearchPage() {
+		WebUI.navigateToUrl(GlobalVariable.baseUrl + '/main-menu/paquetes/buscar')
+		WebUI.waitForElementPresent(byTestId('package-search-input'), 30)
+	}
+
+	static void selectPackageSearchField(String field) {
+		WebUI.click(byTestId('package-search-field'))
+		TestObject option = css("[role='option'][data-value='" + field + "']", 'search-field-' + field)
+		WebUI.waitForElementVisible(option, 10)
+		WebUI.click(option)
+	}
+
+	static void searchPackage(String field, String term, String shipment, String evidenceName) {
+		selectPackageSearchField(field)
+		WebUI.setText(byTestId('package-search-input'), term)
+		WebUI.click(byTestId('package-search-submit'))
+
+		waitForSearchResult(shipment, term)
+		evidence(evidenceName)
+	}
+
+	static void waitForSearchResult(String shipment, String term) {
+		WebUI.waitForElementVisible(css("[data-testid='package-result-row'] a[href\$='/" + shipment + "']"), 20)
+		verifyContains(textOf('package-result-row'), shipment)
+		verifyContains(WebUI.getText(byTestId('package-search-summary')), term)
+	}
+
 	/**
 	 * Paso 1 de la importación: elige el archivo y pulsa "Revisar datos". El selector de archivo está oculto
 	 * (display: none), así que la prueba lo muestra antes de subir el archivo; la aplicación no cambia.

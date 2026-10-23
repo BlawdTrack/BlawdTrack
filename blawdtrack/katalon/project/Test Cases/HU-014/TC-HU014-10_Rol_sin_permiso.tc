@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Inicia sesión como Mensajero y verifica que el acceso a la búsqueda sea denegado.</description>
+   <name>TC-HU014-10_Rol_sin_permiso</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>51a8b05a-2a90-4ea8-afa9-c99d3e147059</testCaseGuid>
+</TestCaseEntity>
