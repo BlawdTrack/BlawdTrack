@@ -365,7 +365,7 @@ describe('PackageSearchPage', () => {
       expect(screen.getByRole('link', { name: 'Ir a Importación de paquetes' })).toHaveAttribute('href', '/main-menu/paquetes/importar');
     });
 
-    it('un número de envío que no existe dice que el paquete no fue encontrado', async () => {
+    it('un número de envío que no existe muestra que no hubo resultados', async () => {
       searchPackages
         .mockResolvedValueOnce({ content: [pkg(1, 'PENDING')], totalElements: 1 })
         .mockResolvedValueOnce({ content: [], totalElements: 0 });
@@ -376,7 +376,7 @@ describe('PackageSearchPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
       await settle();
 
-      expect(screen.getByText('Paquete no encontrado')).toBeInTheDocument();
+      expect(screen.getByTestId('package-search-empty-title')).toHaveTextContent('Sin resultados para “BG-2026-999”');
     });
 
     it('Eliminar en una fila pide confirmación, elimina el paquete, avisa y vuelve a pedir la lista y los conteos', async () => {

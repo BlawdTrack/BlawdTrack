@@ -24,6 +24,7 @@ describe('PackageSearchBar', () => {
     expect(screen.getByText('Paquete a buscar')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '¿Cómo puedo buscar paquetes?' })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Buscar por' })).toHaveTextContent('Todos los campos');
+    expect(screen.getByTestId('package-search-field')).toBe(screen.getByRole('combobox', { name: 'Buscar por' }));
 
     fireEvent.change(screen.getByLabelText('Buscar paquetes'), { target: { value: 'cafe' } });
     expect(handleChange).toHaveBeenCalledWith('cafe');

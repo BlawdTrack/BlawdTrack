@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Busca paquetes por el horario de preferencia de entrega.</description>
+   <name>TC-HU014-06_Buscar_por_horario_de_preferencia</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>864308ce-6e2a-4dcd-b5ad-48cf230e6149</testCaseGuid>
+</TestCaseEntity>

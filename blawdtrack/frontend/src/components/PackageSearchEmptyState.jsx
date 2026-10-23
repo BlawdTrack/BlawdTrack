@@ -2,20 +2,11 @@ import SearchOffOutlinedIcon from '@mui/icons-material/SearchOffOutlined';
 import { Button } from '@mui/material';
 import EmptyState from './EmptyState';
 
-// Un término con forma de número de envío (BG-2026-001): si no aparece, se dice que ese paquete no existe.
-const SHIPMENT_NUMBER_LIKE = /^[a-z]{2,}-?\d/i;
-
 function describeNoMatches(term, statusLabel) {
   if (!term) {
     return {
       title: `Sin paquetes en estado “${statusLabel}”`,
       description: 'Ningún paquete está en este estado por ahora. Prueba con otra pestaña de estado.',
-    };
-  }
-  if (SHIPMENT_NUMBER_LIKE.test(term)) {
-    return {
-      title: 'Paquete no encontrado',
-      description: `No existe el número de envío “${term}”. Revisa que esté bien escrito o prueba con la orden, el cliente o la dirección.`,
     };
   }
   return {
@@ -32,7 +23,11 @@ export function PackageSearchEmptyState({ term, statusLabel = null, onClear }) {
   const { title, description } = describeNoMatches(term, statusLabel);
 
   return (
-    <EmptyState icon={SearchOffOutlinedIcon} title={title} description={description}>
+    <EmptyState
+      icon={SearchOffOutlinedIcon}
+      title={<span data-testid="package-search-empty-title">{title}</span>}
+      description={description}
+    >
       <Button type="button" variant="contained" onClick={onClear} data-testid="package-search-empty-clear">
         Limpiar búsqueda
       </Button>

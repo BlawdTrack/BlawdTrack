@@ -8,7 +8,7 @@ describe('PackageSearchEmptyState', () => {
 
     render(<PackageSearchEmptyState term="Limon" onClear={onClear} />);
 
-    expect(screen.getByText('Sin resultados para “Limon”')).toBeInTheDocument();
+    expect(screen.getByTestId('package-search-empty-title')).toHaveTextContent('Sin resultados para “Limon”');
     expect(screen.getByText(/Revisa la ortografía o prueba con menos letras/)).toBeInTheDocument();
 
     const button = screen.getByRole('button', { name: 'Limpiar búsqueda' });
@@ -25,11 +25,11 @@ describe('PackageSearchEmptyState', () => {
     expect(screen.getByText(`Sin resultados para “${longTerm}”`)).toBeInTheDocument();
   });
 
-  it('un término con forma de número de envío dice que ese paquete no existe', () => {
+  it('un término con forma de número de envío muestra que no hubo resultados', () => {
     render(<PackageSearchEmptyState term="BG-2026-999" onClear={() => {}} />);
 
-    expect(screen.getByText('Paquete no encontrado')).toBeInTheDocument();
-    expect(screen.getByText(/No existe el número de envío “BG-2026-999”/)).toBeInTheDocument();
+    expect(screen.getByTestId('package-search-empty-title')).toHaveTextContent('Sin resultados para “BG-2026-999”');
+    expect(screen.getByText(/Revisa la ortografía o prueba con menos letras/)).toBeInTheDocument();
   });
 
   it('un filtro de estado sin término dice que no hay paquetes en ese estado', () => {

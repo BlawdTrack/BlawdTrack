@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Limpia los criterios de búsqueda y valida que se muestre el listado completo.</description>
+   <name>TC-HU014-09_Limpiar_busqueda</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>70b5ed04-46e9-455c-9edd-f93b15b4de18</testCaseGuid>
+</TestCaseEntity>

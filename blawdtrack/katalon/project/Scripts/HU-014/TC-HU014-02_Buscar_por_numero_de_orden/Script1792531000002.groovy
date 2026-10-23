@@ -1,0 +1,15 @@
+import com.blawd.Env
+import com.blawd.Ui
+import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
+
+import internal.GlobalVariable
+
+Env.prepareData()
+Ui.login(GlobalVariable.salesEmail, GlobalVariable.salesPassword)
+try {
+	Ui.openPackageSearchPage()
+	Ui.searchPackage('orderNumber', 'SO-E2E-001', 'E2E-PEND-01', 'TC-HU014-02_numero_orden')
+}
+finally {
+	WebUI.closeBrowser()
+}

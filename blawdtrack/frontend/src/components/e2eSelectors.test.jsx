@@ -7,6 +7,7 @@ import { NewPasswordForm } from './NewPasswordForm';
 import { NewPasswordInvalidLink, NewPasswordSuccess } from './NewPasswordOutcomes';
 import PackageProofCard from './PackageProofCard';
 import PackageLoadMore from './PackageLoadMore';
+import PackageSearchEmptyState from './PackageSearchEmptyState';
 import PackageSearchSummary from './PackageSearchSummary';
 import PreviewFilters from './preview/PreviewFilters';
 import { RecoveryEmailSent } from './RecoveryEmailSent';
@@ -45,6 +46,13 @@ describe('selectores de las pruebas de extremo a extremo', () => {
 
     expect(screen.getByTestId('package-load-more')).toBeInTheDocument();
     expect(screen.getByTestId('package-load-more-count')).toHaveTextContent('Mostrando 100 de 250 paquetes');
+  });
+
+  it('el mensaje de búsqueda sin coincidencias', () => {
+    render(<PackageSearchEmptyState term="inexistente" onClear={() => {}} />);
+
+    expect(screen.getByTestId('package-search-empty-title')).toHaveTextContent('Sin resultados para');
+    expect(screen.getByTestId('package-search-empty-clear')).toBeInTheDocument();
   });
 
   it('el resumen de la búsqueda', () => {
