@@ -1,0 +1,43 @@
+name: Sin coautores de IA
+
+# Rechaza los PR que traigan atribuciones de Claude (líneas "Co-authored-by", "Generated with" o el correo de
+# Anthropic) en los mensajes de sus commits, en el título o en la descripción. Sin filtro de ramas ni de rutas. Se
+# vuelve a correr al editar el título o la descripción, porque el squash usa ese texto como mensaje final.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sin-coautores-ia-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  trailers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Buscar atribuciones de Claude en commits, título y descripción
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          pattern='co-authored-by:.*(claude|anthropic)|noreply@anthropic\.com|generated with.*claude'
+          failed=0
+          for sha in $(git rev-list "${BASE_SHA}..${HEAD_SHA}"); do
+            if git log -1 --format=%B "$sha" | grep -qiE "$pattern"; then
+              echo "::error::El commit ${sha:0:7} trae una atribución de Claude en su mensaje."
+              failed=1
+            fi
+          done
+          if printf '%s\n%s\n' "$PR_TITLE" "$PR_BODY" | grep -qiE "$pattern"; then
+            echo "::error::El título o la descripción del PR traen una atribución de Claude."
+            failed=1
+          fi
+          exit "$failed"
