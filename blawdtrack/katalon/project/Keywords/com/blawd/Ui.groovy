@@ -73,10 +73,15 @@ public class Ui {
 	 * (display: none), así que la prueba lo muestra antes de subir el archivo; la aplicación no cambia.
 	 */
 	static void uploadAndReview(String fileName) {
-		WebUI.executeJavaScript('document.querySelector("[data-testid=\'import-file-input\']").style.display = "block"', null)
-		WebUI.uploadFile(byTestId('import-file-input'), Env.importFilePath(fileName))
+		selectFile(fileName)
 		WebUI.click(byTestId('import-review'))
 		WebUI.waitForElementPresent(byTestId('import-count-read'), 30)
+	}
+
+	/** Elige el archivo en la zona de carga sin pulsar "Revisar datos". */
+	static void selectFile(String fileName) {
+		WebUI.executeJavaScript('document.querySelector("[data-testid=\'import-file-input\']").style.display = "block"', null)
+		WebUI.uploadFile(byTestId('import-file-input'), Env.importFilePath(fileName))
 	}
 
 	static int count(String name) {

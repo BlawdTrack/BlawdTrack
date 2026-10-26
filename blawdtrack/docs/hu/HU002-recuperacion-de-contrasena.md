@@ -10,7 +10,7 @@ enlace lleva un token de un solo uso que vence a los 15 minutos.
 ## Criterios de aceptación
 
 | Criterio | Estado en `develop` |
-|---|---|
+| --- | --- |
 | El sistema valida que la cuenta no esté inactiva antes de enviar el correo | ❌ La validación existe, pero el correo **nunca se envía** desde este flujo (ver "Limitaciones") |
 | Contraseña de mínimo 8 caracteres que combine letras y números | ⚠️ El backend lo cumple; el frontend exige además una mayúscula |
 | El token tiene un tiempo de expiración y queda invalidado al usarse con éxito | ✅ Vence a los 15 minutos y se marca como usado al confirmar |
@@ -90,7 +90,7 @@ flowchart LR
 ### Backend
 
 | Clase | Rol |
-|---|---|
+| --- | --- |
 | `auth.controller.PasswordResetController` | Endpoints de solicitud y confirmación. |
 | `auth.service.PasswordResetService`, `impl.PasswordResetServiceImpl` | Reglas: cuenta activa, token, expiración, historial. |
 | `auth.service.PasswordResetResult` | Resultado interno (token en claro solo en memoria). |
@@ -103,7 +103,7 @@ flowchart LR
 ### Frontend
 
 | Archivo | Rol |
-|---|---|
+| --- | --- |
 | `pages/PasswordRecoveryRequestPage.jsx`, `pages/NewPasswordPage.jsx` | Pantallas del flujo. |
 | `components/RecoverySteps.jsx`, `components/PasswordRequirements.jsx` | Indicador de pasos y lista de requisitos. |
 | `services/PasswordRecoveryService.js` | Llamadas a los dos endpoints. |
@@ -111,18 +111,18 @@ flowchart LR
 
 ## Pruebas
 
-### Backend
+### Pruebas del backend
 
 | Test | Qué verifica |
-|---|---|
+| --- | --- |
 | `PasswordResetServiceImplTest` | Con correo existente y activo se genera y guarda el token (solo su hash); con correo inexistente o cuenta inactiva no se guarda nada. |
 | `PasswordResetConfirmIntegrationTest` | Confirmar actualiza la contraseña, guarda el historial y consume el token; token inexistente, reutilizado o vencido dan el mismo error genérico; formato inválido da validación; reutilizar la contraseña actual o una de las dos últimas da error específico. |
 | `EmailServiceTest`, `EmailServiceSmtpTest`, `BrevoConfigurationTest` | Armado del correo (enlace con el token codificado, HTML escapado), entrega por SMTP local y carga del perfil de correo. |
 
-### Frontend
+### Pruebas del frontend
 
 | Test | Qué verifica |
-|---|---|
+| --- | --- |
 | `PasswordRecoveryRequestPage.test.jsx` | Validación del correo, envío sin espacios, confirmación neutra y avisos de error. |
 | `NewPasswordPage.test.jsx` | Validaciones del cliente, envío del token y la contraseña, y cada respuesta del backend (`TOKEN_INVALIDO`, `CONTRASENA_REUTILIZADA`, `VALIDATION_ERROR`, sin conexión). |
 | `PasswordRecoveryService.test.js` | Contrato de los dos endpoints y propagación de errores. |

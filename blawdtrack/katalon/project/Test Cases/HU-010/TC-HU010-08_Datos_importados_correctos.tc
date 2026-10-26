@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-08 Datos importados correctos</description>
+   <name>TC-HU010-08_Datos_importados_correctos</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>8f01195e-09dc-4cfb-b6bb-ee0bd05f5314</testCaseGuid>
+</TestCaseEntity>

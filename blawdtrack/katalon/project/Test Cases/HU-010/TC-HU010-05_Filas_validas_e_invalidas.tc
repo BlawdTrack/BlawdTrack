@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-05 Filas validas e invalidas mezcladas</description>
+   <name>TC-HU010-05_Filas_validas_e_invalidas</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>2d69f9e2-14aa-4b7b-9f91-d0fb6bd94a13</testCaseGuid>
+</TestCaseEntity>
