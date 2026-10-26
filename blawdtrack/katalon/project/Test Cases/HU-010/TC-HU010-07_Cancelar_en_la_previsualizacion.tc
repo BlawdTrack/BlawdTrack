@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-07 Cancelar en la previsualizacion</description>
+   <name>TC-HU010-07_Cancelar_en_la_previsualizacion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>7866201c-0d16-418e-a676-4cccdea1660b</testCaseGuid>
+</TestCaseEntity>
