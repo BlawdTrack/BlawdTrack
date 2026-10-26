@@ -9,6 +9,7 @@ import com.blawdgourmet.blawdtrack.users.constant.RoleName;
 import jakarta.servlet.DispatcherType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -57,10 +58,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            @Value("${app.cors.allowed-origins:*}") List<String> allowedOrigins) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource(allowedOrigins)))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
@@ -117,12 +120,13 @@ public class SecurityConfig {
     }
 
     /**
-     * Habilita CORS para que el frontend de React pueda consumir la API
-     * desde un origen distinto durante el desarrollo.
+     * Habilita CORS para que el frontend de React pueda consumir la API desde un origen distinto.
+     * {@code app.cors.allowed-origins} lista los orígenes permitidos separados por comas; sin definir
+     * (desarrollo) se aceptan todos, y en un despliegue real debe ser la URL pública del frontend.
      */
-    private CorsConfigurationSource corsConfigurationSource() {
+    private CorsConfigurationSource corsConfigurationSource(List<String> allowedOrigins) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
