@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU012-03 Cancelar en el dialogo</description>
+   <name>TC-HU012-03_Cancelar_en_el_dialogo</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>7601f67a-19b5-47ad-8c4d-b2e044fd8807</testCaseGuid>
+</TestCaseEntity>

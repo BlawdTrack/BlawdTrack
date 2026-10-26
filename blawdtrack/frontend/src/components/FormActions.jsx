@@ -1,0 +1,44 @@
+import { Box, Button, CircularProgress } from '@mui/material';
+import { RADIUS, FONT, TOUCH_TARGET, rem } from '../theme';
+
+/**
+ * Botones al pie de un formulario de creación: el principal (con un punto naranja, como el resto de la
+ * aplicación) y "Descartar".
+ * @param {{ submitLabel: string, submittingLabel: string, isSubmitting: boolean, onDiscard: Function,
+ *   submitDisabled?: boolean }} props `submitDisabled` bloquea el botón principal mientras falta algo por completar.
+ */
+export default function FormActions({ submitLabel, submittingLabel, isSubmitting, onDiscard, submitDisabled = false }) {
+  return (
+    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', '& button': { width: { xs: '100%', sm: 'auto' } } }}>
+      <Button
+        type="submit"
+        variant="contained"
+        data-testid="form-submit"
+        disabled={isSubmitting || submitDisabled}
+        sx={{ fontWeight: 600, px: 4, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm, gap: 1.2, boxShadow: 'none' }}
+      >
+        {isSubmitting ? (
+          <>
+            <CircularProgress size={18} color="inherit" />
+            {submittingLabel}
+          </>
+        ) : (
+          <>
+            {submitLabel}
+            <Box component="span" sx={{ width: rem(12), height: rem(12), borderRadius: '50%', backgroundColor: '#FF6C0E' }} />
+          </>
+        )}
+      </Button>
+      <Button
+        type="button"
+        variant="outlined"
+        onClick={onDiscard}
+        data-testid="form-discard"
+        disabled={isSubmitting}
+        sx={{ color: 'primary.main', border: '1.5px solid', borderColor: 'neutral.borderStrong', fontWeight: 600, px: 3, minHeight: TOUCH_TARGET, fontSize: FONT.md, borderRadius: RADIUS.sm }}
+      >
+        Descartar
+      </Button>
+    </Box>
+  );
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU012-07 Rol sin permiso</description>
+   <name>TC-HU012-07_Rol_sin_permiso</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>0f59dc3c-0259-414b-9318-4c06fb05c1db</testCaseGuid>
+</TestCaseEntity>

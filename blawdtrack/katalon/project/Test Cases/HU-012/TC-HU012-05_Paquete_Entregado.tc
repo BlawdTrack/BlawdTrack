@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU012-05 Paquete Entregado</description>
+   <name>TC-HU012-05_Paquete_Entregado</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>107dbae9-100d-4fbb-b1cb-63601ab49924</testCaseGuid>
+</TestCaseEntity>

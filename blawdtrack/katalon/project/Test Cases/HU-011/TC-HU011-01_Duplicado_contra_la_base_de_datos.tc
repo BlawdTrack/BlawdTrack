@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU011-01 Duplicado contra la base de datos</description>
+   <name>TC-HU011-01_Duplicado_contra_la_base_de_datos</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>54aec8b7-79b4-4842-ad5f-48a9e1c16e70</testCaseGuid>
+</TestCaseEntity>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Busca un paquete por su número de envío real y verifica su información básica.</description>
+   <name>TC-HU014-01_Buscar_por_numero_de_envio</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>1a78bc09-8933-4c03-a49c-0b0f8f0efccf</testCaseGuid>
+</TestCaseEntity>

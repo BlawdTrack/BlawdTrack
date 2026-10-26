@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Busca paquetes con una coincidencia parcial en el nombre del cliente.</description>
+   <name>TC-HU014-03_Busqueda_parcial_por_cliente</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>0a3a3e99-ffc8-4064-ad92-994fd3cc7c9b</testCaseGuid>
+</TestCaseEntity>

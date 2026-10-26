@@ -1,0 +1,5 @@
+Packing Number,SO Number,Customer Name,Shipping Address,Shipping Phone,Notes,Item Name,Quantity Packed
+E2E-HU010-T06-001,,Cliente Sin Orden,"San Jose, Tibas",88006001,,Brownie,1
+E2E-HU010-T06-002,SO-HU010-T06-002,,"San Jose, Curridabat",88006002,,Galleta,1
+E2E-HU010-T06-003,SO-HU010-T06-003,Cliente Sin Direccion,,88006003,,Alfajor,1
+E2E-HU010-T06-004,,Cliente Sin Orden Ni Direccion,,88006004,,Brownie,1

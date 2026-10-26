@@ -1,0 +1,16 @@
+/*
+ * Reset mínimo de la aplicación. La tipografía, los colores y los espaciados los define el tema de MUI
+ * (src/theme.js) junto con CssBaseline; aquí no se fija el tamaño de letra de la página (queda el del
+ * navegador, 16px) ni se centra el texto, para que `rem` y `px` midan lo mismo en todas las pantallas.
+ */
+body {
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}

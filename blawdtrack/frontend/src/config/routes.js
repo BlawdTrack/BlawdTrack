@@ -1,0 +1,35 @@
+/** Rutas de la aplicación en un solo lugar; `App.jsx` las registra y el menú lateral las enlaza. */
+export const ROUTES = {
+  LOGIN: '/login',
+  PASSWORD_RECOVERY: '/password-recovery',
+  // Destino del enlace del correo de recuperación (MAIL_LINK_URL del backend).
+  PASSWORD_RESET: '/recovery',
+  MAIN_MENU: '/main-menu',
+  // Menú de cada módulo: lista las funciones del módulo que el rol puede usar (ver NAVIGATION_GROUPS).
+  MODULE_USERS: '/main-menu/usuarios',
+  MODULE_COURIERS: '/main-menu/mensajeros',
+  MODULE_ADMINS: '/main-menu/administradores',
+  MODULE_SETTINGS: '/main-menu/ajustes',
+  MODULE_PACKAGE_MANAGEMENT: '/main-menu/gestion-paquetes',
+  // Mismo flujo que PASSWORD_RECOVERY, pero dentro del menú principal para un
+  // usuario ya logueado (mantiene la barra lateral visible). Lo usan el Súper Usuario y el Administrador de Ventas.
+  PASSWORD_RESET_OWN: '/main-menu/restablecer-contrasena',
+  // Importación de paquetes: una sola pantalla con los tres pasos (cargar, revisar, listo); sin menú de módulo.
+  PACKAGE_IMPORT: '/main-menu/paquetes/importar',
+  PACKAGE_SEARCH: '/main-menu/paquetes/buscar',
+  // Ficha de un paquete, a la que se llega desde las filas de la búsqueda (HU-013).
+  PACKAGE_DETAIL: '/main-menu/paquetes/buscar/:shipmentNumber',
+  COURIER_CREATE: '/main-menu/couriers/new',
+  COURIER_UPDATE: '/editar-mensajero',
+  COURIER_DEACTIVATE: '/main-menu/couriers/deactivate',
+  ADMIN_CREATE: '/main-menu/admins/new',
+  ADMIN_UPDATE: '/main-menu/admins/update',
+  ADMIN_DELETE: '/main-menu/admins/delete',
+  ROLES_PERMISSIONS: '/gestion-roles',
+  // Inicio del rol que no usa el menú principal (HU-001 T12). El Administrador de Ventas usa el menú principal.
+  COURIER_HOME: '/mensajero',
+};
+
+/** Ruta de la ficha del paquete con ese número de envío. */
+export const packageDetailPath = (shipmentNumber) =>
+  `${ROUTES.PACKAGE_SEARCH}/${encodeURIComponent(shipmentNumber)}`;

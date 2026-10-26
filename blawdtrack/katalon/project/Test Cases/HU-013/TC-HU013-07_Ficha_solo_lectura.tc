@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU013-07 Ficha en modo solo lectura</description>
+   <name>TC-HU013-07_Ficha_solo_lectura</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>53c88f99-a44a-4437-b192-2a59fa6429c2</testCaseGuid>
+</TestCaseEntity>

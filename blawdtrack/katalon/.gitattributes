@@ -1,0 +1,2 @@
+# Estos archivos se usan dentro de contenedores Linux o se envian a mysql por una tuberia: siempre con saltos de linea LF.
+* text=auto eol=lf
