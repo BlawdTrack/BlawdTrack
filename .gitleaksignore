@@ -1,0 +1,11 @@
+# Hallazgos de Gitleaks revisados a mano en commits antiguos: son valores de ejemplo o de desarrollo, no secretos
+# reales. Cada línea es la huella (commit:archivo:regla:línea) y solo silencia ese hallazgo exacto.
+
+# README del backend (04c685e9): ejemplos de JWT_SECRET ("una-clave-larga-y-aleatoria-de-al-menos-32-caracteres").
+04c685e9f3ed07dbeaf9341f21ca9bc0bd1710d8:blawdtrack/backend/README.md:generic-api-key:42
+04c685e9f3ed07dbeaf9341f21ca9bc0bd1710d8:blawdtrack/backend/README.md:generic-api-key:48
+
+# application.properties del árbol viejo blawdtrack/src (40aa85d0), hoy borrado: claves de desarrollo y de pruebas
+# ("clave-temporal-de-desarrollo-cambiar-en-produccion..." y "clave-de-pruebas-no-usar-en-produccion...").
+40aa85d090d74fd59e3ca8fe2df8171c0802bcf4:blawdtrack/src/main/resources/application.properties:generic-api-key:16
+40aa85d090d74fd59e3ca8fe2df8171c0802bcf4:blawdtrack/src/test/resources/application.properties:generic-api-key:15
