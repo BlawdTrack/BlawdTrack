@@ -44,22 +44,30 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final boolean resetSuperUserPassword;
+    private final String seedPassword;
 
     /**
      * @param resetSuperUserPassword si es {@code true}, cada arranque deja al Super Usuario por defecto con la
-     *        contraseña de desarrollo aunque alguien la haya cambiado (propiedad
+     *        contraseña sembrada aunque alguien la haya cambiado (propiedad
      *        {@code app.seed.super-user.reset-password}). Solo para entornos de desarrollo: esa contraseña
      *        está en el repositorio, así que en un despliegue real debe estar desactivada.
+     * @param initialPassword contraseña con la que nace el Super Usuario (propiedad
+     *        {@code app.seed.super-user.initial-password}). Si está vacía se usa la de desarrollo; en un
+     *        despliegue real se define por variable de entorno para que la contraseña pública nunca se use.
      */
     public DataSeeder(
             RoleRepository roleRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            @Value("${app.seed.super-user.reset-password:false}") boolean resetSuperUserPassword) {
+            @Value("${app.seed.super-user.reset-password:false}") boolean resetSuperUserPassword,
+            @Value("${app.seed.super-user.initial-password:}") String initialPassword) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.resetSuperUserPassword = resetSuperUserPassword;
+        this.seedPassword = initialPassword == null || initialPassword.isBlank()
+                ? DEFAULT_SUPER_USER_PASSWORD
+                : initialPassword;
     }
 
     @Override
@@ -99,16 +107,16 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         if (usesLegacyDefaultPassword(admin)) {
-            admin.setPasswordHash(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD));
+            admin.setPasswordHash(passwordEncoder.encode(seedPassword));
             log.info(
                     "Default Super User legacy password updated"
             );
             updated = true;
         }
 
-        if (resetSuperUserPassword && !hasDefaultPassword(admin)) {
+        if (resetSuperUserPassword && !hasSeedPassword(admin)) {
             // changePassword también cierra las sesiones abiertas con la contraseña anterior.
-            admin.changePassword(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD));
+            admin.changePassword(passwordEncoder.encode(seedPassword));
             log.warn(
                     "Default Super User password restored (app.seed.super-user.reset-password=true); "
                             + "disable it outside development"
@@ -130,7 +138,7 @@ public class DataSeeder implements CommandLineRunner {
         admin.setFullName(DEFAULT_SUPER_USER_NAME);
 
         if (usesLegacyDefaultPassword(admin)) {
-            admin.setPasswordHash(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD));
+            admin.setPasswordHash(passwordEncoder.encode(seedPassword));
         }
 
         userRepository.save(admin);
@@ -154,7 +162,7 @@ public class DataSeeder implements CommandLineRunner {
                 .documentId("000000000")
                 .fullName(DEFAULT_SUPER_USER_NAME)
                 .email(DEFAULT_SUPER_USER_EMAIL)
-                .passwordHash(passwordEncoder.encode(DEFAULT_SUPER_USER_PASSWORD))
+                .passwordHash(passwordEncoder.encode(seedPassword))
                 .phone("00000000")
                 .status(UserStatus.ACTIVE)
                 .role(superUserRole)
@@ -162,17 +170,20 @@ public class DataSeeder implements CommandLineRunner {
 
         userRepository.save(admin);
 
-        log.warn(
-                "Default Super User created ({}). "
-                        + "A password change should be enforced "
-                        + "before going to production.",
-                DEFAULT_SUPER_USER_EMAIL
-        );
+        if (DEFAULT_SUPER_USER_PASSWORD.equals(seedPassword)) {
+            log.warn(
+                    "Default Super User created ({}) with the public development password. "
+                            + "Set app.seed.super-user.initial-password before going to production.",
+                    DEFAULT_SUPER_USER_EMAIL
+            );
+        } else {
+            log.info("Default Super User created ({}) with the configured initial password", DEFAULT_SUPER_USER_EMAIL);
+        }
     }
 
-    private boolean hasDefaultPassword(User user) {
+    private boolean hasSeedPassword(User user) {
         return passwordEncoder.matches(
-                DEFAULT_SUPER_USER_PASSWORD,
+                seedPassword,
                 user.getPasswordHash()
         );
     }

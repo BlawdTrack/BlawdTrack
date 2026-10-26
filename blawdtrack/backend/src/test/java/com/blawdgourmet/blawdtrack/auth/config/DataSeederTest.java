@@ -11,9 +11,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.blawdgourmet.blawdtrack.users.constant.RoleName;
+import com.blawdgourmet.blawdtrack.users.model.Role;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.repository.RoleRepository;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
@@ -42,7 +45,24 @@ class DataSeederTest {
     }
 
     private DataSeeder seeder(boolean resetPassword) {
-        return new DataSeeder(roles, users, encoder, resetPassword);
+        return seeder(resetPassword, "");
+    }
+
+    private DataSeeder seeder(boolean resetPassword, String initialPassword) {
+        return new DataSeeder(roles, users, encoder, resetPassword, initialPassword);
+    }
+
+    /** Sin Super Usuario sembrado: el seeder lo crea y devuelve el que guardó. */
+    private User createdSuperUser(String initialPassword) {
+        when(users.findByEmail(EMAIL)).thenReturn(Optional.empty());
+        when(users.findByEmail("alicia@blawdgourmet.com")).thenReturn(Optional.empty());
+        when(roles.findByName(RoleName.SUPER_USER)).thenReturn(Optional.of(Role.builder().name(RoleName.SUPER_USER).build()));
+
+        seeder(false, initialPassword).run();
+
+        ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+        verify(users).save(saved.capture());
+        return saved.getValue();
     }
 
     @Test
@@ -76,5 +96,20 @@ class DataSeederTest {
         assertThat(superUser.getPasswordHash()).isEqualTo(hashBefore);
         assertThat(encoder.matches(DEFAULT_PASSWORD, superUser.getPasswordHash())).isFalse();
         verify(users, never()).save(any());
+    }
+
+    @Test
+    void alCrearloUsaLaContrasenaInicialConfigurada() {
+        User created = createdSuperUser("clave-privada-de-produccion-1");
+
+        assertThat(encoder.matches("clave-privada-de-produccion-1", created.getPasswordHash())).isTrue();
+        assertThat(encoder.matches(DEFAULT_PASSWORD, created.getPasswordHash())).isFalse();
+    }
+
+    @Test
+    void sinContrasenaInicialConfiguradaConservaLaDeDesarrollo() {
+        User created = createdSuperUser("  ");
+
+        assertThat(encoder.matches(DEFAULT_PASSWORD, created.getPasswordHash())).isTrue();
     }
 }
