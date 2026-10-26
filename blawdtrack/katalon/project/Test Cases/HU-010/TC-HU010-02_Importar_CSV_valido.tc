@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-02 Importar CSV valido</description>
+   <name>TC-HU010-02_Importar_CSV_valido</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>14fd7474-1409-4a52-a20e-cd63a6da6ebf</testCaseGuid>
+</TestCaseEntity>

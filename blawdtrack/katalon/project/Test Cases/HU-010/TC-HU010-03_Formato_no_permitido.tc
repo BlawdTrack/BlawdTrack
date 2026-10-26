@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-03 Formato no permitido</description>
+   <name>TC-HU010-03_Formato_no_permitido</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>79caf234-adbd-4036-9264-587d95806fb0</testCaseGuid>
+</TestCaseEntity>

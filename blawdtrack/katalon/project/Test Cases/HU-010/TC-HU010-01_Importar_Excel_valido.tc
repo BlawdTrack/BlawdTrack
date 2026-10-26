@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-01 Importar Excel valido</description>
+   <name>TC-HU010-01_Importar_Excel_valido</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>27152859-041d-47bc-8fd6-6d6a62d0690d</testCaseGuid>
+</TestCaseEntity>

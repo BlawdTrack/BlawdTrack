@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-06 Todas las filas invalidas</description>
+   <name>TC-HU010-06_Todas_las_filas_invalidas</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>d2a71602-7cfc-4db5-a8d3-239c0c42fc32</testCaseGuid>
+</TestCaseEntity>

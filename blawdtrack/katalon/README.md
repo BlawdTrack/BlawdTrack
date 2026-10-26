@@ -23,6 +23,7 @@ El proyecto de Katalon Studio está en `project/` y hoy trae 5 casos de la HU-01
 15. [Estructura de la carpeta](#15-estructura-de-la-carpeta)
 16. [Proyecto de Katalon Studio (HU-011)](#16-proyecto-de-katalon-studio-hu-011)
 17. [Pruebas de la HU-012 (eliminar paquetes)](#17-pruebas-de-la-hu-012-eliminar-paquetes)
+18. [Pruebas de la HU-010 (importar paquetes)](#18-pruebas-de-la-hu-010-importar-paquetes)
 
 ---
 
@@ -142,12 +143,12 @@ Si una prueba borra un paquete, `prepare-data.ps1` lo recrea.
 
 ## 8. Archivos de importación
 
-En `environment/import-files/` hay tres CSV con el formato de Zoho. Resultado esperado en la previsualización:
+En `environment/import-files/` hay CSV con el formato de Zoho (los `hu010-*` se describen en la sección 18). Resultado esperado en la previsualización:
 
 | Archivo | Válidos | Inválidos | Duplicados | Para qué |
 | --- | --- | --- | --- | --- |
 | `importacion-valida.csv` | 4 | 0 | 0 | Importación correcta, con horarios de entrega variados (09-16, 09-14, 14-16, 10-14). |
-| `importacion-con-errores.csv` | 1 | 4 | 0 | Campos obligatorios vacíos. |
+| `importacion-con-errores.csv` | 2 | 3 | 0 | Campos obligatorios vacíos (orden, cliente o dirección). `E2E-ERR-005` no trae teléfono y es válido: el teléfono no es obligatorio. |
 | `importacion-con-duplicados.csv` | 2 | 0 | 2 | `E2E-PEND-01` ya está registrado (necesita haber corrido `prepare-data.ps1`); `E2E-DUP-001` viene dos veces con datos distintos (se conserva el primero y la copia queda como duplicado en el archivo); `E2E-DUP-002` viene en dos filas con los mismos datos y se agrupa en un solo paquete. |
 
 Los paquetes que se importan empiezan con `E2E-`, así que el siguiente `prepare-data.ps1` los borra y el archivo
@@ -208,7 +209,7 @@ Endpoints de paquetes que usan las HU (bajo `/api/v1/packages`): `GET /search`, 
 
 | HU | Qué se prueba | Cuenta | Datos |
 | --- | --- | --- | --- |
-| HU-010 | Previsualización con horario de entrega | Administrador de Ventas o Súper Usuario | `importacion-valida.csv` |
+| HU-010 | Importar Excel y CSV, formato no permitido, errores, cancelar y datos registrados | Ventas o Súper Usuario; Mensajero para denegación | `hu010-*` y `importacion-valida.csv` (sección 18) |
 | HU-011 | Duplicados y errores | Ventas o Súper Usuario | `importacion-con-duplicados.csv`, `importacion-con-errores.csv`; `E2E-PEND-01` como paquete ya registrado |
 | HU-012 | Eliminar paquetes (solo Pendiente/Asignado) | Ventas o Súper Usuario | `E2E-DEL-*` para borrar; `E2E-ENV-01`, `E2E-TRANS-01`, `E2E-ENTR-01` para comprobar que no se puede |
 | HU-013 | Línea de tiempo de la ficha | Cualquiera con acceso | `E2E-ENTR-01` (completa) y un paquete recién importado (evento "Registrado como Pendiente") |
@@ -348,3 +349,39 @@ Se abren y se corren igual que los de la HU-011 (sección 16).
 
 - Los avisos flotantes no tienen `data-testid`: `Packages.verifyMessage` los reconoce por `role="status"` y su texto.
 - Desde #155 el Súper Usuario también puede eliminar; el único rol sin permiso es el Mensajero.
+
+## 18. Pruebas de la HU-010 (importar paquetes)
+
+Están en `Test Cases/HU-010/` y la suite es `Test Suites/HU-010`. Se abren y se corren igual que los de la HU-011
+(sección 16). Los casos que importan ejecutan `scripts\prepare-data.ps1` al empezar, así que se pueden repetir sin
+volver a levantar nada. Código compartido en `Keywords/com/blawd/Imports.groovy`.
+
+### Casos
+
+| Caso | Archivo | Qué comprueba |
+| --- | --- | --- |
+| TC-HU010-01 Importar Excel válido | `hu010-tc01-valido.xlsx` | Previsualización con 4 válidos; al confirmar, aviso "4 paquetes registrados" y cada paquete queda en la lista como Pendiente. |
+| TC-HU010-02 Importar CSV válido | `importacion-valida.csv` | Lo mismo con el CSV. |
+| TC-HU010-03 Formato no permitido | `hu010-tc03-formato-no-permitido.pdf` y `.txt` | Aviso "Formato no compatible. Solo se permiten archivos .xlsx y .csv.", el archivo no queda seleccionado y "Revisar datos" sigue bloqueado. |
+| TC-HU010-04 Falta columna obligatoria | `hu010-tc04-sin-columna-telefono.csv` | Debe marcar las 2 filas con error por el teléfono y no dejar confirmar. **Falla hoy** (ver abajo). |
+| TC-HU010-05 Filas válidas e inválidas | `importacion-con-errores.csv` | 5 leídos, 2 válidos y 3 con error, con el motivo de cada fila antes de confirmar; solo se registran los 2 válidos. |
+| TC-HU010-06 Todas inválidas | `hu010-tc06-todo-invalido.csv` | "Ningún registro se puede importar"; "Confirmar importación" bloqueado. |
+| TC-HU010-07 Cancelar en la previsualización | `importacion-valida.csv` | "Cambiar archivo" y "Cancelar" salen sin registrar nada. |
+| TC-HU010-08 Datos importados correctos | `importacion-valida.csv` | En la lista, orden, envío, cliente, dirección, teléfono y horario de los 4 paquetes coinciden con el archivo. |
+| TC-HU010-09 Rol sin permiso | (sin archivo) | El Mensajero vuelve a su inicio, no ve la importación y la API responde 403. |
+
+### Notas
+
+- **TC-HU010-04 falla a propósito.** Refleja literalmente el criterio ("sin teléfono: error que indica el campo faltante").
+  El backend (`RequiredPackageFieldsValidator`) solo exige número de envío, número de orden, cliente y dirección, así que
+  hoy un archivo sin teléfono se acepta como válido. El caso pasará cuando el teléfono sea obligatorio o cuando el
+  criterio cambie.
+
+- `hu010-tc01-valido.xlsx` tiene los mismos datos que `importacion-valida.csv` pero con números `E2E-HU010-XLS-*`, para
+  que el 01 y el 02 no choquen entre sí. Se generó con un script, sin Excel.
+
+- El horario que muestra la lista es el texto de la columna Notes (`Antes de las 3 p.m.`); sin nota queda el horario por
+  defecto `9:00 a.m. a 4:00 p.m.`.
+
+- Escritos sin abrir Katalon Studio: si al correrlos marca algún error, corrígelo ahí y avisa para dejarlo en el
+  repositorio.

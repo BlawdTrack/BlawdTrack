@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU010-04 Falta columna obligatoria</description>
+   <name>TC-HU010-04_Falta_columna_obligatoria</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>3fec03e1-75c5-454f-bdc2-421948ac04d5</testCaseGuid>
+</TestCaseEntity>
