@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Verifica que un Super User no puede actualizar un administrador inexistente.</description>
+   <name>TC-HU007-05-Actualizar-Administrador-Inexistente</name>
+   <tag>GenAI</tag>
+   <comment></comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>10497fbe-6d16-4fca-9dde-ab00b43710b2</testCaseGuid>
+</TestCaseEntity>

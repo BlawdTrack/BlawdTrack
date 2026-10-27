@@ -1,5 +1,7 @@
 # HU007 · Edición de administradores
 
+Inventario vigente, comandos y pruebas funcionales incorporadas: [Pruebas de HU007](../HU007-pruebas.md).
+
 **Estado:** en desarrollo (Sprint 3). Tasks 91 a 95 hechas: búsqueda y validación de existencia del administrador, actualización de datos
 con cierre de sesión y bitácora (backend), y la pantalla *Actualizar administrador* con su integración y avisos
 (frontend).

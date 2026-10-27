@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Verifica que actualizar un administrador existente con nombre completo vacío sea rechazado sin modificar sus datos.</description>
+   <name>TC-HU007-07-Actualizar-Nombre-Vacio</name>
+   <tag>GenAI</tag>
+   <comment></comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>ea06fccd-28fb-4583-b4c1-1ae410eaddc3</testCaseGuid>
+</TestCaseEntity>

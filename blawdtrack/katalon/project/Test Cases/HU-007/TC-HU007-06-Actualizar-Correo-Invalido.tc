@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Verifica que actualizar un administrador existente con un correo inválido sea rechazado sin cambiar sus datos.</description>
+   <name>TC-HU007-06-Actualizar-Correo-Invalido</name>
+   <tag>GenAI</tag>
+   <comment></comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>76a95803-2abc-4576-a7bf-8131b302bd09</testCaseGuid>
+</TestCaseEntity>

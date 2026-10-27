@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Verifica que un Super User pueda buscar un administrador por cédula, actualizar únicamente su nombre completo y confirmar que el cambio persiste.</description>
+   <name>TC-HU007-01-Actualizar-Nombre-Completo</name>
+   <tag>GenAI</tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>8d957970-7588-4b12-badc-5acb2cbb75b5</testCaseGuid>
+</TestCaseEntity>
