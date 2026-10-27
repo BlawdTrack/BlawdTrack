@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Verifica que un Super User pueda actualizar únicamente el correo válido de un administrador, confirmar el Snackbar Material UI y comprobar la persistencia del cambio sin modificar nombre completo, contraseña ni estado de acceso.</description>
+   <name>TC-HU007-02-Actualizar-Correo-Valido</name>
+   <tag>GenAI</tag>
+   <comment></comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>854fa1d8-cedf-4ba8-94eb-0c85f8516ab8</testCaseGuid>
+</TestCaseEntity>

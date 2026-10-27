@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Actualiza únicamente la contraseña del administrador 1-2345-6789 y verifica rechazo de la contraseña anterior y acceso con la nueva. Conserva correo, nombre completo y estado de acceso.</description>
+   <name>TC-HU007-03-Cambiar-Contrasena</name>
+   <tag>GenAI,HU007,funcional,contraseña</tag>
+   <comment>Variables de entorno requeridas: BLAWDTRACK_SUPER_USER_EMAIL, BLAWDTRACK_SUPER_USER_PASSWORD, BLAWDTRACK_ADMIN_ORIGINAL_PASSWORD y BLAWDTRACK_ADMIN_NEW_PASSWORD. Procedimiento de reset: si una ejecución queda interrumpida después del guardado, la contraseña vigente es BLAWDTRACK_ADMIN_NEW_PASSWORD; ejecutar este caso con BLAWDTRACK_ADMIN_ORIGINAL_PASSWORD igual a esa contraseña vigente y BLAWDTRACK_ADMIN_NEW_PASSWORD igual a la contraseña de restauración. El flujo nunca modifica la contraseña del Super User.</comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>2f06ae8a-9384-401c-9318-e0046034f37e</testCaseGuid>
+</TestCaseEntity>

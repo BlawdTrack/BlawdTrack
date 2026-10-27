@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Verifica que una actualización exitosa del nombre completo de un administrador de ventas crea un registro persistente de auditoría y que la restauración queda auditada.</description>
+   <name>TC-HU007-09-Verificar-Historial-Auditoria</name>
+   <tag>GenAI</tag>
+   <comment>Usa Java HttpClient; no registra credenciales, JWTs ni respuestas HTTP completas. Restaura el nombre original en finally.</comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>a36c81c6-8716-4e8d-8440-0d8bf8aa42cc</testCaseGuid>
+</TestCaseEntity>

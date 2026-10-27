@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Desactiva a Carlos durante una sesión activa, verifica el rechazo de operaciones y de nuevas sesiones, y restaura el estado Active incluso si falla la prueba.</description>
+   <name>TC-HU007-04-Desactivar-Administrador-Sesion-Activa</name>
+   <tag>GenAI</tag>
+   <comment></comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>76fe1218-739e-4e14-84a2-0b8538937c29</testCaseGuid>
+</TestCaseEntity>

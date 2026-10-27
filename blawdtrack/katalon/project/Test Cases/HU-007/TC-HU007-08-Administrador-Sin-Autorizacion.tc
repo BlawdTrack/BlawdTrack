@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>Verifica que un Administrador de Ventas no puede actualizar a otro administrador mediante el endpoint protegido de la API.</description>
+   <name>TC-HU007-08-Administrador-Sin-Autorizacion</name>
+   <tag>GenAI</tag>
+   <comment></comment>
+   <origin>STUDIOASSIST</origin>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>a8bfdbdd-a1a5-4730-8043-01b590829fdb</testCaseGuid>
+</TestCaseEntity>

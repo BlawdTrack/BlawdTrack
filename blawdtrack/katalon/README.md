@@ -2,7 +2,9 @@
 
 Esta carpeta deja listo todo lo que se necesita **antes** de escribir los casos de Katalon: un entorno que se levanta
 y se reinicia con un comando, cuentas conocidas, datos de prueba, archivos de importación y selectores estables.
-El proyecto de Katalon Studio está en `project/` y hoy trae 5 casos de la HU-011 (sección 16) y 7 de la HU-012 (sección 17); las demás HU se agregan encima de esta base.
+El proyecto de Katalon Studio está en `project/` y trae 5 casos de la HU-011 (sección 16), 7 de la HU-012 (sección 17) y 9 de la HU007.
+Para HU007, consultar el [inventario, preparación de datos y ejecución](../docs/HU007-pruebas.md#suite-funcional-de-katalon).
+Su suite conserva una preparación de datos propia; las cuentas de `prepare-data.ps1` no sustituyen sus precondiciones.
 
 ## Contenido
 
