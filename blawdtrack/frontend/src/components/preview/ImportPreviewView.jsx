@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import StatusMessage from '../StatusMessage';
+import PreviewErrorList from './PreviewErrorList';
 import PreviewFilters from './PreviewFilters';
 import PreviewRecordList from './PreviewRecordList';
 import PreviewSearchField from './PreviewSearchField';
@@ -64,6 +65,7 @@ export default function ImportPreviewView({ preview }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.75 }}>
       <StatusMessage severity={alert.severity} title={alert.title} message={alert.message} testId="import-summary" />
+      <PreviewErrorList rows={preview.rows} />
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75, flexWrap: 'wrap' }}>
         {preview.fileName && (

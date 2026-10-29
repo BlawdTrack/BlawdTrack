@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import StatusMessage from '../StatusMessage';
 import FileDropzone from './FileDropzone';
 import ImportFileHelp from './ImportFileHelp';
@@ -43,7 +43,7 @@ export default function ImportUploadStep({ file, alertMessage = null, alertSever
             variant="contained"
             data-testid="import-review"
             disabled={isUploading || !file}
-            endIcon={isUploading ? null : <ArrowForwardOutlinedIcon />}
+            startIcon={isUploading ? null : <FactCheckOutlinedIcon />}
             sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm, boxShadow: 'none', gap: 1 }}
           >
             {isUploading ? (

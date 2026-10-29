@@ -11,18 +11,40 @@ const fileOf = (name, content = 'contenido') => new File([content], name);
 afterEach(() => cleanup());
 
 describe('ImportFileHelp', () => {
-  it('ofrece la ayuda cerrada y, al abrirla, explica formato, columnas y duplicados', async () => {
+  it('muestra la ayuda abierta con formato, columnas y duplicados, y se puede cerrar', async () => {
     const user = userEvent.setup();
     render(<ImportFileHelp />);
 
     const toggle = screen.getByRole('button', { name: '¿Cómo debe ser el archivo?' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(/se marca como duplicado y no se importa/)).toBeVisible();
 
     await user.click(toggle);
 
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText(/Columnas obligatorias: "SO Number"/)).toBeVisible();
-    expect(screen.getByText(/se marca como duplicado y no se importa/)).toBeVisible();
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('lista las columnas esperadas e indica cuáles son obligatorias', () => {
+    render(<ImportFileHelp />);
+
+    const rows = within(screen.getByRole('table', { name: 'Columnas del archivo' })).getAllByRole('row').slice(1);
+    const byColumn = Object.fromEntries(rows.map((row) => [within(row).getByRole('rowheader').textContent, within(row).getAllByRole('cell')[0].textContent]));
+
+    expect(byColumn).toMatchObject({ 'SO Number': 'Sí', 'Customer Name': 'Sí', 'Packing Number': 'No', 'Shipping Address': 'No', 'Shipping Phone': 'No', Schedule: 'No' });
+  });
+
+  it('descarga el CSV de ejemplo', async () => {
+    const user = userEvent.setup();
+    URL.createObjectURL = vi.fn(() => 'blob:ejemplo');
+    URL.revokeObjectURL = vi.fn();
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    render(<ImportFileHelp />);
+
+    await user.click(screen.getByRole('button', { name: 'Descargar CSV de ejemplo' }));
+
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+    click.mockRestore();
   });
 });
 

@@ -3,6 +3,7 @@ import { render, screen, within, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import StatusRow from '../StatusRow';
 import ImportPreviewView from './ImportPreviewView';
+import PreviewErrorList from './PreviewErrorList';
 import PreviewFilters from './PreviewFilters';
 import PreviewRecordList from './PreviewRecordList';
 import PreviewRecordRow from './PreviewRecordRow';
@@ -29,6 +30,32 @@ const previewOf = (overrides) =>
   });
 
 afterEach(() => cleanup());
+
+describe('PreviewErrorList', () => {
+  it('dice qué registro falló y por qué', () => {
+    render(<PreviewErrorList rows={previewOf().rows} />);
+
+    const list = screen.getByTestId('import-error-list');
+    expect(within(list).getByText('Qué corregir en el archivo')).toBeInTheDocument();
+    expect(within(list).getByText(/Envío BG-3 · Orden ZI-3:/)).toBeInTheDocument();
+    expect(within(list).getByText(/El campo teléfono es obligatorio/)).toBeInTheDocument();
+  });
+
+  it('con más de cinco errores lista cinco y manda el resto a la tabla', () => {
+    const invalidRecords = Array.from({ length: 7 }, (_, i) => ({ packageData: { shipmentNumber: `E-${i}`, orderNumber: `O-${i}` }, issues: [{ field: 'phone', message: 'Falta el teléfono' }] }));
+
+    render(<PreviewErrorList rows={previewOf({ invalidRecords, invalidRecordsCount: 7 }).rows} />);
+
+    expect(within(screen.getByTestId('import-error-list')).getAllByTestId('import-error-item')).toHaveLength(5);
+    expect(screen.getByText(/y 2 registros más/)).toBeInTheDocument();
+  });
+
+  it('no aparece si no hay registros con error', () => {
+    render(<PreviewErrorList rows={previewOf({ invalidRecords: [], invalidRecordsCount: 0 }).rows} />);
+
+    expect(screen.queryByTestId('import-error-list')).not.toBeInTheDocument();
+  });
+});
 
 describe('StatusRow', () => {
   it('se dibuja como elemento de lista con su contenido', () => {

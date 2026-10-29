@@ -23,7 +23,9 @@ La configuración está en `src/main/resources/application.properties` y se ajus
 | `MAIL_HOST`, `MAIL_PORT` | No (`localhost:1025`) | Servidor SMTP. En desarrollo sirve cualquier servidor local de captura de correo. |
 | `MAIL_USERNAME`, `MAIL_PASSWORD` | No | Credenciales SMTP. |
 | `MAIL_SMTP_AUTH`, `MAIL_STARTTLS_ENABLED` | No (`false`) | Autenticación y TLS del SMTP. |
-| `MAIL_FROM` | No | Remitente de los correos. |
+| `MAIL_FROM_EMAIL` | No en desarrollo (`no-reply@blawdtrack.local`); en el perfil `brevo` sí | Correo remitente. Debe estar verificado en Brevo > Senders; usa el de la empresa. |
+| `MAIL_FROM_NAME` | No (`Blawd Gourmet`) | Nombre que ve quien recibe el correo junto al remitente. |
+| `MAIL_FROM` | No | Forma anterior (solo el correo); sigue valiendo como respaldo de `MAIL_FROM_EMAIL`. |
 | `MAIL_LINK_URL` | No (`http://localhost:5173/recovery`) | Enlace base del correo de recuperación de contraseña. |
 
 ### Correo real con Brevo (local)
@@ -36,7 +38,8 @@ sincronizada con la nube**: se guardan en un archivo local fuera del proyecto, p
 ```properties
 spring.mail.username=   # "login SMTP" de Brevo (SMTP & API > SMTP)
 spring.mail.password=   # clave SMTP (no la contraseña de la cuenta)
-app.mail.from=          # remitente verificado en Brevo > Senders
+app.mail.from=          # correo remitente verificado en Brevo > Senders (equivale a MAIL_FROM_EMAIL)
+app.mail.from-name=Blawd Gourmet   # nombre visible (equivale a MAIL_FROM_NAME)
 app.mail.link-url=http://localhost:5173/recovery
 ```
 
@@ -59,6 +62,19 @@ esquema lo crea Flyway al arrancar (`src/main/resources/db/migration`); Hibernat
 Al arrancar, la aplicación siembra los permisos, los tres roles y un **Super Usuario de desarrollo**
 (`superadmin@blawdgourmet.com`). Su contraseña inicial está definida en `DataSeeder` solo para
 desarrollo: **cámbiala antes de cualquier despliegue real**.
+
+## Documentación de la API (Swagger / OpenAPI)
+
+Swagger está **oculto por defecto** (las dos URL responden 404). Para usarlo en desarrollo, arranca el backend con la
+variable de entorno `SWAGGER_ENABLED=true`. Con ella, la API se puede explorar y probar en:
+
+- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
+- **Especificación OpenAPI (JSON):** `http://localhost:8080/v3/api-docs`
+
+La documentación la genera `springdoc-openapi` (dependencia en `pom.xml`) y el esquema de seguridad Bearer JWT está
+declarado en `web/OpenApiConfig.java`. Ambas rutas son públicas (ver `SecurityConfig`), pero casi todos los endpoints
+exigen sesión: abre `POST /api/v1/auth/login` en Swagger, copia el `token` de la respuesta y pégalo en el botón
+**Authorize** (solo el token, sin la palabra `Bearer`).
 
 ## Levantar el backend
 

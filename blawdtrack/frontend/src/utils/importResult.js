@@ -27,18 +27,28 @@ export function buildImportResult(response) {
 const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
 
 /**
- * Aviso que se muestra en "Consultar paquetes" cuando termina la importación: cuántos paquetes se registraron, o una
- * advertencia si el archivo no tenía registros válidos.
- * @param {{ fileName: string, counts: { registered: number } }} result Resultado de `buildImportResult`.
+ * Resumen de lo que pasó con los registros del archivo: importados, duplicados y con error (estos dos quedan fuera).
+ * @param {{ registered: number, duplicate?: number, invalid?: number }} counts
+ */
+const summaryOf = ({ registered, duplicate = 0, invalid = 0 }) =>
+  `Resumen: ${plural(registered, 'importado', 'importados')} · ${plural(duplicate, 'duplicado', 'duplicados')} · ${plural(invalid, 'con error', 'con error')}.`;
+
+/**
+ * Aviso que se muestra en "Consultar paquetes" cuando termina la importación: cuántos paquetes se registraron y el
+ * resumen de importados, duplicados y con error, o una advertencia si el archivo no tenía registros válidos.
+ * @param {{ fileName: string, counts: { registered: number, duplicate?: number, invalid?: number } }} result Resultado de `buildImportResult`.
  * @returns {{ message: string, severity: 'success'|'warning' }}
  */
 export function importResultNotice({ fileName, counts }) {
   const inFile = fileName ? ` de ${fileName}` : '';
   if (counts.registered > 0) {
     return {
-      message: `${plural(counts.registered, 'paquete registrado', 'paquetes registrados')}${inFile}. Los registros con errores y los duplicados se excluyeron.`,
+      message: `${plural(counts.registered, 'paquete registrado', 'paquetes registrados')}${inFile}. ${summaryOf(counts)} Los duplicados y los registros con errores se excluyeron.`,
       severity: 'success',
     };
   }
-  return { message: `No se registró ningún paquete: el archivo${fileName ? ` ${fileName}` : ''} no tenía registros válidos.`, severity: 'warning' };
+  return {
+    message: `No se registró ningún paquete: el archivo${fileName ? ` ${fileName}` : ''} no tenía registros válidos. ${summaryOf(counts)}`,
+    severity: 'warning',
+  };
 }

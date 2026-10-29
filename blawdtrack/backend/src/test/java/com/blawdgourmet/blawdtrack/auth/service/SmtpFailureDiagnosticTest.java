@@ -36,6 +36,14 @@ class SmtpFailureDiagnosticTest {
     }
 
     @Test
+    void identificaElBloqueoPorIpDeBrevoSinExponerLaRespuesta() {
+        var failure = new MailSendException(Map.of("mensaje-privado",
+                new SendFailedException("525 5.7.1 Unauthorized IP address 203.0.113.7")));
+        assertThat(SmtpFailureDiagnostic.describe(failure)).contains("IP_NOT_AUTHORIZED", "525")
+                .doesNotContain("203.0.113.7", "privado");
+    }
+
+    @Test
     void detectaRechazoEnMensajesFallidos() {
         var failure = new MailSendException(Map.of("mensaje-privado",
                 new SendFailedException("550 remitente-privado rechazado")));

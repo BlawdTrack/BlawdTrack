@@ -22,8 +22,9 @@ class EmailServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        service = new EmailService(sender, "no-reply@blawdtrack.test",
+        service = new EmailService(sender, "no-reply@blawdtrack.test", "Blawd Gourmet",
                 "https://blawdtrack.test/recovery",
+                new ClassPathResource("templates/mail/mail-layout.html"),
                 new ClassPathResource("templates/mail/email-with-token.html"),
                 new ClassPathResource("templates/mail/courier-welcome.html"));
     }
@@ -42,7 +43,7 @@ class EmailServiceTest {
         message.saveChanges();
         assertThat(message.getAllRecipients()).hasSize(1);
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo("usuario@example.com");
-        assertThat(message.getFrom()[0].toString()).isEqualTo("no-reply@blawdtrack.test");
+        assertThat(message.getFrom()[0].toString()).isEqualTo("Blawd Gourmet <no-reply@blawdtrack.test>");
         assertThat(message.getSubject()).isEqualTo("BlawdTrack: enlace de recuperación");
         String link = "https://blawdtrack.test/recovery?token=abc%2B%2F%3D%26%3F%C3%B1";
         assertThat(body(message, "text/plain")).contains(link, "ignorá");
@@ -68,10 +69,23 @@ class EmailServiceTest {
     }
 
     @Test
+    void usesOnlyTheAddressWhenNoSenderNameIsConfigured() throws Exception {
+        var unnamed = new EmailService(sender, "no-reply@blawdtrack.test", " ", "https://blawdtrack.test/recovery",
+                new ClassPathResource("templates/mail/mail-layout.html"),
+                new ClassPathResource("templates/mail/email-with-token.html"),
+                new ClassPathResource("templates/mail/courier-welcome.html"));
+        var message = prepare();
+        unnamed.sendEmailWithToken("usuario@example.com", "token");
+        message.saveChanges();
+        assertThat(message.getFrom()[0].toString()).isEqualTo("no-reply@blawdtrack.test");
+    }
+
+    @Test
     void rejectsInvalidLinkUrl() {
         for (String url : new String[]{"javascript:alert(1)", "/reset", "https://example.com/reset?token=old",
                 "https://example.com/reset#fragment", "https://user:password@example.com/reset"}) {
-            assertThatThrownBy(() -> new EmailService(sender, "a@example.com", url,
+            assertThatThrownBy(() -> new EmailService(sender, "a@example.com", "", url,
+                    new ClassPathResource("templates/mail/mail-layout.html"),
                     new ClassPathResource("templates/mail/email-with-token.html"),
                     new ClassPathResource("templates/mail/courier-welcome.html")))
                     .isInstanceOf(IllegalArgumentException.class);
@@ -106,6 +120,34 @@ class EmailServiceTest {
         assertThat(body(message, "text/html"))
                 .contains("Tu cuenta de administrador de ventas en BlawdTrack está lista", "Ab12cd34!")
                 .doesNotContain("{{accountLabel}}", "mensajero");
+    }
+
+    @Test
+    void recoveryEmailUsesTheBrandDesignWithAnActionButton() throws Exception {
+        var message = prepare();
+        service.sendEmailWithToken("usuario@example.com", "token-123");
+        message.saveChanges();
+        String link = "https://blawdtrack.test/recovery?token=token-123";
+        String html = body(message, "text/html");
+        assertThat(html).contains("Blawd Gourmet", "Restablecé tu contraseña", "Crear nueva contraseña",
+                "href=\"" + link + "\"", "#1A3C34", "#FF6C0E", "<title>Restablecé tu contraseña</title>");
+        assertGmailSafe(html);
+    }
+
+    @Test
+    void welcomeEmailUsesTheSameDesignAndFillsTheData() throws Exception {
+        var message = prepare();
+        service.sendCourierWelcome("ana@example.com", "Ana Mora", "Tmp-2026-xyz");
+        message.saveChanges();
+        String html = body(message, "text/html");
+        assertThat(html).contains("Blawd Gourmet", "Hola <strong>Ana Mora</strong>", "ana@example.com",
+                "Tmp-2026-xyz", "Tu cuenta de mensajero en BlawdTrack está lista", "#1A3C34", "#FF6C0E");
+        assertGmailSafe(html);
+    }
+
+    /** Gmail ignora hojas de estilo y bloquea imágenes remotas: todo va en línea y sin recursos externos. */
+    private void assertGmailSafe(String html) {
+        assertThat(html).doesNotContain("{{", "}}", "<img", "<link", "<style", "<script", "src=\"http", "url(");
     }
 
     private String body(Part part, String type) throws Exception {

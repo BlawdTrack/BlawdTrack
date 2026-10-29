@@ -41,9 +41,15 @@ describe('buildImportResult', () => {
 describe('importResultNotice', () => {
   it('avisa cuántos paquetes se registraron y de qué archivo', () => {
     expect(importResultNotice({ fileName: 'zoho.xlsx', counts: { registered: 3 } })).toEqual({
-      message: '3 paquetes registrados de zoho.xlsx. Los registros con errores y los duplicados se excluyeron.',
+      message: '3 paquetes registrados de zoho.xlsx. Resumen: 3 importados · 0 duplicados · 0 con error. Los duplicados y los registros con errores se excluyeron.',
       severity: 'success',
     });
+  });
+
+  it('resume los importados, los duplicados y los registros con error', () => {
+    const { message } = importResultNotice({ fileName: 'zoho.xlsx', counts: { registered: 2, duplicate: 1, invalid: 3 } });
+
+    expect(message).toContain('Resumen: 2 importados · 1 duplicado · 3 con error.');
   });
 
   it('usa el singular con un solo paquete', () => {
@@ -51,8 +57,8 @@ describe('importResultNotice', () => {
   });
 
   it('con cero registrados lo avisa en advertencia', () => {
-    expect(importResultNotice({ fileName: 'zoho.xlsx', counts: { registered: 0 } })).toEqual({
-      message: 'No se registró ningún paquete: el archivo zoho.xlsx no tenía registros válidos.',
+    expect(importResultNotice({ fileName: 'zoho.xlsx', counts: { registered: 0, duplicate: 1, invalid: 2 } })).toEqual({
+      message: 'No se registró ningún paquete: el archivo zoho.xlsx no tenía registros válidos. Resumen: 0 importados · 1 duplicado · 2 con error.',
       severity: 'warning',
     });
   });

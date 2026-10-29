@@ -299,7 +299,7 @@ describe('PackageImportPage (confirmar la importación, pasos 2 y 3)', () => {
     expect(confirmPackageImport).toHaveBeenCalledWith(file);
     await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent(ROUTES.PACKAGE_SEARCH));
     expect(JSON.parse(screen.getByTestId('notice').textContent)).toEqual({
-      message: '2 paquetes registrados de paquetes.xlsx. Los registros con errores y los duplicados se excluyeron.',
+      message: '2 paquetes registrados de paquetes.xlsx. Resumen: 2 importados · 1 duplicado · 1 con error. Los duplicados y los registros con errores se excluyeron.',
       severity: 'success',
     });
   });

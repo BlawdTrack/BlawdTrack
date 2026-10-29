@@ -10,6 +10,7 @@ import com.blawdgourmet.blawdtrack.auth.repository.PasswordResetTokenRepository;
 import com.blawdgourmet.blawdtrack.auth.service.EmailService;
 import com.blawdgourmet.blawdtrack.auth.service.PasswordResetResult;
 import com.blawdgourmet.blawdtrack.auth.service.PasswordResetService;
+import com.blawdgourmet.blawdtrack.auth.service.SmtpFailureDiagnostic;
 import com.blawdgourmet.blawdtrack.users.model.User;
 import com.blawdgourmet.blawdtrack.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
 
         String rawToken = issueToken(user.get());
-        sendResetEmail(user.get().getEmail(), rawToken);
+        sendResetEmail(user.get().getId(), rawToken, user.get().getEmail());
 
         return PasswordResetResult.generated(rawToken, user.get().getId());
     }
@@ -74,7 +75,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         try {
             emailService.sendEmailWithToken(user.getEmail(), rawToken);
         } catch (MailException ex) {
-            log.error("No se pudo enviar el correo de restablecimiento al usuario {}", user.getId(), ex);
+            log.error("No se pudo enviar el correo de restablecimiento al usuario {}: {}", user.getId(),
+                    SmtpFailureDiagnostic.describe(ex));
+            log.debug("Detalle del fallo de envio", ex);
             // Revierte la transacción: sin correo no queda un token que nadie pueda usar.
             throw new PasswordResetEmailException(ex);
         }
@@ -97,14 +100,17 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     }
 
     /**
-     * Un fallo SMTP no se propaga: el endpoint responde siempre igual para no
-     * revelar qué correos existen. El token queda vigente hasta que expire.
+     * Un fallo SMTP no se propaga: el endpoint responde siempre igual para no revelar qué correos existen. Solo
+     * queda en el log, con la etiqueta del motivo (sin credenciales ni mensajes del proveedor); el token queda
+     * vigente hasta que expire.
      */
-    private void sendResetEmail(String email, String rawToken) {
+    private void sendResetEmail(Long userId, String rawToken, String email) {
         try {
             emailService.sendEmailWithToken(email, rawToken);
         } catch (MailException ex) {
-            log.warn("Password reset email could not be sent", ex);
+            log.error("No se pudo enviar el correo de restablecimiento al usuario {}: {}", userId,
+                    SmtpFailureDiagnostic.describe(ex));
+            log.debug("Detalle del fallo de envio", ex);
         }
     }
 
