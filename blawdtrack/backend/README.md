@@ -23,7 +23,9 @@ La configuración está en `src/main/resources/application.properties` y se ajus
 | `MAIL_HOST`, `MAIL_PORT` | No (`localhost:1025`) | Servidor SMTP. En desarrollo sirve cualquier servidor local de captura de correo. |
 | `MAIL_USERNAME`, `MAIL_PASSWORD` | No | Credenciales SMTP. |
 | `MAIL_SMTP_AUTH`, `MAIL_STARTTLS_ENABLED` | No (`false`) | Autenticación y TLS del SMTP. |
-| `MAIL_FROM` | No | Remitente de los correos. |
+| `MAIL_FROM_EMAIL` | No en desarrollo (`no-reply@blawdtrack.local`); en el perfil `brevo` sí | Correo remitente. Debe estar verificado en Brevo > Senders; usa el de la empresa. |
+| `MAIL_FROM_NAME` | No (`Blawd Gourmet`) | Nombre que ve quien recibe el correo junto al remitente. |
+| `MAIL_FROM` | No | Forma anterior (solo el correo); sigue valiendo como respaldo de `MAIL_FROM_EMAIL`. |
 | `MAIL_LINK_URL` | No (`http://localhost:5173/recovery`) | Enlace base del correo de recuperación de contraseña. |
 
 ### Correo real con Brevo (local)
@@ -36,7 +38,8 @@ sincronizada con la nube**: se guardan en un archivo local fuera del proyecto, p
 ```properties
 spring.mail.username=   # "login SMTP" de Brevo (SMTP & API > SMTP)
 spring.mail.password=   # clave SMTP (no la contraseña de la cuenta)
-app.mail.from=          # remitente verificado en Brevo > Senders
+app.mail.from=          # correo remitente verificado en Brevo > Senders (equivale a MAIL_FROM_EMAIL)
+app.mail.from-name=Blawd Gourmet   # nombre visible (equivale a MAIL_FROM_NAME)
 app.mail.link-url=http://localhost:5173/recovery
 ```
 

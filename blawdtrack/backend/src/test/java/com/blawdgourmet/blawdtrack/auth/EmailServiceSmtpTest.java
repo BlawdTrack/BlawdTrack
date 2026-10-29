@@ -38,7 +38,7 @@ class EmailServiceSmtpTest {
             sender.getJavaMailProperties().setProperty("mail.smtp.connectiontimeout", "5000");
             sender.getJavaMailProperties().setProperty("mail.smtp.timeout", "5000");
             sender.getJavaMailProperties().setProperty("mail.smtp.writetimeout", "5000");
-            var service = new EmailService(sender, "no-reply@blawdtrack.test",
+            var service = new EmailService(sender, "no-reply@blawdtrack.test", "Blawd Gourmet",
                     "https://blawdtrack.test/recovery",
                     new ClassPathResource("templates/mail/email-with-token.html"),
                     new ClassPathResource("templates/mail/courier-welcome.html"));

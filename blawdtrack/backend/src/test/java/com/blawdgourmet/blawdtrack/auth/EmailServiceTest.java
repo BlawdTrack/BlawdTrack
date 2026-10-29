@@ -22,7 +22,7 @@ class EmailServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        service = new EmailService(sender, "no-reply@blawdtrack.test",
+        service = new EmailService(sender, "no-reply@blawdtrack.test", "Blawd Gourmet",
                 "https://blawdtrack.test/recovery",
                 new ClassPathResource("templates/mail/email-with-token.html"),
                 new ClassPathResource("templates/mail/courier-welcome.html"));
@@ -42,7 +42,7 @@ class EmailServiceTest {
         message.saveChanges();
         assertThat(message.getAllRecipients()).hasSize(1);
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo("usuario@example.com");
-        assertThat(message.getFrom()[0].toString()).isEqualTo("no-reply@blawdtrack.test");
+        assertThat(message.getFrom()[0].toString()).isEqualTo("Blawd Gourmet <no-reply@blawdtrack.test>");
         assertThat(message.getSubject()).isEqualTo("BlawdTrack: enlace de recuperación");
         String link = "https://blawdtrack.test/recovery?token=abc%2B%2F%3D%26%3F%C3%B1";
         assertThat(body(message, "text/plain")).contains(link, "ignorá");
@@ -68,10 +68,21 @@ class EmailServiceTest {
     }
 
     @Test
+    void usesOnlyTheAddressWhenNoSenderNameIsConfigured() throws Exception {
+        var unnamed = new EmailService(sender, "no-reply@blawdtrack.test", " ", "https://blawdtrack.test/recovery",
+                new ClassPathResource("templates/mail/email-with-token.html"),
+                new ClassPathResource("templates/mail/courier-welcome.html"));
+        var message = prepare();
+        unnamed.sendEmailWithToken("usuario@example.com", "token");
+        message.saveChanges();
+        assertThat(message.getFrom()[0].toString()).isEqualTo("no-reply@blawdtrack.test");
+    }
+
+    @Test
     void rejectsInvalidLinkUrl() {
         for (String url : new String[]{"javascript:alert(1)", "/reset", "https://example.com/reset?token=old",
                 "https://example.com/reset#fragment", "https://user:password@example.com/reset"}) {
-            assertThatThrownBy(() -> new EmailService(sender, "a@example.com", url,
+            assertThatThrownBy(() -> new EmailService(sender, "a@example.com", "", url,
                     new ClassPathResource("templates/mail/email-with-token.html"),
                     new ClassPathResource("templates/mail/courier-welcome.html")))
                     .isInstanceOf(IllegalArgumentException.class);

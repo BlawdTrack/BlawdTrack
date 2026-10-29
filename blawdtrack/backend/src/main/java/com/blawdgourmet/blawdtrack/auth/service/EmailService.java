@@ -12,6 +12,7 @@ import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
@@ -20,12 +21,14 @@ import java.nio.charset.StandardCharsets;
 public class EmailService {
     private final JavaMailSender mailSender;
     private final String from;
+    private final String fromName;
     private final String linkUrl;
     private final String recoveryTemplate;
     private final String courierWelcomeTemplate;
 
     public EmailService(JavaMailSender mailSender,
             @Value("${app.mail.from}") String from,
+            @Value("${app.mail.from-name:}") String fromName,
             @Value("${app.mail.link-url}") String linkUrl,
             @Value("classpath:templates/mail/email-with-token.html") Resource recoveryTemplate,
             @Value("classpath:templates/mail/courier-welcome.html") Resource courierWelcomeTemplate)
@@ -38,6 +41,7 @@ public class EmailService {
         Assert.hasText(from, "Mail sender is required");
         this.mailSender = mailSender;
         this.from = from;
+        this.fromName = fromName;
         this.linkUrl = linkUrl;
         this.recoveryTemplate = recoveryTemplate.getContentAsString(StandardCharsets.UTF_8);
         this.courierWelcomeTemplate = courierWelcomeTemplate.getContentAsString(StandardCharsets.UTF_8);
@@ -90,11 +94,15 @@ public class EmailService {
         try {
             var helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
             helper.setValidateAddresses(true);
-            helper.setFrom(from);
+            if (fromName == null || fromName.isBlank()) {
+                helper.setFrom(from);
+            } else {
+                helper.setFrom(from, fromName.trim());
+            }
             helper.setTo(recipient);
             helper.setSubject(subject);
             helper.setText(text, html);
-        } catch (MessagingException ex) {
+        } catch (MessagingException | UnsupportedEncodingException ex) {
             throw new MailPreparationException("Could not prepare email", ex);
         }
         mailSender.send(message);
