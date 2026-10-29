@@ -23,8 +23,9 @@ try {
 	Ui.verifyAlert('El correo ya está registrado')
 	Ui.evidence('TC-HU004-06_correo_repetido')
 
-	Users.openCourierForEdit(second.documentNumber)
-	Ui.verifyEquals('correo guardado', Ui.valueOf('email'), second.email)
+	// No se guardó: la cuenta sigue entrando con su correo original. (Volver a abrir el formulario no sirve: con cambios
+	// sin guardar la pantalla conserva lo escrito.)
+	Ui.verifyEquals('HTTP login con el correo original', Api.loginStatus(second.email, second.password), 200)
 }
 finally {
 	WebUI.closeBrowser()
