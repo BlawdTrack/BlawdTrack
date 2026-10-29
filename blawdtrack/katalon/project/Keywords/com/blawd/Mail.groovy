@@ -12,6 +12,10 @@ import internal.GlobalVariable
  */
 public class Mail {
 
+	/** Partes del asunto de cada correo que envía el backend. */
+	static final String SUBJECT_RECOVERY = 'enlace de recuperación'
+	static final String SUBJECT_WELCOME = 'bienvenida'
+
 	private static Object getJson(String path) {
 		HttpURLConnection connection = (HttpURLConnection) new URL(GlobalVariable.mailUrl + path).openConnection()
 		connection.setRequestMethod('GET')
@@ -20,21 +24,25 @@ public class Mail {
 		return new JsonSlurper().parseText(connection.getInputStream().getText('UTF-8'))
 	}
 
-	/** Mensajes enviados a ese correo, del más nuevo al más antiguo: cada uno trae `ID` y `Subject`. */
-	static List<Map> messagesTo(String address) {
+	/**
+	 * Mensajes enviados a ese correo, del más nuevo al más antiguo: cada uno trae `ID` y `Subject`. Con `subjectPart` solo
+	 * los que lo tienen en el asunto: una cuenta nueva ya recibe un correo de bienvenida, que no es el de recuperación.
+	 */
+	static List<Map> messagesTo(String address, String subjectPart = null) {
 		Map result = (Map) getJson('/api/v1/search?query=' + URLEncoder.encode('to:' + address, 'UTF-8'))
-		return (List<Map>) (result.messages ?: [])
+		List<Map> messages = (List<Map>) (result.messages ?: [])
+		return subjectPart == null ? messages : messages.findAll { ((it.Subject ?: '') as String).contains(subjectPart) }
 	}
 
-	static int countTo(String address) {
-		return messagesTo(address).size()
+	static int countTo(String address, String subjectPart = null) {
+		return messagesTo(address, subjectPart).size()
 	}
 
-	/** Espera a que haya al menos `count` mensajes para ese correo y devuelve el más nuevo. */
-	static Map waitForMessage(String address, int count = 1, int timeoutSeconds = 40) {
+	/** Espera a que haya al menos `count` mensajes (con ese asunto, si se indica) y devuelve el más nuevo. */
+	static Map waitForMessage(String address, int count = 1, int timeoutSeconds = 40, String subjectPart = null) {
 		long deadline = System.currentTimeMillis() + timeoutSeconds * 1000L
 		while (System.currentTimeMillis() < deadline) {
-			List<Map> messages = messagesTo(address)
+			List<Map> messages = messagesTo(address, subjectPart)
 			if (messages.size() >= count) {
 				return messages[0]
 			}
@@ -52,7 +60,7 @@ public class Mail {
 
 	/** Enlace de recuperación del correo más nuevo (o el n-ésimo, esperándolo) enviado a ese correo. */
 	static String recoveryLink(String address, int count = 1) {
-		String text = textOf(waitForMessage(address, count))
+		String text = textOf(waitForMessage(address, count, 40, SUBJECT_RECOVERY))
 		def matcher = (text =~ /(https?:\/\/\S+\/recovery\?token=[^\s"<>]+)/)
 		if (!matcher.find()) {
 			KeywordUtil.markFailedAndStop('El correo no trae el enlace de recuperación: ' + text)
@@ -62,7 +70,7 @@ public class Mail {
 
 	/** Contraseña temporal del correo de bienvenida enviado a ese correo. */
 	static String temporaryPassword(String address) {
-		String text = textOf(waitForMessage(address))
+		String text = textOf(waitForMessage(address, 1, 40, SUBJECT_WELCOME))
 		def matcher = (text =~ /Contraseña temporal:\s*(\S+)/)
 		if (!matcher.find()) {
 			KeywordUtil.markFailedAndStop('El correo no trae la contraseña temporal: ' + text)

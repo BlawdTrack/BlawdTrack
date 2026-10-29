@@ -21,7 +21,7 @@ try {
 	Ui.evidence('TC-HU002-03_cuenta_inactiva')
 
 	WebUI.delay(6)
-	Ui.verifyEquals('correos enviados a la cuenta inactiva', Mail.countTo(courier.email), 0)
+	Ui.verifyEquals('correos enviados a la cuenta inactiva', Mail.countTo(courier.email, Mail.SUBJECT_RECOVERY), 0)
 }
 finally {
 	WebUI.closeBrowser()

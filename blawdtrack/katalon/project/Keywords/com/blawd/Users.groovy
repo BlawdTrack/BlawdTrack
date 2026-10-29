@@ -102,7 +102,7 @@ public class Users {
 	/** Busca por número de documento (el tipo por defecto es Cédula) y pulsa "Buscar". */
 	static void searchByDocument(String documentNumber) {
 		WebUI.waitForElementVisible(documentField(), Packages.TIMEOUT)
-		WebUI.setText(documentField(), documentNumber)
+		Ui.replaceText(documentField(), documentNumber)
 		WebUI.click(Ui.byTestId('document-search-submit'))
 	}
 

@@ -20,7 +20,7 @@ try {
 	Ui.verifyContains(WebUI.getText(Ui.byTestId('recovery-email-sent')), courier.email)
 	Ui.evidence('TC-HU002-01_revisa_tu_correo')
 
-	Map message = Mail.waitForMessage(courier.email)
+	Map message = Mail.waitForMessage(courier.email, 1, 40, Mail.SUBJECT_RECOVERY)
 	Ui.verifyEquals('asunto del correo', message.Subject, 'BlawdTrack: enlace de recuperación')
 	Ui.verifyContains(Mail.recoveryLink(courier.email), '/recovery?token=')
 }

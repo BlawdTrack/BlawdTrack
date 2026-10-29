@@ -21,7 +21,7 @@ try {
 	Ui.evidence('TC-HU002-02_correo_no_registrado')
 
 	WebUI.delay(6)
-	Ui.verifyEquals('correos enviados a ' + email, Mail.countTo(email), 0)
+	Ui.verifyEquals('correos enviados a ' + email, Mail.countTo(email, Mail.SUBJECT_RECOVERY), 0)
 }
 finally {
 	WebUI.closeBrowser()

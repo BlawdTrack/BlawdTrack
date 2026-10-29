@@ -18,7 +18,7 @@ Ui.login(GlobalVariable.superEmail, GlobalVariable.superPassword)
 try {
 	Users.registerCourierThroughUi(courier)
 
-	Map message = Mail.waitForMessage(courier.email)
+	Map message = Mail.waitForMessage(courier.email, 1, 40, Mail.SUBJECT_WELCOME)
 	Ui.verifyEquals('asunto del correo', message.Subject, 'BlawdTrack: bienvenida y credenciales de acceso')
 	String temporaryPassword = Mail.temporaryPassword(courier.email)
 	Ui.verifyContains(Mail.textOf(message), courier.email)

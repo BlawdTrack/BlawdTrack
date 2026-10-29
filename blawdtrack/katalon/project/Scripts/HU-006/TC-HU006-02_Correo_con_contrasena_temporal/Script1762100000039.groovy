@@ -18,7 +18,7 @@ Ui.login(GlobalVariable.superEmail, GlobalVariable.superPassword)
 try {
 	Users.registerAdminThroughUi(admin)
 
-	Map message = Mail.waitForMessage(admin.email)
+	Map message = Mail.waitForMessage(admin.email, 1, 40, Mail.SUBJECT_WELCOME)
 	Ui.verifyEquals('asunto del correo', message.Subject, 'BlawdTrack: bienvenida y credenciales de acceso')
 	String temporaryPassword = Mail.temporaryPassword(admin.email)
 	Ui.verifyContains(Mail.textOf(message), 'administrador de ventas')

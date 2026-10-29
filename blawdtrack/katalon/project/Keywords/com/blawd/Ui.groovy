@@ -6,6 +6,8 @@ import com.kms.katalon.core.testobject.TestObject
 import com.kms.katalon.core.util.KeywordUtil
 import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
 
+import org.openqa.selenium.Keys
+
 import internal.GlobalVariable
 
 /**
@@ -206,9 +208,20 @@ public class Ui {
 		return css("input[name='" + nameOrId + "'], input#" + nameOrId, 'campo-' + nameOrId)
 	}
 
+	/**
+	 * Reemplaza el texto de un campo (aunque ya tenga uno): selecciona todo, borra y escribe. `WebUI.setText` solo limpia
+	 * con `clear()`, que los campos de React no registran, y el texto nuevo se sumaría al anterior.
+	 */
+	static void replaceText(TestObject field, String value) {
+		WebUI.click(field)
+		WebUI.sendKeys(field, Keys.chord(Keys.CONTROL, 'a'))
+		WebUI.sendKeys(field, Keys.chord(Keys.BACK_SPACE))
+		WebUI.sendKeys(field, value)
+	}
+
 	static void type(String nameOrId, String value) {
 		WebUI.waitForElementVisible(field(nameOrId), 15)
-		WebUI.setText(field(nameOrId), value)
+		replaceText(field(nameOrId), value)
 	}
 
 	/** Valor actual de un campo de texto. */
@@ -267,8 +280,8 @@ public class Ui {
 
 	/** Escribe la nueva contraseña y su confirmación (no pulsa "Guardar"). */
 	static void typeNewPassword(String password, String confirmation) {
-		WebUI.setText(css('#new-password'), password)
-		WebUI.setText(css('#confirm-password'), confirmation)
+		replaceText(css('#new-password'), password)
+		replaceText(css('#confirm-password'), confirmation)
 	}
 
 	/** El botón "Guardar nueva contraseña" está bloqueado (`true`) o disponible (`false`). */
