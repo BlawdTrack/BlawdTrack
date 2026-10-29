@@ -16,6 +16,11 @@
    </GlobalVariableEntity>
    <GlobalVariableEntity>
       <description></description>
+      <initValue>'http://localhost:8025'</initValue>
+      <name>mailUrl</name>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description></description>
       <initValue>'superadmin@blawdgourmet.com'</initValue>
       <name>superEmail</name>
    </GlobalVariableEntity>

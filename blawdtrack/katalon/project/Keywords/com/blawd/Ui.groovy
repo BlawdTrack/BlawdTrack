@@ -133,4 +133,152 @@ public class Ui {
 	static void evidence(String name) {
 		WebUI.takeScreenshot(Env.evidencePath(name))
 	}
+
+	// ---------- Inicio de sesión y navegación (HU-001 a HU-009) ----------
+
+	/** Abre el navegador en la pantalla de inicio de sesión y envía el formulario, sin esperar a que cambie la pantalla. */
+	static void loginAttempt(String email, String password) {
+		WebUI.openBrowser('')
+		WebUI.maximizeWindow()
+		WebUI.navigateToUrl(GlobalVariable.baseUrl + '/login')
+		WebUI.waitForElementPresent(byTestId('login-submit'), 30)
+		WebUI.setText(css('#login-email'), email)
+		WebUI.setText(css('#login-password'), password)
+		WebUI.click(byTestId('login-submit'))
+	}
+
+	/** Cierra la sesión con el botón del menú lateral y espera a la pantalla de inicio de sesión. */
+	static void logout() {
+		WebUI.click(byTestId('logout-button'))
+		WebUI.waitForElementPresent(byTestId('login-submit'), 30)
+	}
+
+	/** Espera a que la dirección cumpla el patrón (la aplicación redirige sola) y lo comprueba. */
+	static void verifyUrl(String regex, int timeoutSeconds = 15) {
+		long deadline = System.currentTimeMillis() + timeoutSeconds * 1000L
+		while (System.currentTimeMillis() < deadline && !WebUI.getUrl().matches(regex)) {
+			Thread.sleep(300)
+		}
+		KeywordUtil.logInfo('URL: ' + WebUI.getUrl() + ', patrón: ' + regex)
+		WebUI.verifyMatch(WebUI.getUrl(), regex, true, FailureHandling.CONTINUE_ON_FAILURE)
+	}
+
+	/** Entra por la dirección (sin pasar por el menú) y espera a que la aplicación decida a dónde llevar. */
+	static void goTo(String path) {
+		WebUI.navigateToUrl(GlobalVariable.baseUrl + path)
+		WebUI.waitForPageLoad(15)
+	}
+
+	/** Enlace del menú lateral (`nav-<ruta>`): si no está para ese rol, el menú no lo ofrece. */
+	static void verifyNavLink(String path, boolean visible) {
+		if (visible) {
+			WebUI.verifyElementPresent(byTestId('nav-' + path), 10, FailureHandling.CONTINUE_ON_FAILURE)
+		} else {
+			WebUI.verifyElementNotPresent(byTestId('nav-' + path), 5, FailureHandling.CONTINUE_ON_FAILURE)
+		}
+	}
+
+	// ---------- Avisos, formularios y selectores de rueda ----------
+
+	/** Aviso fijo dentro del formulario (`role="alert"`) que contiene ese texto. */
+	static TestObject alert(String text) {
+		return Packages.xpath("//*[@role='alert' and contains(normalize-space(.), " + Packages.literal(text) + ")]", 'alerta: ' + text)
+	}
+
+	/** Comprueba que aparezca el aviso fijo con ese texto. */
+	static void verifyAlert(String text) {
+		boolean shown = WebUI.waitForElementPresent(alert(text), 20, FailureHandling.OPTIONAL)
+		if (!shown) KeywordUtil.logInfo('No apareció el aviso esperado: ' + text)
+		WebUI.verifyEqual(shown, true, FailureHandling.CONTINUE_ON_FAILURE)
+	}
+
+	/** Texto de ayuda de un campo con error (los campos no llevan `data-testid`; se reconoce por su texto). */
+	static void verifyFieldError(String text) {
+		TestObject error = Packages.xpath("//*[contains(@id,'helper-text') and contains(normalize-space(.), " + Packages.literal(text) + ")]",
+				'error-campo: ' + text)
+		boolean shown = WebUI.waitForElementPresent(error, 10, FailureHandling.OPTIONAL)
+		if (!shown) KeywordUtil.logInfo('No apareció el error de campo esperado: ' + text)
+		WebUI.verifyEqual(shown, true, FailureHandling.CONTINUE_ON_FAILURE)
+	}
+
+	/** Campo de texto de un formulario por su atributo `name` (o `id`, si no lo tiene). */
+	static TestObject field(String nameOrId) {
+		return css("input[name='" + nameOrId + "'], input#" + nameOrId, 'campo-' + nameOrId)
+	}
+
+	static void type(String nameOrId, String value) {
+		WebUI.waitForElementVisible(field(nameOrId), 15)
+		WebUI.setText(field(nameOrId), value)
+	}
+
+	/** Valor actual de un campo de texto. */
+	static String valueOf(String nameOrId) {
+		WebUI.waitForElementVisible(field(nameOrId), 15)
+		return WebUI.getAttribute(field(nameOrId), 'value')
+	}
+
+	private static TestObject wheelOption(String listLabel, String optionText) {
+		return Packages.xpath("//*[@role='listbox' and @aria-label=" + Packages.literal(listLabel) + "]//*[@role='option' and normalize-space(.)=" +
+				Packages.literal(optionText) + "]", 'rueda-' + listLabel + '-' + optionText)
+	}
+
+	private static void confirmWheel() {
+		WebUI.click(Packages.xpath("//button[normalize-space(.)='Listo']", 'rueda-listo'))
+		WebUI.waitForElementNotPresent(Packages.xpath("//button[normalize-space(.)='Listo']", 'rueda-listo'), 10)
+	}
+
+	/**
+	 * Elige una hora en el selector de rueda de un campo (`Hora de entrada` u `Hora de salida`). La rueda solo muestra
+	 * las horas cercanas a la actual (4 hacia cada lado), así que se eligen valores dentro de ese rango.
+	 */
+	static void pickTime(String inputSelector, String label, String hour, String minute, String period) {
+		WebUI.click(css(inputSelector))
+		WebUI.click(wheelOption(label + ': hora', hour))
+		WebUI.click(wheelOption(label + ': minutos', minute))
+		WebUI.click(wheelOption(label + ': am o pm', period))
+		confirmWheel()
+	}
+
+	/** Elige la capacidad de carga en su rueda (un valor cercano al actual: 4 hacia cada lado). */
+	static void pickWeight(String inputSelector, String label, String kilos) {
+		WebUI.click(css(inputSelector))
+		WebUI.click(wheelOption(label, kilos))
+		confirmWheel()
+	}
+
+	// ---------- Recuperar contraseña (HU-002) ----------
+
+	/** Abre el navegador en "Recuperar contraseña", pide el enlace para ese correo y espera la pantalla "Revisa tu correo". */
+	static void requestRecovery(String email) {
+		WebUI.openBrowser('')
+		WebUI.maximizeWindow()
+		WebUI.navigateToUrl(GlobalVariable.baseUrl + '/password-recovery')
+		WebUI.waitForElementPresent(byTestId('recovery-submit'), 30)
+		WebUI.setText(css('#recovery-email'), email)
+		WebUI.click(byTestId('recovery-submit'))
+		WebUI.waitForElementPresent(byTestId('recovery-email-sent'), 30)
+	}
+
+	/** Abre el enlace del correo (o cualquier dirección de /recovery) y espera el formulario de la nueva contraseña. */
+	static void openRecoveryLink(String link) {
+		WebUI.navigateToUrl(link)
+		WebUI.waitForElementPresent(css('#new-password'), 30)
+	}
+
+	/** Escribe la nueva contraseña y su confirmación (no pulsa "Guardar"). */
+	static void typeNewPassword(String password, String confirmation) {
+		WebUI.setText(css('#new-password'), password)
+		WebUI.setText(css('#confirm-password'), confirmation)
+	}
+
+	/** El botón "Guardar nueva contraseña" está bloqueado (`true`) o disponible (`false`). */
+	static void verifyNewPasswordSubmitDisabled(String what, boolean disabled) {
+		boolean actual = WebUI.getAttribute(byTestId('new-password-submit'), 'disabled') != null
+		verifyEquals(what + ': botón bloqueado', actual, disabled)
+	}
+
+	/** Botón por su texto visible. */
+	static TestObject buttonByText(String text) {
+		return Packages.xpath("//button[normalize-space(.)='" + text + "']", 'boton-' + text)
+	}
 }
