@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import realBackendResponse from './fixtures/packageImportPreview.real.json';
-import { PREVIEW_STATUS, buildImportPreview, filterPreviewRows, formatDeliveryWindow } from './importPreview';
+import { PREVIEW_STATUS, buildImportPreview, describeRowIdentity, filterPreviewRows, formatDeliveryWindow, listInvalidRows } from './importPreview';
 
 const validRecord = {
   shipmentNumber: 'BG-1',
@@ -32,6 +32,35 @@ const preview = {
     { shipmentNumber: 'BG-6', occurrences: 3, reasons: ['DUPLICATED_IN_FILE'], customerName: 'Carla', address: 'Alajuela' },
   ],
 };
+
+describe('describeRowIdentity', () => {
+  it('identifica el registro por su envío, su orden y su cliente', () => {
+    expect(describeRowIdentity({ shipmentNumber: 'PK-2', orderNumber: 'SO-2', customerName: 'Ana' })).toBe('Envío PK-2 · Orden SO-2 · Cliente Ana');
+  });
+
+  it('no repite la orden cuando es igual al número de envío', () => {
+    expect(describeRowIdentity({ shipmentNumber: 'SO-2', orderNumber: 'SO-2', customerName: null })).toBe('Envío SO-2');
+  });
+
+  it('avisa cuando el registro no trae ningún dato para identificarlo', () => {
+    expect(describeRowIdentity({})).toBe('Registro sin número');
+  });
+});
+
+describe('listInvalidRows', () => {
+  it('lista solo los registros con error con su identidad y sus motivos', () => {
+    const rows = buildImportPreview(preview).rows;
+
+    expect(listInvalidRows(rows)).toEqual([
+      { key: expect.any(String), identity: 'Envío BG-3 · Orden ZI-3 · Cliente Beto', reasons: ['El campo teléfono es obligatorio'] },
+      {
+        key: expect.any(String),
+        identity: 'Orden ZI-4',
+        reasons: ['El campo número de envío es obligatorio', 'El campo nombre del cliente es obligatorio'],
+      },
+    ]);
+  });
+});
 
 describe('formatDeliveryWindow', () => {
   it.each([

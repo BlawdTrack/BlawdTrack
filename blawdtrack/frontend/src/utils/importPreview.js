@@ -107,6 +107,31 @@ export function buildImportPreview(preview) {
 }
 
 /**
+ * Cómo se identifica un registro en los avisos: su número de envío, su orden y su cliente, los que traiga.
+ * @param {{ shipmentNumber?: string|null, orderNumber?: string|null, customerName?: string|null }} row
+ * @returns {string} Por ejemplo `Envío PK-2 · Orden SO-2 · Cliente Ana`; `Registro sin número` si no trae ninguno.
+ */
+export function describeRowIdentity({ shipmentNumber, orderNumber, customerName }) {
+  const parts = [
+    shipmentNumber && `Envío ${shipmentNumber}`,
+    orderNumber && orderNumber !== shipmentNumber && `Orden ${orderNumber}`,
+    customerName && `Cliente ${customerName}`,
+  ].filter(Boolean);
+  return parts.length ? parts.join(' · ') : 'Registro sin número';
+}
+
+/**
+ * Los registros con error con lo que hay que corregir en cada uno, para listarlos sin recorrer toda la tabla.
+ * @param {Array<{ status: string, key: string, notes: string[] }>} rows Filas de `buildImportPreview`.
+ * @returns {Array<{ key: string, identity: string, reasons: string[] }>}
+ */
+export function listInvalidRows(rows) {
+  return rows
+    .filter((row) => row.status === PREVIEW_STATUS.INVALID)
+    .map((row) => ({ key: row.key, identity: describeRowIdentity(row), reasons: row.notes }));
+}
+
+/**
  * Filas que muestra un filtro de la lista.
  * @param {Array<{ status: string }>} rows
  * @param {string} filterId `'all'` o uno de los valores de `PREVIEW_STATUS`.
