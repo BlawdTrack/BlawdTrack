@@ -79,7 +79,9 @@ Pruebas: `npm test`. Versión de producción: `npm run build`.
 
 ### 5. Documentación de la API (Swagger / OpenAPI)
 
-Con el backend corriendo (`http://localhost:8080`):
+Swagger está **oculto por defecto** (esas URL responden 404). Para usarlo en desarrollo, arranca el backend con la
+variable `SWAGGER_ENABLED=true` (por ejemplo `$env:SWAGGER_ENABLED = "true"` en PowerShell). Con el backend corriendo
+(`http://localhost:8080`):
 
 | Qué | URL |
 |---|---|

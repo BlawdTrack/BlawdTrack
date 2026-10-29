@@ -65,7 +65,8 @@ desarrollo: **cámbiala antes de cualquier despliegue real**.
 
 ## Documentación de la API (Swagger / OpenAPI)
 
-Con el backend corriendo, la API se puede explorar y probar en:
+Swagger está **oculto por defecto** (las dos URL responden 404). Para usarlo en desarrollo, arranca el backend con la
+variable de entorno `SWAGGER_ENABLED=true`. Con ella, la API se puede explorar y probar en:
 
 - **Swagger UI:** `http://localhost:8080/swagger-ui.html`
 - **Especificación OpenAPI (JSON):** `http://localhost:8080/v3/api-docs`

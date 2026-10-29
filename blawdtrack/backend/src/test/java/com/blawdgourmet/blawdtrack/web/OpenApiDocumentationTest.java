@@ -10,8 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
-/** Swagger y /v3/api-docs responden sin iniciar sesión y declaran el esquema Bearer JWT del botón "Authorize". */
-@SpringBootTest
+/** Con Swagger activado (SWAGGER_ENABLED=true), Swagger y /v3/api-docs responden sin iniciar sesión y declaran el esquema Bearer JWT del botón "Authorize". */
+@SpringBootTest(properties = {"springdoc.api-docs.enabled=true", "springdoc.swagger-ui.enabled=true"})
 @AutoConfigureMockMvc
 class OpenApiDocumentationTest {
 

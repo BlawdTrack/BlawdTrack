@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordResetEmailException;
 import com.blawdgourmet.blawdtrack.auth.exception.PasswordReusedException;
@@ -186,6 +187,18 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
+    }
+
+    /** Una ruta que no existe (por ejemplo Swagger, oculto por defecto) responde 404 y no un error interno. */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> manejarRutaInexistente(NoResourceFoundException ex) {
+        ApiError error = ApiError.builder()
+                .code("RECURSO_NO_ENCONTRADO")
+                .message("El recurso solicitado no existe.")
+                .status(HttpStatus.NOT_FOUND.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(Exception.class)
