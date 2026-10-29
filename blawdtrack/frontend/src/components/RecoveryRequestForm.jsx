@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import AuthStateHeader from './AuthStateHeader';
 import { AUTH_BUTTON_SX, FIELD_LABEL_SX, FIELD_SX } from './authStyles';
@@ -52,7 +52,7 @@ export function RecoveryRequestForm({ request }) {
         variant="contained"
         disabled={loading}
         data-testid="recovery-submit"
-        endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
+        startIcon={loading ? null : <SendOutlinedIcon />}
         sx={AUTH_BUTTON_SX}
       >
         {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Enviar enlace'}

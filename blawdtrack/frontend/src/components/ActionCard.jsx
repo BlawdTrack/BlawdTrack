@@ -1,6 +1,5 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { FONT, RADIUS, rem, fontPx } from '../theme';
 
 // Colores de cada tono: el del icono en reposo (fondo suave y tinta) y el que toma al pasar el cursor.
@@ -43,7 +42,6 @@ export default function ActionCard({ to = null, icon: Icon, title, description, 
             borderColor: colors.accent,
             boxShadow: '0 10px 24px -14px rgba(26,60,52,.35)',
             '& .action-card-icon': { bgcolor: colors.accent, color: 'common.white' },
-            '& .action-card-go': { bgcolor: 'primary.main', color: 'common.white', transform: 'translateX(2px)' },
           },
           '&:focus-visible': { outline: '3px solid #1A3C34', outlineOffset: 3 },
         }),
@@ -87,30 +85,11 @@ export default function ActionCard({ to = null, icon: Icon, title, description, 
           {description}
         </Typography>
       )}
-      {/* El pie va siempre abajo, así las flechas quedan alineadas aunque el texto tenga distinto largo. */}
+      {/* El pie va siempre abajo, así la acción queda alineada aunque el texto tenga distinto largo. */}
       <Box sx={{ mt: 'auto', pt: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}>
         <Typography component="span" sx={{ fontWeight: 600, fontSize: FONT.md, color: 'primary.main' }}>
           {to ? actionLabel : 'Próximamente'}
         </Typography>
-        {to && (
-          <Box
-            className="action-card-go"
-            sx={{
-              flex: '0 0 auto',
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
-              border: '1.5px solid',
-              borderColor: 'primary.main',
-              color: 'primary.main',
-              display: 'grid',
-              placeItems: 'center',
-              transition: 'background-color .18s ease, color .18s ease, transform .18s ease',
-            }}
-          >
-            <ArrowForwardOutlinedIcon />
-          </Box>
-        )}
       </Box>
     </Box>
   );

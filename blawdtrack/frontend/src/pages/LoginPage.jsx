@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { StatusMessage } from '../components/StatusMessage';
 import PasswordField from '../components/PasswordField';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { LINK_BUTTON_SX } from '../components/formStyles';
 import { FIELD_LABEL_SX, FIELD_SX, AUTH_BUTTON_SX } from '../components/authStyles';
@@ -153,7 +153,7 @@ export function LoginPage({ onLoginSuccess, onSubmitAttempt, onForgotPassword })
           size="large"
           data-testid="login-submit"
           disabled={loading}
-          endIcon={loading ? null : <ArrowForwardOutlinedIcon />}
+          startIcon={loading ? null : <LoginOutlinedIcon />}
           sx={AUTH_BUTTON_SX}
         >
           {loading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : 'Iniciar sesión'}

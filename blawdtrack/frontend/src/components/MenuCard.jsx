@@ -1,6 +1,5 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Tooltip, Typography } from '@mui/material';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { COMING_SOON_MESSAGE } from '../config/mainMenu';
 import { CARD_PATTERN_SX, FONT, RADIUS, rem, fontPx } from '../theme';
 
@@ -46,20 +45,6 @@ const DESCRIPTION_SX = {
   overflow: 'hidden',
 };
 
-// Círculo con la flecha: al pasar el cursor se vuelve verde con la flecha blanca.
-const ARROW_SX = {
-  flex: '0 0 auto',
-  width: rem(40),
-  height: rem(40),
-  borderRadius: '50%',
-  bgcolor: 'neutral.surface',
-  color: 'primary.main',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'background-color .15s ease, color .15s ease',
-};
-
 /**
  * Fila del menú principal: icono, título y descripción corta, con un círculo con la flecha a la derecha. Toda la
  * fila es el enlace (objetivo grande, ley de Fitts) y no cambia de tamaño ni de sitio al pasar el cursor: solo el
@@ -86,7 +71,7 @@ export default function MenuCard({ to = null, icon: Icon, title, description, mu
         cursor: to ? 'pointer' : 'not-allowed',
         transition: 'border-color .15s ease',
         ...(to && {
-          '&:hover': { borderColor: 'secondary.main', '& .menu-card-arrow': { bgcolor: 'primary.main', color: 'common.white' } },
+          '&:hover': { borderColor: 'secondary.main' },
           '&:focus-visible': { outline: '2px solid #FF6C0E', outlineOffset: 2 },
         }),
       }}
@@ -105,11 +90,6 @@ export default function MenuCard({ to = null, icon: Icon, title, description, mu
           <Typography sx={{ fontSize: FONT.sm, fontWeight: 600, color: 'text.secondary', mt: 1 }}>Próximamente</Typography>
         )}
       </Box>
-      {to && (
-        <Box className="menu-card-arrow" sx={ARROW_SX}>
-          <ArrowForwardOutlinedIcon fontSize="small" />
-        </Box>
-      )}
     </Box>
   );
 

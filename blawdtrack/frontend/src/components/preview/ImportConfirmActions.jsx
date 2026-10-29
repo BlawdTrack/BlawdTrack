@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
-import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
 import StatusMessage from '../StatusMessage';
 import { FONT, RADIUS } from '../../theme';
 
@@ -41,7 +41,7 @@ export default function ImportConfirmActions({ validCount, excludedCount = 0, ha
           variant="outlined"
           onClick={onLoadAnother}
           disabled={isConfirming}
-          startIcon={<ArrowBackOutlinedIcon />}
+          startIcon={<FolderOpenOutlinedIcon />}
           data-testid="import-load-another"
           sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm }}
         >
@@ -58,7 +58,7 @@ export default function ImportConfirmActions({ validCount, excludedCount = 0, ha
             data-testid="import-confirm"
             disabled={!canConfirm || isConfirming}
             aria-busy={isConfirming}
-            endIcon={isConfirming ? null : <ArrowForwardOutlinedIcon />}
+            startIcon={isConfirming ? null : <FileUploadOutlinedIcon />}
             sx={{ fontWeight: 700, minHeight: 48, px: 3, borderRadius: RADIUS.sm, boxShadow: 'none', fontSize: FONT.md }}
           >
             {isConfirming ? (
