@@ -79,10 +79,17 @@ Pruebas: `npm test`. Versión de producción: `npm run build`.
 
 ### 5. Documentación de la API (Swagger / OpenAPI)
 
-**POR COMPLETAR.** El proyecto no incluye hoy una librería que publique Swagger/OpenAPI (no hay dependencia
-`springdoc` en `backend/pom.xml`), por lo que no hay una URL de Swagger funcionando. El código solo deja
-permitido el acceso a `/swagger-ui/**` y `/v3/api-docs/**` sin autenticación. Los endpoints están descritos en
-[`docs/arquitectura.md`](docs/arquitectura.md) y en [`docs/hu/`](docs/hu/README.md).
+Con el backend corriendo (`http://localhost:8080`):
+
+| Qué | URL |
+|---|---|
+| Swagger UI (probar los endpoints) | `http://localhost:8080/swagger-ui.html` |
+| Especificación OpenAPI (JSON) | `http://localhost:8080/v3/api-docs` |
+
+Casi todos los endpoints exigen sesión. Para probarlos: en Swagger abre `POST /api/v1/auth/login`, envía un correo y
+contraseña válidos, copia el `token` de la respuesta y pégalo en el botón **Authorize** (solo el token, sin la palabra
+`Bearer`). Los endpoints están descritos también en [`docs/arquitectura.md`](docs/arquitectura.md) y en
+[`docs/hu/`](docs/hu/README.md).
 
 ## Roles del sistema
 

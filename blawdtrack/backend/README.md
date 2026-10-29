@@ -63,6 +63,18 @@ Al arrancar, la aplicación siembra los permisos, los tres roles y un **Super Us
 (`superadmin@blawdgourmet.com`). Su contraseña inicial está definida en `DataSeeder` solo para
 desarrollo: **cámbiala antes de cualquier despliegue real**.
 
+## Documentación de la API (Swagger / OpenAPI)
+
+Con el backend corriendo, la API se puede explorar y probar en:
+
+- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
+- **Especificación OpenAPI (JSON):** `http://localhost:8080/v3/api-docs`
+
+La documentación la genera `springdoc-openapi` (dependencia en `pom.xml`) y el esquema de seguridad Bearer JWT está
+declarado en `web/OpenApiConfig.java`. Ambas rutas son públicas (ver `SecurityConfig`), pero casi todos los endpoints
+exigen sesión: abre `POST /api/v1/auth/login` en Swagger, copia el `token` de la respuesta y pégalo en el botón
+**Authorize** (solo el token, sin la palabra `Bearer`).
+
 ## Levantar el backend
 
 Desde esta carpeta (`blawdtrack/backend`):
