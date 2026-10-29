@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.net.ssl.SSLException;
 import org.springframework.mail.MailAuthenticationException;
@@ -38,6 +39,10 @@ public final class SmtpFailureDiagnostic {
 
     /** Etiqueta que corresponde a este eslabon de la cadena; si no reconoce el tipo, conserva la anterior. */
     private static String classify(Throwable current, String reason) {
+        if (current instanceof MessagingException mail && isUnauthorizedIp(mail)) {
+            return "IP_NOT_AUTHORIZED: autorizar la IP de este servidor en Brevo "
+                    + "(Seguridad > Direcciones IP autorizadas) o desactivar ese bloqueo";
+        }
         if (current instanceof MailAuthenticationException || current instanceof AuthenticationFailedException) {
             return "AUTH_FAILED: verificar usuario y clave SMTP";
         }
@@ -57,6 +62,11 @@ public final class SmtpFailureDiagnostic {
             return "SEND_REJECTED: revisar remitente, destinatario y restricciones del proveedor";
         }
         return reason;
+    }
+
+    /** Brevo rechaza con "525 5.7.1 Unauthorized IP address" cuando la cuenta limita las IP de envio. */
+    private static boolean isUnauthorizedIp(MessagingException mail) {
+        return mail.getMessage() != null && mail.getMessage().toLowerCase(Locale.ROOT).contains("unauthorized ip");
     }
 
     private static String statusOf(Throwable current, String status) {
