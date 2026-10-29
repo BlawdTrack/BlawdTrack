@@ -18,9 +18,12 @@ public class Users {
 	static final String KNOWN_PASSWORD = 'Katalon2026'
 
 	/** Seis dígitos distintos en cada ejecución, para documentos, teléfonos y correos únicos. */
-	static String suffix() {
-		return String.format('%06d', (System.nanoTime() / 1000L) % 1000000L)
+	static synchronized String suffix() {
+		sequence++
+		return String.format('%06d', (System.currentTimeMillis().intdiv(100L) + sequence) % 1000000L)
 	}
+
+	private static long sequence = 0
 
 	/** Datos de un mensajero nuevo (sin crearlo). `tag` va en el nombre y el correo para reconocerlo. */
 	static Map courierData(String tag) {
