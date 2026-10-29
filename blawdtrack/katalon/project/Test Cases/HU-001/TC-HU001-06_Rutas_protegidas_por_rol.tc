@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-06 Rutas protegidas por rol</description>
+   <name>TC-HU001-06_Rutas_protegidas_por_rol</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>adfd0fb9-3575-512b-8b22-da278af373a5</testCaseGuid>
+</TestCaseEntity>

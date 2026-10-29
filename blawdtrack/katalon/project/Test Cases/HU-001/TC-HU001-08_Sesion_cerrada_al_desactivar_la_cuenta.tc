@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-08 Sesion cerrada al desactivar la cuenta</description>
+   <name>TC-HU001-08_Sesion_cerrada_al_desactivar_la_cuenta</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>cc22b3f5-8c5d-5a38-8b00-db19967c06c5</testCaseGuid>
+</TestCaseEntity>

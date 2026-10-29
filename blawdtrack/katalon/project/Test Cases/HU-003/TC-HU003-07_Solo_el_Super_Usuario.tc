@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU003-07 Solo el Super Usuario puede registrar</description>
+   <name>TC-HU003-07_Solo_el_Super_Usuario</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>ba39d5db-7a02-5671-a3ec-851b2eb84d36</testCaseGuid>
+</TestCaseEntity>

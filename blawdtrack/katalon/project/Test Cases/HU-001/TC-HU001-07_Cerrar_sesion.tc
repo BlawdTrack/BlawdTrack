@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-07 Cerrar sesion</description>
+   <name>TC-HU001-07_Cerrar_sesion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>da1ef20d-b06f-582d-8045-40e02df5e1e1</testCaseGuid>
+</TestCaseEntity>

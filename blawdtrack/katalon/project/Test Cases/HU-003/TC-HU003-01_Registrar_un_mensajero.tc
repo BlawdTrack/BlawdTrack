@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU003-01 Registrar un mensajero</description>
+   <name>TC-HU003-01_Registrar_un_mensajero</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>315bdacd-53ea-5fbc-941b-b0c81cf9ab4b</testCaseGuid>
+</TestCaseEntity>

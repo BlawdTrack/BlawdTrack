@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU003-06 Formato del documento</description>
+   <name>TC-HU003-06_Formato_del_documento</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>5dea1dac-73d5-58dd-a95e-2e91158e8399</testCaseGuid>
+</TestCaseEntity>

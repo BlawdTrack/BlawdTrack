@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-04 Restablecer la contrasena con el enlace</description>
+   <name>TC-HU002-04_Restablecer_la_contrasena</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>66234184-97dd-5e23-9af9-bc445dfbfbd5</testCaseGuid>
+</TestCaseEntity>

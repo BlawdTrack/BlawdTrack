@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-03 Una cuenta inactiva no recibe el correo</description>
+   <name>TC-HU002-03_Cuenta_inactiva_no_recibe_correo</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>f00d0cde-7715-5c22-8040-7c87b61809fc</testCaseGuid>
+</TestCaseEntity>

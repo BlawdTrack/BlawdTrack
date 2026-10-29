@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-08 No se puede reutilizar una contrasena reciente</description>
+   <name>TC-HU002-08_Contrasena_reutilizada</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>7e42a4b2-3d27-51c0-84b0-eac2167f311e</testCaseGuid>
+</TestCaseEntity>

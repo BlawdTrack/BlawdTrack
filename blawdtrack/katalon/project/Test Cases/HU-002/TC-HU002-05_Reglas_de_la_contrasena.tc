@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-05 Reglas de la contrasena nueva</description>
+   <name>TC-HU002-05_Reglas_de_la_contrasena</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>47464161-f11b-5d6e-bace-3e0187c64058</testCaseGuid>
+</TestCaseEntity>

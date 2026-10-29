@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU003-03 Campos obligatorios vacios</description>
+   <name>TC-HU003-03_Campos_obligatorios_vacios</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>1e3e90bb-d308-5965-851d-f8558c9443f6</testCaseGuid>
+</TestCaseEntity>
