@@ -23,6 +23,7 @@ public class EmailService {
     private final String from;
     private final String fromName;
     private final String linkUrl;
+    private final String layoutTemplate;
     private final String recoveryTemplate;
     private final String courierWelcomeTemplate;
 
@@ -30,6 +31,7 @@ public class EmailService {
             @Value("${app.mail.from}") String from,
             @Value("${app.mail.from-name:}") String fromName,
             @Value("${app.mail.link-url}") String linkUrl,
+            @Value("classpath:templates/mail/mail-layout.html") Resource layoutTemplate,
             @Value("classpath:templates/mail/email-with-token.html") Resource recoveryTemplate,
             @Value("classpath:templates/mail/courier-welcome.html") Resource courierWelcomeTemplate)
             throws IOException {
@@ -43,6 +45,7 @@ public class EmailService {
         this.from = from;
         this.fromName = fromName;
         this.linkUrl = linkUrl;
+        this.layoutTemplate = layoutTemplate.getContentAsString(StandardCharsets.UTF_8);
         this.recoveryTemplate = recoveryTemplate.getContentAsString(StandardCharsets.UTF_8);
         this.courierWelcomeTemplate = courierWelcomeTemplate.getContentAsString(StandardCharsets.UTF_8);
     }
@@ -61,7 +64,8 @@ public class EmailService {
         String text = "Enlace de recuperación de BlawdTrack\n\n"
                 + "Para continuar con tu solicitud, abrí este enlace:\n" + link
                 + "\n\nSi no solicitaste este cambio, ignorá este correo.";
-        String html = recoveryTemplate.replace("{{emailLink}}", HtmlUtils.htmlEscape(link));
+        String html = page("Restablecé tu contraseña", "Creá una nueva contraseña para tu cuenta de BlawdTrack.",
+                "Recuperación de acceso", recoveryTemplate.replace("{{emailLink}}", HtmlUtils.htmlEscape(link)));
         send(recipient, "BlawdTrack: enlace de recuperación", text, html);
     }
 
@@ -81,12 +85,26 @@ public class EmailService {
         String text = "Hola " + fullName + ",\n\nBienvenido a BlawdTrack. Tu cuenta " + accountLabel + " está lista."
                 + "\nCorreo de acceso: " + recipient + "\nContraseña temporal: " + temporaryPassword
                 + "\n\nGuardá estas credenciales en un lugar seguro y no las compartás.";
-        String html = courierWelcomeTemplate
+        String content = courierWelcomeTemplate
                 .replace("{{accountLabel}}", accountLabel)
                 .replace("{{fullName}}", HtmlUtils.htmlEscape(fullName))
                 .replace("{{recipient}}", HtmlUtils.htmlEscape(recipient))
                 .replace("{{temporaryPassword}}", HtmlUtils.htmlEscape(temporaryPassword));
+        String html = page("Bienvenido a BlawdTrack", "Tu cuenta " + accountLabel + " está lista. Aquí están tus credenciales.",
+                "Notificaciones de tu cuenta", content);
         send(recipient, "BlawdTrack: bienvenida y credenciales de acceso", text, html);
+    }
+
+    /**
+     * Envuelve el contenido de un correo en el diseño común (cabecera, pie y colores de Blawd Gourmet). El contenido se
+     * inserta al final para que lo que viene de usuarios nunca se vuelva a interpretar como marcador.
+     */
+    private String page(String title, String preheader, String subtitle, String content) {
+        return layoutTemplate
+                .replace("{{title}}", title)
+                .replace("{{preheader}}", preheader)
+                .replace("{{subtitle}}", subtitle)
+                .replace("{{content}}", content);
     }
 
     private void send(String recipient, String subject, String text, String html) {
