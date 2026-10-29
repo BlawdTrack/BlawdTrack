@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-01 Ver los permisos del Administrador de Ventas</description>
+   <name>TC-HU009-01_Ver_los_permisos_de_un_rol</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>e65ea913-048b-5a7c-af43-8fa4a59f96ac</testCaseGuid>
+</TestCaseEntity>

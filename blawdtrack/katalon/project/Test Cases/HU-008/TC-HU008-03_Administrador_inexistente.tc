@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU008-03 Administrador no existente</description>
+   <name>TC-HU008-03_Administrador_inexistente</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>349fd09c-5b65-5fe2-89b0-534837491445</testCaseGuid>
+</TestCaseEntity>

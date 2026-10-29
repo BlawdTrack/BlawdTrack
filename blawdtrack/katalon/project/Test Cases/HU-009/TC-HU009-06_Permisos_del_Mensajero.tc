@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-06 Permisos del rol Mensajero</description>
+   <name>TC-HU009-06_Permisos_del_Mensajero</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>bb9c7de8-bead-575c-ba4e-2628ec08657a</testCaseGuid>
+</TestCaseEntity>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-04 Permisos que no se pueden editar</description>
+   <name>TC-HU009-04_Permisos_no_editables</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>09350d89-0e5f-5bde-bb55-3f94f0ccc805</testCaseGuid>
+</TestCaseEntity>

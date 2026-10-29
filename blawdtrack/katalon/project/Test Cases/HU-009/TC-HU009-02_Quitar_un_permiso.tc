@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-02 Quitar un permiso y aplicar los cambios</description>
+   <name>TC-HU009-02_Quitar_un_permiso</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>43a1b8c9-3a45-57d0-a247-bf027dd2c24e</testCaseGuid>
+</TestCaseEntity>

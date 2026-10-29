@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-07 Usuario no existente</description>
+   <name>TC-HU009-07_Usuario_no_existente</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>eeb1535e-f555-54fb-845d-824a9f707d9f</testCaseGuid>
+</TestCaseEntity>

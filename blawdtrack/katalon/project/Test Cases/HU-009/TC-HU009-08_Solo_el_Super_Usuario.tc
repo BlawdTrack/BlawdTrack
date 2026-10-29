@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-08 Solo el Super Usuario administra permisos</description>
+   <name>TC-HU009-08_Solo_el_Super_Usuario</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>e45c2f72-eb86-5278-93d6-6f432b65ecf8</testCaseGuid>
+</TestCaseEntity>

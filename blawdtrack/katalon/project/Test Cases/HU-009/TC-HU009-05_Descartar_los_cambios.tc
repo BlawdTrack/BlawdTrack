@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-05 Descartar los cambios sin guardar</description>
+   <name>TC-HU009-05_Descartar_los_cambios</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>f9b5ac39-cd6c-5b48-a0ac-28cfe0e89e01</testCaseGuid>
+</TestCaseEntity>
