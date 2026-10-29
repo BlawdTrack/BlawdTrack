@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-02 Correo no registrado: misma respuesta</description>
+   <name>TC-HU002-02_Correo_no_registrado_responde_igual</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>6b367a7f-6f6a-5ee9-9306-04ebcc9c9044</testCaseGuid>
+</TestCaseEntity>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-04 Credenciales incorrectas</description>
+   <name>TC-HU001-04_Credenciales_incorrectas</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>eb05323c-67e8-59d8-b8c4-0ad3cad7ae03</testCaseGuid>
+</TestCaseEntity>

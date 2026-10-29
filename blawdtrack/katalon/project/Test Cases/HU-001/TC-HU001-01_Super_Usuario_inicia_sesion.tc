@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-01 El Super Usuario inicia sesion</description>
+   <name>TC-HU001-01_Super_Usuario_inicia_sesion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>d3a05d0a-97d1-508c-b389-bb580bfccc5b</testCaseGuid>
+</TestCaseEntity>

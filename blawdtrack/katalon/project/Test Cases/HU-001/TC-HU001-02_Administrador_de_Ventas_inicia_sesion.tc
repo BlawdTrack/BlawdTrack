@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-02 El Administrador de Ventas inicia sesion</description>
+   <name>TC-HU001-02_Administrador_de_Ventas_inicia_sesion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>7a656edb-19e9-5ef7-b2b5-a4d88b8ca825</testCaseGuid>
+</TestCaseEntity>

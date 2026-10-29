@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU008-01 Eliminar un administrador con confirmacion</description>
+   <name>TC-HU008-01_Eliminar_con_confirmacion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>bea609e7-2a2f-51ad-bf84-bb1c3e33860c</testCaseGuid>
+</TestCaseEntity>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU005-04 El registro del mensajero se conserva</description>
+   <name>TC-HU005-04_Registro_conservado</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>e4f5499b-6d83-5c5f-adff-951da06adee2</testCaseGuid>
+</TestCaseEntity>

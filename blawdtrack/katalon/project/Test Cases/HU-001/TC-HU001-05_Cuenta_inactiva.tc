@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-05 Cuenta inactiva</description>
+   <name>TC-HU001-05_Cuenta_inactiva</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>ea7a60d3-f972-54b9-ab05-30d4750acd0f</testCaseGuid>
+</TestCaseEntity>

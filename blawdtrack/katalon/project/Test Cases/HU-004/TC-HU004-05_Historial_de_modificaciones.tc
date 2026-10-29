@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU004-05 Historial de modificaciones</description>
+   <name>TC-HU004-05_Historial_de_modificaciones</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>554e4105-73c2-5f2e-926a-3226b0ba4e4b</testCaseGuid>
+</TestCaseEntity>

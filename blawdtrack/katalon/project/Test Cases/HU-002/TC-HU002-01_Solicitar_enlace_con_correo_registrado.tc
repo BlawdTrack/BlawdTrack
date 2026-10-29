@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-01 Solicitar el enlace con un correo registrado</description>
+   <name>TC-HU002-01_Solicitar_enlace_con_correo_registrado</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>d5677d6e-8dcf-5e16-b774-1431cfe507c7</testCaseGuid>
+</TestCaseEntity>

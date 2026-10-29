@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU003-05 Cedula, correo y telefono unicos</description>
+   <name>TC-HU003-05_Datos_duplicados</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>387ce75e-6b52-5664-9fb8-fae54376c96c</testCaseGuid>
+</TestCaseEntity>

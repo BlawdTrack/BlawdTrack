@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU001-03 El Mensajero inicia sesion</description>
+   <name>TC-HU001-03_Mensajero_inicia_sesion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>eff58869-79f6-5409-b578-d37133604024</testCaseGuid>
+</TestCaseEntity>

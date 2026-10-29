@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU006-01 Crear un administrador</description>
+   <name>TC-HU006-01_Crear_un_administrador</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>dd05ecaf-c69d-511e-87a5-c0e937f1e25d</testCaseGuid>
+</TestCaseEntity>

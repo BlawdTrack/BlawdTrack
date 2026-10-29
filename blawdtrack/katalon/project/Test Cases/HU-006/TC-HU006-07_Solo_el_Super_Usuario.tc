@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU006-07 Solo el Super Usuario puede crear administradores</description>
+   <name>TC-HU006-07_Solo_el_Super_Usuario</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>44140cc2-fe40-5380-bafc-dbb114ee2a5c</testCaseGuid>
+</TestCaseEntity>

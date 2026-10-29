@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU008-05 Registro de auditoria de la eliminacion</description>
+   <name>TC-HU008-05_Registro_de_auditoria</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>01ee8359-ef10-5549-9fa0-89adb983f8c7</testCaseGuid>
+</TestCaseEntity>

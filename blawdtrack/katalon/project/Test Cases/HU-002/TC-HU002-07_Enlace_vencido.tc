@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-07 Enlace vencido</description>
+   <name>TC-HU002-07_Enlace_vencido</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>078f6157-2851-5fcc-b398-e7ae53843879</testCaseGuid>
+</TestCaseEntity>

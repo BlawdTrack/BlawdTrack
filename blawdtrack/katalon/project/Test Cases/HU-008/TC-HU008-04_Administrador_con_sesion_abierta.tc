@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU008-04 Administrador con una sesion abierta</description>
+   <name>TC-HU008-04_Administrador_con_sesion_abierta</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>6056b32c-3714-5510-ac86-1fb0065ab8cb</testCaseGuid>
+</TestCaseEntity>

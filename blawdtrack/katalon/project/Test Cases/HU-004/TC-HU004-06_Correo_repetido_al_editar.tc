@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU004-06 No se puede usar un correo ya registrado</description>
+   <name>TC-HU004-06_Correo_repetido_al_editar</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>7d320123-4db1-563d-b640-5c09e0f9f470</testCaseGuid>
+</TestCaseEntity>

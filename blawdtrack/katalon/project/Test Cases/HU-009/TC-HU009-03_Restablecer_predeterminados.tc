@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU009-03 Restablecer los permisos predeterminados</description>
+   <name>TC-HU009-03_Restablecer_predeterminados</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>91b0b4e1-2959-5173-a86b-719261a6d810</testCaseGuid>
+</TestCaseEntity>

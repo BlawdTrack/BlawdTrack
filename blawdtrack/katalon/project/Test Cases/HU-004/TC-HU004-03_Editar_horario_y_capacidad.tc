@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU004-03 Editar el horario y la capacidad de carga</description>
+   <name>TC-HU004-03_Editar_horario_y_capacidad</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>d23860b0-5199-5f6d-9a06-616c4abd5cc4</testCaseGuid>
+</TestCaseEntity>

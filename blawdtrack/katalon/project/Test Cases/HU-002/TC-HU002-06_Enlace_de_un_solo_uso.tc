@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU002-06 El enlace se puede usar una sola vez</description>
+   <name>TC-HU002-06_Enlace_de_un_solo_uso</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>0855a442-6d87-5638-b5cf-9adfbb5fcc8f</testCaseGuid>
+</TestCaseEntity>

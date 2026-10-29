@@ -26,6 +26,7 @@ Su suite conserva una preparación de datos propia; las cuentas de `prepare-data
 16. [Proyecto de Katalon Studio (HU-011)](#16-proyecto-de-katalon-studio-hu-011)
 17. [Pruebas de la HU-012 (eliminar paquetes)](#17-pruebas-de-la-hu-012-eliminar-paquetes)
 18. [Pruebas de la HU-010 (importar paquetes)](#18-pruebas-de-la-hu-010-importar-paquetes)
+19. [Pruebas de las HU-001 a HU-009 (usuarios y accesos)](#19-pruebas-de-las-hu-001-a-hu-009-usuarios-y-accesos)
 
 ---
 
@@ -387,3 +388,122 @@ volver a levantar nada. Código compartido en `Keywords/com/blawd/Imports.groovy
 
 - Escritos sin abrir Katalon Studio: si al correrlos marca algún error, corrígelo ahí y avisa para dejarlo en el
   repositorio.
+
+## 19. Pruebas de las HU-001 a HU-009 (usuarios y accesos)
+
+Cubren el inicio de sesión (HU-001), la recuperación de contraseña (HU-002), los mensajeros (HU-003, HU-004 y HU-005), los administradores (HU-006 y HU-008) y los roles y permisos (HU-009). La HU-007 tiene su propia suite (`TS-HU007-Pruebas-Funcionales`, ver `docs/HU007-pruebas.md`). Hay una suite por HU en `Test Suites/` (`HU-001`, `HU-002`, ...) y sus casos están en `Test Cases/HU-00X/`. Se abren y se corren igual que los de la HU-011 (sección 16).
+
+### Cómo funcionan
+
+- **Cuentas propias por caso.** Cada caso crea por la API los mensajeros o administradores que necesita (documento, correo y teléfono únicos en cada corrida, con la contraseña `Katalon2026`), así que se pueden repetir sin reiniciar el entorno. Las cuentas compartidas de la sección 6 solo se usan para iniciar sesión. Los casos ejecutan `scripts\prepare-data.ps1` al empezar, por si alguna se alteró.
+- **Correo (Mailpit).** HU-002, HU-003 y HU-006 leen los correos de `http://localhost:8025` (`Keywords/com/blawd/Mail.groovy`): el enlace de recuperación y la contraseña temporal. La dirección está en la variable global `mailUrl` del perfil `default`.
+- **Selectores de rueda.** El horario y la capacidad de carga se eligen con ruedas: la prueba abre el selector, hace clic en un valor visible y pulsa "Listo" (`Ui.pickTime` y `Ui.pickWeight`). La rueda solo muestra 4 valores a cada lado del actual, por eso los casos usan valores cercanos (9:00 am, 12:00 pm, 5 kg y 22 kg).
+- **Base de datos.** Lo que la pantalla no muestra (estado de la cuenta, rol y auditoría) se consulta en la base del entorno de pruebas con `docker exec`, igual que en la HU-012 (`Packages.query`, `Users.auditAfter` y `Users.auditForUserAfter`).
+- **Permisos (HU-009).** Los casos que cambian permisos del Administrador de Ventas compartido los restablecen al terminar (`DELETE /api/v1/users/CEDULA/900000001/permissions`), aunque el caso falle.
+- **Avisos y errores.** Los avisos flotantes se reconocen por `role="status"` (`Packages.verifyMessage`), los avisos fijos por `role="alert"` (`Ui.verifyAlert`) y el error de un campo por su texto de ayuda (`Ui.verifyFieldError`); no tienen `data-testid`. No se agregaron `data-testid` nuevos: se usan los de la sección 9, los `id` y `name` de los campos y las etiquetas de accesibilidad.
+- **Sesión.** `GET /api/v1/auth/session` responde 204 con sesión válida y 401 si no.
+
+### HU-001 (inicio de sesión y control de acceso por rol)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU001-01 El Super Usuario inicia sesion | Llega a `/main-menu` y ve todos los módulos. |
+| TC-HU001-02 El Administrador de Ventas inicia sesion | Llega a `/main-menu` y solo ve paquetes (no ve mensajeros, administradores ni roles). |
+| TC-HU001-03 El Mensajero inicia sesion | Llega a `/mensajero`; el menú no le ofrece paquetes ni administración. |
+| TC-HU001-04 Credenciales incorrectas | Aviso "Correo o contraseña incorrectos"; la API responde 401 con el mismo código y mensaje para contraseña mala y correo inexistente. |
+| TC-HU001-05 Cuenta inactiva | Aviso "Tu cuenta está inactiva"; la API responde 403 `ACCOUNT_INACTIVE`. |
+| TC-HU001-06 Rutas protegidas por rol | Sin sesión todo lleva a `/login`; con sesión, una ruta ajena devuelve a Ventas a `/main-menu` y al Mensajero a `/mensajero`. |
+| TC-HU001-07 Cerrar sesion | "Cerrar sesión" lleva a `/login` y las rutas protegidas ya no abren. |
+| TC-HU001-08 Sesion cerrada al desactivar la cuenta | Al desactivar la cuenta, su token deja de valer (204 antes, 401 después). |
+
+### HU-002 (recuperación de contraseña)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU002-01 Solicitar el enlace con un correo registrado | "Revisa tu correo" y el correo con el enlace llega a Mailpit. |
+| TC-HU002-02 Correo no registrado: misma respuesta | Un correo inexistente ve la misma pantalla y no recibe correo. |
+| TC-HU002-03 Una cuenta inactiva no recibe el correo | Una cuenta inactiva ve la misma pantalla y no recibe correo. |
+| TC-HU002-04 Restablecer la contrasena con el enlace | Con el enlace se define una contraseña nueva; la cuenta entra con la nueva y ya no con la anterior. |
+| TC-HU002-05 Reglas de la contrasena nueva | El botón "Guardar nueva contraseña" se bloquea con menos de 8 caracteres, sin letras, sin números o con confirmación distinta. |
+| TC-HU002-06 El enlace se puede usar una sola vez | El enlace usado queda invalidado ("Enlace no válido"). |
+| TC-HU002-07 Enlace vencido | Con el enlace vencido (se adelanta la expiración en la base) aparece "Enlace no válido". |
+| TC-HU002-08 No se puede reutilizar una contrasena reciente | No se acepta reutilizar una de las últimas contraseñas. |
+
+### HU-003 (registro de mensajeros)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU003-01 Registrar un mensajero | Se crea con el formulario completo; la cuenta queda `ACTIVE` con rol `MENSAJERO` y se encuentra en "Actualizar mensajero". |
+| TC-HU003-02 Correo con la contrasena temporal y acceso | Llega el correo de bienvenida con la contraseña temporal y con ella se inicia sesión. |
+| TC-HU003-03 Campos obligatorios vacios | El formulario vacío marca los campos obligatorios. |
+| TC-HU003-04 La capacidad de carga es positiva | La API rechaza capacidad 0 y negativa (400) y acepta una positiva. |
+| TC-HU003-05 Cedula, correo y telefono unicos | Correo repetido marcado en pantalla; cédula, teléfono y correo repetidos responden 409. |
+| TC-HU003-06 Formato del documento | Cédula de 8 dígitos o con letras responde 400; la de 9 dígitos se acepta. |
+| TC-HU003-07 Solo el Super Usuario puede registrar | Ventas y Mensajero: sin opción, ruta bloqueada y API 403. |
+
+### HU-004 (edición de mensajeros)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU004-01 Buscar un mensajero por documento y abrir su formulario | Se busca por documento y el formulario trae nombre, correo y teléfono. |
+| TC-HU004-02 Editar el telefono de un mensajero | Cambiar el teléfono muestra el aviso de éxito y queda guardado. |
+| TC-HU004-03 Editar el horario y la capacidad de carga | Cambiar horario (9:00 am a 12:00 pm) y capacidad (22 kg) con las ruedas. |
+| TC-HU004-04 La capacidad de carga es positiva | La API rechaza capacidad 0 y negativa al editar (400). |
+| TC-HU004-05 Historial de modificaciones | El historial muestra "Campos modificados: Teléfono". |
+| TC-HU004-06 No se puede usar un correo ya registrado | Un correo de otro usuario muestra "El correo ya está registrado". |
+| TC-HU004-07 Cambiar el estado de acceso cierra la sesion | Pasar a Inactivo avisa que la sesión se cerrará; tras guardar el token falla (401) y el login da 403. |
+| TC-HU004-08 Rol sin permiso | Ventas y Mensajero: API 403 y la ruta devuelve a Ventas. |
+
+### HU-005 (desactivación de mensajeros)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU005-01 Desactivar un mensajero con confirmacion | Desactivar con confirmación: aviso, fila "Inactivo", estado `INACTIVE` y login 403. |
+| TC-HU005-02 Cancelar en el dialogo de confirmacion | "Cancelar" no desactiva. |
+| TC-HU005-03 Documento de un mensajero que no existe | Un documento inexistente avisa "No se encontró ningún mensajero con ese documento." |
+| TC-HU005-04 El registro del mensajero se conserva | El mensajero desactivado sigue en el sistema, como Inactivo. |
+| TC-HU005-05 Registro de auditoria de la desactivacion | Queda un registro `DESACTIVAR_MENSAJERO` con fecha y responsable. |
+| TC-HU005-06 Rol sin permiso | Ventas y Mensajero: API 403, la cuenta sigue Activa y la ruta se bloquea. |
+
+### HU-006 (creación de administradores)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU006-01 Crear un administrador | Se crea con el formulario completo; la cuenta queda `ACTIVE` con rol `ADMIN_VENTAS`. |
+| TC-HU006-02 Correo con la contrasena temporal y acceso | Llega el correo con la contraseña temporal y con ella se inicia sesión. |
+| TC-HU006-03 Ningun campo puede estar vacio | El formulario vacío marca los cuatro campos obligatorios. |
+| TC-HU006-04 Formato del documento segun su tipo | Una cédula de 8 dígitos se marca en pantalla y la API responde 400. |
+| TC-HU006-05 Correo y documento no se repiten | Correo repetido marcado en pantalla; documento repetido responde 409. |
+| TC-HU006-06 Registro de auditoria de la creacion | Queda un registro `CREAR_ADMINISTRADOR` con fecha, responsable y documento. |
+| TC-HU006-07 Solo el Super Usuario puede crear administradores | Ventas y Mensajero: API 403 y la ruta bloquea a Ventas. |
+
+### HU-008 (eliminación de administradores)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU008-01 Eliminar un administrador con confirmacion | Eliminar con confirmación: aviso, la cuenta desaparece y no puede iniciar sesión. |
+| TC-HU008-02 Cancelar en el dialogo de confirmacion | "Cancelar" no elimina. |
+| TC-HU008-03 Administrador no existente | Un documento inexistente avisa "No se encontró ningún administrador con ese documento." |
+| TC-HU008-04 Administrador con una sesion abierta | Con una sesión abierta el diálogo lo avisa; tras eliminar el token falla (401). |
+| TC-HU008-05 Registro de auditoria de la eliminacion | Queda un registro `ELIMINAR_ADMINISTRADOR` con fecha, responsable y documento. |
+| TC-HU008-06 Rol sin permiso | Ventas y Mensajero: API 403, la cuenta sigue y la ruta bloquea a Ventas. |
+
+### HU-009 (roles y permisos)
+
+| Caso | Qué comprueba |
+| --- | --- |
+| TC-HU009-01 Ver los permisos del Administrador de Ventas | La matriz del Administrador de Ventas muestra sus permisos de fábrica. |
+| TC-HU009-02 Quitar un permiso y aplicar los cambios | Quitar "Importar paquetes" y aplicar: aviso y la API responde 403 al importar. |
+| TC-HU009-03 Restablecer los permisos predeterminados | "Restablecer predeterminados" devuelve el permiso y la API ya no responde 403. |
+| TC-HU009-04 Permisos que no se pueden editar | Los permisos "no editables" tienen la casilla bloqueada. |
+| TC-HU009-05 Descartar los cambios sin guardar | Descartar pide "Salir sin guardar" y no guarda nada. |
+| TC-HU009-06 Permisos del rol Mensajero | El rol Mensajero tiene su propia matriz de tres permisos. |
+| TC-HU009-07 Usuario no existente | Un documento inexistente avisa "Usuario no existente". |
+| TC-HU009-08 Solo el Super Usuario administra permisos | Ventas y Mensajero: API 403 y la ruta bloquea a Ventas. |
+
+### Notas
+
+- **Escritos sin abrir Katalon Studio.** Se revisó la sintaxis de todo el Groovy con el compilador de Groovy y los selectores, las respuestas de la API y los mensajes se comprobaron contra el entorno de Docker con un navegador automatizado, pero los casos no se ejecutaron en Katalon: si al correrlos marca algún error, corrígelo ahí y avisa para dejarlo en el repositorio.
+- **Mensajes que se comprueban.** Los textos de los avisos están copiados de la aplicación (por ejemplo "Mensajero desactivado correctamente."). Si cambian, hay que actualizar el caso.
+- **Importar sin archivo.** Para saber si un rol tiene el permiso de importar, los casos de HU-009 llaman a la previsualización sin archivo: con permiso responde un error de formato (distinto de 403) y sin permiso responde 403.
+- **Lo que no se prueba.** "No recibir nuevas asignaciones" y "reasignar paquetes" (HU-005) dependen del módulo de asignación, que aún no existe; el vencimiento real del enlace de recuperación (15 minutos) se simula adelantando la fecha en la base.
