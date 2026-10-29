@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU006-02 Correo con la contrasena temporal y acceso</description>
+   <name>TC-HU006-02_Correo_con_contrasena_temporal</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>adb6aa30-3a2b-575b-9483-48780578696c</testCaseGuid>
+</TestCaseEntity>

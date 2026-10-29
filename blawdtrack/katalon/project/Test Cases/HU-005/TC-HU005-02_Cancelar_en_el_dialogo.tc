@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU005-02 Cancelar en el dialogo de confirmacion</description>
+   <name>TC-HU005-02_Cancelar_en_el_dialogo</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>5e053a97-ba90-5f56-85f5-8ef2b9f158b6</testCaseGuid>
+</TestCaseEntity>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU006-05 Correo y documento no se repiten</description>
+   <name>TC-HU006-05_Datos_duplicados</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>eb47ce84-a4d6-537c-ae78-5e027febfd83</testCaseGuid>
+</TestCaseEntity>

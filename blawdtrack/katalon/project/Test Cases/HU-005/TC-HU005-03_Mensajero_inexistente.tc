@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU005-03 Documento de un mensajero que no existe</description>
+   <name>TC-HU005-03_Mensajero_inexistente</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>54fb9fe5-d2fa-58d9-8edf-282c120a0335</testCaseGuid>
+</TestCaseEntity>

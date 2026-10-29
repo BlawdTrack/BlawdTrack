@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU005-01 Desactivar un mensajero con confirmacion</description>
+   <name>TC-HU005-01_Desactivar_con_confirmacion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>77610601-e74c-5e00-ae33-180ca8e8e4ae</testCaseGuid>
+</TestCaseEntity>

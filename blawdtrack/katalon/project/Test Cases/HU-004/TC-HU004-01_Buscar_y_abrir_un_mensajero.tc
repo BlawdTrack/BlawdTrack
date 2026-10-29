@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU004-01 Buscar un mensajero por documento y abrir su formulario</description>
+   <name>TC-HU004-01_Buscar_y_abrir_un_mensajero</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>0d0d7a54-3704-5529-a716-a094027089ce</testCaseGuid>
+</TestCaseEntity>

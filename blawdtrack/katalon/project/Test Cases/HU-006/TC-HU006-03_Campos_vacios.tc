@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU006-03 Ningun campo puede estar vacio</description>
+   <name>TC-HU006-03_Campos_vacios</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>bb85d624-caa9-5374-a77c-688ccee4150c</testCaseGuid>
+</TestCaseEntity>

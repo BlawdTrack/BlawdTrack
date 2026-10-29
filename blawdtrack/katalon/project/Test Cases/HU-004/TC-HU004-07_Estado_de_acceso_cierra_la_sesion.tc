@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU004-07 Cambiar el estado de acceso cierra la sesion</description>
+   <name>TC-HU004-07_Estado_de_acceso_cierra_la_sesion</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>1263e13a-f7f2-502d-bf44-8cf22d309e13</testCaseGuid>
+</TestCaseEntity>

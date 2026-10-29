@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU004-04 La capacidad de carga es positiva</description>
+   <name>TC-HU004-04_Capacidad_de_carga_positiva</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>dcf566d9-f1a0-5e40-b8b4-832422793279</testCaseGuid>
+</TestCaseEntity>

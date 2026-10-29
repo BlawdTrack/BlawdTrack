@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU005-05 Registro de auditoria de la desactivacion</description>
+   <name>TC-HU005-05_Registro_de_auditoria</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>b8257203-c845-5f1d-9e22-8123c759ed78</testCaseGuid>
+</TestCaseEntity>

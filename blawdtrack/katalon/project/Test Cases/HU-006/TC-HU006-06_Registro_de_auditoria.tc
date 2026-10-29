@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU006-06 Registro de auditoria de la creacion</description>
+   <name>TC-HU006-06_Registro_de_auditoria</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>f002c8a6-147f-531b-a4e1-e9b89783c428</testCaseGuid>
+</TestCaseEntity>

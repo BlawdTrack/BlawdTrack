@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description>TC-HU004-02 Editar el telefono de un mensajero</description>
+   <name>TC-HU004-02_Editar_el_telefono</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>e656c2bb-ef6e-588d-871d-169a77208822</testCaseGuid>
+</TestCaseEntity>
